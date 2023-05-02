@@ -1,33 +1,36 @@
 module Rail exposing (..)
 
-import REnd exposing (REnd)
-import RPoint
 import RDir
+import RPoint
 import RPole
+import Tie exposing (Tie)
 
-type RType
+
+type Kind
     = Straight
     | Curve
 
 
-
 straight =
-    { railType = Straight
+    { kind = Straight
     , ends =
-          [ REnd.make (RPoint.make 0 0 0 0) RPoint.zero RDir.s RPole.plus
-          , REnd.make (RPoint.make 0 0 1 0) RPoint.zero RDir.s RPole.plus
-          ]
+        [ Tie.make (RPoint.make 0 0 0 0) RPoint.zero RDir.s RPole.plus
+        , Tie.make (RPoint.make 0 0 1 0) RPoint.zero RDir.s RPole.plus
+        ]
     }
 
-isReversible : RType -> Bool
+
+isReversible : Kind -> Bool
 isReversible _ =
     False
 
-getLocalEnds : RType -> List REnd
-getLocalEnds _ =
+
+getLocalTies : Kind -> List Tie
+getLocalTies _ =
     []
 
+
 type alias Rail =
-    { railType : RType
-    , origin : REnd
+    { kind : Kind
+    , origin : Tie
     }
