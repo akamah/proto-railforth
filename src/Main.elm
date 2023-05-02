@@ -53,7 +53,7 @@ type alias Model =
     , azimuth : Float
     , altitude : Float
     , pixelPerUnit : Float
-    , panOffset : Vec3
+    , target : Vec3
     , draggingState : Maybe DraggingState
     , program : String
     , rails : List Rail
@@ -86,7 +86,7 @@ initModel =
     , azimuth = degrees -90
     , altitude = degrees 80
     , pixelPerUnit = 100
-    , panOffset = vec3 0 0 0
+    , target = vec3 0 0 0
     , draggingState = Nothing
     , program = ""
     , rails = []
@@ -540,12 +540,30 @@ doPanning model ( x0, y0 ) ( x, y ) =
         os =
             orthoScale model.pixelPerUnit
 
+        ca =
+            cos model.azimuth
+
+        sa =
+            sin model.azimuth
+
+        cb =
+            cos model.altitude
+
+        sb =
+            sin model.altitude
+
+        tanx =
+            Vec3.scale (os * dx) (vec3 sa 0 ca)
+
+        tany =
+            Vec3.scale (os * dy) (vec3 (ca * sb) -cb -(sa * sb))
+
         trans =
-            Vec3.add model.panOffset (vec3 (os * dx) (os * dy) 0)
+            Vec3.add model.target (Vec3.add tanx tany)
     in
     { model
         | draggingState = Just (Panning ( x, y ))
-        , panOffset = Debug.log "panOffset" trans
+        , target = trans
     }
 
 
@@ -573,16 +591,17 @@ makeTransform model =
             makeOrtho railViewport model.pixelPerUnit
 
         pan =
-            Mat4.makeTranslate model.panOffset
+            Mat4.makeTranslate model.target
 
-        camera =
+        lookat =
             makeLookAt model
     in
     List.foldr Mat4.mul
         Mat4.identity
         [ ortho
-        , pan
-        , camera
+
+        --        , pan
+        , lookat
         ]
 
 
@@ -630,7 +649,7 @@ makeLookAt model =
         z =
             distance * cos model.altitude * -(sin model.azimuth)
     in
-    Mat4.makeLookAt (vec3 x y z) (vec3 0 0 0) (vec3 0 1 0)
+    Mat4.makeLookAt (Vec3.add model.target (vec3 x y z)) model.target (vec3 0 1 0)
 
 
 railVertexShader : Shader Vertex Uniforms { contrast : Float }
