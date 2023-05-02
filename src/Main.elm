@@ -6,7 +6,7 @@ import Browser.Events exposing (onResize)
 import Browser.Dom exposing (getViewport, Viewport)
 import Dict exposing (Dict)
 import Html exposing (Html)
-import Html.Attributes exposing (height, width, style)
+import Html.Attributes exposing (height, width, style, spellcheck)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Task
@@ -29,6 +29,8 @@ type Msg
     | Wheel (Float, Float)
     | GetViewport Viewport
     | Resize Float Float
+    | ProgramUpdate String
+
 
 type alias CameraModel =
     { azimuth: Float
@@ -50,7 +52,7 @@ type alias Model =
         , height: Float
         }
     , camera : CameraModel
-    , log : String
+    , program : String
     }
 
 
@@ -69,7 +71,7 @@ initModel =
     { mesh = Dict.empty
     , viewport = { width = 0, height = 0 }
     , camera = initCamera
-    , log = ""
+    , program = ""
     }
 
 initCamera : CameraModel
@@ -114,10 +116,10 @@ view model =
         , WebGL.depth 1
         , WebGL.clearColor 0.9 0.9 1.0 1
         ]
-        [ width (round model.viewport.width)
+        [ width (round (2.0 * model.viewport.width))
         , height (round model.viewport.height)
         , style "display" "block"
-        , style "width" (String.fromFloat (model.viewport.width / 2) ++ "px")
+        , style "width" (String.fromFloat model.viewport.width ++ "px")
         , style "height" (String.fromFloat (model.viewport.height / 2) ++ "px")
         , onMouseUpHandler model
         , onMouseMoveHandler model
@@ -132,7 +134,21 @@ view model =
             , ("cross", vec3 216 0 0)
             , ("auto_point", vec3 -324 0 0)
             ])
-    , Html.text model.log
+    , Html.textarea
+        [ style "resize" "none"
+        , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
+        , style "height" (String.fromFloat (model.viewport.height / 2 - 16) ++ "px")
+        , style "margin" "3px"
+        , style "padding" "0"
+        , style "border" "solid 1px"
+        , style "outline" "none"
+        , style "font-family" "monospace"
+        , style "font-size" "large"
+        , spellcheck False
+        , HE.onInput ProgramUpdate
+        ]
+        [ Html.text model.program
+        ]
     ]
 
 
@@ -163,19 +179,34 @@ showMesh model { vertices, indices } origin =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        LoadMesh name mesh -> ({ model | mesh = updateLoadMesh name mesh model.mesh}, Cmd.none)
-        MouseDown pos -> ({ model | camera = updateMouseDown model.camera pos }, Cmd.none)
-        MouseDownWithShift pos -> ({ model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none)
-        MouseMove pos -> ({ model | camera = updateMouseMove model.camera pos
-                                  , log = Debug.toString model.camera.translate }, Cmd.none)
-        MouseUp pos -> ({ model | camera = updateMouseUp model.camera pos }, Cmd.none)
-        Wheel pos -> ({ model | camera = updateWheel model.camera pos }, Cmd.none)
+        LoadMesh name mesh ->
+            ({ model | mesh = updateLoadMesh name mesh model.mesh}, Cmd.none)
+
+        MouseDown pos ->
+            ({ model | camera = updateMouseDown model.camera pos }, Cmd.none)
+        MouseDownWithShift pos ->
+            ({ model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none)
+
+        MouseMove pos ->
+            ({ model | camera = updateMouseMove model.camera pos }, Cmd.none)
+
+        MouseUp pos ->
+            ({ model | camera = updateMouseUp model.camera pos }, Cmd.none)
+
+        Wheel pos ->
+            ({ model | camera = updateWheel model.camera pos }, Cmd.none)
+
         GetViewport viewport ->
             (updateViewport viewport.viewport.width
                             viewport.viewport.height
                             model
             , Cmd.none)
-        Resize width height -> (updateViewport width height model, Cmd.none)
+
+        Resize width height ->
+            (updateViewport width height model, Cmd.none)
+
+        ProgramUpdate program ->
+            ({ model | program = program }, Cmd.none)
 
 
 updateLoadMesh : String -> Result String (MeshWith Vertex) -> Dict String (MeshWith Vertex) -> Dict String (MeshWith Vertex)
@@ -187,7 +218,7 @@ updateLoadMesh name meshOrErr dict =
 
 updateViewport : Float -> Float -> Model -> Model
 updateViewport w h model = 
-    { model | viewport = { width = 2 * w, height = 2 * h - 200 } }
+    { model | viewport = { width = w, height = h } }
 
 
 updateMouseDown : CameraModel -> (Float, Float) -> CameraModel
@@ -373,7 +404,7 @@ makeOrtho { width, height } ppu =
     let
         unit = 216 / ppu
         w = unit * width / 2
-        h = unit * height / 2
+        h = unit * height / 4
     in
         Mat4.makeOrtho (-w) w (-h) h 0.1 10000
 
