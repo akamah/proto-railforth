@@ -9,8 +9,6 @@ module Forth.Geometry.Joint exposing
     , toString
     )
 
-import Forth.Geometry.Rot45 exposing (Rot45)
-
 
 {-| 凹凸を表す。 minusが凹、pluｓが凸。
 -}

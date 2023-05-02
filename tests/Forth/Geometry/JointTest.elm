@@ -1,8 +1,7 @@
-module JointTest exposing (..)
+module Forth.Geometry.JointTest exposing (..)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
-import Joint exposing (..)
+import Expect
+import Forth.Geometry.Joint as Joint exposing (..)
 import Test exposing (..)
 
 

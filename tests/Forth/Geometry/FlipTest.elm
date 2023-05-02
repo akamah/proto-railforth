@@ -1,9 +1,8 @@
-module FlipTest exposing (..)
+module Forth.Geometry.FlipTest exposing (..)
 
-import Expect exposing (Expectation)
-import Flip exposing (..)
-import Fuzz exposing (Fuzzer, int, list, string)
-import Test exposing (..)
+import Expect
+import Forth.Geometry.Flip exposing (..)
+import Test exposing (describe, test, Test)
 
 
 suite : Test
