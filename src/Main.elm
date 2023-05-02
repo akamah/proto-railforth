@@ -7,7 +7,7 @@ import Compiler exposing (compile)
 import Debug
 import Dir
 import Html exposing (Html, div)
-import Html.Attributes exposing (height, spellcheck, style, width)
+import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
@@ -64,18 +64,18 @@ type alias Model =
     }
 
 
-main : Program String Model Msg
+main : Program () Model Msg
 main =
     Browser.document
-        { init = \savedProgram -> ( initModel savedProgram, initCmd )
+        { init = always ( initModel, initCmd )
         , view = document
         , subscriptions = subscriptions
         , update = update
         }
 
 
-initModel : String -> Model
-initModel savedProgram =
+initModel : Model
+initModel =
     { meshes = Mesh.init
     , viewport = { width = 0, height = 0 }
     , azimuth = degrees -90
@@ -83,8 +83,8 @@ initModel savedProgram =
     , pixelPerUnit = 100
     , target = vec3 0 0 0
     , draggingState = Nothing
-    , program = savedProgram
-    , rails = compile savedProgram
+    , program = ""
+    , rails = []
     , splitBarDragState = Nothing
     , splitBarPosition = 1000.0
     }
@@ -184,6 +184,7 @@ view model =
             , style "font-size" "large"
             , style "box-sizing" "border-box"
             , spellcheck False
+            , autocomplete False
             , HE.onInput UpdateScript
             ]
             [ Html.text model.program
@@ -461,7 +462,8 @@ onWheelHandler _ =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ onResize (\w h -> Resize (toFloat w) (toFloat h))
+        [ Storage.load UpdateScript
+        , onResize (\w h -> Resize (toFloat w) (toFloat h))
         , subscriptionPan model
         , subscriptionRotate model
         , subscriptionSplitBar model
