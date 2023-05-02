@@ -12,6 +12,7 @@ import Dict exposing (Dict)
 import Kind exposing (Kind, allKinds)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
+import WebGL
 
 
 type Msg
@@ -19,7 +20,7 @@ type Msg
 
 
 type alias Model =
-    { meshes : Dict String (MeshWith Vertex)
+    { meshes : Dict String (WebGL.Mesh Vertex)
     , errors : List String
     }
 
@@ -39,7 +40,11 @@ update msg model =
                 Err e ->
                     { model | errors = e :: model.errors }
 
-                Ok mesh ->
+                Ok meshWith ->
+                    let
+                        mesh =
+                            WebGL.indexedTriangles meshWith.vertices meshWith.indices
+                    in
                     { model | meshes = Dict.insert name mesh model.meshes }
 
 
@@ -76,12 +81,12 @@ loadMeshCmd f =
                 allKinds
 
 
-dummyMesh : MeshWith Vertex
+dummyMesh : WebGL.Mesh Vertex
 dummyMesh =
-    { vertices = [], indices = [] }
+    WebGL.triangles []
 
 
-getMesh : Model -> Kind -> MeshWith Vertex
+getMesh : Model -> Kind -> WebGL.Mesh Vertex
 getMesh model kind =
     Maybe.withDefault dummyMesh <|
         Dict.get (kindToObjName kind) model.meshes

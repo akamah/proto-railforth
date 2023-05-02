@@ -18,7 +18,7 @@ import Rot45
 import Storage
 import Task
 import Tie exposing (Tie)
-import WebGL exposing (Entity, Shader)
+import WebGL exposing (Entity, Mesh, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest as DepthTest
 
@@ -235,15 +235,15 @@ originToRotate tie =
     Dir.toRadian tie.dir
 
 
-showMesh : Model -> MeshWith Vertex -> Tie -> Entity
-showMesh model { vertices, indices } origin =
+showMesh : Model -> Mesh Vertex -> Tie -> Entity
+showMesh model mesh origin =
     WebGL.entityWith
         [ DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
         ]
         railVertexShader
         railFragmentShader
-        (WebGL.indexedTriangles vertices indices)
+        mesh
         (uniforms model
             (originToVec3 origin)
             (originToRotate origin)
