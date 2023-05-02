@@ -101,6 +101,10 @@ buildMeshUri name =
     "http://localhost:8080/" ++ name ++ ".obj"
 
 
+type alias RailModel =
+    List (String, Vec3)
+
+
 view : Model -> Html Msg
 view model =
     Html.div []
@@ -121,16 +125,31 @@ view model =
         , onMouseLeaveHandler model
         , onWheelHandler model
         ]
-        (case Dict.get "auto_point" model.mesh of
-          Just m -> [showMesh model m]
-          Nothing -> []
-        )
+        (showMeshes model
+            [ ("straight_1", vec3 0 0 0)
+            , ("straight_1", vec3 0 0 60)
+            , ("straight_1", vec3 0 50 60)
+            , ("cross", vec3 216 0 0)
+            , ("auto_point", vec3 -324 0 0)
+            ])
     , Html.text model.log
     ]
 
 
-showMesh : Model -> MeshWith Vertex -> Entity
-showMesh model { vertices, indices } =
+showMeshes : Model -> RailModel -> List Entity
+showMeshes model rails =
+    List.concatMap
+        (\(name, origin) ->
+            case Dict.get name model.mesh of 
+                Just mesh ->
+                    [showMesh model mesh origin]
+                Nothing ->
+                    [])
+        rails
+
+
+showMesh : Model -> MeshWith Vertex -> Vec3 -> Entity
+showMesh model { vertices, indices } origin =
     WebGL.entityWith
         [ DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
@@ -138,7 +157,7 @@ showMesh model { vertices, indices } =
         railVertexShader
         railFragmentShader
         (WebGL.indexedTriangles vertices indices)
-        (uniforms model)
+        (uniforms model origin)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -236,7 +255,7 @@ updateMouseUp cameraModel _ =
 updateWheel : CameraModel ->  (Float, Float) -> CameraModel
 updateWheel cameraModel (_, dy) =
     let
-        multiplier = 1.1
+        multiplier = 1.05
 
         delta =
             if dy < 0 then -- zoom out
@@ -248,7 +267,7 @@ updateWheel cameraModel (_, dy) =
         
         next =
             cameraModel.pixelPerUnit * delta |>
-                clamp 20 2000
+                clamp 20 1000
     in
         { cameraModel | pixelPerUnit = next }
 
@@ -329,10 +348,10 @@ type alias Uniforms =
     }
 
 
-uniforms : Model -> Uniforms
-uniforms model =
+uniforms : Model -> Vec3 -> Uniforms
+uniforms model origin =
     { transform = makeTransform model
-    , origin = vec3 0 0 0
+    , origin = origin
     }
 
 makeTransform : Model -> Mat4

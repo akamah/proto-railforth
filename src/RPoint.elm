@@ -78,9 +78,13 @@ mul x y =
     , d = x.a * y.d + x.b * y.c + x.c * y.b + x.d * y.a
     }
 
+sqrt1_2 : Float
+sqrt1_2 =
+    sqrt (1/2.0)
+
 toFloat : RPoint -> (Float, Float)
 toFloat x =
-    ( Basics.toFloat x.a + sqrt (1/2.0) * Basics.toFloat (x.b - x.d)
-    , Basics.toFloat x.c + sqrt (1/2.0) * Basics.toFloat (x.b + x.d)
+    ( Basics.toFloat x.a + sqrt1_2 * Basics.toFloat (x.b - x.d)
+    , Basics.toFloat x.c + sqrt1_2 * Basics.toFloat (x.b + x.d)
     )
 

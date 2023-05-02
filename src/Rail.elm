@@ -1,6 +1,6 @@
 module Rail exposing (..)
 
-type RailType
+type RType
     = Straight
     | Curve
 
@@ -12,4 +12,9 @@ straight =
           [ End.make (RPoint.make 0 0 0 0) RDir.s RPole.plus
           , End.make (RPoint.make 0 0 1 0) RDir.s RPole.plus
           ]
+    }
+
+type alias Rail =
+    { railType : RType
+    , origin : End
     }
