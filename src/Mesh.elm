@@ -103,3 +103,22 @@ getMesh model placement =
 getErrors : Model -> List String
 getErrors model =
     model.errors
+
+
+{-| Internal. flip mesh to flip a rail
+-}
+flipMesh : MeshWith Vertex -> MeshWith Vertex
+flipMesh meshWith =
+    { indices = meshWith.indices, vertices = List.map flipVertex meshWith.vertices }
+
+
+flipVertex : Vertex -> Vertex
+flipVertex vertex =
+    { position = flipVec3 vertex.position
+    , normal = flipVec3 vertex.normal
+    }
+
+
+flipVec3 : Vec3 -> Vec3
+flipVec3 v =
+    Vec3.vec3 (Vec3.getX v) (negate <| Vec3.getY v) (negate <| Vec3.getZ v)
