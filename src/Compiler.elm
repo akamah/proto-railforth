@@ -17,8 +17,10 @@ getLocalTie p =
         Curve ->
             Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne
 
-        Turnout -> -- Super stub!!!
+        Turnout ->
+            -- Super stub!!!
             Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e
+
 
 getNextTie : Tie -> Placement -> Tie
 getNextTie tie placement =
@@ -39,7 +41,6 @@ getNextTie tie placement =
 
         dir2 =
             Dir.mul tie.dir local.dir
-
     in
     Tie.make single2 double2 height2 dir2
 
@@ -73,6 +74,10 @@ compileRec tie toks =
                 "l" ->
                     Rail.make Placement.curveLeft tie
                         :: compileRec (getNextTie tie Placement.curveLeft) ts
+
+                "tl" ->
+                    Rail.make Placement.turnoutLeftPlus tie
+                        :: compileRec (getNextTie tie Placement.turnoutLeftPlus) ts
 
                 _ ->
                     []

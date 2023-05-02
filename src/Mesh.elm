@@ -10,10 +10,12 @@ module Mesh exposing
     )
 
 import Dict exposing (Dict)
+import Math.Vector3 as Vec3 exposing (Vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import Placement exposing (Placement)
 import Shape exposing (Shape(..))
+import String exposing (indices)
 import WebGL
 
 
@@ -63,9 +65,7 @@ buildMeshUri name =
 
 allMeshNames : List String
 allMeshNames =
-    [ "straight_1"
-    , "curve_8"
-    ]
+    List.map getMeshName [ Straight, Curve, Turnout ]
 
 
 loadMeshCmd : (Msg -> msg) -> Cmd msg
@@ -92,6 +92,10 @@ getMeshName shape =
 
         Curve ->
             "curve_8"
+
+        Turnout ->
+            -- Stub
+            "turnout_L"
 
 
 getMesh : Model -> Placement -> Mesh
