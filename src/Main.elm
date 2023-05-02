@@ -11,14 +11,14 @@ import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
-import Mesh
+import Mesh exposing (Mesh)
 import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (Rail)
 import Rot45
 import Storage
 import Task
 import Tie exposing (Tie)
-import WebGL exposing (Entity, Mesh, Shader)
+import WebGL exposing (Entity, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest as DepthTest
 
@@ -193,14 +193,35 @@ view model =
 
 showRails : Model -> List Rail -> List Entity
 showRails model rails =
+    let
+        modelTransform =
+            makeTransform model
+    in
     List.map
         (\rail ->
-            showMesh
-                model
+            showRail
+                modelTransform
                 (Mesh.getMesh model.meshes rail.kind)
                 rail.origin
         )
         rails
+
+
+showRail : Mat4 -> Mesh -> Tie -> Entity
+showRail modelTransform mesh origin =
+    WebGL.entityWith
+        [ DepthTest.default
+        , WebGL.Settings.cullFace WebGL.Settings.front
+        ]
+        railVertexShader
+        railFragmentShader
+        mesh.mesh
+        (uniforms modelTransform
+            (originToVec3 origin)
+            (originToRotate origin)
+            (toFloat origin.height)
+            mesh.flipped
+        )
 
 
 originToVec3 : Tie -> Vec3
@@ -233,22 +254,6 @@ originToVec3 tie =
 originToRotate : Tie -> Float
 originToRotate tie =
     Dir.toRadian tie.dir
-
-
-showMesh : Model -> Mesh Vertex -> Tie -> Entity
-showMesh model mesh origin =
-    WebGL.entityWith
-        [ DepthTest.default
-        , WebGL.Settings.cullFace WebGL.Settings.front
-        ]
-        railVertexShader
-        railFragmentShader
-        mesh
-        (uniforms model
-            (originToVec3 origin)
-            (originToRotate origin)
-            (toFloat origin.height)
-        )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -553,12 +558,21 @@ type alias Uniforms =
     }
 
 
-uniforms : Model -> Vec3 -> Float -> Float -> Uniforms
-uniforms model origin rotate height =
+uniforms : Mat4 -> Vec3 -> Float -> Float -> Bool -> Uniforms
+uniforms modelTransform origin rotate height flipped =
     { transform =
-        Mat4.mul (makeTransform model) (makeMeshMatrix origin rotate)
+        Mat4.mul modelTransform (makeMeshMatrix origin rotate flipped)
     , height = height
     }
+
+
+makeFlip : Bool -> Mat4
+makeFlip flipped =
+    if flipped then
+        Mat4.makeRotate Basics.pi (vec3 1.0 0.0 0.0)
+
+    else
+        Mat4.identity
 
 
 makeTransform : Model -> Mat4
@@ -573,8 +587,8 @@ makeTransform model =
     Mat4.mul ortho lookat
 
 
-makeMeshMatrix : Vec3 -> Float -> Mat4
-makeMeshMatrix origin angle =
+makeMeshMatrix : Vec3 -> Float -> Bool -> Mat4
+makeMeshMatrix origin angle flipped =
     let
         position =
             Mat4.makeTranslate origin
@@ -582,7 +596,7 @@ makeMeshMatrix origin angle =
         rotate =
             Mat4.makeRotate angle (vec3 0 1 0)
     in
-    Mat4.mul position rotate
+    Mat4.mul position <| Mat4.mul rotate (makeFlip flipped)
 
 
 orthoScale : Float -> Float
