@@ -20,6 +20,7 @@ import WebGL.Settings.DepthTest as DepthTest
 type Msg
     = LoadMesh (Result String (MeshWith Vertex))
     | MouseDown (Float, Float)
+    | MouseDownWithShift (Float, Float)
     | MouseMove (Float, Float)
     | MouseUp (Float, Float)
     | Wheel (Float, Float)
@@ -30,7 +31,7 @@ type alias CameraModel =
     { azimuth: Float
     , altitude: Float
     , zoom: Float
-    , previousPoint: Maybe (Float, Float) 
+    , draggingState: Maybe DraggingState
     }
 
 type DraggingState
@@ -65,9 +66,9 @@ initModel =
     , viewport = { width = 0, height = 0 }
     , camera =
         { azimuth = degrees (-90)
-        , altitude = degrees 90
+        , altitude = degrees 80
         , zoom = 1.0
-        , previousPoint = Nothing
+        , draggingState = Nothing
         }
     , log = ""
     }
@@ -77,7 +78,7 @@ initCmd : Cmd Msg
 initCmd =
     Cmd.batch 
         [ Task.perform GetViewport getViewport
-        , OBJ.loadMeshWithoutTexture "http://localhost:8080/slope.obj" LoadMesh
+        , OBJ.loadMeshWithoutTexture "http://localhost:8080/slope_curve_b.obj" LoadMesh
         ]
 
 
@@ -133,6 +134,7 @@ update msg model =
     case msg of
         LoadMesh mesh -> ({ model | mesh = mesh}, Cmd.none)
         MouseDown pos -> ({ model | camera = updateMouseDown model.camera pos }, Cmd.none)
+        MouseDownWithShift pos -> ({ model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none)
         MouseMove pos -> ({ model | camera = updateMouseMove model.camera pos }, Cmd.none)
         MouseUp pos -> ({ model | camera = updateMouseUp model.camera pos }, Cmd.none)
         Wheel pos -> ({ model | camera = updateWheel model.camera pos }, Cmd.none)
@@ -143,39 +145,80 @@ update msg model =
             , Cmd.none)
         Resize width height -> (updateViewport width height model, Cmd.none)
 
+
 updateViewport : Float -> Float -> Model -> Model
 updateViewport w h model = 
     { model | viewport = { width = 2 * w, height = 2 * h - 200 } }
 
+
 updateMouseDown : CameraModel -> (Float, Float) -> CameraModel
 updateMouseDown cameraModel pos = 
-    { cameraModel | previousPoint = Just pos }
+    { cameraModel | draggingState = Just (Rotating pos) }
+
+
+updateMouseDownWithShift : CameraModel -> (Float, Float) -> CameraModel
+updateMouseDownWithShift cameraModel pos = 
+    { cameraModel | draggingState = Just (Panning pos) }
+
 
 updateMouseMove : CameraModel -> (Float, Float) -> CameraModel
-updateMouseMove cameraModel (x, y) =
-    case cameraModel.previousPoint of
-        Nothing -> cameraModel
-        Just (px, py) ->
-            let
-                dx = x - px
-                dy = y - py
-                azimuth = cameraModel.azimuth - dx * degrees 0.3
-                altitude = cameraModel.altitude + dy * degrees 0.3
-                         |> clamp (degrees 0) (degrees 90)
-            in
-                { cameraModel | previousPoint = Just (x, y)
-                              , azimuth = azimuth
-                              , altitude = altitude
-                }
+updateMouseMove cameraModel newPoint =
+    case cameraModel.draggingState of
+        Nothing ->
+            cameraModel
+        Just (Rotating oldPoint) ->
+            doRotation cameraModel oldPoint newPoint
+        Just (Panning oldPoint) ->
+            doPanning cameraModel oldPoint newPoint
+
+
+doRotation : CameraModel -> (Float, Float) -> (Float, Float) -> CameraModel
+doRotation cameraModel (px, py) (x, y) =
+    let
+        dx =
+            x - px
+        dy =
+            y - py
+        azimuth =
+            cameraModel.azimuth - dx * degrees 0.3
+        altitude =
+            cameraModel.altitude + dy * degrees 0.3
+                |> clamp (degrees 0) (degrees 90)
+    in
+        { cameraModel | draggingState = Just (Rotating (x, y))
+                      , azimuth = azimuth
+                      , altitude = altitude
+        }
+
+
+doPanning : CameraModel -> (Float, Float) -> (Float, Float) -> CameraModel
+doPanning cameraModel (px, py) (x, y) =
+    let
+        dx =
+            x - px
+        dy =
+            y - py
+        azimuth =
+            cameraModel.azimuth - dx * degrees 0.3
+        altitude =
+            cameraModel.altitude + dy * degrees 0.3
+                |> clamp (degrees 0) (degrees 90)
+    in
+        { cameraModel | draggingState = Just (Rotating (x, y))
+                      , azimuth = azimuth
+                      , altitude = altitude
+        }
+
 
 updateMouseUp : CameraModel ->  (Float, Float) -> CameraModel
 updateMouseUp cameraModel _ =
-    { cameraModel | previousPoint = Nothing }
+    { cameraModel | draggingState = Nothing }
+
 
 updateWheel : CameraModel ->  (Float, Float) -> CameraModel
 updateWheel cameraModel (_, dy) =
     let
-        multiplier = 1.03125
+        multiplier = 1.1
 
         delta =
             if dy > 0 then -- zoom out
@@ -188,11 +231,28 @@ updateWheel cameraModel (_, dy) =
         { cameraModel | zoom = cameraModel.zoom * delta }
 
 
+type alias PointToMsg msg = (Float, Float) -> msg
+
+
 mouseEventDecoder : Decoder (Float, Float)
 mouseEventDecoder =
     Decode.map2 Tuple.pair
         (Decode.field "clientX" Decode.float)
         (Decode.field "clientY" Decode.float)
+
+
+mouseEventDecoderWithModifier : PointToMsg msg -> PointToMsg msg -> Decoder msg
+mouseEventDecoderWithModifier normal shift =
+    Decode.map3 (\x y shiftPressed ->
+        if shiftPressed then
+            shift (x, y)
+        else
+            normal (x, y)
+    )
+        (Decode.field "clientX" Decode.float)
+        (Decode.field "clientY" Decode.float)
+        (Decode.field "shiftKey" Decode.bool)
+
 
 wheelEventDecoder : Decoder (Float, Float)
 wheelEventDecoder =
@@ -206,18 +266,21 @@ preventDefaultDecoder = Decode.map (\a -> (a, True))
 
 onMouseUpHandler : Model -> Html.Attribute Msg
 onMouseUpHandler _ =
-    HE.on "mouseup" (Decode.map MouseUp mouseEventDecoder)
+    HE.on "mouseup" <|
+        Decode.map MouseUp mouseEventDecoder
 
 
 -- Since this is a toy program, always handle mouse move event!
 onMouseMoveHandler : Model -> Html.Attribute Msg
 onMouseMoveHandler _ =
-    HE.on "mousemove" (Decode.map MouseMove mouseEventDecoder)
+    HE.on "mousemove" <|
+        Decode.map MouseMove mouseEventDecoder
 
 
 onMouseDownHandler : Model -> Html.Attribute Msg
 onMouseDownHandler _ =
-    HE.on "mousedown" (Decode.map MouseDown mouseEventDecoder)
+    HE.on "mousedown" <|
+        mouseEventDecoderWithModifier MouseDown MouseDownWithShift
 
 onMouseLeaveHandler : Model -> Html.Attribute Msg
 onMouseLeaveHandler _ =
