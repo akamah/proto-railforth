@@ -12,9 +12,9 @@ import Kind exposing (Kind)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Mesh
-import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (Rail)
+import Rot45 exposing (Rot45)
 import Task
 import Tie exposing (Tie)
 import WebGL exposing (Entity, Shader)
@@ -200,9 +200,43 @@ view model =
         ]
 
 
+tieToVec3 : Tie -> Vec3
+tieToVec3 tie =
+    let
+        ( sx, sy ) =
+            tie.single |> Rot45.toFloat
+
+        ( dx, dy ) =
+            tie.double |> Rot45.toFloat
+
+        h =
+            tie.height |> Basics.toFloat
+
+        sunit =
+            216.0
+
+        dunit =
+            270.0
+
+        hunit =
+            66.0
+    in
+    vec3
+        (sunit * sx + dunit * dx)
+        (sunit * sy + dunit * dy)
+        (hunit * h)
+
+
 showRails : Model -> List Rail -> List Entity
 showRails model rails =
-    []
+    List.map
+        (\rail ->
+            showMesh
+                model
+                (Mesh.getMesh model.meshes rail.kind)
+                (tieToVec3 rail.origin)
+        )
+        Rail.test1
 
 
 
@@ -232,17 +266,7 @@ showMesh model { vertices, indices } origin =
 
 compile : String -> List Rail
 compile program =
-    simple 0.0 <| String.words program
-
-
-
-{- [ ("straight_1", vec3 0 0 0)
-   , ("straight_1", vec3 0 0 60)
-   , ("straight_1", vec3 0 50 60)
-   , ("cross", vec3 216 0 0)
-   , ("auto_point", vec3 -324 0 0)
-   ]
--}
+    Rail.test1
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -553,8 +577,13 @@ uniforms model origin =
 makeTransform : Model -> Mat4
 makeTransform model =
     let
+        railViewport =
+            { width = model.viewport.width
+            , height = model.splitBarPosition
+            }
+
         ortho =
-            makeOrtho model.viewport model.camera.pixelPerUnit
+            makeOrtho railViewport model.camera.pixelPerUnit
 
         camera =
             makeLookAt model.camera
@@ -576,7 +605,7 @@ makeOrtho { width, height } ppu =
             unit * width / 2
 
         h =
-            unit * height / 4
+            unit * height / 2
     in
     Mat4.makeOrtho -w w -h h -100000 100000
 
