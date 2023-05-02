@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
-import Browser.Events exposing (onResize)
+import Browser.Events as BE exposing (onResize)
 import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (height, spellcheck, style, width)
@@ -22,14 +22,19 @@ import WebGL.Settings.DepthTest as DepthTest
 
 type Msg
     = LoadMesh String (Result String (MeshWith Vertex))
-    | MouseDown ( Float, Float )
-    | MouseDownWithShift ( Float, Float )
-    | MouseMove ( Float, Float )
-    | MouseUp ( Float, Float )
+    | BeginPan ( Float, Float )
+    | UpdatePan ( Float, Float )
+    | EndPan ( Float, Float )
+    | BeginRotate ( Float, Float )
+    | UpdateRotate ( Float, Float )
+    | EndRotate ( Float, Float )
     | Wheel ( Float, Float )
     | GetViewport Viewport
     | Resize Float Float
     | UpdateScript String
+    | SplitBarBeginDrag ( Float, Float )
+    | SplitBarUpdateDrag ( Float, Float )
+    | SplitBarEndDrag ( Float, Float )
 
 
 type alias CameraModel =
@@ -55,6 +60,8 @@ type alias Model =
     , camera : CameraModel
     , program : String
     , rails : List Rail
+    , splitBarDragState : Maybe ( Float, Float )
+    , splitBarPosition : Float
     }
 
 
@@ -82,6 +89,8 @@ initModel =
     , camera = initCamera
     , program = ""
     , rails = []
+    , splitBarDragState = Nothing
+    , splitBarPosition = 1000.0
     }
 
 
@@ -115,8 +124,32 @@ buildMeshUri name =
     "http://localhost:8080/" ++ name ++ ".obj"
 
 
+px : Float -> String
+px x =
+    String.fromFloat x ++ "px"
+
+
 view : Model -> Html Msg
 view model =
+    let
+        railViewTop =
+            0
+
+        railViewHeight =
+            model.splitBarPosition
+
+        barTop =
+            model.splitBarPosition
+
+        barHeight =
+            8
+
+        editorTop =
+            barTop + barHeight
+
+        editorHeight =
+            model.viewport.height - editorTop - barHeight
+    in
     div []
         [ WebGL.toHtmlWith
             [ WebGL.alpha True
@@ -125,21 +158,43 @@ view model =
             , WebGL.clearColor 0.9 0.9 1.0 1
             ]
             [ width (round (2.0 * model.viewport.width))
-            , height (round model.viewport.height)
+            , height (round (2.0 * barTop))
             , style "display" "block"
-            , style "width" (String.fromFloat model.viewport.width ++ "px")
-            , style "height" (String.fromFloat (model.viewport.height / 2) ++ "px")
+            , style "position" "absolute"
+            , style "left" (px 0)
+            , style "top" (px railViewTop)
+            , style "width" (px model.viewport.width)
+            , style "height" (px railViewHeight)
             , onMouseUpHandler model
             , onMouseMoveHandler model
             , onMouseDownHandler model
-            , onMouseLeaveHandler model
             , onWheelHandler model
             ]
-            (showRails model model.rails)
+          <|
+            showRails model model.rails
+        , Html.div
+            [ style "display" "block"
+            , style "position" "absolute"
+            , style "left" (px 0)
+            , style "top" (px barTop)
+            , style "cursor" "row-resize"
+            , style "width" (px model.viewport.width)
+            , style "height" (px barHeight)
+            , style "box-sizing" "border-box"
+            , style "background-color" "lightgrey"
+            , style "border-style" "outset"
+            , style "border-width" "1px"
+            , onSplitBarDragBegin model
+            ]
+            []
         , Html.textarea
-            [ style "resize" "none"
+            [ style "display" "block"
+            , style "position" "absolute"
+            , style "resize" "none"
+            , style "top" (px editorTop)
+            , style "left" (px 0)
             , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
-            , style "height" (String.fromFloat (model.viewport.height / 2 - 40) ++ "px")
+            , style "height" (px editorHeight)
             , style "margin" "3px"
             , style "padding" "0"
             , style "border" "solid 1px"
@@ -211,16 +266,22 @@ update msg model =
         LoadMesh name mesh ->
             ( { model | meshes = updateLoadMesh name mesh model.meshes }, Cmd.none )
 
-        MouseDown pos ->
+        BeginPan pos ->
             ( { model | camera = updateMouseDown model.camera pos }, Cmd.none )
 
-        MouseDownWithShift pos ->
-            ( { model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none )
-
-        MouseMove pos ->
+        UpdatePan pos ->
             ( { model | camera = updateMouseMove model.camera pos }, Cmd.none )
 
-        MouseUp pos ->
+        EndPan pos ->
+            ( { model | camera = updateMouseUp model.camera pos }, Cmd.none )
+
+        BeginRotate pos ->
+            ( { model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none )
+
+        UpdateRotate pos ->
+            ( { model | camera = updateMouseMove model.camera pos }, Cmd.none )
+
+        EndRotate pos ->
             ( { model | camera = updateMouseUp model.camera pos }, Cmd.none )
 
         Wheel pos ->
@@ -243,6 +304,15 @@ update msg model =
               }
             , Cmd.none
             )
+
+        SplitBarBeginDrag pos ->
+            ( { model | splitBarDragState = Just pos }, Cmd.none )
+
+        SplitBarUpdateDrag ( _, y ) ->
+            ( { model | splitBarPosition = Debug.log "clamp" (clamp 100 1000 y) }, Cmd.none )
+
+        SplitBarEndDrag _ ->
+            ( { model | splitBarDragState = Nothing }, Cmd.none )
 
 
 updateLoadMesh : String -> Result String (MeshWith Vertex) -> Dict String (MeshWith Vertex) -> Dict String (MeshWith Vertex)
@@ -284,13 +354,13 @@ updateMouseMove cameraModel newPoint =
 
 
 doRotation : CameraModel -> ( Float, Float ) -> ( Float, Float ) -> CameraModel
-doRotation cameraModel ( px, py ) ( x, y ) =
+doRotation cameraModel ( x0, y0 ) ( x, y ) =
     let
         dx =
-            x - px
+            x - x0
 
         dy =
-            y - py
+            y - y0
 
         azimuth =
             cameraModel.azimuth - dx * degrees 0.3
@@ -309,13 +379,13 @@ doRotation cameraModel ( px, py ) ( x, y ) =
 
 
 doPanning : CameraModel -> ( Float, Float ) -> ( Float, Float ) -> CameraModel
-doPanning cameraModel ( px, py ) ( x, y ) =
+doPanning cameraModel ( x0, y0 ) ( x, y ) =
     let
         dx =
-            x - px
+            x - x0
 
         dy =
-            y - py
+            y - y0
 
         trans =
             Vec3.add cameraModel.translate (vec3 dx dy 0)
@@ -363,7 +433,7 @@ type alias PointToMsg msg =
 
 mouseEventDecoder : Decoder ( Float, Float )
 mouseEventDecoder =
-    Decode.map2 (\x y -> ( x, -y ))
+    Decode.map2 (\x y -> ( x, y ))
         (Decode.field "clientX" Decode.float)
         (Decode.field "clientY" Decode.float)
 
@@ -371,15 +441,15 @@ mouseEventDecoder =
 mouseEventDecoderWithModifier : PointToMsg msg -> PointToMsg msg -> Decoder msg
 mouseEventDecoderWithModifier normal shift =
     Decode.map2
-        (\point shiftPressed ->
+        (\shiftPressed ->
             if shiftPressed then
-                shift point
+                shift
 
             else
-                normal point
+                normal
         )
-        mouseEventDecoder
         (Decode.field "shiftKey" Decode.bool)
+        mouseEventDecoder
 
 
 wheelEventDecoder : Decoder ( Float, Float )
@@ -397,7 +467,13 @@ preventDefaultDecoder =
 onMouseUpHandler : Model -> Html.Attribute Msg
 onMouseUpHandler _ =
     HE.on "mouseup" <|
-        Decode.map MouseUp mouseEventDecoder
+        Decode.map EndRotate mouseEventDecoder
+
+
+onSplitBarDragBegin : Model -> Html.Attribute Msg
+onSplitBarDragBegin _ =
+    HE.on "mousedown" <|
+        Decode.map SplitBarBeginDrag mouseEventDecoder
 
 
 
@@ -407,19 +483,13 @@ onMouseUpHandler _ =
 onMouseMoveHandler : Model -> Html.Attribute Msg
 onMouseMoveHandler _ =
     HE.on "mousemove" <|
-        Decode.map MouseMove mouseEventDecoder
+        Decode.map UpdateRotate mouseEventDecoder
 
 
 onMouseDownHandler : Model -> Html.Attribute Msg
 onMouseDownHandler _ =
     HE.on "mousedown" <|
-        mouseEventDecoderWithModifier MouseDown MouseDownWithShift
-
-
-onMouseLeaveHandler : Model -> Html.Attribute Msg
-onMouseLeaveHandler _ =
-    HE.on "mouseleave" <|
-        Decode.map MouseUp mouseEventDecoder
+        mouseEventDecoderWithModifier BeginPan BeginRotate
 
 
 onWheelHandler : Model -> Html.Attribute Msg
@@ -432,7 +502,49 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ onResize (\w h -> Resize (toFloat w) (toFloat h))
+        , subscriptionPan model
+        , subscriptionRotate model
+        , subscriptionSplitBar model
         ]
+
+
+subscriptionPan : Model -> Sub Msg
+subscriptionPan model =
+    case model.camera.draggingState of
+        Just (Panning _) ->
+            Sub.batch
+                [ BE.onMouseMove <| Decode.map UpdatePan mouseEventDecoder
+                , BE.onMouseUp <| Decode.map EndPan mouseEventDecoder
+                ]
+
+        _ ->
+            Sub.none
+
+
+subscriptionRotate : Model -> Sub Msg
+subscriptionRotate model =
+    case model.camera.draggingState of
+        Just (Panning _) ->
+            Sub.batch
+                [ BE.onMouseMove <| Decode.map UpdateRotate mouseEventDecoder
+                , BE.onMouseUp <| Decode.map EndRotate mouseEventDecoder
+                ]
+
+        _ ->
+            Sub.none
+
+
+subscriptionSplitBar : Model -> Sub Msg
+subscriptionSplitBar model =
+    case model.splitBarDragState of
+        Just _ ->
+            Sub.batch
+                [ BE.onMouseMove <| Decode.map SplitBarUpdateDrag mouseEventDecoder
+                , BE.onMouseUp <| Decode.map SplitBarEndDrag mouseEventDecoder
+                ]
+
+        Nothing ->
+            Sub.none
 
 
 type alias Uniforms =

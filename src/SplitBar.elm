@@ -1,11 +1,4 @@
-module SplitBar exposing
-    ( Model
-    , Msg
-    , init
-    , subscriptions
-    , update
-    , view
-    )
+module SplitBar exposing (Orientation(..), view)
 
 import Browser.Events as BE
 import Debug
@@ -20,36 +13,11 @@ type Orientation
     | Vertical
 
 
-type alias Drag =
-    { clientX : Int
-    , clientY : Int
-    }
-
-
-type alias Model =
-    { orientation : Orientation
-    , drag : Maybe Drag
-    }
-
-
-type Msg
-    = MouseDown Drag
-    | MouseMove Drag
-    | MouseUp
-
-
-init : Model
-init =
-    { orientation = Horizontal
-    , drag = Nothing
-    }
-
-
-view : (Msg -> msg) -> Model -> Html msg
-view functor model =
+view : List (Attribute msg) -> Html msg
+view attributes =
     Html.div
-        [ HA.map functor onMouseDown
-        , HA.style "cursor" "row-resize"
+        List.append
+        [ HA.style "cursor" "row-resize"
         , HA.style "width" "auto"
         , HA.style "height" "8px"
         , HA.style "box-sizing" "border-box"
@@ -57,6 +25,7 @@ view functor model =
         , HA.style "border-style" "outset"
         , HA.style "border-width" "1px"
         ]
+        attributes
         []
 
 
@@ -74,21 +43,6 @@ preventDefaultAndStopPropagation event decoder =
             )
             decoder
         )
-
-
-update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        MouseDown drag ->
-            Debug.log "mousedown"
-                { model | drag = Just drag }
-
-        MouseMove drag ->
-            Debug.log "mousemove" model
-
-        MouseUp ->
-            Debug.log "mouseup"
-                { model | drag = Nothing }
 
 
 subscriptions : (Msg -> msg) -> Model -> Sub msg
