@@ -1,5 +1,5 @@
-module RPole exposing
-    ( RPole
+module Joint exposing
+    ( Joint
     , isMinus
     , isPlus
     , minus
@@ -11,35 +11,35 @@ module RPole exposing
 import Rot45 exposing (Rot45)
 
 
-type alias RPole =
+type alias Joint =
     Rot45
 
 
-minus : RPole
+minus : Joint
 minus =
     Rot45.make -1 0 0 0
 
 
-plus : RPole
+plus : Joint
 plus =
     Rot45.make 1 0 0 0
 
 
-isMinus : RPole -> Bool
+isMinus : Joint -> Bool
 isMinus p =
     p == minus
 
 
-isPlus : RPole -> Bool
+isPlus : Joint -> Bool
 isPlus p =
     p == plus
 
 
-negate : RPole -> RPole
+negate : Joint -> Joint
 negate p =
     Rot45.negate p
 
 
-mul : RPole -> RPole -> RPole
+mul : Joint -> Joint -> Joint
 mul p q =
     Rot45.mul p q
