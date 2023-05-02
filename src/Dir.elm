@@ -99,8 +99,8 @@ aux a b x =
 
 toRot45 : Dir -> Rot45
 toRot45 (Dir d) =
-    { a = aux 0 4 d
-    , b = aux 1 5 d
-    , c = aux 2 6 d
-    , d = aux 3 7 d
-    }
+    Rot45.make
+        (aux 0 4 d)
+        (aux 1 5 d)
+        (aux 2 6 d)
+        (aux 3 7 d)

@@ -14,48 +14,66 @@ module Rot45 exposing
 -}
 
 
-type alias Rot45 =
-    { a : Int
-    , b : Int
-    , c : Int
-    , d : Int
-    }
+type Rot45
+    = Rot45
+        { a : Int
+        , b : Int
+        , c : Int
+        , d : Int
+        }
 
 
 make : Int -> Int -> Int -> Int -> Rot45
 make a b c d =
-    { a = a
-    , b = b
-    , c = c
-    , d = d
-    }
+    Rot45
+        { a = a
+        , b = b
+        , c = c
+        , d = d
+        }
+
+
+getA : Rot45 -> Int
+getA (Rot45 { a }) =
+    a
+
+
+getB : Rot45 -> Int
+getB (Rot45 { b }) =
+    b
+
+
+getC : Rot45 -> Int
+getC (Rot45 { c }) =
+    c
+
+
+getD : Rot45 -> Int
+getD (Rot45 { d }) =
+    d
 
 
 zero : Rot45
 zero =
-    { a = 0
-    , b = 0
-    , c = 0
-    , d = 0
-    }
+    make 0 0 0 0
 
 
 add : Rot45 -> Rot45 -> Rot45
 add x y =
-    { a = x.a + y.a
-    , b = x.b + y.b
-    , c = x.c + y.c
-    , d = x.d + y.d
-    }
+    make
+        (getA x + getA y)
+        (getB x + getB y)
+        (getC x + getC y)
+        (getD x + getD y)
 
 
 negate : Rot45 -> Rot45
 negate x =
-    { a = -x.a
-    , b = -x.b
-    , c = -x.c
-    , d = -x.d
-    }
+    make
+        (Basics.negate <| getA x)
+        (Basics.negate <| getB x)
+        (Basics.negate <| getC x)
+        (Basics.negate <| getD x)
 
 
 sub : Rot45 -> Rot45 -> Rot45
@@ -67,20 +85,20 @@ sub x y =
 -}
 mul : Rot45 -> Rot45 -> Rot45
 mul x y =
-    { a = x.a * y.a - x.b * y.d - x.c * y.c - x.d * y.b
-    , b = x.a * y.b + x.b * y.a - x.c * y.d - x.d * y.c
-    , c = x.a * y.c + x.b * y.b + x.c * y.a - x.d * y.d
-    , d = x.a * y.d + x.b * y.c + x.c * y.b + x.d * y.a
-    }
+    make
+        (getA x * getA y - getB x * getD y - getC x * getC y - getD x * getB y)
+        (getA x * getB y + getB x * getA y - getC x * getD y - getD x * getC y)
+        (getA x * getC y + getB x * getB y + getC x * getA y - getD x * getD y)
+        (getA x * getD y + getB x * getC y + getC x * getB y + getD x * getA y)
 
 
 sqrt1_2 : Float
 sqrt1_2 =
-    sqrt (1 / 2.0)
+    sqrt (1.0 / 2.0)
 
 
 toFloat : Rot45 -> ( Float, Float )
 toFloat x =
-    ( Basics.toFloat x.a + sqrt1_2 * Basics.toFloat (x.b - x.d)
-    , Basics.toFloat x.c + sqrt1_2 * Basics.toFloat (x.b + x.d)
+    ( Basics.toFloat (getA x) + sqrt1_2 * Basics.toFloat (getB x - getD x)
+    , Basics.toFloat (getC x) + sqrt1_2 * Basics.toFloat (getB x + getD x)
     )
