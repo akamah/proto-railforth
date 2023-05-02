@@ -19,7 +19,7 @@ suite =
                     |> Expect.false "isFlipped no"
         , test "yes is not no" <|
             \_ ->
-                yes /= no |> Expect.true "yes /= no"
+                Expect.notEqual yes no
         , test "toString yes" <|
             \_ ->
                 Expect.equal "Flip@yes" (toString yes)

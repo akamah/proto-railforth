@@ -59,7 +59,7 @@ mul p q =
 toString : Joint -> String
 toString p =
     if isPlus p then
-        "plus"
+        "Joint@plus"
 
     else
-        "minus"
+        "Joint@minus"
