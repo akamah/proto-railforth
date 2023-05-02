@@ -242,7 +242,11 @@ showMesh model { vertices, indices } origin =
         railVertexShader
         railFragmentShader
         (WebGL.indexedTriangles vertices indices)
-        (uniforms model (originToVec3 origin) (originToRotate origin))
+        (uniforms model
+            (originToVec3 origin)
+            (originToRotate origin)
+            (toFloat origin.height)
+        )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -542,13 +546,15 @@ doPanning model ( x0, y0 ) ( x, y ) =
 
 type alias Uniforms =
     { transform : Mat4
+    , height : Float
     }
 
 
-uniforms : Model -> Vec3 -> Float -> Uniforms
-uniforms model origin rotate =
+uniforms : Model -> Vec3 -> Float -> Float -> Uniforms
+uniforms model origin rotate height =
     { transform =
         Mat4.mul (makeTransform model) (makeMeshMatrix origin rotate)
+    , height = height
     }
 
 
@@ -633,7 +639,13 @@ railFragmentShader =
     [glsl|
         varying highp float contrast;
         
+        uniform highp float height;
+
         void main() {
-            gl_FragColor = vec4(contrast * vec3(0.12, 0.56, 1.0), 1.0);
+            const highp vec3 blue = vec3(0.12, 0.56, 1.0);
+            const highp vec3 green = vec3(0.12, 1.0, 0.56);
+            highp float ratio = clamp(height / 40.0, 0.0, 1.0);
+            highp vec3 color = ratio * green + (1.0 - ratio) * blue;
+            gl_FragColor = vec4(contrast * color, 1.0);
         }
     |]
