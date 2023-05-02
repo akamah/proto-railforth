@@ -1,8 +1,5 @@
 module Main exposing (main)
 
-{- 100px in canvas = 2160mm (1U) in world
-
--}
 
 import Browser
 import Browser.Events exposing (onResize)
@@ -20,6 +17,7 @@ import OBJ.Types exposing (MeshWith, Vertex)
 import WebGL exposing (Shader, Entity)
 import WebGL.Settings
 import WebGL.Settings.DepthTest as DepthTest
+
 
 type Msg
     = LoadMesh (Result String (MeshWith Vertex))
@@ -69,14 +67,17 @@ initModel : Model
 initModel =
     { mesh = Err "loading..."
     , viewport = { width = 0, height = 0 }
-    , camera =
-        { azimuth = degrees (-90)
-        , altitude = degrees 80
-        , pixelPerUnit = 100
-        , translate = vec3 0 0 0
-        , draggingState = Nothing
-        }
+    , camera = initCamera
     , log = ""
+    }
+
+initCamera : CameraModel
+initCamera =
+    { azimuth = degrees (-90)
+    , altitude = degrees 80
+    , pixelPerUnit = 100
+    , translate = vec3 0 0 0
+    , draggingState = Nothing
     }
 
 
@@ -92,8 +93,7 @@ view : Model -> Html Msg
 view model =
     Html.div []
     [ WebGL.toHtmlWith
-        [
-          WebGL.alpha True
+        [ WebGL.alpha True
         , WebGL.antialias
         , WebGL.depth 1
         , WebGL.clearColor 0.9 0.9 1.0 1
