@@ -4,6 +4,7 @@ import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
 import Compiler exposing (compile)
+import Debug
 import Dir
 import Html exposing (Html, div)
 import Html.Attributes exposing (height, spellcheck, style, width)
@@ -15,6 +16,7 @@ import Mesh
 import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (Rail)
 import Rot45
+import Storage
 import Task
 import Tie exposing (Tie)
 import WebGL exposing (Entity, Shader)
@@ -62,29 +64,29 @@ type alias Model =
     }
 
 
-main : Program () Model Msg
+main : Program String Model Msg
 main =
     Browser.document
-        { init = always ( initModel, initCmd )
+        { init = \savedProgram -> ( initModel savedProgram, initCmd )
         , view = document
         , subscriptions = subscriptions
         , update = update
         }
 
 
-initModel : Model
-initModel =
+initModel : String -> Model
+initModel savedProgram =
     { meshes = Mesh.init
     , viewport = { width = 0, height = 0 }
     , azimuth = degrees -90
-    , altitude = degrees 80
+    , altitude = degrees 90
     , pixelPerUnit = 100
     , target = vec3 0 0 0
     , draggingState = Nothing
-    , program = ""
-    , rails = []
+    , program = savedProgram
+    , rails = compile savedProgram
     , splitBarDragState = Nothing
-    , splitBarPosition = 500.0
+    , splitBarPosition = 1000.0
     }
 
 
@@ -291,7 +293,7 @@ update msg model =
                 | program = program
                 , rails = compile program
               }
-            , Cmd.none
+            , Storage.save program
             )
 
         SplitBarBeginDrag pos ->
