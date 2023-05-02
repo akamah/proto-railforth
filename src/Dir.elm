@@ -1,6 +1,9 @@
 module Dir exposing
     ( Dir
+    , div
     , e
+    , inv
+    , mul
     , n
     , ne
     , nw
@@ -8,60 +11,93 @@ module Dir exposing
     , se
     , sw
     , toRadian
+    , toRot45
     , w
     )
 
 import Rot45 exposing (Rot45)
 
 
-type alias Dir =
-    Rot45
+type Dir
+    = Dir Int
 
 
 e : Dir
 e =
-    Rot45.make 1 0 0 0
+    Dir 0
 
 
 ne : Dir
 ne =
-    Rot45.make 0 1 0 0
+    Dir 1
 
 
 n : Dir
 n =
-    Rot45.make 0 0 1 0
+    Dir 2
 
 
 nw : Dir
 nw =
-    Rot45.make 0 0 0 1
+    Dir 3
 
 
 w : Dir
 w =
-    Rot45.make -1 0 0 0
+    Dir 4
 
 
 sw : Dir
 sw =
-    Rot45.make 0 -1 0 0
+    Dir 5
 
 
 s : Dir
 s =
-    Rot45.make 0 0 -1 0
+    Dir 6
 
 
 se : Dir
 se =
-    Rot45.make 0 0 0 -1
+    Dir 7
 
 
 toRadian : Dir -> Float
-toRadian r =
-    let
-        ( x, y ) =
-            Rot45.toFloat r
-    in
-    atan2 y x
+toRadian (Dir d) =
+    Basics.pi / 4.0 * Basics.toFloat d
+
+
+mul : Dir -> Dir -> Dir
+mul (Dir d1) (Dir d2) =
+    Dir (modBy 8 <| d1 + d2)
+
+
+inv : Dir -> Dir
+inv (Dir d) =
+    Dir (modBy 8 (8 - d))
+
+
+div : Dir -> Dir -> Dir
+div d1 d2 =
+    mul d1 (inv d2)
+
+
+aux : Int -> Int -> Int -> Int
+aux a b x =
+    if x == a then
+        1
+
+    else if x == b then
+        -1
+
+    else
+        0
+
+
+toRot45 : Dir -> Rot45
+toRot45 (Dir d) =
+    { a = aux 0 4 d
+    , b = aux 1 5 d
+    , c = aux 2 6 d
+    , d = aux 3 7 d
+    }

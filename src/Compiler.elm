@@ -4,7 +4,7 @@ import Dir
 import Joint
 import Kind exposing (Kind(..))
 import Rail exposing (Rail)
-import Rot45
+import Rot45 exposing (Rot45)
 import Tie exposing (Tie)
 
 
@@ -52,27 +52,6 @@ getLocalTie k =
             Tie.make (Rot45.make 0 1 -1 0) Rot45.zero 0 Dir.se Joint.plus
 
 
-goStraight : Tie -> Tie
-goStraight tie =
-    let
-        sn =
-            Rot45.add tie.single <| tie.dir
-    in
-    Tie.make sn tie.double tie.height tie.dir tie.joint
-
-
-curveLeft : Tie -> Tie
-curveLeft tie =
-    let
-        ns =
-            Rot45.add tie.single <| Rot45.mul tie.dir (Rot45.make 0 0 1 -1)
-
-        nd =
-            Rot45.mul Dir.ne tie.dir
-    in
-    Tie.make ns tie.double tie.height nd tie.joint
-
-
 getNextTie : Tie -> Kind -> Tie
 getNextTie tie kind =
     let
@@ -80,16 +59,16 @@ getNextTie tie kind =
             getLocalTie kind
 
         single2 =
-            Rot45.add tie.single <| Rot45.mul tie.dir local.single
+            Rot45.add tie.single <| Rot45.mul (Dir.toRot45 tie.dir) local.single
 
         double2 =
-            Rot45.add tie.double <| Rot45.mul tie.dir local.double
+            Rot45.add tie.double <| Rot45.mul (Dir.toRot45 tie.dir) local.double
 
         height2 =
             tie.height + local.height
 
         dir2 =
-            Rot45.mul tie.dir local.dir
+            Dir.mul tie.dir local.dir
 
         joint2 =
             Rot45.mul tie.joint local.joint
