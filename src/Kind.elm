@@ -21,12 +21,3 @@ allKinds =
 getLocalTies : Kind -> List Tie
 getLocalTies _ =
     []
-
-
-straight =
-    { kind = Straight
-    , ends =
-        [ Tie.make Rot45.zero Rot45.zero Dir.s Joint.plus
-        , Tie.make (Rot45.make 0 0 1 0) Rot45.zero Dir.s Joint.plus
-        ]
-    }

@@ -8,6 +8,7 @@ import Html exposing (Html, div)
 import Html.Attributes exposing (height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
+import Kind exposing (Kind)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Mesh
@@ -227,11 +228,6 @@ showMesh model { vertices, indices } origin =
         railFragmentShader
         (WebGL.indexedTriangles vertices indices)
         (uniforms model origin)
-
-
-simple : Float -> List String -> List Rail
-simple current commands =
-    []
 
 
 compile : String -> List Rail
