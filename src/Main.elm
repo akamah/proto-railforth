@@ -4,7 +4,6 @@ import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
 import Compiler exposing (compile)
-import Debug
 import Dir
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)

@@ -1,9 +1,6 @@
 module Rail exposing (Rail, make)
 
-import Dir
-import Joint
 import Kind exposing (Kind)
-import Rot45
 import Tie exposing (Tie)
 
 

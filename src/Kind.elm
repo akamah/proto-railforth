@@ -3,8 +3,6 @@ module Kind exposing
     , allKinds
     )
 
-import Tie exposing (Tie)
-
 
 type Kind
     = Straight
@@ -18,8 +16,3 @@ allKinds =
     , CurveRight
     , CurveLeft
     ]
-
-
-getLocalTies : Kind -> List Tie
-getLocalTies _ =
-    []
