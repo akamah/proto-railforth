@@ -3,18 +3,18 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
-import Dict exposing (Dict)
+import Compiler exposing (compile)
+import Dir
 import Html exposing (Html, div)
 import Html.Attributes exposing (height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
-import Kind exposing (Kind)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Mesh
 import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (Rail)
-import Rot45 exposing (Rot45)
+import Rot45
 import Task
 import Tie exposing (Tie)
 import WebGL exposing (Entity, Shader)
@@ -198,7 +198,7 @@ showRails model rails =
                 (Mesh.getMesh model.meshes rail.kind)
                 rail.origin
         )
-        Rail.test1
+        rails
 
 
 originToVec3 : Tie -> Vec3
@@ -230,11 +230,7 @@ originToVec3 tie =
 
 originToRotate : Tie -> Float
 originToRotate tie =
-    let
-        ( x, y ) =
-            tie.dir |> Rot45.toFloat
-    in
-    Basics.atan2 y x
+    Dir.toRadian tie.dir
 
 
 showMesh : Model -> MeshWith Vertex -> Tie -> Entity
@@ -247,11 +243,6 @@ showMesh model { vertices, indices } origin =
         railFragmentShader
         (WebGL.indexedTriangles vertices indices)
         (uniforms model (originToVec3 origin) (originToRotate origin))
-
-
-compile : String -> List Rail
-compile program =
-    Rail.test1
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -307,20 +298,6 @@ update msg model =
 
         SplitBarEndDrag _ ->
             ( { model | splitBarDragState = Nothing }, Cmd.none )
-
-
-updateLoadMesh :
-    String
-    -> Result String (MeshWith Vertex)
-    -> Dict String (MeshWith Vertex)
-    -> Dict String (MeshWith Vertex)
-updateLoadMesh name meshOrErr dict =
-    case meshOrErr of
-        Err _ ->
-            dict
-
-        Ok mesh ->
-            Dict.insert name mesh dict
 
 
 updateViewport : Float -> Float -> Model -> Model
@@ -590,17 +567,12 @@ makeTransform model =
         ortho =
             makeOrtho railViewport model.pixelPerUnit
 
-        pan =
-            Mat4.makeTranslate model.target
-
         lookat =
             makeLookAt model
     in
     List.foldr Mat4.mul
         Mat4.identity
         [ ortho
-
-        --        , pan
         , lookat
         ]
 

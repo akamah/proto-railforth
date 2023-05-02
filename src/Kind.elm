@@ -1,8 +1,8 @@
-module Kind exposing (..)
+module Kind exposing
+    ( Kind(..)
+    , allKinds
+    )
 
-import Dir
-import Joint
-import Rot45
 import Tie exposing (Tie)
 
 

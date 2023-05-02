@@ -7,6 +7,7 @@ module Dir exposing
     , s
     , se
     , sw
+    , toRadian
     , w
     )
 
@@ -55,3 +56,12 @@ s =
 se : Dir
 se =
     Rot45.make 0 0 0 -1
+
+
+toRadian : Dir -> Float
+toRadian r =
+    let
+        ( x, y ) =
+            Rot45.toFloat r
+    in
+    atan2 y x
