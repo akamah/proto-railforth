@@ -1,5 +1,9 @@
 module Main exposing (main)
 
+{- 100px in canvas = 2160mm (1U) in world
+
+-}
+
 import Browser
 import Browser.Events exposing (onResize)
 import Browser.Dom exposing (getViewport, Viewport)
@@ -10,7 +14,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Task
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
-import Math.Vector3 exposing (Vec3, vec3)
+import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import WebGL exposing (Shader, Entity)
@@ -30,7 +34,8 @@ type Msg
 type alias CameraModel =
     { azimuth: Float
     , altitude: Float
-    , zoom: Float
+    , pixelPerUnit: Float
+    , translate: Vec3
     , draggingState: Maybe DraggingState
     }
 
@@ -67,7 +72,8 @@ initModel =
     , camera =
         { azimuth = degrees (-90)
         , altitude = degrees 80
-        , zoom = 1.0
+        , pixelPerUnit = 100
+        , translate = vec3 0 0 0
         , draggingState = Nothing
         }
     , log = ""
@@ -78,7 +84,7 @@ initCmd : Cmd Msg
 initCmd =
     Cmd.batch 
         [ Task.perform GetViewport getViewport
-        , OBJ.loadMeshWithoutTexture "http://localhost:8080/slope_curve_b.obj" LoadMesh
+        , OBJ.loadMeshWithoutTexture "http://localhost:8080/straight_1.obj" LoadMesh
         ]
 
 
@@ -135,7 +141,8 @@ update msg model =
         LoadMesh mesh -> ({ model | mesh = mesh}, Cmd.none)
         MouseDown pos -> ({ model | camera = updateMouseDown model.camera pos }, Cmd.none)
         MouseDownWithShift pos -> ({ model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none)
-        MouseMove pos -> ({ model | camera = updateMouseMove model.camera pos }, Cmd.none)
+        MouseMove pos -> ({ model | camera = updateMouseMove model.camera pos
+                                  , log = Debug.toString model.camera.translate }, Cmd.none)
         MouseUp pos -> ({ model | camera = updateMouseUp model.camera pos }, Cmd.none)
         Wheel pos -> ({ model | camera = updateWheel model.camera pos }, Cmd.none)
         GetViewport viewport ->
@@ -182,7 +189,7 @@ doRotation cameraModel (px, py) (x, y) =
         azimuth =
             cameraModel.azimuth - dx * degrees 0.3
         altitude =
-            cameraModel.altitude + dy * degrees 0.3
+            cameraModel.altitude - dy * degrees 0.3
                 |> clamp (degrees 0) (degrees 90)
     in
         { cameraModel | draggingState = Just (Rotating (x, y))
@@ -198,15 +205,13 @@ doPanning cameraModel (px, py) (x, y) =
             x - px
         dy =
             y - py
-        azimuth =
-            cameraModel.azimuth - dx * degrees 0.3
-        altitude =
-            cameraModel.altitude + dy * degrees 0.3
-                |> clamp (degrees 0) (degrees 90)
+        
+        trans =
+            Vec3.add cameraModel.translate (vec3 dx dy 0)
+
     in
-        { cameraModel | draggingState = Just (Rotating (x, y))
-                      , azimuth = azimuth
-                      , altitude = altitude
+        { cameraModel | draggingState = Just (Panning (x, y))
+                      , translate = trans
         }
 
 
@@ -221,14 +226,18 @@ updateWheel cameraModel (_, dy) =
         multiplier = 1.1
 
         delta =
-            if dy > 0 then -- zoom out
+            if dy < 0 then -- zoom out
                 1 / multiplier
-            else if dy < 0 then -- zoom in
+            else if dy > 0 then -- zoom in
                 1 * multiplier
             else
                 1
+        
+        next =
+            cameraModel.pixelPerUnit * delta |>
+                clamp 20 2000
     in
-        { cameraModel | zoom = cameraModel.zoom * delta }
+        { cameraModel | pixelPerUnit = next }
 
 
 type alias PointToMsg msg = (Float, Float) -> msg
@@ -236,29 +245,29 @@ type alias PointToMsg msg = (Float, Float) -> msg
 
 mouseEventDecoder : Decoder (Float, Float)
 mouseEventDecoder =
-    Decode.map2 Tuple.pair
+    Decode.map2 (\x y -> (x, -y))
         (Decode.field "clientX" Decode.float)
         (Decode.field "clientY" Decode.float)
 
 
 mouseEventDecoderWithModifier : PointToMsg msg -> PointToMsg msg -> Decoder msg
 mouseEventDecoderWithModifier normal shift =
-    Decode.map3 (\x y shiftPressed ->
+    Decode.map2 (\point shiftPressed ->
         if shiftPressed then
-            shift (x, y)
+            shift point
         else
-            normal (x, y)
+            normal point
     )
-        (Decode.field "clientX" Decode.float)
-        (Decode.field "clientY" Decode.float)
+        mouseEventDecoder
         (Decode.field "shiftKey" Decode.bool)
 
 
 wheelEventDecoder : Decoder (Float, Float)
 wheelEventDecoder =
-    Decode.map2 Tuple.pair
+    Decode.map2 (\x y -> (x, -y))
         (Decode.field "deltaX" Decode.float)
         (Decode.field "deltaY" Decode.float)
+
 
 preventDefaultDecoder : Decoder a -> Decoder (a, Bool)
 preventDefaultDecoder = Decode.map (\a -> (a, True))
@@ -282,9 +291,12 @@ onMouseDownHandler _ =
     HE.on "mousedown" <|
         mouseEventDecoderWithModifier MouseDown MouseDownWithShift
 
+
 onMouseLeaveHandler : Model -> Html.Attribute Msg
 onMouseLeaveHandler _ =
-    HE.on "mouseleave" (Decode.map MouseUp mouseEventDecoder)
+    HE.on "mouseleave" <|
+        Decode.map MouseUp mouseEventDecoder
+
 
 onWheelHandler : Model -> Html.Attribute Msg
 onWheelHandler _ =
@@ -299,25 +311,37 @@ subscriptions _ =
         ]
 
 type alias Uniforms =
-    { perspective : Mat4
-    , camera : Mat4
-    , transform : Vec3
+    { transform : Mat4
+    , origin : Vec3
     }
 
 
 uniforms : Model -> Uniforms
 uniforms model =
-    { perspective = makeOrtho model.viewport model.camera.zoom
-    , camera = makeLookAt model.camera
-    , transform = vec3 0 0 0
+    { transform = makeTransform model
+    , origin = vec3 0 0 0
     }
 
+makeTransform : Model -> Mat4
+makeTransform model =
+    let
+        ortho =
+            makeOrtho model.viewport model.camera.pixelPerUnit
+        camera =
+            makeLookAt model.camera
+        translate =
+            makeTranslate model.camera
+    in
+        Mat4.mul ortho <|
+            Mat4.mul translate camera
+        
 
 makeOrtho : { width: Float, height: Float } -> Float -> Mat4
-makeOrtho { width, height } zoom =
+makeOrtho { width, height } ppu =
     let
-        w = width / zoom / 2
-        h = height / zoom / 2
+        unit = 216 / ppu
+        w = unit * width / 2
+        h = unit * height / 2
     in
         Mat4.makeOrtho (-w) w (-h) h 0.1 10000
 
@@ -334,20 +358,29 @@ makeLookAt model =
     in
         Mat4.makeLookAt (vec3 x y z) (vec3 0 0 0) (vec3 0 1 0)
 
+
+makeTranslate : CameraModel -> Mat4
+makeTranslate model =
+    let
+        scale =
+            2 * 216 / model.pixelPerUnit
+    in
+        Mat4.makeTranslate (Vec3.scale scale model.translate)
+
+
 railVertexShader : Shader Vertex Uniforms { contrast: Float }
 railVertexShader =
     [glsl|
         attribute vec3 position;
         attribute vec3 normal;
         
-        uniform mat4 perspective;
-        uniform mat4 camera;
-        uniform vec3 transform;
+        uniform mat4 transform;
+        uniform vec3 origin;
         
         varying highp float contrast;
         
         void main() {
-            gl_Position = perspective * camera * vec4(position, 1.0) + vec4(transform, 0.0);
+            gl_Position = transform * vec4(position + origin, 1.0);
             contrast = 0.3 + 0.7 * normal[1] * normal[1]; // XZ face should be blue
         }
     |]
