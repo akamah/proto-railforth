@@ -1,17 +1,17 @@
 module Rail exposing (Rail, make)
 
-import Kind exposing (Kind)
+import Placement exposing (Placement)
 import Tie exposing (Tie)
 
 
 type alias Rail =
-    { kind : Kind
+    { placement : Placement
     , origin : Tie
     }
 
 
-make : Kind -> Tie -> Rail
-make kind origin =
-    { kind = kind
+make : Placement -> Tie -> Rail
+make placement origin =
+    { placement = placement
     , origin = origin
     }

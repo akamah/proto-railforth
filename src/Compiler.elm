@@ -2,30 +2,28 @@ module Compiler exposing (compile)
 
 import Dir
 import Joint
-import Kind exposing (Kind(..))
+import Placement exposing (Placement)
 import Rail exposing (Rail)
 import Rot45
+import Shape exposing (Shape(..))
 import Tie exposing (Tie)
 
 
-getLocalTie : Kind -> Tie
-getLocalTie k =
-    case k of
+getLocalTie : Placement -> Tie
+getLocalTie p =
+    case p.shape of
         Straight ->
             Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.plus
 
-        CurveLeft ->
+        Curve ->
             Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne Joint.plus
 
-        CurveRight ->
-            Tie.make (Rot45.make 0 1 -1 0) Rot45.zero 0 Dir.se Joint.plus
 
-
-getNextTie : Tie -> Kind -> Tie
-getNextTie tie kind =
+getNextTie : Tie -> Placement -> Tie
+getNextTie tie placement =
     let
         local =
-            getLocalTie kind
+            getLocalTie placement
 
         single2 =
             Rot45.add tie.single <| Rot45.mul (Dir.toRot45 tie.dir) local.single
@@ -68,13 +66,10 @@ compileRec tie toks =
         t :: ts ->
             case t of
                 "s" ->
-                    Rail.make Straight tie :: compileRec (getNextTie tie Straight) ts
+                    Rail.make Placement.straightPlus tie :: compileRec (getNextTie tie Placement.straightPlus) ts
 
                 "l" ->
-                    Rail.make CurveLeft tie :: compileRec (getNextTie tie CurveLeft) ts
-
-                "r" ->
-                    Rail.make CurveRight tie :: compileRec (getNextTie tie CurveRight) ts
+                    Rail.make Placement.curveLeft tie :: compileRec (getNextTie tie Placement.curveLeft) ts
 
                 _ ->
                     []

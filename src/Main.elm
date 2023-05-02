@@ -201,7 +201,7 @@ showRails model rails =
         (\rail ->
             showRail
                 modelTransform
-                (Mesh.getMesh model.meshes rail.kind)
+                (Mesh.getMesh model.meshes rail.placement)
                 rail.origin
         )
         rails
@@ -215,12 +215,12 @@ showRail modelTransform mesh origin =
         ]
         railVertexShader
         railFragmentShader
-        mesh.mesh
+        mesh
         (uniforms modelTransform
             (originToVec3 origin)
             (originToRotate origin)
             (toFloat origin.height)
-            mesh.flipped
+            False
         )
 
 

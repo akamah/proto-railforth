@@ -10,20 +10,20 @@ module Mesh exposing
     )
 
 import Dict exposing (Dict)
-import Kind exposing (Kind, allKinds)
+import Flip exposing (Flip)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
+import Placement exposing (Placement)
+import Shape exposing (Shape(..))
 import WebGL
 
 
 type alias Mesh =
-    { mesh : WebGL.Mesh Vertex
-    , flipped : Bool
-    }
+    WebGL.Mesh Vertex
 
 
 type Msg
-    = LoadMesh String Bool (Result String (MeshWith Vertex))
+    = LoadMesh String (Result String (MeshWith Vertex))
 
 
 type alias Model =
@@ -42,66 +42,31 @@ init =
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        LoadMesh name flipped meshOrErr ->
+        LoadMesh name meshOrErr ->
             case meshOrErr of
                 Err e ->
                     { model | errors = e :: model.errors }
 
                 Ok meshWith ->
                     let
-                        glmesh =
-                            WebGL.indexedTriangles meshWith.vertices meshWith.indices
-
                         mesh =
-                            { mesh = glmesh
-                            , flipped = flipped
-                            }
+                            WebGL.indexedTriangles meshWith.vertices meshWith.indices
                     in
                     { model | meshes = Dict.insert name mesh model.meshes }
 
 
-buildMeshUri : Kind -> String
-buildMeshUri kind =
-    "http://localhost:8080/" ++ objNameOfKind kind ++ ".obj"
+{-| pass only safe constant strings
+-}
+buildMeshUri : String -> String
+buildMeshUri name =
+    "http://localhost:8080/" ++ name ++ ".obj"
 
 
-objNameOfKind : Kind -> String
-objNameOfKind k =
-    case k of
-        Kind.Straight ->
-            "straight_1"
-
-        Kind.CurveRight ->
-            "curve_8"
-
-        Kind.CurveLeft ->
-            "curve_8"
-
-
-keyOfKind : Kind -> String
-keyOfKind k =
-    case k of
-        Kind.Straight ->
-            "Straight"
-
-        Kind.CurveRight ->
-            "CurveRight"
-
-        Kind.CurveLeft ->
-            "CurveLeft"
-
-
-isFlipped : Kind -> Bool
-isFlipped k =
-    case k of
-        Kind.Straight ->
-            False
-
-        Kind.CurveRight ->
-            True
-
-        Kind.CurveLeft ->
-            False
+allMeshNames : List String
+allMeshNames =
+    [ "straight_1"
+    , "curve_8"
+    ]
 
 
 loadMeshCmd : (Msg -> msg) -> Cmd msg
@@ -109,23 +74,31 @@ loadMeshCmd f =
     Cmd.map f <|
         Cmd.batch <|
             List.map
-                (\kind ->
-                    OBJ.loadMeshWithoutTexture (buildMeshUri kind) (LoadMesh (keyOfKind kind) (isFlipped kind))
+                (\name ->
+                    OBJ.loadMeshWithoutTexture (buildMeshUri name) (LoadMesh name)
                 )
-                allKinds
+                allMeshNames
 
 
 dummyMesh : Mesh
 dummyMesh =
-    { mesh = WebGL.triangles []
-    , flipped = False
-    }
+    WebGL.triangles []
 
 
-getMesh : Model -> Kind -> Mesh
-getMesh model kind =
+getMeshName : Shape -> String
+getMeshName shape =
+    case shape of
+        Straight ->
+            "straight_1"
+
+        Curve ->
+            "curve_8"
+
+
+getMesh : Model -> Placement -> Mesh
+getMesh model placement =
     Maybe.withDefault dummyMesh <|
-        Dict.get (keyOfKind kind) model.meshes
+        Dict.get (getMeshName placement.shape) model.meshes
 
 
 getErrors : Model -> List String
