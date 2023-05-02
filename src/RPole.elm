@@ -1,45 +1,45 @@
 module RPole exposing
     ( RPole
-    , minus
-    , plus
     , isMinus
     , isPlus
-    , flip
+    , minus
     , mul
+    , negate
+    , plus
     )
 
-type RPole
-    = Minus
-    | Plus
+import Rot45 exposing (Rot45)
+
+
+type alias RPole =
+    Rot45
 
 
 minus : RPole
 minus =
-    Minus
+    Rot45.make -1 0 0 0
+
 
 plus : RPole
 plus =
-    Plus
+    Rot45.make 1 0 0 0
+
 
 isMinus : RPole -> Bool
 isMinus p =
     p == minus
 
+
 isPlus : RPole -> Bool
 isPlus p =
     p == plus
 
-flip : RPole -> RPole
-flip p =
-    if isMinus p then
-        plus
-    else
-        minus
+
+negate : RPole -> RPole
+negate p =
+    Rot45.negate p
+
 
 mul : RPole -> RPole -> RPole
 mul p q =
-    if isPlus p then
-        flip q
-    else
-        q
-
+    Rot45.mul p q
