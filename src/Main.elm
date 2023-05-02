@@ -31,6 +31,7 @@ type Msg
     | GetViewport Viewport
     | Resize Float Float
     | ProgramUpdate String
+    | SplitViewMsg SplitView.Msg
 
 
 type alias CameraModel =
@@ -113,32 +114,35 @@ buildMeshUri name =
 
 view : Model -> Html Msg
 view model =
-    Html.div []
-        [ WebGL.toHtmlWith
+    SplitView.view SplitViewMsg
+        model.splitView
+        (WebGL.toHtmlWith
             [ WebGL.alpha True
             , WebGL.antialias
             , WebGL.depth 1
             , WebGL.clearColor 0.9 0.9 1.0 1
             ]
-            [ width (round (2.0 * model.viewport.width))
-            , height (round model.viewport.height)
-            , style "display" "block"
-            , style "width" (String.fromFloat model.viewport.width ++ "px")
-            , style "height" (String.fromFloat (model.viewport.height / 2) ++ "px")
-            , onMouseUpHandler model
+            [ -- width (round (2.0 * model.viewport.width))
+              --            , height (round model.viewport.height)
+              --            , style "display" "block"
+              --            , style "width" (String.fromFloat model.viewport.width ++ "px")
+              --            , style "height" (String.fromFloat (model.viewport.height / 2) ++ "px")
+              onMouseUpHandler model
             , onMouseMoveHandler model
             , onMouseDownHandler model
             , onMouseLeaveHandler model
             , onWheelHandler model
             ]
             (showRails model model.rails)
-        , Html.textarea
+        )
+        (Html.textarea
             [ style "resize" "none"
-            , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
-            , style "height" (String.fromFloat (model.viewport.height / 2 - 16) ++ "px")
-            , style "margin" "3px"
-            , style "padding" "0"
-            , style "border" "solid 1px"
+
+            --            , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
+            --            , style "height" (String.fromFloat (model.viewport.height / 2 - 16) ++ "px")
+            --            , style "margin" "3px"
+            --            , style "padding" "0"
+            --            , style "border" "solid 1px"
             , style "outline" "none"
             , style "font-family" "monospace"
             , style "font-size" "large"
@@ -147,7 +151,7 @@ view model =
             ]
             [ Html.text model.program
             ]
-        ]
+        )
 
 
 showRails : Model -> List Rail -> List Entity
@@ -236,6 +240,11 @@ update msg model =
                 | program = program
                 , rails = compile program
               }
+            , Cmd.none
+            )
+
+        SplitViewMsg m ->
+            ( { model | splitView = SplitView.update m model.splitView }
             , Cmd.none
             )
 
@@ -424,9 +433,10 @@ onWheelHandler _ =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
+subscriptions model =
     Sub.batch
         [ onResize (\w h -> Resize (toFloat w) (toFloat h))
+        , SplitView.subscriptions SplitViewMsg model.splitView
         ]
 
 
