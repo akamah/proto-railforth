@@ -617,7 +617,7 @@ makeLookAt azimuth altitude target =
     Mat4.makeLookAt (Vec3.add target (vec3 x y z)) target (vec3 0 1 0)
 
 
-railVertexShader : Shader Vertex Uniforms { contrast : Float }
+railVertexShader : Shader Vertex Uniforms { contrast : Float, edge : Float }
 railVertexShader =
     [glsl|
         attribute vec3 position;
@@ -626,19 +626,22 @@ railVertexShader =
         uniform mat4 transform;
         
         varying highp float contrast;
-        
+        varying highp float edge;
+
         void main() {
             gl_Position = transform * vec4(position, 1.0);
             contrast = 0.3 + 0.7 * normal[1] * normal[1]; // XZ face should be blue
+            edge = distance(vec3(0.0, 0.0, 0.0), position);
         }
     |]
 
 
-railFragmentShader : Shader {} Uniforms { contrast : Float }
+railFragmentShader : Shader {} Uniforms { contrast : Float, edge : Float }
 railFragmentShader =
     [glsl|
         varying highp float contrast;
-        
+        varying highp float edge;
+
         uniform highp float height;
 
         void main() {
@@ -646,6 +649,7 @@ railFragmentShader =
             const highp vec3 green = vec3(0.12, 1.0, 0.56);
             highp float ratio = clamp(height / 40.0, 0.0, 1.0);
             highp vec3 color = ratio * green + (1.0 - ratio) * blue;
-            gl_FragColor = vec4(contrast * color, 1.0);
+            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);
+            gl_FragColor = vec4(dist_density * contrast * color, dist_density);
         }
     |]
