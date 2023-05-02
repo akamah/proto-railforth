@@ -4,7 +4,6 @@ module Tie exposing
     )
 
 import Dir exposing (Dir)
-import Joint exposing (Joint)
 import Rot45 exposing (Rot45)
 
 
@@ -16,15 +15,13 @@ type alias Tie =
     , double : Rot45
     , height : Int
     , dir : Dir
-    , joint : Joint
     }
 
 
-make : Rot45 -> Rot45 -> Int -> Dir -> Joint -> Tie
-make single double height dir joint =
+make : Rot45 -> Rot45 -> Int -> Dir -> Tie
+make single double height dir =
     { single = single
     , double = double
     , height = height
     , dir = dir
-    , joint = joint
     }

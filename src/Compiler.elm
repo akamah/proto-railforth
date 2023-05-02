@@ -1,7 +1,6 @@
 module Compiler exposing (compile)
 
 import Dir
-import Joint
 import Placement exposing (Placement)
 import Rail exposing (Rail)
 import Rot45
@@ -13,10 +12,10 @@ getLocalTie : Placement -> Tie
 getLocalTie p =
     case p.shape of
         Straight ->
-            Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.plus
+            Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e
 
         Curve ->
-            Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne Joint.plus
+            Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne
 
 
 getNextTie : Tie -> Placement -> Tie
@@ -39,10 +38,8 @@ getNextTie tie placement =
         dir2 =
             Dir.mul tie.dir local.dir
 
-        joint2 =
-            Rot45.mul tie.joint local.joint
     in
-    Tie.make single2 double2 height2 dir2 joint2
+    Tie.make single2 double2 height2 dir2
 
 
 tokenize : String -> List String
@@ -56,7 +53,7 @@ compile src =
         tokens =
             tokenize src
     in
-    compileRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e Joint.plus) tokens
+    compileRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e) tokens
 
 
 compileRec : Tie -> List String -> List Rail
