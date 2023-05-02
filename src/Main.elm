@@ -12,7 +12,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Mesh exposing (Mesh)
-import OBJ.Types exposing (MeshWith, Vertex)
+import OBJ.Types exposing (Vertex)
 import Rail exposing (Rail)
 import Rot45
 import Storage
