@@ -28,4 +28,6 @@ test1 =
         Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.plus
     , Rail Kind.Curve <|
         Tie.make (Rot45.make 1 0 1 -1) Rot45.zero 0 Dir.ne Joint.plus
+    , Rail Kind.Straight <|
+        Tie.make Rot45.zero Rot45.zero 4 Dir.e Joint.plus
     ]

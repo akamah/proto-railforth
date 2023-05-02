@@ -72,13 +72,6 @@ main =
         }
 
 
-document : Model -> Browser.Document Msg
-document model =
-    { title = "visrail"
-    , body = [ view model ]
-    }
-
-
 initModel : Model
 initModel =
     { meshes = Mesh.init
@@ -101,6 +94,13 @@ initCmd =
         [ Task.perform SetViewport getViewport
         , Mesh.loadMeshCmd LoadMesh
         ]
+
+
+document : Model -> Browser.Document Msg
+document model =
+    { title = "visrail"
+    , body = [ view model ]
+    }
 
 
 px : Float -> String
@@ -220,7 +220,7 @@ originToVec3 tie =
             270.0
 
         hunit =
-            66.0
+            66.0 / 4.0
     in
     vec3
         (sunit * sx + dunit * dx)
@@ -433,10 +433,6 @@ onSplitBarDragBegin _ =
         Decode.map SplitBarBeginDrag mouseEventDecoder
 
 
-
--- Since this is a toy program, always handle mouse move event!
-
-
 onMouseMoveHandler : Model -> Html.Attribute Msg
 onMouseMoveHandler _ =
     HE.on "mousemove" <|
@@ -559,22 +555,13 @@ uniforms model origin rotate =
 makeTransform : Model -> Mat4
 makeTransform model =
     let
-        railViewport =
-            { width = model.viewport.width
-            , height = model.splitBarPosition
-            }
-
         ortho =
-            makeOrtho railViewport model.pixelPerUnit
+            makeOrtho model.viewport.width model.splitBarPosition model.pixelPerUnit
 
         lookat =
-            makeLookAt model
+            makeLookAt model.azimuth model.altitude model.target
     in
-    List.foldr Mat4.mul
-        Mat4.identity
-        [ ortho
-        , lookat
-        ]
+    Mat4.mul ortho lookat
 
 
 makeMeshMatrix : Vec3 -> Float -> Mat4
@@ -594,8 +581,8 @@ orthoScale ppu =
     216.0 / ppu
 
 
-makeOrtho : { width : Float, height : Float } -> Float -> Mat4
-makeOrtho { width, height } ppu =
+makeOrtho : Float -> Float -> Float -> Mat4
+makeOrtho width height ppu =
     let
         w =
             orthoScale ppu * width / 2
@@ -606,22 +593,22 @@ makeOrtho { width, height } ppu =
     Mat4.makeOrtho -w w -h h -100000 100000
 
 
-makeLookAt : Model -> Mat4
-makeLookAt model =
+makeLookAt : Float -> Float -> Vec3 -> Mat4
+makeLookAt azimuth altitude target =
     let
         distance =
             10000
 
         x =
-            distance * cos model.altitude * cos model.azimuth
+            distance * cos altitude * cos azimuth
 
         y =
-            distance * sin model.altitude
+            distance * sin altitude
 
         z =
-            distance * cos model.altitude * -(sin model.azimuth)
+            distance * cos altitude * -(sin azimuth)
     in
-    Mat4.makeLookAt (Vec3.add model.target (vec3 x y z)) model.target (vec3 0 1 0)
+    Mat4.makeLookAt (Vec3.add target (vec3 x y z)) target (vec3 0 1 0)
 
 
 railVertexShader : Shader Vertex Uniforms { contrast : Float }
