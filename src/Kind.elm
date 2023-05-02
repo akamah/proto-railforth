@@ -8,13 +8,15 @@ import Tie exposing (Tie)
 
 type Kind
     = Straight
-    | Curve
+    | CurveRight
+    | CurveLeft
 
 
 allKinds : List Kind
 allKinds =
     [ Straight
-    , Curve
+    , CurveRight
+    , CurveLeft
     ]
 
 

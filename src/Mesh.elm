@@ -54,7 +54,10 @@ kindToObjName k =
         Kind.Straight ->
             "straight_1"
 
-        Kind.Curve ->
+        Kind.CurveRight ->
+            "curve_8"
+
+        Kind.CurveLeft ->
             "curve_8"
 
 
