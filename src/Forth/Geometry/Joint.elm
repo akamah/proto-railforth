@@ -1,4 +1,4 @@
-module Joint exposing
+module Forth.Geometry.Joint exposing
     ( Joint
     , isMinus
     , isPlus
@@ -9,7 +9,7 @@ module Joint exposing
     , toString
     )
 
-import Rot45 exposing (Rot45)
+import Forth.Geometry.Rot45 exposing (Rot45)
 
 
 {-| 凹凸を表す。 minusが凹、pluｓが凸。

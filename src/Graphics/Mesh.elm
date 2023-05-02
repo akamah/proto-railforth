@@ -1,4 +1,4 @@
-module Mesh exposing
+module Graphics.Mesh exposing
     ( Mesh
     , Model
     , Msg

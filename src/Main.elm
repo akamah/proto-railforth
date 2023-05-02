@@ -3,21 +3,21 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
-import Compiler exposing (compile)
-import Dir
+import Forth.Interpreter exposing (compile)
+import Forth.Geometry.Dir as Dir
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
-import Mesh exposing (Mesh)
+import Graphics.Mesh as Mesh exposing (Mesh)
 import OBJ.Types exposing (Vertex)
 import Rail exposing (Rail)
-import Rot45
+import Forth.Geometry.Rot45 as Rot45
 import Storage
 import Task
-import Tie exposing (Tie)
+import Forth.Geometry.Tie exposing (Tie)
 import WebGL exposing (Entity, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest as DepthTest
@@ -99,7 +99,7 @@ initCmd =
 
 document : Model -> Browser.Document Msg
 document model =
-    { title = "visrail"
+    { title = "RailForth prototype"
     , body = [ view model ]
     }
 

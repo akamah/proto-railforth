@@ -1,4 +1,4 @@
-module Flip exposing
+module Forth.Geometry.Flip exposing
     ( Flip
     , isFlipped
     , no

@@ -1,10 +1,10 @@
-module Tie exposing
+module Forth.Geometry.Tie exposing
     ( Tie
     , make
     )
 
-import Dir exposing (Dir)
-import Rot45 exposing (Rot45)
+import Forth.Geometry.Dir exposing (Dir)
+import Forth.Geometry.Rot45 exposing (Rot45)
 
 
 {-| レールの端点を表す。

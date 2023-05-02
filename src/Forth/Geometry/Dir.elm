@@ -1,4 +1,4 @@
-module Dir exposing
+module Forth.Geometry.Dir exposing
     ( Dir
     , div
     , e
@@ -15,7 +15,7 @@ module Dir exposing
     , w
     )
 
-import Rot45 exposing (Rot45)
+import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 
 
 {-| 8つの方向を表す。

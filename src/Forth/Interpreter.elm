@@ -1,11 +1,11 @@
-module Compiler exposing (compile)
+module Forth.Interpreter exposing (compile)
 
-import Dir
+import Forth.Geometry.Dir as Dir
 import Placement exposing (Placement)
 import Rail exposing (Rail)
-import Rot45
+import Forth.Geometry.Rot45 as Rot45
 import Shape exposing (Shape(..))
-import Tie exposing (Tie)
+import Forth.Geometry.Tie as Tie exposing (Tie)
 
 
 getLocalTie : Placement -> Tie

@@ -5,8 +5,8 @@ module Placement exposing
     , turnoutLeftPlus
     )
 
-import Flip exposing (Flip)
-import Joint exposing (Joint)
+import Forth.Geometry.Flip as Flip exposing (Flip)
+import Forth.Geometry.Joint as Joint exposing (Joint)
 import Shape exposing (Shape(..))
 
 

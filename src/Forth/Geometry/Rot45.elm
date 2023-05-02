@@ -1,4 +1,4 @@
-module Rot45 exposing
+module Forth.Geometry.Rot45 exposing
     ( Rot45
     , add
     , make
