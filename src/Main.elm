@@ -10,6 +10,7 @@ import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
+import Mesh
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (Rail)
@@ -21,7 +22,7 @@ import WebGL.Settings.DepthTest as DepthTest
 
 
 type Msg
-    = LoadMesh String (Result String (MeshWith Vertex))
+    = LoadMesh Mesh.Msg
     | BeginPan ( Float, Float )
     | UpdatePan ( Float, Float )
     | EndPan ( Float, Float )
@@ -52,7 +53,7 @@ type DraggingState
 
 
 type alias Model =
-    { meshes : Dict String (MeshWith Vertex)
+    { meshes : Mesh.Model
     , viewport :
         { width : Float
         , height : Float
@@ -77,14 +78,14 @@ main =
 
 document : Model -> Browser.Document Msg
 document model =
-    { title = "Visrail"
+    { title = "visrail"
     , body = [ view model ]
     }
 
 
 initModel : Model
 initModel =
-    { meshes = Dict.empty
+    { meshes = Mesh.init
     , viewport = { width = 0, height = 0 }
     , camera = initCamera
     , program = ""
@@ -108,20 +109,8 @@ initCmd : Cmd Msg
 initCmd =
     Cmd.batch
         [ Task.perform GetViewport getViewport
-        , loadMesh "straight_1"
-        , loadMesh "cross"
-        , loadMesh "auto_point"
+        , Mesh.loadMeshCmd LoadMesh
         ]
-
-
-loadMesh : String -> Cmd Msg
-loadMesh name =
-    OBJ.loadMeshWithoutTexture (buildMeshUri name) (LoadMesh name)
-
-
-buildMeshUri : String -> String
-buildMeshUri name =
-    "http://localhost:8080/" ++ name ++ ".obj"
 
 
 px : Float -> String
@@ -155,7 +144,7 @@ view model =
             [ WebGL.alpha True
             , WebGL.antialias
             , WebGL.depth 1
-            , WebGL.clearColor 0.5 0.7 0.5 1.0
+            , WebGL.clearColor 1.0 1.0 1.0 1.0
             ]
             [ width (round (2.0 * model.viewport.width))
             , height (round (2.0 * barTop))
@@ -263,8 +252,8 @@ compile program =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadMesh name mesh ->
-            ( { model | meshes = updateLoadMesh name mesh model.meshes }, Cmd.none )
+        LoadMesh meshMsg ->
+            ( { model | meshes = Mesh.update meshMsg model.meshes }, Cmd.none )
 
         BeginPan pos ->
             ( { model | camera = updateMouseDown model.camera pos }, Cmd.none )
@@ -492,8 +481,9 @@ onMouseMoveHandler _ =
 
 onMouseDownHandler : Model -> Html.Attribute Msg
 onMouseDownHandler _ =
-    HE.on "mousedown" <|
-        mouseEventDecoderWithModifier BeginPan BeginRotate
+    HE.preventDefaultOn "mousedown" <|
+        preventDefaultDecoder <|
+            mouseEventDecoderWithModifier BeginPan BeginRotate
 
 
 onWheelHandler : Model -> Html.Attribute Msg

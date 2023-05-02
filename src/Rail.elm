@@ -11,6 +11,13 @@ type Kind
     | Curve
 
 
+allKinds : List Kind
+allKinds =
+    [ Straight
+    , Curve
+    ]
+
+
 straight =
     { kind = Straight
     , ends =
