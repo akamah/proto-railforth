@@ -18,6 +18,9 @@ module Dir exposing
 import Rot45 exposing (Rot45)
 
 
+{-| 8つの方向を表す。
+e (東)が基本的な方向。感覚としては数学のグラフに合わせた。
+-}
 type Dir
     = Dir Int
 

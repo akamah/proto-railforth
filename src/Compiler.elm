@@ -26,10 +26,12 @@ getNextTie tie placement =
             getLocalTie placement
 
         single2 =
-            Rot45.add tie.single <| Rot45.mul (Dir.toRot45 tie.dir) local.single
+            Rot45.add tie.single <|
+                Rot45.mul (Dir.toRot45 tie.dir) local.single
 
         double2 =
-            Rot45.add tie.double <| Rot45.mul (Dir.toRot45 tie.dir) local.double
+            Rot45.add tie.double <|
+                Rot45.mul (Dir.toRot45 tie.dir) local.double
 
         height2 =
             tie.height + local.height
@@ -66,10 +68,12 @@ compileRec tie toks =
         t :: ts ->
             case t of
                 "s" ->
-                    Rail.make Placement.straightPlus tie :: compileRec (getNextTie tie Placement.straightPlus) ts
+                    Rail.make Placement.straightPlus tie
+                        :: compileRec (getNextTie tie Placement.straightPlus) ts
 
                 "l" ->
-                    Rail.make Placement.curveLeft tie :: compileRec (getNextTie tie Placement.curveLeft) ts
+                    Rail.make Placement.curveLeft tie
+                        :: compileRec (getNextTie tie Placement.curveLeft) ts
 
                 _ ->
                     []

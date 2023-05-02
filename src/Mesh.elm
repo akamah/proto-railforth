@@ -10,7 +10,6 @@ module Mesh exposing
     )
 
 import Dict exposing (Dict)
-import Flip exposing (Flip)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import Placement exposing (Placement)

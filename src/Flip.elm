@@ -4,6 +4,9 @@ module Flip exposing
     , yes
     )
 
+{-| レールについて、反転しているかどうかを表す。
+-}
+
 
 type alias Flip =
     Bool

@@ -11,6 +11,8 @@ module Joint exposing
 import Rot45 exposing (Rot45)
 
 
+{-| 凹凸を表す。 minusが凹、pluｓが凸。
+-}
 type alias Joint =
     Rot45
 

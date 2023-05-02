@@ -9,6 +9,13 @@ import Joint exposing (Joint)
 import Shape exposing (Shape(..))
 
 
+{-| ある点における、レールの配置を表す。
+
+  - レールの形
+  - その点における凹凸（どっちがどっちかは後述する）
+  - レールが反転しているかどうか
+
+-}
 type alias Placement =
     { shape : Shape
     , joint : Joint
