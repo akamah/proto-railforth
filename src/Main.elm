@@ -31,7 +31,7 @@ type Msg
     | UpdateRotate ( Float, Float )
     | EndRotate ( Float, Float )
     | Wheel ( Float, Float )
-    | GetViewport Viewport
+    | SetViewport Viewport
     | Resize Float Float
     | UpdateScript String
     | SplitBarBeginDrag ( Float, Float )
@@ -109,7 +109,7 @@ initCamera =
 initCmd : Cmd Msg
 initCmd =
     Cmd.batch
-        [ Task.perform GetViewport getViewport
+        [ Task.perform SetViewport getViewport
         , Mesh.loadMeshCmd LoadMesh
         ]
 
@@ -200,8 +200,20 @@ view model =
         ]
 
 
-tieToVec3 : Tie -> Vec3
-tieToVec3 tie =
+showRails : Model -> List Rail -> List Entity
+showRails model rails =
+    List.map
+        (\rail ->
+            showMesh
+                model
+                (Mesh.getMesh model.meshes rail.kind)
+                rail.origin
+        )
+        Rail.test1
+
+
+originToVec3 : Tie -> Vec3
+originToVec3 tie =
     let
         ( sx, sy ) =
             tie.single |> Rot45.toFloat
@@ -223,36 +235,20 @@ tieToVec3 tie =
     in
     vec3
         (sunit * sx + dunit * dx)
-        (sunit * sy + dunit * dy)
         (hunit * h)
+        -(sunit * sy + dunit * dy)
 
 
-showRails : Model -> List Rail -> List Entity
-showRails model rails =
-    List.map
-        (\rail ->
-            showMesh
-                model
-                (Mesh.getMesh model.meshes rail.kind)
-                (tieToVec3 rail.origin)
-        )
-        Rail.test1
+originToRotate : Tie -> Float
+originToRotate tie =
+    let
+        ( x, y ) =
+            tie.dir |> Rot45.toFloat
+    in
+    Basics.atan2 y x
 
 
-
-{-
-   List.concatMap
-       (\rail ->
-           case Dict.get "straight_1" model.meshes of
-               Just mesh ->
-                   [showMesh model mesh rail.origin]
-               Nothing ->
-                   [])
-       rails
--}
-
-
-showMesh : Model -> MeshWith Vertex -> Vec3 -> Entity
+showMesh : Model -> MeshWith Vertex -> Tie -> Entity
 showMesh model { vertices, indices } origin =
     WebGL.entityWith
         [ DepthTest.default
@@ -261,7 +257,7 @@ showMesh model { vertices, indices } origin =
         railVertexShader
         railFragmentShader
         (WebGL.indexedTriangles vertices indices)
-        (uniforms model origin)
+        (uniforms model (originToVec3 origin) (originToRotate origin))
 
 
 compile : String -> List Rail
@@ -296,7 +292,7 @@ update msg model =
         Wheel pos ->
             ( { model | camera = updateWheel model.camera pos }, Cmd.none )
 
-        GetViewport viewport ->
+        SetViewport viewport ->
             ( updateViewport viewport.viewport.width
                 viewport.viewport.height
                 model
@@ -563,19 +559,17 @@ subscriptionSplitBar model =
 
 type alias Uniforms =
     { transform : Mat4
-    , origin : Vec3
     }
 
 
-uniforms : Model -> Vec3 -> Uniforms
-uniforms model origin =
-    { transform = makeTransform model
-    , origin = origin
+uniforms : Model -> Vec3 -> Float -> Uniforms
+uniforms model origin rotate =
+    { transform = makeTransform model origin rotate
     }
 
 
-makeTransform : Model -> Mat4
-makeTransform model =
+makeTransform : Model -> Vec3 -> Float -> Mat4
+makeTransform model origin angle =
     let
         railViewport =
             { width = model.viewport.width
@@ -585,14 +579,26 @@ makeTransform model =
         ortho =
             makeOrtho railViewport model.camera.pixelPerUnit
 
+        scale =
+            makeCameraScale model.camera
+
         camera =
             makeLookAt model.camera
 
-        translate =
-            makeTranslate model.camera
+        position =
+            Mat4.makeTranslate origin
+
+        rotate =
+            Mat4.makeRotate angle (vec3 0 1 0)
     in
-    Mat4.mul ortho <|
-        Mat4.mul translate camera
+    List.foldr Mat4.mul
+        Mat4.identity
+        [ ortho
+        , scale
+        , camera
+        , position
+        , rotate
+        ]
 
 
 makeOrtho : { width : Float, height : Float } -> Float -> Mat4
@@ -628,8 +634,8 @@ makeLookAt model =
     Mat4.makeLookAt (vec3 x y z) (vec3 0 0 0) (vec3 0 1 0)
 
 
-makeTranslate : CameraModel -> Mat4
-makeTranslate model =
+makeCameraScale : CameraModel -> Mat4
+makeCameraScale model =
     let
         scale =
             2 * 216 / model.pixelPerUnit
@@ -644,12 +650,11 @@ railVertexShader =
         attribute vec3 normal;
         
         uniform mat4 transform;
-        uniform vec3 origin;
         
         varying highp float contrast;
         
         void main() {
-            gl_Position = transform * vec4(position + origin, 1.0);
+            gl_Position = transform * vec4(position, 1.0);
             contrast = 0.3 + 0.7 * normal[1] * normal[1]; // XZ face should be blue
         }
     |]
