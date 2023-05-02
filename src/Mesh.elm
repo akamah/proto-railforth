@@ -65,7 +65,10 @@ buildMeshUri name =
 
 allMeshNames : List String
 allMeshNames =
-    List.map getMeshName [ Straight, Curve, Turnout ]
+    [ "straight_1"
+    , "curve_8"
+    , "turnout_L"
+    ]
 
 
 loadMeshCmd : (Msg -> msg) -> Cmd msg
@@ -100,8 +103,8 @@ getMeshName shape =
 
 getMesh : Model -> Placement -> Mesh
 getMesh model placement =
-    Maybe.withDefault dummyMesh <|
-        Dict.get (getMeshName placement.shape) model.meshes
+    Dict.get (getMeshName placement.shape) model.meshes
+        |> Maybe.withDefault dummyMesh
 
 
 getErrors : Model -> List String
@@ -113,7 +116,9 @@ getErrors model =
 -}
 flipMesh : MeshWith Vertex -> MeshWith Vertex
 flipMesh meshWith =
-    { indices = meshWith.indices, vertices = List.map flipVertex meshWith.vertices }
+    { indices = meshWith.indices
+    , vertices = List.map flipVertex meshWith.vertices
+    }
 
 
 flipVertex : Vertex -> Vertex
