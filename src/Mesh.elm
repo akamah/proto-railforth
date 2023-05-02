@@ -9,9 +9,9 @@ module Mesh exposing
     )
 
 import Dict exposing (Dict)
+import Kind exposing (Kind, allKinds)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
-import Rail exposing (Kind, allKinds)
 
 
 type Msg
@@ -51,10 +51,10 @@ buildMeshUri name =
 kindToObjName : Kind -> String
 kindToObjName k =
     case k of
-        Rail.Straight ->
+        Kind.Straight ->
             "straight_1"
 
-        Rail.Curve ->
+        Kind.Curve ->
             "curve_8"
 
 
