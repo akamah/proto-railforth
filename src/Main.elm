@@ -44,15 +44,19 @@ type DraggingState
     = Panning (Float, Float)
     | Rotating (Float, Float)
 
+type alias Rail =
+    (String, Vec3)
+
 
 type alias Model = 
-    { mesh : Dict String (MeshWith Vertex)
+    { meshes : Dict String (MeshWith Vertex)
     , viewport :
         { width: Float
         , height: Float
         }
     , camera : CameraModel
     , program : String
+    , rails : List Rail
     }
 
 
@@ -68,10 +72,11 @@ main =
 
 initModel : Model
 initModel =
-    { mesh = Dict.empty
+    { meshes  = Dict.empty
     , viewport = { width = 0, height = 0 }
     , camera = initCamera
     , program = ""
+    , rails = []
     }
 
 initCamera : CameraModel
@@ -103,9 +108,6 @@ buildMeshUri name =
     "http://localhost:8080/" ++ name ++ ".obj"
 
 
-type alias RailModel =
-    List (String, Vec3)
-
 
 view : Model -> Html Msg
 view model =
@@ -127,13 +129,7 @@ view model =
         , onMouseLeaveHandler model
         , onWheelHandler model
         ]
-        (showMeshes model
-            [ ("straight_1", vec3 0 0 0)
-            , ("straight_1", vec3 0 0 60)
-            , ("straight_1", vec3 0 50 60)
-            , ("cross", vec3 216 0 0)
-            , ("auto_point", vec3 -324 0 0)
-            ])
+        (showRails model model.rails)
     , Html.textarea
         [ style "resize" "none"
         , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
@@ -152,11 +148,11 @@ view model =
     ]
 
 
-showMeshes : Model -> RailModel -> List Entity
-showMeshes model rails =
+showRails : Model -> List Rail -> List Entity
+showRails model rails =
     List.concatMap
         (\(name, origin) ->
-            case Dict.get name model.mesh of 
+            case Dict.get name model.meshes of 
                 Just mesh ->
                     [showMesh model mesh origin]
                 Nothing ->
@@ -176,11 +172,34 @@ showMesh model { vertices, indices } origin =
         (uniforms model origin)
 
 
+
+simple : Float -> List String -> List Rail
+simple current commands =
+    case commands of
+        [] ->
+            []
+
+        c :: rest ->
+            ("straight_1", vec3 (current * 216) 0 0) :: simple (current + 1) rest
+                
+
+compile : String -> List Rail
+compile program =
+    simple 0.0 <| String.words program
+
+{- [ ("straight_1", vec3 0 0 0)
+        , ("straight_1", vec3 0 0 60)
+        , ("straight_1", vec3 0 50 60)
+        , ("cross", vec3 216 0 0)
+        , ("auto_point", vec3 -324 0 0)
+        ]
+-}
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         LoadMesh name mesh ->
-            ({ model | mesh = updateLoadMesh name mesh model.mesh}, Cmd.none)
+            ({ model | meshes = updateLoadMesh name mesh model.meshes }, Cmd.none)
 
         MouseDown pos ->
             ({ model | camera = updateMouseDown model.camera pos }, Cmd.none)
@@ -206,7 +225,9 @@ update msg model =
             (updateViewport width height model, Cmd.none)
 
         ProgramUpdate program ->
-            ({ model | program = program }, Cmd.none)
+            ({ model | program = program
+                     , rails = compile program }
+            , Cmd.none)
 
 
 updateLoadMesh : String -> Result String (MeshWith Vertex) -> Dict String (MeshWith Vertex) -> Dict String (MeshWith Vertex)
@@ -406,12 +427,12 @@ makeOrtho { width, height } ppu =
         w = unit * width / 2
         h = unit * height / 4
     in
-        Mat4.makeOrtho (-w) w (-h) h 0.1 10000
+        Mat4.makeOrtho (-w) w (-h) h -100000 100000
 
 makeLookAt : CameraModel -> Mat4
 makeLookAt model =
     let
-        distance = 1000
+        distance = 10000
         x =
             distance * cos model.altitude * cos model.azimuth 
         y =
