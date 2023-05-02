@@ -1,5 +1,10 @@
 module Rail exposing (..)
 
+import REnd exposing (REnd)
+import RPoint
+import RDir
+import RPole
+
 type RType
     = Straight
     | Curve
@@ -9,12 +14,20 @@ type RType
 straight =
     { railType = Straight
     , ends =
-          [ End.make (RPoint.make 0 0 0 0) RDir.s RPole.plus
-          , End.make (RPoint.make 0 0 1 0) RDir.s RPole.plus
+          [ REnd.make (RPoint.make 0 0 0 0) RPoint.zero RDir.s RPole.plus
+          , REnd.make (RPoint.make 0 0 1 0) RPoint.zero RDir.s RPole.plus
           ]
     }
 
+isReversible : RType -> Bool
+isReversible _ =
+    False
+
+getLocalEnds : RType -> List REnd
+getLocalEnds _ =
+    []
+
 type alias Rail =
     { railType : RType
-    , origin : End
+    , origin : REnd
     }
