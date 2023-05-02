@@ -155,7 +155,7 @@ view model =
             [ WebGL.alpha True
             , WebGL.antialias
             , WebGL.depth 1
-            , WebGL.clearColor 0.9 0.9 1.0 1
+            , WebGL.clearColor 0.5 0.7 0.5 1.0
             ]
             [ width (round (2.0 * model.viewport.width))
             , height (round (2.0 * barTop))
@@ -309,13 +309,17 @@ update msg model =
             ( { model | splitBarDragState = Just pos }, Cmd.none )
 
         SplitBarUpdateDrag ( _, y ) ->
-            ( { model | splitBarPosition = Debug.log "clamp" (clamp 100 1000 y) }, Cmd.none )
+            ( { model | splitBarPosition = clamp 100 1000 y }, Cmd.none )
 
         SplitBarEndDrag _ ->
             ( { model | splitBarDragState = Nothing }, Cmd.none )
 
 
-updateLoadMesh : String -> Result String (MeshWith Vertex) -> Dict String (MeshWith Vertex) -> Dict String (MeshWith Vertex)
+updateLoadMesh :
+    String
+    -> Result String (MeshWith Vertex)
+    -> Dict String (MeshWith Vertex)
+    -> Dict String (MeshWith Vertex)
 updateLoadMesh name meshOrErr dict =
     case meshOrErr of
         Err _ ->
