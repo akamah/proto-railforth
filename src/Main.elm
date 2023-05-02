@@ -39,15 +39,6 @@ type Msg
     | SplitBarEndDrag ( Float, Float )
 
 
-type alias CameraModel =
-    { azimuth : Float
-    , altitude : Float
-    , pixelPerUnit : Float
-    , translate : Vec3
-    , draggingState : Maybe DraggingState
-    }
-
-
 type DraggingState
     = Panning ( Float, Float )
     | Rotating ( Float, Float )
@@ -59,7 +50,11 @@ type alias Model =
         { width : Float
         , height : Float
         }
-    , camera : CameraModel
+    , azimuth : Float
+    , altitude : Float
+    , pixelPerUnit : Float
+    , panOffset : Vec3
+    , draggingState : Maybe DraggingState
     , program : String
     , rails : List Rail
     , splitBarDragState : Maybe ( Float, Float )
@@ -88,21 +83,15 @@ initModel : Model
 initModel =
     { meshes = Mesh.init
     , viewport = { width = 0, height = 0 }
-    , camera = initCamera
+    , azimuth = degrees -90
+    , altitude = degrees 80
+    , pixelPerUnit = 100
+    , panOffset = vec3 0 0 0
+    , draggingState = Nothing
     , program = ""
     , rails = []
     , splitBarDragState = Nothing
-    , splitBarPosition = 1000.0
-    }
-
-
-initCamera : CameraModel
-initCamera =
-    { azimuth = degrees -90
-    , altitude = degrees 80
-    , pixelPerUnit = 100
-    , translate = vec3 0 0 0
-    , draggingState = Nothing
+    , splitBarPosition = 500.0
     }
 
 
@@ -272,25 +261,25 @@ update msg model =
             ( { model | meshes = Mesh.update meshMsg model.meshes }, Cmd.none )
 
         BeginPan pos ->
-            ( { model | camera = updateMouseDown model.camera pos }, Cmd.none )
+            ( updateMouseDown model pos, Cmd.none )
 
         UpdatePan pos ->
-            ( { model | camera = updateMouseMove model.camera pos }, Cmd.none )
+            ( updateMouseMove model pos, Cmd.none )
 
         EndPan pos ->
-            ( { model | camera = updateMouseUp model.camera pos }, Cmd.none )
+            ( updateMouseUp model pos, Cmd.none )
 
         BeginRotate pos ->
-            ( { model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none )
+            ( updateMouseDownWithShift model pos, Cmd.none )
 
         UpdateRotate pos ->
-            ( { model | camera = updateMouseMove model.camera pos }, Cmd.none )
+            ( updateMouseMove model pos, Cmd.none )
 
         EndRotate pos ->
-            ( { model | camera = updateMouseUp model.camera pos }, Cmd.none )
+            ( updateMouseUp model pos, Cmd.none )
 
         Wheel pos ->
-            ( { model | camera = updateWheel model.camera pos }, Cmd.none )
+            ( updateWheel model pos, Cmd.none )
 
         SetViewport viewport ->
             ( updateViewport viewport.viewport.width
@@ -339,31 +328,31 @@ updateViewport w h model =
     { model | viewport = { width = w, height = h } }
 
 
-updateMouseDown : CameraModel -> ( Float, Float ) -> CameraModel
-updateMouseDown cameraModel pos =
-    { cameraModel | draggingState = Just (Rotating pos) }
+updateMouseDown : Model -> ( Float, Float ) -> Model
+updateMouseDown model pos =
+    { model | draggingState = Just (Rotating pos) }
 
 
-updateMouseDownWithShift : CameraModel -> ( Float, Float ) -> CameraModel
-updateMouseDownWithShift cameraModel pos =
-    { cameraModel | draggingState = Just (Panning pos) }
+updateMouseDownWithShift : Model -> ( Float, Float ) -> Model
+updateMouseDownWithShift model pos =
+    { model | draggingState = Just (Panning pos) }
 
 
-updateMouseMove : CameraModel -> ( Float, Float ) -> CameraModel
-updateMouseMove cameraModel newPoint =
-    case cameraModel.draggingState of
+updateMouseMove : Model -> ( Float, Float ) -> Model
+updateMouseMove model newPoint =
+    case model.draggingState of
         Nothing ->
-            cameraModel
+            model
 
         Just (Rotating oldPoint) ->
-            doRotation cameraModel oldPoint newPoint
+            doRotation model oldPoint newPoint
 
         Just (Panning oldPoint) ->
-            doPanning cameraModel oldPoint newPoint
+            doPanning model oldPoint newPoint
 
 
-doRotation : CameraModel -> ( Float, Float ) -> ( Float, Float ) -> CameraModel
-doRotation cameraModel ( x0, y0 ) ( x, y ) =
+doRotation : Model -> ( Float, Float ) -> ( Float, Float ) -> Model
+doRotation model ( x0, y0 ) ( x, y ) =
     let
         dx =
             x - x0
@@ -372,46 +361,28 @@ doRotation cameraModel ( x0, y0 ) ( x, y ) =
             y - y0
 
         azimuth =
-            cameraModel.azimuth - dx * degrees 0.3
+            model.azimuth - dx * degrees 0.3
 
         altitude =
-            cameraModel.altitude
+            model.altitude
                 - dy
                 * degrees 0.3
                 |> clamp (degrees 0) (degrees 90)
     in
-    { cameraModel
+    { model
         | draggingState = Just (Rotating ( x, y ))
         , azimuth = azimuth
         , altitude = altitude
     }
 
 
-doPanning : CameraModel -> ( Float, Float ) -> ( Float, Float ) -> CameraModel
-doPanning cameraModel ( x0, y0 ) ( x, y ) =
-    let
-        dx =
-            x - x0
-
-        dy =
-            y - y0
-
-        trans =
-            Vec3.add cameraModel.translate (vec3 dx dy 0)
-    in
-    { cameraModel
-        | draggingState = Just (Panning ( x, y ))
-        , translate = trans
-    }
+updateMouseUp : Model -> ( Float, Float ) -> Model
+updateMouseUp model _ =
+    { model | draggingState = Nothing }
 
 
-updateMouseUp : CameraModel -> ( Float, Float ) -> CameraModel
-updateMouseUp cameraModel _ =
-    { cameraModel | draggingState = Nothing }
-
-
-updateWheel : CameraModel -> ( Float, Float ) -> CameraModel
-updateWheel cameraModel ( _, dy ) =
+updateWheel : Model -> ( Float, Float ) -> Model
+updateWheel model ( _, dy ) =
     let
         multiplier =
             1.05
@@ -429,11 +400,11 @@ updateWheel cameraModel ( _, dy ) =
                 1
 
         next =
-            cameraModel.pixelPerUnit
+            model.pixelPerUnit
                 * delta
                 |> clamp 20 1000
     in
-    { cameraModel | pixelPerUnit = next }
+    { model | pixelPerUnit = next }
 
 
 type alias PointToMsg msg =
@@ -520,7 +491,7 @@ subscriptions model =
 
 subscriptionPan : Model -> Sub Msg
 subscriptionPan model =
-    case model.camera.draggingState of
+    case model.draggingState of
         Just (Panning _) ->
             Sub.batch
                 [ BE.onMouseMove <| Decode.map UpdatePan mouseEventDecoder
@@ -533,7 +504,7 @@ subscriptionPan model =
 
 subscriptionRotate : Model -> Sub Msg
 subscriptionRotate model =
-    case model.camera.draggingState of
+    case model.draggingState of
         Just (Panning _) ->
             Sub.batch
                 [ BE.onMouseMove <| Decode.map UpdateRotate mouseEventDecoder
@@ -557,6 +528,27 @@ subscriptionSplitBar model =
             Sub.none
 
 
+doPanning : Model -> ( Float, Float ) -> ( Float, Float ) -> Model
+doPanning model ( x0, y0 ) ( x, y ) =
+    let
+        dx =
+            x - x0
+
+        dy =
+            -(y - y0)
+
+        os =
+            orthoScale model.pixelPerUnit
+
+        trans =
+            Vec3.add model.panOffset (vec3 (os * dx) (os * dy) 0)
+    in
+    { model
+        | draggingState = Just (Panning ( x, y ))
+        , panOffset = Debug.log "panOffset" trans
+    }
+
+
 type alias Uniforms =
     { transform : Mat4
     }
@@ -564,12 +556,13 @@ type alias Uniforms =
 
 uniforms : Model -> Vec3 -> Float -> Uniforms
 uniforms model origin rotate =
-    { transform = makeTransform model origin rotate
+    { transform =
+        Mat4.mul (makeTransform model) (makeMeshMatrix origin rotate)
     }
 
 
-makeTransform : Model -> Vec3 -> Float -> Mat4
-makeTransform model origin angle =
+makeTransform : Model -> Mat4
+makeTransform model =
     let
         railViewport =
             { width = model.viewport.width
@@ -577,46 +570,52 @@ makeTransform model origin angle =
             }
 
         ortho =
-            makeOrtho railViewport model.camera.pixelPerUnit
+            makeOrtho railViewport model.pixelPerUnit
 
-        scale =
-            makeCameraScale model.camera
+        pan =
+            Mat4.makeTranslate model.panOffset
 
         camera =
-            makeLookAt model.camera
+            makeLookAt model
+    in
+    List.foldr Mat4.mul
+        Mat4.identity
+        [ ortho
+        , pan
+        , camera
+        ]
 
+
+makeMeshMatrix : Vec3 -> Float -> Mat4
+makeMeshMatrix origin angle =
+    let
         position =
             Mat4.makeTranslate origin
 
         rotate =
             Mat4.makeRotate angle (vec3 0 1 0)
     in
-    List.foldr Mat4.mul
-        Mat4.identity
-        [ ortho
-        , scale
-        , camera
-        , position
-        , rotate
-        ]
+    Mat4.mul position rotate
+
+
+orthoScale : Float -> Float
+orthoScale ppu =
+    216.0 / ppu
 
 
 makeOrtho : { width : Float, height : Float } -> Float -> Mat4
 makeOrtho { width, height } ppu =
     let
-        unit =
-            216 / ppu
-
         w =
-            unit * width / 2
+            orthoScale ppu * width / 2
 
         h =
-            unit * height / 2
+            orthoScale ppu * height / 2
     in
     Mat4.makeOrtho -w w -h h -100000 100000
 
 
-makeLookAt : CameraModel -> Mat4
+makeLookAt : Model -> Mat4
 makeLookAt model =
     let
         distance =
@@ -632,15 +631,6 @@ makeLookAt model =
             distance * cos model.altitude * -(sin model.azimuth)
     in
     Mat4.makeLookAt (vec3 x y z) (vec3 0 0 0) (vec3 0 1 0)
-
-
-makeCameraScale : CameraModel -> Mat4
-makeCameraScale model =
-    let
-        scale =
-            2 * 216 / model.pixelPerUnit
-    in
-    Mat4.makeTranslate (Vec3.scale scale model.translate)
 
 
 railVertexShader : Shader Vertex Uniforms { contrast : Float }
