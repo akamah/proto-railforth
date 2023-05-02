@@ -14,15 +14,17 @@ import Rot45 exposing (Rot45)
 type alias Tie =
     { single : Rot45
     , double : Rot45
+    , height : Int
     , dir : Dir
     , joint : Joint
     }
 
 
-make : Rot45 -> Rot45 -> Dir -> Joint -> Tie
-make single double dir joint =
+make : Rot45 -> Rot45 -> Int -> Dir -> Joint -> Tie
+make single double height dir joint =
     { single = single
     , double = double
+    , height = height
     , dir = dir
     , joint = joint
     }
