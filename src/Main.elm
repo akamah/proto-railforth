@@ -4,6 +4,7 @@ module Main exposing (main)
 import Browser
 import Browser.Events exposing (onResize)
 import Browser.Dom exposing (getViewport, Viewport)
+import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes exposing (height, width, style)
 import Html.Events as HE
@@ -20,7 +21,7 @@ import WebGL.Settings.DepthTest as DepthTest
 
 
 type Msg
-    = LoadMesh (Result String (MeshWith Vertex))
+    = LoadMesh String (Result String (MeshWith Vertex))
     | MouseDown (Float, Float)
     | MouseDownWithShift (Float, Float)
     | MouseMove (Float, Float)
@@ -43,7 +44,7 @@ type DraggingState
 
 
 type alias Model = 
-    { mesh : Result String (MeshWith Vertex)
+    { mesh : Dict String (MeshWith Vertex)
     , viewport :
         { width: Float
         , height: Float
@@ -65,7 +66,7 @@ main =
 
 initModel : Model
 initModel =
-    { mesh = Err "loading..."
+    { mesh = Dict.empty
     , viewport = { width = 0, height = 0 }
     , camera = initCamera
     , log = ""
@@ -85,8 +86,19 @@ initCmd : Cmd Msg
 initCmd =
     Cmd.batch 
         [ Task.perform GetViewport getViewport
-        , OBJ.loadMeshWithoutTexture "http://localhost:8080/straight_1.obj" LoadMesh
+        , loadMesh "straight_1"
+        , loadMesh "cross"
+        , loadMesh "auto_point"
         ]
+
+loadMesh : String -> Cmd Msg
+loadMesh name =
+    OBJ.loadMeshWithoutTexture (buildMeshUri name) (LoadMesh name)
+
+
+buildMeshUri : String -> String
+buildMeshUri name =
+    "http://localhost:8080/" ++ name ++ ".obj"
 
 
 view : Model -> Html Msg
@@ -109,15 +121,10 @@ view model =
         , onMouseLeaveHandler model
         , onWheelHandler model
         ]
-        (case model.mesh of
-          Ok m -> [showMesh model m]
-          Err _ -> []
+        (case Dict.get "auto_point" model.mesh of
+          Just m -> [showMesh model m]
+          Nothing -> []
         )
-    , Html.textarea [] [ Html.text 
-      (case model.mesh of
-        Err e -> e
-        Ok _ -> "SUCCESS: mesh loaded"
-      )]
     , Html.text model.log
     ]
 
@@ -125,8 +132,7 @@ view model =
 showMesh : Model -> MeshWith Vertex -> Entity
 showMesh model { vertices, indices } =
     WebGL.entityWith
-        [
-          DepthTest.default
+        [ DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
         ]
         railVertexShader
@@ -138,7 +144,7 @@ showMesh model { vertices, indices } =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        LoadMesh mesh -> ({ model | mesh = mesh}, Cmd.none)
+        LoadMesh name mesh -> ({ model | mesh = updateLoadMesh name mesh model.mesh}, Cmd.none)
         MouseDown pos -> ({ model | camera = updateMouseDown model.camera pos }, Cmd.none)
         MouseDownWithShift pos -> ({ model | camera = updateMouseDownWithShift model.camera pos }, Cmd.none)
         MouseMove pos -> ({ model | camera = updateMouseMove model.camera pos
@@ -151,6 +157,13 @@ update msg model =
                             model
             , Cmd.none)
         Resize width height -> (updateViewport width height model, Cmd.none)
+
+
+updateLoadMesh : String -> Result String (MeshWith Vertex) -> Dict String (MeshWith Vertex) -> Dict String (MeshWith Vertex)
+updateLoadMesh name meshOrErr dict =
+    case meshOrErr of
+        Err _ -> dict
+        Ok mesh -> Dict.insert name mesh dict
 
 
 updateViewport : Float -> Float -> Model -> Model
