@@ -1,85 +1,57 @@
 module Dir exposing
     ( Dir
-    , add
     , e
-    , getDir
-    , make
     , n
     , ne
-    , negate
     , nw
     , s
     , se
-    , sub
     , sw
     , w
     )
 
-
-type Dir
-    = Dir Int
+import Rot45 exposing (Rot45)
 
 
-getDir : Dir -> Int
-getDir (Dir d) =
-    d
-
-
-make : Int -> Dir
-make d =
-    Dir (modBy 8 d)
+type alias Dir =
+    Rot45
 
 
 e : Dir
 e =
-    make 0
+    Rot45.make 1 0 0 0
 
 
 ne : Dir
 ne =
-    make 1
+    Rot45.make 0 1 0 0
 
 
 n : Dir
 n =
-    make 2
+    Rot45.make 0 0 1 0
 
 
 nw : Dir
 nw =
-    make 3
+    Rot45.make 0 0 0 1
 
 
 w : Dir
 w =
-    make 4
+    Rot45.make -1 0 0 0
 
 
 sw : Dir
 sw =
-    make 5
+    Rot45.make 0 -1 0 0
 
 
 s : Dir
 s =
-    make 6
+    Rot45.make 0 0 -1 0
 
 
 se : Dir
 se =
-    make 7
-
-
-add : Dir -> Dir -> Dir
-add x y =
-    make <| getDir x + getDir y
-
-
-negate : Dir -> Dir
-negate x =
-    make <| Basics.negate (getDir x)
-
-
-sub : Dir -> Dir -> Dir
-sub x y =
-    add x (negate y)
+    Rot45.make 0 0 0 -1
