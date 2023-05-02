@@ -52,6 +52,8 @@ turnoutLeftPlus =
 -}
 toString : Placement -> String
 toString placement =
-    Shape.toString placement.shape
-        ++ Joint.toString placement.joint
-        ++ Flip.toString placement.flip
+    String.join "+"
+        [ Shape.toString placement.shape
+        , Joint.toString placement.joint
+        , Flip.toString placement.flip
+        ]
