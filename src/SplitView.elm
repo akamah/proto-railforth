@@ -1,4 +1,4 @@
-module SplitView exposing
+module SplitBar exposing
     ( Model
     , Msg
     , init
@@ -20,15 +20,7 @@ type Orientation
     | Vertical
 
 
-type alias DragStart =
-    { startX : Int
-    , startY : Int
-    , parentWidth : Int
-    , parentHeight : Int
-    }
-
-
-type alias DragMove =
+type alias Drag =
     { clientX : Int
     , clientY : Int
     }
@@ -36,13 +28,13 @@ type alias DragMove =
 
 type alias Model =
     { orientation : Orientation
-    , drag : Maybe DragStart
+    , drag : Maybe Drag
     }
 
 
 type Msg
-    = MouseDown DragStart
-    | MouseMove DragMove
+    = MouseDown Drag
+    | MouseMove Drag
     | MouseUp
 
 
@@ -53,30 +45,35 @@ init =
     }
 
 
-view : (Msg -> msg) -> Model -> Html msg -> Html msg -> Html msg
-view functor model first second =
-    Html.div []
-        [ Html.div
-            []
-            [ first ]
-        , Html.div
-            [ HA.map functor onMouseDown
-            , HA.style "cursor" "row-resize"
-            , HA.style "width" "auto"
-            , HA.style "height" "8px"
-            , HA.style "box-sizing" "border-box"
-            , HA.style "background-color" "lightgrey"
-            , HA.style "border-style" "outset"
-            , HA.style "border-width" "1px"
-            ]
-            []
-        , Html.div [] [ second ]
+view : (Msg -> msg) -> Model -> Html msg
+view functor model =
+    Html.div
+        [ HA.map functor onMouseDown
+        , HA.style "cursor" "row-resize"
+        , HA.style "width" "auto"
+        , HA.style "height" "8px"
+        , HA.style "box-sizing" "border-box"
+        , HA.style "background-color" "lightgrey"
+        , HA.style "border-style" "outset"
+        , HA.style "border-width" "1px"
         ]
+        []
 
 
 onMouseDown : Attribute Msg
 onMouseDown =
-    HE.on "mousedown" (Decode.map MouseDown mouseDownDecoder)
+    preventDefaultAndStopPropagation "mousedown" (Decode.map MouseDown mouseDecoder)
+
+
+preventDefaultAndStopPropagation : String -> Decoder msg -> Attribute msg
+preventDefaultAndStopPropagation event decoder =
+    HE.custom event
+        (Decode.map
+            (\x ->
+                { message = x, stopPropagation = True, preventDefault = True }
+            )
+            decoder
+        )
 
 
 update : Msg -> Model -> Model
@@ -101,22 +98,13 @@ subscriptions functor model =
 
     else
         Sub.batch
-            [ BE.onMouseMove <| Decode.map (functor << MouseMove) mouseMoveDecoder
+            [ BE.onMouseMove <| Decode.map (functor << MouseMove) mouseDecoder
             , BE.onMouseUp <| Decode.succeed (functor MouseUp)
             ]
 
 
-mouseDownDecoder : Decoder DragStart
-mouseDownDecoder =
-    Decode.map4 DragStart
-        (Decode.field "clientX" Decode.int)
-        (Decode.field "clientY" Decode.int)
-        (Decode.at [ "target", "parentElement", "clientWidth" ] Decode.int)
-        (Decode.at [ "target", "parentElement", "clientHeight" ] Decode.int)
-
-
-mouseMoveDecoder : Decoder DragMove
-mouseMoveDecoder =
-    Decode.map2 DragMove
+mouseDecoder : Decoder Drag
+mouseDecoder =
+    Decode.map2 Drag
         (Decode.field "clientX" Decode.int)
         (Decode.field "clientY" Decode.int)

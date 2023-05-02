@@ -4,7 +4,7 @@ import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events exposing (onResize)
 import Dict exposing (Dict)
-import Html exposing (Html)
+import Html exposing (Html, div)
 import Html.Attributes exposing (height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
@@ -12,10 +12,9 @@ import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
-import REnd exposing (REnd)
 import Rail exposing (Rail)
-import SplitView
 import Task
+import Tie exposing (Tie)
 import WebGL exposing (Entity, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest as DepthTest
@@ -30,8 +29,7 @@ type Msg
     | Wheel ( Float, Float )
     | GetViewport Viewport
     | Resize Float Float
-    | ProgramUpdate String
-    | SplitViewMsg SplitView.Msg
+    | UpdateScript String
 
 
 type alias CameraModel =
@@ -57,18 +55,24 @@ type alias Model =
     , camera : CameraModel
     , program : String
     , rails : List Rail
-    , splitView : SplitView.Model
     }
 
 
 main : Program () Model Msg
 main =
-    Browser.element
+    Browser.document
         { init = always ( initModel, initCmd )
-        , view = view
+        , view = document
         , subscriptions = subscriptions
         , update = update
         }
+
+
+document : Model -> Browser.Document Msg
+document model =
+    { title = "Visrail"
+    , body = [ view model ]
+    }
 
 
 initModel : Model
@@ -78,7 +82,6 @@ initModel =
     , camera = initCamera
     , program = ""
     , rails = []
-    , splitView = SplitView.init
     }
 
 
@@ -114,44 +117,42 @@ buildMeshUri name =
 
 view : Model -> Html Msg
 view model =
-    SplitView.view SplitViewMsg
-        model.splitView
-        (WebGL.toHtmlWith
+    div []
+        [ WebGL.toHtmlWith
             [ WebGL.alpha True
             , WebGL.antialias
             , WebGL.depth 1
             , WebGL.clearColor 0.9 0.9 1.0 1
             ]
-            [ -- width (round (2.0 * model.viewport.width))
-              --            , height (round model.viewport.height)
-              --            , style "display" "block"
-              --            , style "width" (String.fromFloat model.viewport.width ++ "px")
-              --            , style "height" (String.fromFloat (model.viewport.height / 2) ++ "px")
-              onMouseUpHandler model
+            [ width (round (2.0 * model.viewport.width))
+            , height (round model.viewport.height)
+            , style "display" "block"
+            , style "width" (String.fromFloat model.viewport.width ++ "px")
+            , style "height" (String.fromFloat (model.viewport.height / 2) ++ "px")
+            , onMouseUpHandler model
             , onMouseMoveHandler model
             , onMouseDownHandler model
             , onMouseLeaveHandler model
             , onWheelHandler model
             ]
             (showRails model model.rails)
-        )
-        (Html.textarea
+        , Html.textarea
             [ style "resize" "none"
-
-            --            , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
-            --            , style "height" (String.fromFloat (model.viewport.height / 2 - 16) ++ "px")
-            --            , style "margin" "3px"
-            --            , style "padding" "0"
-            --            , style "border" "solid 1px"
+            , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
+            , style "height" (String.fromFloat (model.viewport.height / 2 - 40) ++ "px")
+            , style "margin" "3px"
+            , style "padding" "0"
+            , style "border" "solid 1px"
             , style "outline" "none"
             , style "font-family" "monospace"
             , style "font-size" "large"
+            , style "box-sizing" "border-box"
             , spellcheck False
-            , HE.onInput ProgramUpdate
+            , HE.onInput UpdateScript
             ]
             [ Html.text model.program
             ]
-        )
+        ]
 
 
 showRails : Model -> List Rail -> List Entity
@@ -235,16 +236,11 @@ update msg model =
         Resize width height ->
             ( updateViewport width height model, Cmd.none )
 
-        ProgramUpdate program ->
+        UpdateScript program ->
             ( { model
                 | program = program
                 , rails = compile program
               }
-            , Cmd.none
-            )
-
-        SplitViewMsg m ->
-            ( { model | splitView = SplitView.update m model.splitView }
             , Cmd.none
             )
 
@@ -436,7 +432,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ onResize (\w h -> Resize (toFloat w) (toFloat h))
-        , SplitView.subscriptions SplitViewMsg model.splitView
         ]
 
 
