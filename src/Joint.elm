@@ -6,6 +6,7 @@ module Joint exposing
     , mul
     , negate
     , plus
+    , toString
     )
 
 import Rot45 exposing (Rot45)
@@ -13,18 +14,18 @@ import Rot45 exposing (Rot45)
 
 {-| 凹凸を表す。 minusが凹、pluｓが凸。
 -}
-type alias Joint =
-    Rot45
+type Joint
+    = Joint Bool
 
 
 minus : Joint
 minus =
-    Rot45.make -1 0 0 0
+    Joint False
 
 
 plus : Joint
 plus =
-    Rot45.make 1 0 0 0
+    Joint True
 
 
 isMinus : Joint -> Bool
@@ -39,9 +40,26 @@ isPlus p =
 
 negate : Joint -> Joint
 negate p =
-    Rot45.negate p
+    if isPlus p then
+        minus
+
+    else
+        plus
 
 
 mul : Joint -> Joint -> Joint
 mul p q =
-    Rot45.mul p q
+    if isPlus p then
+        negate q
+
+    else
+        q
+
+
+toString : Joint -> String
+toString p =
+    if isPlus p then
+        "plus"
+
+    else
+        "minus"

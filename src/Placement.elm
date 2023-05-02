@@ -2,6 +2,7 @@ module Placement exposing
     ( Placement
     , curveLeft
     , straightPlus
+    , turnoutLeftPlus
     )
 
 import Flip exposing (Flip)
@@ -37,3 +38,20 @@ curveLeft =
     , joint = Joint.minus
     , flip = Flip.no
     }
+
+
+turnoutLeftPlus : Placement
+turnoutLeftPlus =
+    { shape = Turnout
+    , joint = Joint.minus
+    , flip = Flip.no
+    }
+
+
+{-| for map key
+-}
+toString : Placement -> String
+toString placement =
+    Shape.toString placement.shape
+        ++ Joint.toString placement.joint
+        ++ Flip.toString placement.flip

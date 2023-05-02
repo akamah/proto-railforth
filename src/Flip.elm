@@ -1,6 +1,8 @@
 module Flip exposing
     ( Flip
+    , isFlipped
     , no
+    , toString
     , yes
     )
 
@@ -8,15 +10,31 @@ module Flip exposing
 -}
 
 
-type alias Flip =
-    Bool
+type Flip
+    = Flip Bool
 
 
 yes : Flip
 yes =
-    True
+    Flip True
 
 
 no : Flip
 no =
-    False
+    Flip False
+
+
+isFlipped : Flip -> Bool
+isFlipped f =
+    case f of
+        Flip boolean ->
+            boolean
+
+
+toString : Flip -> String
+toString f =
+    if isFlipped f then
+        "Flip@yes"
+
+    else
+        "Flip@no"
