@@ -17,6 +17,8 @@ getLocalTie p =
         Curve ->
             Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne
 
+        Turnout -> -- Super stub!!!
+            Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e
 
 getNextTie : Tie -> Placement -> Tie
 getNextTie tie placement =
