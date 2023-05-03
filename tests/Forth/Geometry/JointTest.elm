@@ -17,21 +17,21 @@ suite =
             [ test "isMinus minus" <|
                 \_ ->
                     isMinus minus
-                        |> Expect.true "isMinus minus"
+                        |> Expect.equal True
             , test "isMinus plus" <|
                 \_ ->
                     isMinus plus
-                        |> Expect.false "isMinus plus"
+                        |> Expect.equal False
             ]
         , describe "isPlus"
             [ test "isPlus minus" <|
                 \_ ->
                     isPlus minus
-                        |> Expect.false "isPlus minus"
+                        |> Expect.equal False
             , test "isPlus plus" <|
                 \_ ->
                     isPlus plus
-                        |> Expect.true "isPlus plus"
+                        |> Expect.equal True
             ]
         , describe "negate"
             [ test "negate plus" <|

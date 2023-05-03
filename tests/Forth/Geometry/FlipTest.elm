@@ -11,11 +11,11 @@ suite =
         [ test "is true to yes" <|
             \_ ->
                 isFlipped yes
-                    |> Expect.true "isFlipped yes"
+                    |> Expect.equal True
         , test "is false to no" <|
             \_ ->
                 isFlipped no
-                    |> Expect.false "isFlipped no"
+                    |> Expect.equal False
         , test "yes is not no" <|
             \_ ->
                 Expect.notEqual yes no
