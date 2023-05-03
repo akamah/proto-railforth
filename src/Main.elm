@@ -3,9 +3,6 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
-import Forth.Geometry.Dir as Dir
-import Forth.Geometry.Rot45 as Rot45
-import Forth.Geometry.Tie exposing (Tie)
 import Forth.Interpreter exposing (execute)
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
