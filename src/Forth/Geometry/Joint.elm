@@ -9,9 +9,10 @@ module Forth.Geometry.Joint exposing
     , toString
     )
 
-
 {-| 凹凸を表す。 minusが凹、pluｓが凸。
 -}
+
+
 type Joint
     = Joint Bool
 

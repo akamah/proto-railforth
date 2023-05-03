@@ -2,7 +2,7 @@ module Forth.Geometry.FlipTest exposing (..)
 
 import Expect
 import Forth.Geometry.Flip exposing (..)
-import Test exposing (describe, test, Test)
+import Test exposing (Test, describe, test)
 
 
 suite : Test

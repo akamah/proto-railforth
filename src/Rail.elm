@@ -1,7 +1,7 @@
 module Rail exposing (Rail, make)
 
-import Placement exposing (Placement)
 import Forth.Geometry.Tie exposing (Tie)
+import Placement exposing (Placement)
 
 
 {-| 一本のレールを配置するのに十分な情報を持ったデータ型。

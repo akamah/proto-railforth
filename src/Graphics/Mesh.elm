@@ -15,7 +15,6 @@ import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import Placement exposing (Placement)
 import Shape exposing (Shape(..))
-
 import WebGL
 
 
@@ -112,13 +111,14 @@ getErrors model =
     model.errors
 
 
+
 {- Internal. flip mesh to flip a rail
 
-flipMesh : MeshWith Vertex -> MeshWith Vertex
-flipMesh meshWith =
-    { indices = meshWith.indices
-    , vertices = List.map flipVertex meshWith.vertices
-    }
+   flipMesh : MeshWith Vertex -> MeshWith Vertex
+   flipMesh meshWith =
+       { indices = meshWith.indices
+       , vertices = List.map flipVertex meshWith.vertices
+       }
 -}
 
 

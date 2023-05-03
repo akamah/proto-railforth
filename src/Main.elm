@@ -3,21 +3,21 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
-import Forth.Interpreter exposing (execute)
 import Forth.Geometry.Dir as Dir
+import Forth.Geometry.Rot45 as Rot45
+import Forth.Geometry.Tie exposing (Tie)
+import Forth.Interpreter exposing (execute)
+import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
-import Graphics.Mesh as Mesh exposing (Mesh)
 import OBJ.Types exposing (Vertex)
 import Rail exposing (Rail)
-import Forth.Geometry.Rot45 as Rot45
 import Storage
 import Task
-import Forth.Geometry.Tie exposing (Tie)
 import WebGL exposing (Entity, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest as DepthTest
