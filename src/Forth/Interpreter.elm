@@ -1,4 +1,4 @@
-module Forth.Interpreter exposing (compile)
+module Forth.Interpreter exposing (execute)
 
 import Forth.Geometry.Dir as Dir
 import Placement exposing (Placement)
@@ -50,17 +50,17 @@ tokenize =
     String.words
 
 
-compile : String -> List Rail
-compile src =
+execute : String -> List Rail
+execute src =
     let
         tokens =
             tokenize src
     in
-    compileRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e) tokens
+    executeRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e) tokens
 
 
-compileRec : Tie -> List String -> List Rail
-compileRec tie toks =
+executeRec : Tie -> List String -> List Rail
+executeRec tie toks =
     case toks of
         [] ->
             []
@@ -69,15 +69,15 @@ compileRec tie toks =
             case t of
                 "s" ->
                     Rail.make Placement.straightPlus tie
-                        :: compileRec (getNextTie tie Placement.straightPlus) ts
+                        :: executeRec (getNextTie tie Placement.straightPlus) ts
 
                 "l" ->
                     Rail.make Placement.curveLeft tie
-                        :: compileRec (getNextTie tie Placement.curveLeft) ts
+                        :: executeRec (getNextTie tie Placement.curveLeft) ts
 
                 "tl" ->
                     Rail.make Placement.turnoutLeftPlus tie
-                        :: compileRec (getNextTie tie Placement.turnoutLeftPlus) ts
+                        :: executeRec (getNextTie tie Placement.turnoutLeftPlus) ts
 
                 _ ->
                     []

@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
-import Forth.Interpreter exposing (compile)
+import Forth.Interpreter exposing (execute)
 import Forth.Geometry.Dir as Dir
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
@@ -296,7 +296,7 @@ update msg model =
         UpdateScript program ->
             ( { model
                 | program = program
-                , rails = compile program
+                , rails = execute program
               }
             , Storage.save program
             )
