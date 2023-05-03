@@ -1,7 +1,4 @@
-module Shape exposing
-    ( Shape(..)
-    , toString
-    )
+module Shape exposing (dummy)
 
 {-| ひっくり返すか、およびレールの凹凸にこだわらず、レールの形そのものを記述する値。
 -}
@@ -10,7 +7,13 @@ module Shape exposing
 type Shape
     = Straight
     | Curve
-    | Turnout
+    | TurnoutLeft
+    | TurnoutRight
+
+
+dummy : String
+dummy =
+    "Hoge"
 
 
 toString : Shape -> String
@@ -22,5 +25,8 @@ toString shape =
         Curve ->
             "curve"
 
-        Turnout ->
+        TurnoutLeft ->
+            "turnout"
+
+        TurnoutRight ->
             "turnout"

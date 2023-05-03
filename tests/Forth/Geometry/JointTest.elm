@@ -1,7 +1,7 @@
 module Forth.Geometry.JointTest exposing (..)
 
 import Expect
-import Forth.Geometry.Joint as Joint exposing (..)
+import Forth.Geometry.Joint as Joint
 import Test exposing (..)
 
 
@@ -11,56 +11,22 @@ suite =
         [ describe "distinguishable"
             [ test "minus is not plus" <|
                 \_ ->
-                    Expect.notEqual minus plus
-            ]
-        , describe "isMinus"
-            [ test "isMinus minus" <|
-                \_ ->
-                    isMinus minus
-                        |> Expect.equal True
-            , test "isMinus plus" <|
-                \_ ->
-                    isMinus plus
-                        |> Expect.equal False
-            ]
-        , describe "isPlus"
-            [ test "isPlus minus" <|
-                \_ ->
-                    isPlus minus
-                        |> Expect.equal False
-            , test "isPlus plus" <|
-                \_ ->
-                    isPlus plus
-                        |> Expect.equal True
+                    Expect.notEqual Joint.Minus Joint.Plus
             ]
         , describe "negate"
             [ test "negate plus" <|
                 \_ ->
-                    Expect.equal minus (Joint.negate plus)
+                    Expect.equal Joint.Minus (Joint.negate Joint.Plus)
             , test "negate minus" <|
                 \_ ->
-                    Expect.equal plus (Joint.negate minus)
-            ]
-        , describe "mul"
-            [ test "mul plus plus" <|
-                \_ ->
-                    Expect.equal minus (mul plus plus)
-            , test "mul plus minus" <|
-                \_ ->
-                    Expect.equal plus (mul plus minus)
-            , test "mul minus plus" <|
-                \_ ->
-                    Expect.equal plus (mul minus plus)
-            , test "mul minus minus" <|
-                \_ ->
-                    Expect.equal minus (mul minus minus)
+                    Expect.equal Joint.Plus (Joint.negate Joint.Minus)
             ]
         , describe "toString"
             [ test "toString minus" <|
                 \_ ->
-                    Expect.equal "Joint@minus" (toString minus)
+                    Expect.equal "Joint@minus" (Joint.toString Joint.Minus)
             , test "toString plus" <|
                 \_ ->
-                    Expect.equal "Joint@plus" (toString plus)
+                    Expect.equal "Joint@plus" (Joint.toString Joint.Plus)
             ]
         ]

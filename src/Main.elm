@@ -15,7 +15,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import OBJ.Types exposing (Vertex)
-import Rail exposing (Rail)
+import RailPosition exposing (RailPosition)
 import Storage
 import Task
 import WebGL exposing (Entity, Shader)
@@ -57,7 +57,7 @@ type alias Model =
     , target : Vec3
     , draggingState : Maybe DraggingState
     , program : String
-    , rails : List Rail
+    , rails : List RailPosition
     , splitBarDragState : Maybe ( Float, Float )
     , splitBarPosition : Float
     }
@@ -191,24 +191,25 @@ view model =
         ]
 
 
-showRails : Model -> List Rail -> List Entity
+showRails : Model -> List RailPosition -> List Entity
 showRails model rails =
     let
         modelTransform =
             makeTransform model
     in
     List.map
-        (\rail ->
+        (\railPosition ->
             showRail
                 modelTransform
-                (Mesh.getMesh model.meshes rail.placement)
-                rail.origin
+                (Mesh.getMesh model.meshes railPosition)
+                railPosition.origin
+                railPosition.angle
         )
         rails
 
 
-showRail : Mat4 -> Mesh -> Tie -> Entity
-showRail modelTransform mesh origin =
+showRail : Mat4 -> Mesh -> Vec3 -> Float -> Entity
+showRail modelTransform mesh origin angle =
     WebGL.entityWith
         [ DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
@@ -217,43 +218,36 @@ showRail modelTransform mesh origin =
         railFragmentShader
         mesh
         (uniforms modelTransform
-            (originToVec3 origin)
-            (originToRotate origin)
-            (toFloat origin.height)
+            origin
+            angle
             False
         )
 
 
-originToVec3 : Tie -> Vec3
-originToVec3 tie =
-    let
-        ( sx, sy ) =
-            tie.single |> Rot45.toFloat
 
-        ( dx, dy ) =
-            tie.double |> Rot45.toFloat
-
-        h =
-            tie.height |> Basics.toFloat
-
-        sunit =
-            216.0
-
-        dunit =
-            270.0
-
-        hunit =
-            66.0 / 4.0
-    in
-    vec3
-        (sunit * sx + dunit * dx)
-        (hunit * h)
-        -(sunit * sy + dunit * dy)
-
-
-originToRotate : Tie -> Float
-originToRotate tie =
-    Dir.toRadian tie.dir
+-- originToVec3 : Vec3 -> Vec3
+-- originToVec3 tie =
+--     let
+--         ( sx, sy ) =
+--             tie.single |> Rot45.toFloat
+--         ( dx, dy ) =
+--             tie.double |> Rot45.toFloat
+--         h =
+--             tie.height |> Basics.toFloat
+--         sunit =
+--             216.0
+--         dunit =
+--             270.0
+--         hunit =
+--             66.0 / 4.0
+--     in
+--     vec3
+--         (sunit * sx + dunit * dx)
+--         (hunit * h)
+--         -(sunit * sy + dunit * dy)
+-- originToRotate : Tie -> Float
+-- originToRotate tie =
+--     Dir.toRadian tie.dir
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -558,11 +552,11 @@ type alias Uniforms =
     }
 
 
-uniforms : Mat4 -> Vec3 -> Float -> Float -> Bool -> Uniforms
-uniforms modelTransform origin rotate height flipped =
+uniforms : Mat4 -> Vec3 -> Float -> Bool -> Uniforms
+uniforms modelTransform origin rotate flipped =
     { transform =
         Mat4.mul modelTransform (makeMeshMatrix origin rotate flipped)
-    , height = height
+    , height = 0.0
     }
 
 

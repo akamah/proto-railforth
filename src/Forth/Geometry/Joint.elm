@@ -1,11 +1,6 @@
 module Forth.Geometry.Joint exposing
-    ( Joint
-    , isMinus
-    , isPlus
-    , minus
-    , mul
+    ( Joint(..)
     , negate
-    , plus
     , toString
     )
 
@@ -14,51 +9,25 @@ module Forth.Geometry.Joint exposing
 
 
 type Joint
-    = Joint Bool
-
-
-minus : Joint
-minus =
-    Joint False
-
-
-plus : Joint
-plus =
-    Joint True
-
-
-isMinus : Joint -> Bool
-isMinus p =
-    p == minus
-
-
-isPlus : Joint -> Bool
-isPlus p =
-    p == plus
+    = Plus
+    | Minus
 
 
 negate : Joint -> Joint
 negate p =
-    if isPlus p then
-        minus
+    case p of
+        Plus ->
+            Minus
 
-    else
-        plus
-
-
-mul : Joint -> Joint -> Joint
-mul p q =
-    if isPlus p then
-        negate q
-
-    else
-        q
+        Minus ->
+            Plus
 
 
 toString : Joint -> String
 toString p =
-    if isPlus p then
-        "Joint@plus"
+    case p of
+        Plus ->
+            "Joint@plus"
 
-    else
-        "Joint@minus"
+        Minus ->
+            "Joint@minus"

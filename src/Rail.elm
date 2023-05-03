@@ -1,19 +1,32 @@
-module Rail exposing (Rail, make)
+module Rail exposing (Rail(..), toString)
 
-import Forth.Geometry.Tie exposing (Tie)
-import Placement exposing (Placement)
+import Forth.Geometry.Joint exposing (Joint)
 
 
-{-| 一本のレールを配置するのに十分な情報を持ったデータ型。
+type Rail
+    = Straight Joint
+    | Left Joint
+    | Right Joint
+    | TurnoutLeft Joint
+    | TurnoutRight Joint
+
+
+{-| for map key
 -}
-type alias Rail =
-    { placement : Placement
-    , origin : Tie
-    }
+toString : Rail -> String
+toString placement =
+    case placement of
+        Straight joint ->
+            ""
 
+        Left joint ->
+            ""
 
-make : Placement -> Tie -> Rail
-make placement origin =
-    { placement = placement
-    , origin = origin
-    }
+        Right joint ->
+            ""
+
+        TurnoutLeft _ ->
+            Debug.todo "branch 'TurnoutLeft _' not implemented"
+
+        TurnoutRight _ ->
+            Debug.todo "branch 'TurnoutRight _' not implemented"

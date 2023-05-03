@@ -7,22 +7,25 @@ import Test exposing (Test, describe, test)
 
 suite : Test
 suite =
-    describe "Flip module"
-        [ test "is true to yes" <|
-            \_ ->
-                isFlipped yes
-                    |> Expect.equal True
-        , test "is false to no" <|
-            \_ ->
-                isFlipped no
-                    |> Expect.equal False
-        , test "yes is not no" <|
-            \_ ->
-                Expect.notEqual yes no
-        , test "toString yes" <|
-            \_ ->
-                Expect.equal "Flip@yes" (toString yes)
-        , test "toString no" <|
-            \_ ->
-                Expect.equal "Flip@no" (toString no)
-        ]
+    describe "Flip module" []
+
+
+
+-- [ test "is true to yes" <|
+--     \_ ->
+--         isFlipped yes
+--             |> Expect.equal True
+-- , test "is false to no" <|
+--     \_ ->
+--         isFlipped no
+--             |> Expect.equal False
+-- , test "yes is not no" <|
+--     \_ ->
+--         Expect.notEqual yes no
+-- , test "toString yes" <|
+--     \_ ->
+--         Expect.equal "Flip@yes" (toString yes)
+-- , test "toString no" <|
+--     \_ ->
+--         Expect.equal "Flip@no" (toString no)
+-- ]

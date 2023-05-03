@@ -1,13 +1,12 @@
-module Forth.Geometry.Flip exposing
-    ( Flip
-    , isFlipped
-    , no
-    , toString
-    , yes
-    )
+module Forth.Geometry.Flip exposing (dummy)
 
 {-| レールについて、反転しているかどうかを表す。
 -}
+
+
+dummy : String
+dummy =
+    "hoge"
 
 
 type Flip

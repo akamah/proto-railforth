@@ -1,32 +1,37 @@
 module Forth.Interpreter exposing (execute)
 
 import Forth.Geometry.Dir as Dir
-import Placement exposing (Placement)
-import Rail exposing (Rail)
+import Forth.Geometry.Joint as Joint
 import Forth.Geometry.Rot45 as Rot45
-import Shape exposing (Shape(..))
 import Forth.Geometry.Tie as Tie exposing (Tie)
+import Rail exposing (Rail(..))
+import RailPosition exposing (RailPosition)
 
 
-getLocalTie : Placement -> Tie
-getLocalTie p =
-    case p.shape of
-        Straight ->
-            Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e
+getLocalTie : Rail -> Tie
+getLocalTie rail =
+    case rail of
+        Straight joint ->
+            Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e joint
 
-        Curve ->
-            Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne
+        Right joint ->
+            Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne joint
 
-        Turnout ->
-            -- Super stub!!!
-            Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e
+        Left _ ->
+            Debug.todo "branch 'Left _' not implemented"
+
+        TurnoutLeft _ ->
+            Debug.todo "branch 'TurnoutLeft _' not implemented"
+
+        TurnoutRight _ ->
+            Debug.todo "branch 'TurnoutRight _' not implemented"
 
 
-getNextTie : Tie -> Placement -> Tie
-getNextTie tie placement =
+getNextTie : Tie -> Rail -> Tie
+getNextTie tie rail =
     let
         local =
-            getLocalTie placement
+            getLocalTie rail
 
         single2 =
             Rot45.add tie.single <|
@@ -42,7 +47,7 @@ getNextTie tie placement =
         dir2 =
             Dir.mul tie.dir local.dir
     in
-    Tie.make single2 double2 height2 dir2
+    Tie.make single2 double2 height2 dir2 Joint.Plus
 
 
 tokenize : String -> List String
@@ -50,16 +55,16 @@ tokenize =
     String.words
 
 
-execute : String -> List Rail
+execute : String -> List RailPosition
 execute src =
     let
         tokens =
             tokenize src
     in
-    executeRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e) tokens
+    executeRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus) tokens
 
 
-executeRec : Tie -> List String -> List Rail
+executeRec : Tie -> List String -> List RailPosition
 executeRec tie toks =
     case toks of
         [] ->
@@ -68,16 +73,28 @@ executeRec tie toks =
         t :: ts ->
             case t of
                 "s" ->
-                    Rail.make Placement.straightPlus tie
-                        :: executeRec (getNextTie tie Placement.straightPlus) ts
+                    let
+                        rail =
+                            Rail.Straight tie.joint
+                    in
+                    RailPosition.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
+                        :: executeRec (getNextTie tie rail) ts
 
                 "l" ->
-                    Rail.make Placement.curveLeft tie
-                        :: executeRec (getNextTie tie Placement.curveLeft) ts
+                    let
+                        rail =
+                            Rail.Left tie.joint
+                    in
+                    RailPosition.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
+                        :: executeRec (getNextTie tie rail) ts
 
-                "tl" ->
-                    Rail.make Placement.turnoutLeftPlus tie
-                        :: executeRec (getNextTie tie Placement.turnoutLeftPlus) ts
+                "r" ->
+                    let
+                        rail =
+                            Rail.Right tie.joint
+                    in
+                    RailPosition.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
+                        :: executeRec (getNextTie tie rail) ts
 
                 _ ->
-                    []
+                    executeRec tie ts

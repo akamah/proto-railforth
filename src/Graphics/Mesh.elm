@@ -13,8 +13,8 @@ import Dict exposing (Dict)
 import Math.Vector3 as Vec3 exposing (Vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
-import Placement exposing (Placement)
-import Shape exposing (Shape(..))
+import Rail exposing (Rail(..))
+import RailPosition exposing (RailPosition)
 import WebGL
 
 
@@ -86,23 +86,27 @@ dummyMesh =
     WebGL.triangles []
 
 
-getMeshName : Shape -> String
+getMeshName : Rail -> String
 getMeshName shape =
     case shape of
-        Straight ->
+        Rail.Straight _ ->
             "straight_1"
 
-        Curve ->
+        Rail.Left _ ->
             "curve_8"
 
-        Turnout ->
+        Rail.Right _ ->
             -- Stub
-            "turnout_L"
+            "curve_8"
+
+        _ ->
+            -- STUB!
+            "curve_8"
 
 
-getMesh : Model -> Placement -> Mesh
+getMesh : Model -> RailPosition -> Mesh
 getMesh model placement =
-    Dict.get (getMeshName placement.shape) model.meshes
+    Dict.get (getMeshName placement.rail) model.meshes
         |> Maybe.withDefault dummyMesh
 
 
@@ -112,14 +116,14 @@ getErrors model =
 
 
 
-{- Internal. flip mesh to flip a rail
+{- Internal. flip mesh to flip a rail -}
 
-   flipMesh : MeshWith Vertex -> MeshWith Vertex
-   flipMesh meshWith =
-       { indices = meshWith.indices
-       , vertices = List.map flipVertex meshWith.vertices
-       }
--}
+
+flipMesh : MeshWith Vertex -> MeshWith Vertex
+flipMesh meshWith =
+    { indices = meshWith.indices
+    , vertices = List.map flipVertex meshWith.vertices
+    }
 
 
 flipVertex : Vertex -> Vertex
