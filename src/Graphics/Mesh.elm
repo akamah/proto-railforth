@@ -87,8 +87,8 @@ dummyMesh =
 
 
 getMeshName : Rail -> String
-getMeshName shape =
-    case shape of
+getMeshName rail =
+    case rail of
         Rail.Straight _ ->
             "straight_1"
 
