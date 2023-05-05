@@ -12,7 +12,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import OBJ.Types exposing (Vertex)
-import RailPosition exposing (RailPosition)
+import RailPlacement exposing (RailPlacement)
 import Storage
 import Task
 import WebGL exposing (Entity, Shader)
@@ -54,7 +54,7 @@ type alias Model =
     , target : Vec3
     , draggingState : Maybe DraggingState
     , program : String
-    , rails : List RailPosition
+    , rails : List RailPlacement
     , splitBarDragState : Maybe ( Float, Float )
     , splitBarPosition : Float
     }
@@ -188,7 +188,7 @@ view model =
         ]
 
 
-showRails : Model -> List RailPosition -> List Entity
+showRails : Model -> List RailPlacement -> List Entity
 showRails model rails =
     let
         modelTransform =
@@ -199,7 +199,7 @@ showRails model rails =
             showRail
                 modelTransform
                 (Mesh.getMesh model.meshes railPosition)
-                railPosition.origin
+                railPosition.position
                 railPosition.angle
         )
         rails

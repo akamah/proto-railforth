@@ -14,7 +14,7 @@ import Math.Vector3 as Vec3 exposing (Vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (Rail(..))
-import RailPosition exposing (RailPosition)
+import RailPlacement exposing (RailPlacement)
 import WebGL
 
 
@@ -104,7 +104,7 @@ getMeshName rail =
             "curve_8"
 
 
-getMesh : Model -> RailPosition -> Mesh
+getMesh : Model -> RailPlacement -> Mesh
 getMesh model placement =
     Dict.get (getMeshName placement.rail) model.meshes
         |> Maybe.withDefault dummyMesh

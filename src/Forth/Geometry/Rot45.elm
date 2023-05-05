@@ -2,10 +2,10 @@ module Forth.Geometry.Rot45 exposing
     ( Rot45
     , add
     , extract
-    , getA
-    , getB
-    , getC
-    , getD
+      -- , getA
+      -- , getB
+      -- , getC
+      -- , getD
     , make
     , mul
     , negate
@@ -33,24 +33,19 @@ extract (Rot45 a b c d) f =
     f a b c d
 
 
-getA : Rot45 -> Int
-getA x =
-    extract x (\a _ _ _ -> a)
 
-
-getB : Rot45 -> Int
-getB x =
-    extract x (\_ b _ _ -> b)
-
-
-getC : Rot45 -> Int
-getC x =
-    extract x (\_ _ c _ -> c)
-
-
-getD : Rot45 -> Int
-getD x =
-    extract x (\_ _ d _ -> d)
+-- getA : Rot45 -> Int
+-- getA x =
+--     extract x (\a _ _ _ -> a)
+-- getB : Rot45 -> Int
+-- getB x =
+--     extract x (\_ b _ _ -> b)
+-- getC : Rot45 -> Int
+-- getC x =
+--     extract x (\_ _ c _ -> c)
+-- getD : Rot45 -> Int
+-- getD x =
+--     extract x (\_ _ d _ -> d)
 
 
 zero : Rot45

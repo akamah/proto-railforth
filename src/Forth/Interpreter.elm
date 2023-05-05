@@ -5,7 +5,7 @@ import Forth.Geometry.Joint as Joint
 import Forth.Geometry.Rot45 as Rot45
 import Forth.Geometry.Tie as Tie exposing (Tie)
 import Rail exposing (Rail(..))
-import RailPosition exposing (RailPosition)
+import RailPlacement exposing (RailPlacement)
 
 
 getLocalTie : Rail -> Tie
@@ -55,7 +55,7 @@ tokenize =
     String.words
 
 
-execute : String -> List RailPosition
+execute : String -> List RailPlacement
 execute src =
     let
         tokens =
@@ -64,7 +64,7 @@ execute src =
     executeRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus) tokens
 
 
-executeRec : Tie -> List String -> List RailPosition
+executeRec : Tie -> List String -> List RailPlacement
 executeRec tie toks =
     case toks of
         [] ->
@@ -77,7 +77,7 @@ executeRec tie toks =
                         rail =
                             Rail.Straight tie.joint
                     in
-                    RailPosition.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
+                    RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
                         :: executeRec (getNextTie tie rail) ts
 
                 "l" ->
@@ -85,7 +85,7 @@ executeRec tie toks =
                         rail =
                             Rail.Left tie.joint
                     in
-                    RailPosition.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
+                    RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
                         :: executeRec (getNextTie tie rail) ts
 
                 "r" ->
@@ -93,7 +93,7 @@ executeRec tie toks =
                         rail =
                             Rail.Right tie.joint
                     in
-                    RailPosition.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
+                    RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
                         :: executeRec (getNextTie tie rail) ts
 
                 _ ->
