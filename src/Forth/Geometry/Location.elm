@@ -1,4 +1,4 @@
-module Forth.Geometry.Tie exposing (Tie, make, originToVec3)
+module Forth.Geometry.Location exposing (Location, make, originToVec3)
 
 import Forth.Geometry.Dir exposing (Dir)
 import Forth.Geometry.Joint exposing (Joint)
@@ -13,7 +13,7 @@ type alias Height =
 {-| レールの端点を表現する。ここで言う端点とは、設置されたレールの端っこが持ちうる情報である。
 平面上の点（単線基準、複線基準）、高さ、向いている方向、および凹凸を持つ。
 -}
-type alias Tie =
+type alias Location =
     { single : Rot45
     , double : Rot45
     , height : Height
@@ -22,7 +22,7 @@ type alias Tie =
     }
 
 
-make : Rot45 -> Rot45 -> Height -> Dir -> Joint -> Tie
+make : Rot45 -> Rot45 -> Height -> Dir -> Joint -> Location
 make single double height dir joint =
     { single = single
     , double = double
@@ -32,7 +32,7 @@ make single double height dir joint =
     }
 
 
-originToVec3 : Tie -> Vec3
+originToVec3 : Location -> Vec3
 originToVec3 tie =
     let
         singleUnit =

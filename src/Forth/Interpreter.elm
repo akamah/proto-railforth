@@ -2,49 +2,49 @@ module Forth.Interpreter exposing (execute)
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint
+import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.Rot45 as Rot45
-import Forth.Geometry.Tie as Tie exposing (Tie)
 import Rail exposing (IsFlipped(..), IsInverted, Rail(..))
 import RailPlacement exposing (RailPlacement)
 
 
-getLocalTie : Rail IsInverted IsFlipped -> Tie
-getLocalTie rail =
+getLocalLocation : Rail IsInverted IsFlipped -> Location
+getLocalLocation rail =
     case rail of
         Straight ->
-            Tie.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
+            Location.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
 
         Curve NotFlipped ->
-            Tie.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
+            Location.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
 
         Curve Flipped ->
-            Tie.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.se Joint.Plus
+            Location.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.se Joint.Plus
 
         _ ->
-            Debug.todo "getLocalTie turnout"
+            Debug.todo "getLocalLocation turnout"
 
 
-getNextTie : Tie -> Rail IsInverted IsFlipped -> Tie
-getNextTie tie rail =
+getNextLocation : Location -> Rail IsInverted IsFlipped -> Location
+getNextLocation loc rail =
     let
         local =
-            getLocalTie rail
+            getLocalLocation rail
 
         single2 =
-            Rot45.add tie.single <|
-                Rot45.mul (Dir.toRot45 tie.dir) local.single
+            Rot45.add loc.single <|
+                Rot45.mul (Dir.toRot45 loc.dir) local.single
 
         double2 =
-            Rot45.add tie.double <|
-                Rot45.mul (Dir.toRot45 tie.dir) local.double
+            Rot45.add loc.double <|
+                Rot45.mul (Dir.toRot45 loc.dir) local.double
 
         height2 =
-            tie.height + local.height
+            loc.height + local.height
 
         dir2 =
-            Dir.mul tie.dir local.dir
+            Dir.mul loc.dir local.dir
     in
-    Debug.log "tie" (Tie.make single2 double2 height2 dir2 Joint.Plus)
+    Location.make single2 double2 height2 dir2 Joint.Plus
 
 
 tokenize : String -> List String
@@ -58,11 +58,11 @@ execute src =
         tokens =
             tokenize src
     in
-    executeRec (Tie.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus) tokens
+    executeRec (Location.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus) tokens
 
 
-executeRec : Tie -> List String -> List RailPlacement
-executeRec tie toks =
+executeRec : Location -> List String -> List RailPlacement
+executeRec loc toks =
     case toks of
         [] ->
             []
@@ -74,24 +74,24 @@ executeRec tie toks =
                         rail =
                             Straight
                     in
-                    RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
-                        :: executeRec (getNextTie tie rail) ts
+                    RailPlacement.make rail (Location.originToVec3 loc) (Dir.toRadian loc.dir)
+                        :: executeRec (getNextLocation loc rail) ts
 
                 "l" ->
                     let
                         rail =
                             Curve NotFlipped
                     in
-                    RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
-                        :: executeRec (getNextTie tie rail) ts
+                    RailPlacement.make rail (Location.originToVec3 loc) (Dir.toRadian loc.dir)
+                        :: executeRec (getNextLocation loc rail) ts
 
                 "r" ->
                     let
                         rail =
                             Curve Flipped
                     in
-                    RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
-                        :: executeRec (getNextTie tie rail) ts
+                    RailPlacement.make rail (Location.originToVec3 loc) (Dir.toRadian loc.dir)
+                        :: executeRec (getNextLocation loc rail) ts
 
                 _ ->
-                    executeRec tie ts
+                    executeRec loc ts

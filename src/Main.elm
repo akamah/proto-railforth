@@ -221,32 +221,6 @@ showRail modelTransform mesh origin angle =
         )
 
 
-
--- originToVec3 : Vec3 -> Vec3
--- originToVec3 tie =
---     let
---         ( sx, sy ) =
---             tie.single |> Rot45.toFloat
---         ( dx, dy ) =
---             tie.double |> Rot45.toFloat
---         h =
---             tie.height |> Basics.toFloat
---         sunit =
---             216.0
---         dunit =
---             270.0
---         hunit =
---             66.0 / 4.0
---     in
---     vec3
---         (sunit * sx + dunit * dx)
---         (hunit * h)
---         -(sunit * sy + dunit * dy)
--- originToRotate : Tie -> Float
--- originToRotate tie =
---     Dir.toRadian tie.dir
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of

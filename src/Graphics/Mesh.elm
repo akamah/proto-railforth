@@ -51,8 +51,21 @@ update msg model =
                     let
                         mesh =
                             WebGL.indexedTriangles meshWith.vertices meshWith.indices
+
+                        flippedMeshWith =
+                            flipMesh meshWith
+
+                        flippedMesh =
+                            WebGL.indexedTriangles flippedMeshWith.vertices flippedMeshWith.indices
+
+                        updatedMeshes =
+                            Dict.union model.meshes <|
+                                Dict.fromList
+                                    [ ( name, mesh )
+                                    , ( String.append name "_flip", flippedMesh )
+                                    ]
                     in
-                    { model | meshes = Dict.insert name mesh model.meshes }
+                    { model | meshes = updatedMeshes }
 
 
 {-| pass only safe constant strings
@@ -62,6 +75,8 @@ buildMeshUri name =
     "http://localhost:8080/" ++ name ++ ".obj"
 
 
+{-| The list of mesh names. Used when loading .obj files
+-}
 allMeshNames : List String
 allMeshNames =
     [ "straight_1"
@@ -92,12 +107,12 @@ getMeshName rail =
         Straight ->
             "straight_1"
 
-        Curve Flipped ->
-            "curve_8"
-
         Curve NotFlipped ->
             -- Stub
             "curve_8"
+
+        Curve Flipped ->
+            "curve_8_flip"
 
         _ ->
             -- STUB!

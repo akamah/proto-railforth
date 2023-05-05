@@ -6,13 +6,13 @@ module Rail exposing
 
 
 type IsInverted
-    = Inverted
-    | NotInverted
+    = NotInverted
+    | Inverted
 
 
 type IsFlipped
-    = Flipped
-    | NotFlipped
+    = NotFlipped
+    | Flipped
 
 
 {-| レールの種類を表す型。
