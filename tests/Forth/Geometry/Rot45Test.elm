@@ -71,5 +71,25 @@ suite =
                     Expect.equal
                         (Rot45.mul a (Rot45.add b c))
                         (Rot45.add (Rot45.mul a b) (Rot45.mul a c))
+            , fuzz (Fuzz.pair shortInt rot45) "multiply by scalar" <|
+                \( r, x ) ->
+                    Expect.equal
+                        (Rot45.extract x (\a b c d -> Rot45.make (r * a) (r * b) (r * c) (r * d)))
+                        (Rot45.mul (Rot45.make r 0 0 0) x)
+            , fuzz rot45 "rotate by 45 degree" <|
+                \x ->
+                    Expect.equal
+                        (Rot45.extract x (\a b c d -> Rot45.make -d a b c))
+                        (Rot45.mul (Rot45.make 0 1 0 0) x)
+            , fuzz rot45 "rotate by 90 degree" <|
+                \x ->
+                    Expect.equal
+                        (Rot45.extract x (\a b c d -> Rot45.make -c -d a b))
+                        (Rot45.mul (Rot45.make 0 0 1 0) x)
+            , fuzz rot45 "rotate by 135 degree" <|
+                \x ->
+                    Expect.equal
+                        (Rot45.extract x (\a b c d -> Rot45.make -b -c -d a))
+                        (Rot45.mul (Rot45.make 0 0 0 1) x)
             ]
         ]
