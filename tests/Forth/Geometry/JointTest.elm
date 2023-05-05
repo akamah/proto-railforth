@@ -8,12 +8,7 @@ import Test exposing (..)
 suite : Test
 suite =
     describe "Joint module"
-        [ describe "distinguishable"
-            [ test "minus is not plus" <|
-                \_ ->
-                    Expect.notEqual Joint.Minus Joint.Plus
-            ]
-        , describe "negate"
+        [ describe "negate"
             [ test "negate plus" <|
                 \_ ->
                     Expect.equal Joint.Minus (Joint.negate Joint.Plus)

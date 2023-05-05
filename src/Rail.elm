@@ -3,6 +3,12 @@ module Rail exposing (Rail(..), toString)
 import Forth.Geometry.Joint exposing (Joint)
 
 
+
+{-
+   今ぱっと思ったけれど、こういうふうに書くなら 凹凸が反転可能かということと、裏返しが可能かどうかも記述できたほうが最終的には便利では
+-}
+
+
 type Rail
     = Straight Joint
     | Left Joint
