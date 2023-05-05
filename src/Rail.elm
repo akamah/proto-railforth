@@ -1,38 +1,30 @@
-module Rail exposing (Rail(..), toString)
+module Rail exposing
+    ( IsFlipped(..)
+    , IsInverted(..)
+    , Rail(..)
+    )
 
-import Forth.Geometry.Joint exposing (Joint)
+
+type IsInverted
+    = Inverted
+    | NotInverted
 
 
+type IsFlipped
+    = Flipped
+    | NotFlipped
 
-{-
-   今ぱっと思ったけれど、こういうふうに書くなら 凹凸が反転可能かということと、裏返しが可能かどうかも記述できたほうが最終的には便利では
+
+{-| レールの種類を表す型。
+
+invertは、そのレールの端点の凹凸を逆にすることができるかを、
+flip はそのレールを裏返す事ができるかを持つ。
+逆に、そういったことにこだわらない場合はこれらの型パラメータに()を渡すことができる。
+
+invertやflipについて、そういった操作ができないようなレールについてはそもそもそういうのを持たせない設計
+
 -}
-
-
-type Rail
-    = Straight Joint
-    | Left Joint
-    | Right Joint
-    | TurnoutLeft Joint
-    | TurnoutRight Joint
-
-
-{-| for map key
--}
-toString : Rail -> String
-toString placement =
-    case placement of
-        Straight joint ->
-            ""
-
-        Left joint ->
-            ""
-
-        Right joint ->
-            ""
-
-        TurnoutLeft _ ->
-            Debug.todo "branch 'TurnoutLeft _' not implemented"
-
-        TurnoutRight _ ->
-            Debug.todo "branch 'TurnoutRight _' not implemented"
+type Rail invert flip
+    = Straight
+    | Curve flip
+    | Turnout invert flip

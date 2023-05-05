@@ -4,30 +4,27 @@ import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint
 import Forth.Geometry.Rot45 as Rot45
 import Forth.Geometry.Tie as Tie exposing (Tie)
-import Rail exposing (Rail(..))
+import Rail exposing (IsFlipped(..), IsInverted, Rail(..))
 import RailPlacement exposing (RailPlacement)
 
 
-getLocalTie : Rail -> Tie
+getLocalTie : Rail IsInverted IsFlipped -> Tie
 getLocalTie rail =
     case rail of
-        Straight joint ->
-            Tie.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e joint
+        Straight ->
+            Tie.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
 
-        Right joint ->
-            Tie.make (Rot45.make 0 0 1 -1) Rot45.zero 0 Dir.ne joint
+        Curve NotFlipped ->
+            Tie.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
 
-        Left _ ->
-            Debug.todo "branch 'Left _' not implemented"
+        Curve Flipped ->
+            Tie.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.se Joint.Plus
 
-        TurnoutLeft _ ->
-            Debug.todo "branch 'TurnoutLeft _' not implemented"
-
-        TurnoutRight _ ->
-            Debug.todo "branch 'TurnoutRight _' not implemented"
+        _ ->
+            Debug.todo "getLocalTie turnout"
 
 
-getNextTie : Tie -> Rail -> Tie
+getNextTie : Tie -> Rail IsInverted IsFlipped -> Tie
 getNextTie tie rail =
     let
         local =
@@ -47,7 +44,7 @@ getNextTie tie rail =
         dir2 =
             Dir.mul tie.dir local.dir
     in
-    Tie.make single2 double2 height2 dir2 Joint.Plus
+    Debug.log "tie" (Tie.make single2 double2 height2 dir2 Joint.Plus)
 
 
 tokenize : String -> List String
@@ -75,7 +72,7 @@ executeRec tie toks =
                 "s" ->
                     let
                         rail =
-                            Rail.Straight tie.joint
+                            Straight
                     in
                     RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
                         :: executeRec (getNextTie tie rail) ts
@@ -83,7 +80,7 @@ executeRec tie toks =
                 "l" ->
                     let
                         rail =
-                            Rail.Left tie.joint
+                            Curve NotFlipped
                     in
                     RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
                         :: executeRec (getNextTie tie rail) ts
@@ -91,7 +88,7 @@ executeRec tie toks =
                 "r" ->
                     let
                         rail =
-                            Rail.Right tie.joint
+                            Curve Flipped
                     in
                     RailPlacement.make rail (Tie.originToVec3 tie) (Dir.toRadian tie.dir)
                         :: executeRec (getNextTie tie rail) ts

@@ -13,7 +13,7 @@ import Dict exposing (Dict)
 import Math.Vector3 as Vec3 exposing (Vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
-import Rail exposing (Rail(..))
+import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import RailPlacement exposing (RailPlacement)
 import WebGL
 
@@ -86,16 +86,16 @@ dummyMesh =
     WebGL.triangles []
 
 
-getMeshName : Rail -> String
+getMeshName : Rail IsInverted IsFlipped -> String
 getMeshName rail =
     case rail of
-        Rail.Straight _ ->
+        Straight ->
             "straight_1"
 
-        Rail.Left _ ->
+        Curve Flipped ->
             "curve_8"
 
-        Rail.Right _ ->
+        Curve NotFlipped ->
             -- Stub
             "curve_8"
 
@@ -113,10 +113,6 @@ getMesh model placement =
 getErrors : Model -> List String
 getErrors model =
     model.errors
-
-
-
-{- Internal. flip mesh to flip a rail -}
 
 
 flipMesh : MeshWith Vertex -> MeshWith Vertex

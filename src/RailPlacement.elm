@@ -1,15 +1,15 @@
 module RailPlacement exposing (RailPlacement, make)
 
 import Math.Vector3 exposing (Vec3)
-import Rail exposing (Rail)
+import Rail exposing (IsFlipped, IsInverted, Rail)
 
 
 {-| 一本のレールを配置するための型。
 処理系の内部のデータ構造に依存せず、描画エンジンにぽっと渡せば描画できそうな情報を含ませる。
-レールの種類、およびどこに置くべきかを保持する
+レールの種類、およびどこに置くべきかを保持する。
 -}
 type alias RailPlacement =
-    { rail : Rail
+    { rail : Rail IsInverted IsFlipped
 
     -- 場所の単位は mm とする。理由としては、単線・複線レールなどが存在している都合上、
     -- レールの配置と言った情報は物理的なものであり、実際の大きさといった情報と不可分であることから、
@@ -20,7 +20,7 @@ type alias RailPlacement =
     }
 
 
-make : Rail -> Vec3 -> Float -> RailPlacement
+make : Rail IsInverted IsFlipped -> Vec3 -> Float -> RailPlacement
 make rail position angle =
     { rail = rail
     , position = position
