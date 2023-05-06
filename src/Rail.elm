@@ -23,8 +23,11 @@ flip はそのレールを裏返す事ができるかを持つ。
 
 invertやflipについて、そういった操作ができないようなレールについてはそもそもそういうのを持たせない設計
 
+追記: 直線レールとか曲線レールとか、極性を入れ替えるのなら線路を裏返したり逆向きにつないだりすればできるんですが、
+座標の計算がマジでめんどくさいのでやめた。
+
 -}
 type Rail invert flip
-    = Straight
-    | Curve flip
+    = Straight invert
+    | Curve invert flip
     | Turnout invert flip

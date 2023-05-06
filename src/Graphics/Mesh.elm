@@ -79,9 +79,12 @@ buildMeshUri name =
 -}
 allMeshNames : List String
 allMeshNames =
-    [ "straight_1"
-    , "curve_8"
-    , "turnout_L"
+    [ "straight1_minus"
+    , "straight1_plus"
+    , "curve_8_minus"
+    , "curve_8_plus"
+    , "turnout_minus"
+    , "turnout_plus"
     ]
 
 
@@ -101,34 +104,37 @@ dummyMesh =
     WebGL.triangles []
 
 
+inverted : IsInverted -> String
+inverted isInverted =
+    case isInverted of
+        NotInverted ->
+            "_minus"
+
+        Inverted ->
+            "_plus"
+
+
+flipped : IsFlipped -> String
+flipped isFlipped =
+    case isFlipped of
+        NotFlipped ->
+            ""
+
+        Flipped ->
+            "_flip"
+
+
 getMeshName : Rail IsInverted IsFlipped -> String
 getMeshName rail =
     case rail of
-        Straight ->
-            "straight_1"
+        Straight inv ->
+            "straight1" ++ inverted inv
 
-        Curve NotFlipped ->
-            -- Stub
-            "curve_8"
+        Curve inv flip ->
+            "curve_8" ++ inverted inv ++ flipped flip
 
-        Curve Flipped ->
-            "curve_8_flip"
-
-        Turnout NotInverted NotFlipped ->
-            -- STUB!
-            "turnout_L"
-
-        Turnout NotInverted Flipped ->
-            -- STUB!
-            "turnout_L_flip"
-
-        Turnout Inverted NotFlipped ->
-            -- STUB!
-            "turnout_R"
-
-        Turnout Inverted Flipped ->
-            -- STUB!
-            "turnout_R_flip"
+        Turnout inv flip ->
+            "turnout" ++ inverted inv ++ flipped flip
 
 
 getMesh : Model -> RailPlacement -> Mesh

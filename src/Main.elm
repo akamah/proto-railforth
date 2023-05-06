@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
-import Forth.Interpreter exposing (execute)
+import Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
@@ -54,7 +54,7 @@ type alias Model =
     , target : Vec3
     , draggingState : Maybe DraggingState
     , program : String
-    , rails : List RailPlacement
+    , execResult : ExecResult
     , splitBarDragState : Maybe ( Float, Float )
     , splitBarPosition : Float
     }
@@ -80,7 +80,7 @@ initModel =
     , target = vec3 0 0 0
     , draggingState = Nothing
     , program = ""
-    , rails = []
+    , execResult = emptyResult
     , splitBarDragState = Nothing
     , splitBarPosition = 1000.0
     }
@@ -148,7 +148,23 @@ view model =
             , onWheelHandler model
             ]
           <|
-            showRails model model.rails
+            showRails model model.execResult.rails
+        , Html.div
+            [ style "display" <|
+                if model.execResult.errMsg == Nothing then
+                    "none"
+
+                else
+                    "block"
+            , style "position" "absolute"
+            , style "left" (px 0)
+            , style "top" (px railViewTop)
+            , style "width" (px model.viewport.width)
+            , style "height" (px railViewHeight)
+            , style "font-size" "2rem"
+            , style "background-color" "lightgray"
+            ]
+            [ Html.text <| Maybe.withDefault "" <| model.execResult.errMsg ]
         , Html.div
             [ style "display" "block"
             , style "position" "absolute"
@@ -261,7 +277,7 @@ update msg model =
         UpdateScript program ->
             ( { model
                 | program = program
-                , rails = execute program
+                , execResult = execute program
               }
             , Storage.save program
             )
