@@ -130,7 +130,6 @@ tokenize string =
 type alias ExecStatus =
     { stack : List Location
     , rails : List RailPlacement
-    , commentNest : Int
     }
 
 
@@ -138,7 +137,6 @@ initialStatus : ExecStatus
 initialStatus =
     { stack = [ Location.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus ]
     , rails = []
-    , commentNest = 0
     }
 
 
@@ -155,66 +153,77 @@ executeRec toks status =
 
         t :: ts ->
             case t of
-                "pop" ->
-                    case status.stack of
-                        [] ->
-                            haltWithError "Stack empty" status
-
-                        _ :: restOfStack ->
-                            executeRec ts { status | stack = restOfStack }
-
-                "s" ->
-                    case executeTryPlaceRail (Straight ()) status of
-                        Nothing ->
-                            haltWithError "Stack empty" status
-
-                        Just nextStatus ->
-                            executeRec ts nextStatus
-
-                "l" ->
-                    case executeTryPlaceRail (Curve () NotFlipped) status of
-                        Nothing ->
-                            haltWithError "Stack empty" status
-
-                        Just nextStatus ->
-                            executeRec ts nextStatus
-
-                "r" ->
-                    case executeTryPlaceRail (Curve () Flipped) status of
-                        Nothing ->
-                            haltWithError "Stack empty" status
-
-                        Just nextStatus ->
-                            executeRec ts nextStatus
-
-                "tl" ->
-                    case executeTryPlaceRail (Turnout () NotFlipped) status of
-                        Nothing ->
-                            haltWithError "Stack empty" status
-
-                        Just nextStatus ->
-                            executeRec ts nextStatus
-
-                "tr" ->
-                    case executeTryPlaceRail (Turnout () Flipped) status of
-                        Nothing ->
-                            haltWithError "Stack empty" status
-
-                        Just nextStatus ->
-                            executeRec ts nextStatus
-
                 "" ->
                     executeRec ts status
+
+                "(" ->
+                    executeComment 1 ts status
+
+                ")" ->
+                    haltWithError "extra end comment ) found" status
+
+                "." ->
+                    executePop (executeRec ts) status
+
+                "pop" ->
+                    executePop (executeRec ts) status
+
+                "s" ->
+                    executePlaceRail (executeRec ts) (Straight ()) status
+
+                "l" ->
+                    executePlaceRail (executeRec ts) (Curve () NotFlipped) status
+
+                "r" ->
+                    executePlaceRail (executeRec ts) (Curve () Flipped) status
+
+                "tl" ->
+                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) status
+
+                "tr" ->
+                    executePlaceRail (executeRec ts) (Turnout () Flipped) status
 
                 unknownWord ->
                     haltWithError ("Unknown word: " ++ unknownWord) status
 
 
-executeTryPlaceRail : Rail () IsFlipped -> ExecStatus -> Maybe ExecStatus
-executeTryPlaceRail railType status =
+executePop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executePop cont status =
     case status.stack of
         [] ->
-            Nothing
+            haltWithError "Stack empty" status
+
+        _ :: restOfStack ->
+            cont { status | stack = restOfStack }
+
+
+executeComment : Int -> List String -> ExecStatus -> ExecResult
+executeComment depth tok status =
+    if depth <= 0 then
+        executeRec tok status
+
+    else
+        case tok of
+            [] ->
+                haltWithError "In comment line" status
+
+            t :: ts ->
+                case t of
+                    "(" ->
+                        executeComment (depth + 1) ts status
+
+                    ")" ->
+                        executeComment (depth - 1) ts status
+
+                    _ ->
+                        executeComment depth ts status
+
+
+executePlaceRail : (ExecStatus -> ExecResult) -> Rail () IsFlipped -> ExecStatus -> ExecResult
+executePlaceRail cont railType status =
+    case status.stack of
+        [] ->
+            haltWithError "Stack empty" status
 
         -- Stack empty
         top :: restOfStack ->
@@ -242,7 +251,7 @@ executeTryPlaceRail railType status =
                         , stack = stackElementsToPush ++ restOfStack
                     }
             in
-            Just nextStatus
+            cont nextStatus
 
 
 getInversionWhenOriginIsMinus : Joint -> IsInverted
