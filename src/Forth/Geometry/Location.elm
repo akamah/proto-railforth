@@ -1,5 +1,6 @@
 module Forth.Geometry.Location exposing
     ( Location
+    , extend
     , flip
     , invert
     , make
@@ -50,8 +51,27 @@ flip loc =
         , double = Rot45.conj loc.double
         , height = -loc.height
         , dir = Dir.flip loc.dir
-        , joint = Joint.invert loc.joint
     }
+
+
+extend : Location -> Location -> Location
+extend global local =
+    let
+        single =
+            Rot45.add global.single <|
+                Rot45.mul (Dir.toRot45 global.dir) local.single
+
+        double =
+            Rot45.add global.double <|
+                Rot45.mul (Dir.toRot45 global.dir) local.double
+
+        height =
+            global.height + local.height
+
+        dir =
+            Dir.mul global.dir local.dir
+    in
+    make single double height dir local.joint
 
 
 originToVec3 : Location -> Vec3

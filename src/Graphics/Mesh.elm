@@ -81,8 +81,8 @@ allMeshNames : List String
 allMeshNames =
     [ "straight1_minus"
     , "straight1_plus"
-    , "curve_8_minus"
-    , "curve_8_plus"
+    , "curve8_minus"
+    , "curve8_plus"
     , "turnout_minus"
     , "turnout_plus"
     ]
@@ -131,7 +131,7 @@ getMeshName rail =
             "straight1" ++ inverted inv
 
         Curve inv flip ->
-            "curve_8" ++ inverted inv ++ flipped flip
+            "curve8" ++ inverted inv ++ flipped flip
 
         Turnout inv flip ->
             "turnout" ++ inverted inv ++ flipped flip

@@ -80,26 +80,6 @@ getRailPiece rail =
             Debug.todo "getRailPiece turnout"
 
 
-extendLocation : Location -> Location -> Location
-extendLocation global local =
-    let
-        single =
-            Rot45.add global.single <|
-                Rot45.mul (Dir.toRot45 global.dir) local.single
-
-        double =
-            Rot45.add global.double <|
-                Rot45.mul (Dir.toRot45 global.dir) local.double
-
-        height =
-            global.height + local.height
-
-        dir =
-            Dir.mul global.dir local.dir
-    in
-    Location.make single double height dir local.joint
-
-
 type alias SourceCode =
     String
 
@@ -170,60 +150,69 @@ executeRec status toks =
                             executeRec { status | stack = restOfStack } ts
 
                 "s" ->
-                    case status.stack of
-                        [] ->
+                    case executeTryPlaceRail (Straight ()) status of
+                        Nothing ->
                             haltWithError status "Stack empty"
 
-                        top :: restOfStack ->
-                            -- 直線レールのRailPieceを入手
-                            -- top の極性に合わせて、それをinvert するかしないかをやる
-                            -- - もし、invertできないレールの種類だったらエラーを吐く
-                            -- 入手した RailPiece について、 top から生やすように分岐する
-                            -- 当該種類のRailPieceを status.rails に追加
-                            -- スタックに生えてきたRailPiece を積む
-                            let
-                                railType =
-                                    Straight ()
-
-                                rail =
-                                    getRailMatchingCurrentJoint railType top.joint
-
-                                railPiece =
-                                    getRailPiece rail
-
-                                stackElementsToPush =
-                                    placeRailPieceAtLocation top railPiece
-
-                                newRailPlacement =
-                                    toRailPlacement rail top
-
-                                nextStatus =
-                                    { status
-                                        | rails = newRailPlacement :: status.rails
-                                        , stack = stackElementsToPush ++ restOfStack
-                                    }
-                            in
+                        Just nextStatus ->
                             executeRec nextStatus ts
 
-                -- "l" ->
-                --     let
-                --         rail =
-                --             Curve NotFlipped
-                --     in
-                --     RailPlacement.make rail (Location.originToVec3 loc) (Dir.toRadian loc.dir)
-                --         :: executeRec (getNextLocation loc rail) ts
-                -- "r" ->
-                --     let
-                --         rail =
-                --             Curve Flipped
-                --     in
-                --     RailPlacement.make rail (Location.originToVec3 loc) (Dir.toRadian loc.dir)
-                --         :: executeRec (getNextLocation loc rail) ts
+                "l" ->
+                    case executeTryPlaceRail (Curve () NotFlipped) status of
+                        Nothing ->
+                            haltWithError status "Stack empty"
+
+                        Just nextStatus ->
+                            executeRec nextStatus ts
+
+                "r" ->
+                    case executeTryPlaceRail (Curve () Flipped) status of
+                        Nothing ->
+                            haltWithError status "Stack empty"
+
+                        Just nextStatus ->
+                            executeRec nextStatus ts
+
                 "" ->
                     executeRec status ts
 
                 unknownWord ->
                     haltWithError status ("Unknown word: " ++ unknownWord)
+
+
+executeTryPlaceRail : Rail () IsFlipped -> ExecStatus -> Maybe ExecStatus
+executeTryPlaceRail railType status =
+    case status.stack of
+        [] ->
+            Nothing
+
+        -- Stack empty
+        top :: restOfStack ->
+            let
+                -- railTypeを元に、極性を考慮したレールを作成
+                -- TODO: 極性がうまくハマらなかった場合は失敗させる
+                rail =
+                    getRailMatchingCurrentJoint railType top.joint
+
+                -- 入手した RailPiece について、 top から生やすように分岐する
+                railPiece =
+                    getRailPiece rail
+
+                -- スタックに生えてきたRailPiece を積む
+                stackElementsToPush =
+                    placeRailPieceAtLocation top railPiece
+
+                -- 当該種類のRailPieceを status.rails に追加
+                newRailPlacement =
+                    toRailPlacement rail top
+
+                nextStatus =
+                    { status
+                        | rails = newRailPlacement :: status.rails
+                        , stack = stackElementsToPush ++ restOfStack
+                    }
+            in
+            Just nextStatus
 
 
 getInversionWhenOriginIsMinus : Joint -> IsInverted
@@ -250,8 +239,8 @@ getRailMatchingCurrentJoint rail joint =
 
 {-| -}
 placeRailPieceAtLocation : Location -> RailPiece -> List Location
-placeRailPieceAtLocation location railPiece =
-    List.map (extendLocation location) <| Nonempty.tail railPiece
+placeRailPieceAtLocation base railPiece =
+    List.map (Location.extend base) <| Nonempty.tail railPiece
 
 
 {-| haltWithError
