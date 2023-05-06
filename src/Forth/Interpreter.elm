@@ -163,10 +163,19 @@ executeRec toks status =
                     haltWithError "extra end comment ) found" status
 
                 "." ->
-                    executePop (executeRec ts) status
+                    executeDrop (executeRec ts) status
 
-                "pop" ->
-                    executePop (executeRec ts) status
+                "drop" ->
+                    executeDrop (executeRec ts) status
+
+                "swap" ->
+                    executeSwap (executeRec ts) status
+
+                "rot" ->
+                    executeRot (executeRec ts) status
+
+                "-rot" ->
+                    executeInverseRot (executeRec ts) status
 
                 "s" ->
                     executePlaceRail (executeRec ts) (Straight ()) status
@@ -187,14 +196,44 @@ executeRec toks status =
                     haltWithError ("Unknown word: " ++ unknownWord) status
 
 
-executePop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executePop cont status =
+executeDrop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeDrop cont status =
     case status.stack of
         [] ->
             haltWithError "Stack empty" status
 
         _ :: restOfStack ->
             cont { status | stack = restOfStack }
+
+
+executeSwap : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeSwap cont status =
+    case status.stack of
+        x :: y :: restOfStack ->
+            cont { status | stack = y :: x :: restOfStack }
+
+        _ ->
+            haltWithError "stack should contain at least two elements" status
+
+
+executeRot : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeRot cont status =
+    case status.stack of
+        x :: y :: z :: restOfStack ->
+            cont { status | stack = z :: x :: y :: restOfStack }
+
+        _ ->
+            haltWithError "stack should contain at least three elements" status
+
+
+executeInverseRot : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeInverseRot cont status =
+    case status.stack of
+        x :: y :: z :: restOfStack ->
+            cont { status | stack = y :: z :: x :: restOfStack }
+
+        _ ->
+            haltWithError "stack should contain at least three elements" status
 
 
 executeComment : Int -> List String -> ExecStatus -> ExecResult
