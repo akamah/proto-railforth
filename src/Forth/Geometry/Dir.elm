@@ -2,7 +2,7 @@ module Forth.Geometry.Dir exposing
     ( Dir
     , div
     , e
-    , inv
+    , flip
     , mul
     , n
     , ne
@@ -75,14 +75,14 @@ mul (Dir d1) (Dir d2) =
     Dir (modBy 8 <| d1 + d2)
 
 
-inv : Dir -> Dir
-inv (Dir d) =
+flip : Dir -> Dir
+flip (Dir d) =
     Dir (modBy 8 (8 - d))
 
 
 div : Dir -> Dir -> Dir
 div d1 d2 =
-    mul d1 (inv d2)
+    mul d1 (flip d2)
 
 
 aux : Int -> Int -> Int -> Int

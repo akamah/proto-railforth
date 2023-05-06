@@ -8,13 +8,13 @@ import Test exposing (..)
 suite : Test
 suite =
     describe "Joint module"
-        [ describe "negate"
-            [ test "negate plus" <|
+        [ describe "invert"
+            [ test "invert plus" <|
                 \_ ->
-                    Expect.equal Joint.Minus (Joint.negate Joint.Plus)
-            , test "negate minus" <|
+                    Expect.equal Joint.Minus (Joint.invert Joint.Plus)
+            , test "invert minus" <|
                 \_ ->
-                    Expect.equal Joint.Plus (Joint.negate Joint.Minus)
+                    Expect.equal Joint.Plus (Joint.invert Joint.Minus)
             ]
         , describe "toString"
             [ test "toString minus" <|

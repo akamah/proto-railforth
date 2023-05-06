@@ -1,6 +1,6 @@
 module Forth.Geometry.Joint exposing
     ( Joint(..)
-    , negate
+    , invert
     , toString
     )
 
@@ -13,8 +13,8 @@ type Joint
     | Minus
 
 
-negate : Joint -> Joint
-negate p =
+invert : Joint -> Joint
+invert p =
     case p of
         Plus ->
             Minus

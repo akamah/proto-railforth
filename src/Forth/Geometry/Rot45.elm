@@ -1,6 +1,7 @@
 module Forth.Geometry.Rot45 exposing
     ( Rot45
     , add
+    , conj
     , extract
       -- , getA
       -- , getB
@@ -87,6 +88,13 @@ mul x y =
                         (xa * yb + xb * ya - xc * yd - xd * yc)
                         (xa * yc + xb * yb + xc * ya - xd * yd)
                         (xa * yd + xb * yc + xc * yb + xd * ya)
+
+
+conj : Rot45 -> Rot45
+conj x =
+    extract x <|
+        \a b c d ->
+            make a -d -c -b
 
 
 sqrt1_2 : Float

@@ -114,9 +114,21 @@ getMeshName rail =
         Curve Flipped ->
             "curve_8_flip"
 
-        _ ->
+        Turnout NotInverted NotFlipped ->
             -- STUB!
-            "curve_8"
+            "turnout_L"
+
+        Turnout NotInverted Flipped ->
+            -- STUB!
+            "turnout_L_flip"
+
+        Turnout Inverted NotFlipped ->
+            -- STUB!
+            "turnout_R"
+
+        Turnout Inverted Flipped ->
+            -- STUB!
+            "turnout_R_flip"
 
 
 getMesh : Model -> RailPlacement -> Mesh

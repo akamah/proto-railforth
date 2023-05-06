@@ -1,7 +1,13 @@
-module Forth.Geometry.Location exposing (Location, make, originToVec3)
+module Forth.Geometry.Location exposing
+    ( Location
+    , flip
+    , invert
+    , make
+    , originToVec3
+    )
 
-import Forth.Geometry.Dir exposing (Dir)
-import Forth.Geometry.Joint exposing (Joint)
+import Forth.Geometry.Dir as Dir exposing (Dir)
+import Forth.Geometry.Joint as Joint exposing (Joint)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 import Math.Vector3 as Vec3 exposing (Vec3)
 
@@ -29,6 +35,22 @@ make single double height dir joint =
     , height = height
     , dir = dir
     , joint = joint
+    }
+
+
+invert : Location -> Location
+invert loc =
+    { loc | joint = Joint.invert loc.joint }
+
+
+flip : Location -> Location
+flip loc =
+    { loc
+        | single = Rot45.conj loc.single
+        , double = Rot45.conj loc.double
+        , height = -loc.height
+        , dir = Dir.flip loc.dir
+        , joint = Joint.invert loc.joint
     }
 
 
