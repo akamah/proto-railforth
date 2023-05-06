@@ -162,8 +162,8 @@ view model =
             , style "width" (px model.viewport.width)
             , style "height" (px railViewHeight)
             , style "font-size" "2rem"
-            , style "background-color" "rgba(200, 30, 30, 0.2)"
             , style "pointer-events" "none"
+            , style "z-index" "100"
             ]
             [ Html.text <| Maybe.withDefault "" <| model.execResult.errMsg ]
         , Html.div

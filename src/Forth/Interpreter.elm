@@ -33,18 +33,29 @@ zero =
     Location.make Rot45.zero Rot45.zero 0 Dir.e Joint.Minus
 
 
+goStraight : Location
+goStraight =
+    Location.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
+
+
+turnLeft : Location
+turnLeft =
+    Location.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
+
+
 straight : Nonempty Location
 straight =
-    pair
-        zero
-        (Location.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus)
+    pair zero goStraight
 
 
 curve : Nonempty Location
 curve =
-    pair
-        zero
-        (Location.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus)
+    pair zero turnLeft
+
+
+turnOut : Nonempty Location
+turnOut =
+    triple zero goStraight turnLeft
 
 
 invert : IsInverted -> RailPiece -> RailPiece
@@ -64,7 +75,10 @@ flip flipped piece =
             piece
 
         Flipped ->
-            Nonempty.map Location.flip piece
+            Nonempty (Location.flip <| Nonempty.head piece) <|
+                List.map Location.flip <|
+                    List.reverse <|
+                        Nonempty.tail piece
 
 
 getRailPiece : Rail IsInverted IsFlipped -> RailPiece
@@ -76,8 +90,8 @@ getRailPiece rail =
         Curve inv f ->
             invert inv <| flip f curve
 
-        _ ->
-            Debug.todo "getRailPiece turnout"
+        Turnout inv f ->
+            invert inv <| flip f turnOut
 
 
 type alias SourceCode =
@@ -109,8 +123,8 @@ execute src =
 
 
 tokenize : String -> List String
-tokenize =
-    String.words
+tokenize string =
+    Debug.log "tokenize" <| String.words string
 
 
 type alias ExecStatus =
@@ -167,6 +181,22 @@ executeRec status toks =
 
                 "r" ->
                     case executeTryPlaceRail (Curve () Flipped) status of
+                        Nothing ->
+                            haltWithError status "Stack empty"
+
+                        Just nextStatus ->
+                            executeRec nextStatus ts
+
+                "tl" ->
+                    case executeTryPlaceRail (Turnout () NotFlipped) status of
+                        Nothing ->
+                            haltWithError status "Stack empty"
+
+                        Just nextStatus ->
+                            executeRec nextStatus ts
+
+                "tr" ->
+                    case executeTryPlaceRail (Turnout () Flipped) status of
                         Nothing ->
                             haltWithError status "Stack empty"
 
