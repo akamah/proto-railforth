@@ -119,12 +119,12 @@ emptyResult =
 
 execute : SourceCode -> ExecResult
 execute src =
-    executeRec initialStatus (tokenize src)
+    executeRec (tokenize src) initialStatus
 
 
 tokenize : String -> List String
 tokenize string =
-    Debug.log "tokenize" <| String.words string
+    String.words string
 
 
 type alias ExecStatus =
@@ -147,8 +147,8 @@ toRailPlacement rail location =
     RailPlacement.make rail (Location.originToVec3 location) (Dir.toRadian location.dir)
 
 
-executeRec : ExecStatus -> List String -> ExecResult
-executeRec status toks =
+executeRec : List String -> ExecStatus -> ExecResult
+executeRec toks status =
     case toks of
         [] ->
             haltWithSuccess status
@@ -158,56 +158,56 @@ executeRec status toks =
                 "pop" ->
                     case status.stack of
                         [] ->
-                            haltWithError status "Stack empty"
+                            haltWithError "Stack empty" status
 
                         _ :: restOfStack ->
-                            executeRec { status | stack = restOfStack } ts
+                            executeRec ts { status | stack = restOfStack }
 
                 "s" ->
                     case executeTryPlaceRail (Straight ()) status of
                         Nothing ->
-                            haltWithError status "Stack empty"
+                            haltWithError "Stack empty" status
 
                         Just nextStatus ->
-                            executeRec nextStatus ts
+                            executeRec ts nextStatus
 
                 "l" ->
                     case executeTryPlaceRail (Curve () NotFlipped) status of
                         Nothing ->
-                            haltWithError status "Stack empty"
+                            haltWithError "Stack empty" status
 
                         Just nextStatus ->
-                            executeRec nextStatus ts
+                            executeRec ts nextStatus
 
                 "r" ->
                     case executeTryPlaceRail (Curve () Flipped) status of
                         Nothing ->
-                            haltWithError status "Stack empty"
+                            haltWithError "Stack empty" status
 
                         Just nextStatus ->
-                            executeRec nextStatus ts
+                            executeRec ts nextStatus
 
                 "tl" ->
                     case executeTryPlaceRail (Turnout () NotFlipped) status of
                         Nothing ->
-                            haltWithError status "Stack empty"
+                            haltWithError "Stack empty" status
 
                         Just nextStatus ->
-                            executeRec nextStatus ts
+                            executeRec ts nextStatus
 
                 "tr" ->
                     case executeTryPlaceRail (Turnout () Flipped) status of
                         Nothing ->
-                            haltWithError status "Stack empty"
+                            haltWithError "Stack empty" status
 
                         Just nextStatus ->
-                            executeRec nextStatus ts
+                            executeRec ts nextStatus
 
                 "" ->
-                    executeRec status ts
+                    executeRec ts status
 
                 unknownWord ->
-                    haltWithError status ("Unknown word: " ++ unknownWord)
+                    haltWithError ("Unknown word: " ++ unknownWord) status
 
 
 executeTryPlaceRail : Rail () IsFlipped -> ExecStatus -> Maybe ExecStatus
@@ -275,8 +275,8 @@ placeRailPieceAtLocation base railPiece =
 
 {-| haltWithError
 -}
-haltWithError : ExecStatus -> ExecError -> ExecResult
-haltWithError status errMsg =
+haltWithError : ExecError -> ExecStatus -> ExecResult
+haltWithError errMsg status =
     { rails = status.rails
     , errMsg = Just errMsg
     }
