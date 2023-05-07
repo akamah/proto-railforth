@@ -192,8 +192,8 @@ executeRec toks status =
                 "tr" ->
                     executePlaceRail (executeRec ts) (Turnout () Flipped) status
 
-                unknownWord ->
-                    haltWithError ("Unknown word: " ++ unknownWord) status
+                undefinedWord ->
+                    haltWithError ("Undefined word: " ++ undefinedWord) status
 
 
 executeDrop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
@@ -244,7 +244,7 @@ executeComment depth tok status =
     else
         case tok of
             [] ->
-                haltWithError "In comment line" status
+                haltWithError "[comment]" status
 
             t :: ts ->
                 case t of
