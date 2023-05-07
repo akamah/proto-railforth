@@ -66,10 +66,30 @@ extend global local =
                 Rot45.mul (Dir.toRot45 global.dir) local.double
 
         height =
-            global.height + local.height
+            local.height + global.height
 
         dir =
-            Dir.mul global.dir local.dir
+            Dir.mul local.dir global.dir
+    in
+    make single double height dir local.joint
+
+
+shrink : Location -> Location -> Location
+shrink global local =
+    let
+        single =
+            Rot45.mul (Dir.toRot45 <| Dir.flip global.dir) <|
+                Rot45.sub local.single global.single
+
+        double =
+            Rot45.mul (Dir.toRot45 <| Dir.flip global.dir) <|
+                Rot45.sub local.double global.double
+
+        height =
+            local.height - global.height
+
+        dir =
+            Dir.div local.dir global.dir
     in
     make single double height dir local.joint
 
