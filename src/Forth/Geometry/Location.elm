@@ -1,10 +1,14 @@
 module Forth.Geometry.Location exposing
     ( Location
-    , extend
+    , div
     , flip
     , invert
     , make
+    , mul
+    , negate
     , originToVec3
+    , shrink
+    , zero
     )
 
 import Forth.Geometry.Dir as Dir exposing (Dir)
@@ -39,6 +43,11 @@ make single double height dir joint =
     }
 
 
+zero : Location
+zero =
+    make Rot45.zero Rot45.zero 0 Dir.e Joint.Minus
+
+
 invert : Location -> Location
 invert loc =
     { loc | joint = Joint.invert loc.joint }
@@ -54,16 +63,19 @@ flip loc =
     }
 
 
-extend : Location -> Location -> Location
-extend global local =
+mul : Location -> Location -> Location
+mul global local =
     let
+        dirRot =
+            Dir.toRot45 global.dir
+
         single =
             Rot45.add global.single <|
-                Rot45.mul (Dir.toRot45 global.dir) local.single
+                Rot45.mul dirRot local.single
 
         double =
             Rot45.add global.double <|
-                Rot45.mul (Dir.toRot45 global.dir) local.double
+                Rot45.mul dirRot local.double
 
         height =
             local.height + global.height
@@ -72,6 +84,28 @@ extend global local =
             Dir.mul local.dir global.dir
     in
     make single double height dir local.joint
+
+
+negate : Location -> Location
+negate loc =
+    let
+        flipDir =
+            Dir.flip loc.dir
+
+        flipDirRot45 =
+            Dir.toRot45 flipDir
+    in
+    make
+        (Rot45.mul flipDirRot45 (Rot45.negate loc.single))
+        (Rot45.mul flipDirRot45 (Rot45.negate loc.double))
+        -loc.height
+        flipDir
+        loc.joint
+
+
+div : Location -> Location -> Location
+div x y =
+    mul x (negate y)
 
 
 shrink : Location -> Location -> Location

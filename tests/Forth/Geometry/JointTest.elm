@@ -1,8 +1,14 @@
 module Forth.Geometry.JointTest exposing (..)
 
 import Expect
-import Forth.Geometry.Joint as Joint
+import Forth.Geometry.Joint as Joint exposing (Joint)
+import Fuzz exposing (Fuzzer)
 import Test exposing (..)
+
+
+joint : Fuzzer Joint
+joint =
+    Fuzz.oneOfValues [ Joint.Plus, Joint.Minus ]
 
 
 suite : Test

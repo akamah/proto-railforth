@@ -28,11 +28,6 @@ type alias RailPiece =
     Nonempty Location
 
 
-zero : Location
-zero =
-    Location.make Rot45.zero Rot45.zero 0 Dir.e Joint.Minus
-
-
 goStraight : Location
 goStraight =
     Location.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
@@ -45,17 +40,17 @@ turnLeft =
 
 straight : Nonempty Location
 straight =
-    pair zero goStraight
+    pair Location.zero goStraight
 
 
 curve : Nonempty Location
 curve =
-    pair zero turnLeft
+    pair Location.zero turnLeft
 
 
 turnOut : Nonempty Location
 turnOut =
-    triple zero goStraight turnLeft
+    triple Location.zero goStraight turnLeft
 
 
 invert : IsInverted -> RailPiece -> RailPiece
@@ -318,7 +313,7 @@ getRailMatchingCurrentJoint rail joint =
 {-| -}
 placeRailPieceAtLocation : Location -> RailPiece -> List Location
 placeRailPieceAtLocation base railPiece =
-    List.map (Location.extend base) <| Nonempty.tail railPiece
+    List.map (Location.mul base) <| Nonempty.tail railPiece
 
 
 {-| haltWithError

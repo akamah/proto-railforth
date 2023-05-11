@@ -1,15 +1,30 @@
-module Forth.Geometry.DirTest exposing (..)
+module Forth.Geometry.DirTest exposing (dir, suite)
 
 import Expect exposing (FloatingPointTolerance(..))
 import Forth.Geometry.Dir as Dir exposing (Dir)
+import Fuzz exposing (Fuzzer)
 import Test exposing (..)
 
 
+dir : Fuzzer Dir
+dir =
+    Fuzz.oneOfValues
+        [ Dir.e
+        , Dir.ne
+        , Dir.n
+        , Dir.nw
+        , Dir.w
+        , Dir.sw
+        , Dir.s
+        , Dir.se
+        ]
+
+
 toRadianTest : ( String, Float, Dir ) -> Test
-toRadianTest ( label, expected, dir ) =
+toRadianTest ( label, expected, d ) =
     test label <|
         \_ ->
-            Expect.within (Absolute 0.01) expected <| Dir.toRadian dir
+            Expect.within (Absolute 0.01) expected <| Dir.toRadian d
 
 
 suite : Test

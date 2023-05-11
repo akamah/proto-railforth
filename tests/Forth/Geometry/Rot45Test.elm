@@ -1,4 +1,4 @@
-module Forth.Geometry.Rot45Test exposing (suite)
+module Forth.Geometry.Rot45Test exposing (rot45, suite)
 
 import Expect exposing (FloatingPointTolerance(..))
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
@@ -13,7 +13,7 @@ shortInt =
 
 rot45 : Fuzzer Rot45
 rot45 =
-    Fuzz.map4 (\a b c d -> Rot45.make a b c d) shortInt shortInt shortInt shortInt
+    Fuzz.map4 Rot45.make shortInt shortInt shortInt shortInt
 
 
 suite : Test
