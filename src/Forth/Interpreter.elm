@@ -63,6 +63,8 @@ invert inverted piece =
             Nonempty.map Location.invert piece
 
 
+{-| レールピースをひっくり返す。途中にList.reverseが入るのはひっくり返すと時計回りになるのを反時計回りに戻すため。
+-}
 flip : IsFlipped -> RailPiece -> RailPiece
 flip flipped piece =
     case flipped of
@@ -89,12 +91,19 @@ getRailPiece rail =
             invert inv <| flip f turnOut
 
 
-type alias SourceCode =
-    String
+toRailPlacement : Rail IsInverted IsFlipped -> Location -> RailPlacement
+toRailPlacement rail location =
+    RailPlacement.make rail (Location.originToVec3 location) (Dir.toRadian location.dir)
 
 
 type alias ExecError =
     String
+
+
+type alias ExecStatus =
+    { stack : List Location
+    , rails : List RailPlacement
+    }
 
 
 type alias ExecResult =
@@ -107,12 +116,14 @@ type alias ExecResult =
     }
 
 
+{-| エディタなどで何もしていないときに最初に表示されることを想定
+-}
 emptyResult : ExecResult
 emptyResult =
-    { rails = [], errMsg = Nothing }
+    execute ""
 
 
-execute : SourceCode -> ExecResult
+execute : String -> ExecResult
 execute src =
     executeRec (tokenize src) initialStatus
 
@@ -122,22 +133,11 @@ tokenize string =
     String.words string
 
 
-type alias ExecStatus =
-    { stack : List Location
-    , rails : List RailPlacement
-    }
-
-
 initialStatus : ExecStatus
 initialStatus =
     { stack = [ Location.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus ]
     , rails = []
     }
-
-
-toRailPlacement : Rail IsInverted IsFlipped -> Location -> RailPlacement
-toRailPlacement rail location =
-    RailPlacement.make rail (Location.originToVec3 location) (Dir.toRadian location.dir)
 
 
 executeRec : List String -> ExecStatus -> ExecResult
