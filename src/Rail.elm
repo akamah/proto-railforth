@@ -2,6 +2,8 @@ module Rail exposing
     ( IsFlipped(..)
     , IsInverted(..)
     , Rail(..)
+    , canInvert
+    , map
     )
 
 
@@ -31,3 +33,29 @@ type Rail invert flip
     = Straight invert
     | Curve invert flip
     | Turnout invert flip
+
+
+canInvert : Rail invert flip -> Bool
+canInvert rail =
+    case rail of
+        Straight _ ->
+            True
+
+        Curve _ _ ->
+            True
+
+        Turnout _ _ ->
+            True
+
+
+map : (a -> b) -> Rail a flip -> Rail b flip
+map f rail =
+    case rail of
+        Straight a ->
+            Straight (f a)
+
+        Curve a b ->
+            Curve (f a) b
+
+        Turnout a b ->
+            Turnout (f a) b
