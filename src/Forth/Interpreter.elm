@@ -9,6 +9,10 @@ import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import RailPlacement exposing (RailPlacement)
 
 
+
+-- -- 具体的なレールの形についての定義
+
+
 pair : a -> a -> Nonempty a
 pair a b =
     Nonempty a [ b ]
@@ -19,9 +23,10 @@ triple a b c =
     Nonempty a [ b, c ]
 
 
-quadruple : a -> a -> a -> a -> Nonempty a
-quadruple a b c d =
-    Nonempty a [ b, c, d ]
+
+-- quadruple : a -> a -> a -> a -> Nonempty a
+-- quadruple a b c d =
+--     Nonempty a [ b, c, d ]
 
 
 type alias RailPiece =
@@ -105,6 +110,10 @@ getRailPiece rail =
 toRailPlacement : Rail IsInverted IsFlipped -> Location -> RailPlacement
 toRailPlacement rail location =
     RailPlacement.make rail (Location.originToVec3 location) (Dir.toRadian location.dir)
+
+
+
+-- -- インタープリタの定義
 
 
 type alias ExecError =
@@ -202,6 +211,32 @@ executeRec toks status =
                     haltWithError ("Undefined word: " ++ undefinedWord) status
 
 
+
+-- requireStackTop : (Location -> ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+-- requireStackTop cont status =
+--     case status.stack of
+--         [] ->
+--             haltWithError "Stack empty" status
+--         top :: restOfStack ->
+--             cont top { status | stack = restOfStack }
+
+
+{-| haltWithError
+-}
+haltWithError : ExecError -> ExecStatus -> ExecResult
+haltWithError errMsg status =
+    { rails = status.rails
+    , errMsg = Just errMsg
+    }
+
+
+haltWithSuccess : ExecStatus -> ExecResult
+haltWithSuccess status =
+    { rails = status.rails
+    , errMsg = Nothing
+    }
+
+
 executeDrop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
 executeDrop cont status =
     case status.stack of
@@ -264,6 +299,10 @@ executeComment depth tok status =
                         executeComment depth ts status
 
 
+
+-- レール配置コマンドに関する定義
+
+
 getAppropriateRailAndPieceForJoint : Joint -> Rail () IsFlipped -> Maybe ( Rail IsInverted IsFlipped, RailPiece )
 getAppropriateRailAndPieceForJoint joint railType =
     let
@@ -275,11 +314,11 @@ getAppropriateRailAndPieceForJoint joint railType =
         Just ( Rail.map (\_ -> Rail.NotInverted) railType, railPiece )
 
     else if Rail.canInvert railType then
-        -- 凹凸を反転させる必要がある。
+        -- これから置くレールの凹凸を反転させることで配置することが可能である。
         Just ( Rail.map (\_ -> Rail.Inverted) railType, invert Rail.Inverted railPiece )
 
     else
-        -- 打つ手が無いので、失敗させる
+        -- 凹凸がマッチしないため、配置することができない
         Nothing
 
 
@@ -305,29 +344,3 @@ executePlaceRail cont railType status =
 
                 Nothing ->
                     haltWithError "Joint mismatch" status
-
-
-
--- requireStackTop : (Location -> ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
--- requireStackTop cont status =
---     case status.stack of
---         [] ->
---             haltWithError "Stack empty" status
---         top :: restOfStack ->
---             cont top { status | stack = restOfStack }
-
-
-{-| haltWithError
--}
-haltWithError : ExecError -> ExecStatus -> ExecResult
-haltWithError errMsg status =
-    { rails = status.rails
-    , errMsg = Just errMsg
-    }
-
-
-haltWithSuccess : ExecStatus -> ExecResult
-haltWithSuccess status =
-    { rails = status.rails
-    , errMsg = Nothing
-    }
