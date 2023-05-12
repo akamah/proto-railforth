@@ -28,12 +28,15 @@ type alias RailPiece =
     Nonempty Location
 
 
+minusZero : Location
 minusZero =
     Location.make Rot45.zero Rot45.zero 0 Dir.w Joint.Minus
 
 
-plusZero =
-    Location.make Rot45.zero Rot45.zero 0 Dir.w Joint.Plus
+
+-- plusZero : Location
+-- plusZero =
+--     Location.make Rot45.zero Rot45.zero 0 Dir.w Joint.Plus
 
 
 goStraight : Location
@@ -84,19 +87,6 @@ flip flipped piece =
                 List.map Location.flip <|
                     List.reverse <|
                         Nonempty.tail piece
-
-
-getRailPieceWithInversion : Rail IsInverted IsFlipped -> RailPiece
-getRailPieceWithInversion rail =
-    case rail of
-        Straight inv ->
-            invert inv straight
-
-        Curve inv f ->
-            invert inv <| flip f curve
-
-        Turnout inv f ->
-            invert inv <| flip f turnOut
 
 
 getRailPiece : Rail () IsFlipped -> RailPiece
@@ -194,19 +184,19 @@ executeRec toks status =
                     executeInverseRot (executeRec ts) status
 
                 "s" ->
-                    executePlaceRail2 (executeRec ts) (Straight ()) status
+                    executePlaceRail (executeRec ts) (Straight ()) status
 
                 "l" ->
-                    executePlaceRail2 (executeRec ts) (Curve () NotFlipped) status
+                    executePlaceRail (executeRec ts) (Curve () NotFlipped) status
 
                 "r" ->
-                    executePlaceRail2 (executeRec ts) (Curve () Flipped) status
+                    executePlaceRail (executeRec ts) (Curve () Flipped) status
 
                 "tl" ->
-                    executePlaceRail2 (executeRec ts) (Turnout () NotFlipped) status
+                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) status
 
                 "tr" ->
-                    executePlaceRail2 (executeRec ts) (Turnout () Flipped) status
+                    executePlaceRail (executeRec ts) (Turnout () Flipped) status
 
                 undefinedWord ->
                     haltWithError ("Undefined word: " ++ undefinedWord) status
@@ -274,43 +264,8 @@ executeComment depth tok status =
                         executeComment depth ts status
 
 
-executePlaceRail : (ExecStatus -> ExecResult) -> Rail () IsFlipped -> ExecStatus -> ExecResult
-executePlaceRail cont railType status =
-    case status.stack of
-        [] ->
-            haltWithError "Stack empty" status
-
-        -- Stack empty
-        top :: restOfStack ->
-            let
-                -- railTypeを元に、極性を考慮したレールを作成
-                -- TODO: 極性がうまくハマらなかった場合は失敗させる
-                rail =
-                    getRailMatchingCurrentJoint railType top.joint
-
-                -- 入手した RailPiece について、 top から生やすように分岐する
-                railPiece =
-                    getRailPieceWithInversion rail
-
-                -- スタックに生えてきたRailPiece を積む
-                stackElementsToPush =
-                    placeRailPieceAtLocation top railPiece
-
-                -- 当該種類のRailPieceを status.rails に追加
-                newRailPlacement =
-                    toRailPlacement rail top
-
-                nextStatus =
-                    { status
-                        | rails = newRailPlacement :: status.rails
-                        , stack = stackElementsToPush ++ restOfStack
-                    }
-            in
-            cont nextStatus
-
-
-getAppropriateRaiAndRailPieceForJoint : Joint -> Rail () IsFlipped -> Maybe ( Rail IsInverted IsFlipped, RailPiece )
-getAppropriateRaiAndRailPieceForJoint joint railType =
+getAppropriateRailAndPieceForJoint : Joint -> Rail () IsFlipped -> Maybe ( Rail IsInverted IsFlipped, RailPiece )
+getAppropriateRailAndPieceForJoint joint railType =
     let
         railPiece =
             getRailPiece railType
@@ -328,14 +283,19 @@ getAppropriateRaiAndRailPieceForJoint joint railType =
         Nothing
 
 
-executePlaceRail2 : (ExecStatus -> ExecResult) -> Rail () IsFlipped -> ExecStatus -> ExecResult
-executePlaceRail2 cont railType status =
+placeRailPieceAtLocation : Location -> RailPiece -> List Location
+placeRailPieceAtLocation base railPiece =
+    List.map (Location.mul base) <| Nonempty.tail railPiece
+
+
+executePlaceRail : (ExecStatus -> ExecResult) -> Rail () IsFlipped -> ExecStatus -> ExecResult
+executePlaceRail cont railType status =
     case status.stack of
         [] ->
             haltWithError "Stack empty" status
 
         top :: restOfStack ->
-            case getAppropriateRaiAndRailPieceForJoint top.joint railType of
+            case getAppropriateRailAndPieceForJoint top.joint railType of
                 Just ( rail, railPiece ) ->
                     cont
                         { status
@@ -345,39 +305,6 @@ executePlaceRail2 cont railType status =
 
                 Nothing ->
                     haltWithError "Joint mismatch" status
-
-
-
--- executePlaceRailPiece : (ExecStatus -> ExecResult) -> RailPiece -> ExecStatus -> ExecResult
--- executePlaceRailPiece cont railPiece status =
-
-
-getInversionWhenOriginIsMinus : Joint -> IsInverted
-getInversionWhenOriginIsMinus joint =
-    if joint == Joint.Plus then
-        NotInverted
-
-    else
-        Inverted
-
-
-getRailMatchingCurrentJoint : Rail () IsFlipped -> Joint -> Rail IsInverted IsFlipped
-getRailMatchingCurrentJoint rail joint =
-    case rail of
-        Straight _ ->
-            Straight <| getInversionWhenOriginIsMinus joint
-
-        Curve _ flipped ->
-            Curve (getInversionWhenOriginIsMinus joint) flipped
-
-        Turnout _ flipped ->
-            Turnout (getInversionWhenOriginIsMinus joint) flipped
-
-
-{-| -}
-placeRailPieceAtLocation : Location -> RailPiece -> List Location
-placeRailPieceAtLocation base railPiece =
-    List.map (Location.mul base) <| Nonempty.tail railPiece
 
 
 
