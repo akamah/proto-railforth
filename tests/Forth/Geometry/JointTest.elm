@@ -22,6 +22,11 @@ suite =
                 \_ ->
                     Expect.equal Joint.Plus (Joint.invert Joint.Minus)
             ]
+        , describe "match"
+            [ test "match Plus Minus" <|
+                \_ ->
+                    Expect.equal True (Joint.match Joint.Plus Joint.Minus)
+            ]
         , describe "toString"
             [ test "toString minus" <|
                 \_ ->

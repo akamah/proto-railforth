@@ -1,6 +1,7 @@
 module Forth.Geometry.Joint exposing
     ( Joint(..)
     , invert
+    , match
     , toString
     )
 
@@ -21,6 +22,11 @@ invert p =
 
         Minus ->
             Plus
+
+
+match : Joint -> Joint -> Bool
+match x y =
+    x /= y
 
 
 toString : Joint -> String
