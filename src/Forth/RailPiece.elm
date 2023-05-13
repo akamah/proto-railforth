@@ -54,44 +54,49 @@ minusZero =
 --     Location.make Rot45.zero Rot45.zero 0 Dir.w Joint.Plus
 
 
-goStraight : Location
-goStraight =
-    Location.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
+goStraight1 : Location
+goStraight1 =
+    Location.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
 
 
-goStraightOneHalf : Location
-goStraightOneHalf =
-    Location.make (Rot45.make 6 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
+goStraight1Minus : Location
+goStraight1Minus =
+    Location.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
 
 
-turnLeft : Location
-turnLeft =
+goStraight2 : Location
+goStraight2 =
+    Location.mul goStraight1 goStraight1
+
+
+goStraight4 : Location
+goStraight4 =
+    Location.mul goStraight2 goStraight2
+
+
+goStraight6 : Location
+goStraight6 =
+    Location.mul goStraight2 goStraight4
+
+
+goStraight8 : Location
+goStraight8 =
+    Location.mul goStraight4 goStraight4
+
+
+turnLeft45deg : Location
+turnLeft45deg =
     Location.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
-
-
-goStraightHalfThenTurnLeft : Location
-goStraightHalfThenTurnLeft =
-    Location.make (Rot45.make 2 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
-
-
-straight : Nonempty Location
-straight =
-    pair minusZero goStraight
-
-
-curve : Nonempty Location
-curve =
-    pair minusZero turnLeft
 
 
 turnOut : Nonempty Location
 turnOut =
-    triple minusZero goStraight turnLeft
+    triple minusZero goStraight4 turnLeft45deg
 
 
 autoTurnout : Nonempty Location
 autoTurnout =
-    triple minusZero goStraightOneHalf goStraightHalfThenTurnLeft
+    triple minusZero goStraight6 (Location.mul goStraight2 turnLeft45deg)
 
 
 invert : IsInverted -> RailPiece -> RailPiece
@@ -123,16 +128,16 @@ getRailPiece : Rail () IsFlipped -> RailPiece
 getRailPiece rail =
     case rail of
         Straight _ ->
-            straight
+            pair minusZero goStraight4
 
         Curve _ f ->
-            flip f curve
+            flip f <| pair minusZero turnLeft45deg
 
         Turnout _ f ->
-            flip f turnOut
+            flip f <| triple minusZero goStraight4 turnLeft45deg
 
         AutoTurnout ->
-            autoTurnout
+            triple minusZero goStraight6 (Location.mul goStraight2 turnLeft45deg)
 
 
 getAppropriateRailAndPieceForJoint : Joint -> Rail () IsFlipped -> Maybe ( Rail IsInverted IsFlipped, RailPiece )
