@@ -6,6 +6,8 @@ module Rail exposing
     , map
     )
 
+import Forth.Geometry.Joint exposing (Joint)
+
 
 type IsInverted
     = NotInverted
@@ -38,6 +40,7 @@ type Rail invert flip
     | Curve90 invert flip
     | Turnout invert flip
     | SingleDouble invert flip
+    | JointChange invert
     | AutoTurnout
     | AutoPoint
 
@@ -67,6 +70,9 @@ canInvert rail =
             True
 
         SingleDouble _ _ ->
+            True
+
+        JointChange _ ->
             True
 
         AutoTurnout ->
@@ -102,6 +108,9 @@ map f rail =
 
         Turnout a b ->
             Turnout (f a) b
+
+        JointChange a ->
+            JointChange (f a)
 
         AutoTurnout ->
             AutoTurnout

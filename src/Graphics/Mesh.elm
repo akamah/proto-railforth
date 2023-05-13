@@ -95,6 +95,8 @@ allMeshNames =
     , "turnout_plus"
     , "singledouble_minus"
     , "singledouble_plus"
+    , "pole_minus"
+    , "pole_plus"
     , "autoturnout_minus"
     , "autopoint_minus"
     ]
@@ -162,6 +164,9 @@ getMeshName rail =
 
         SingleDouble inv flip ->
             "singledouble" ++ inverted inv ++ flipped flip
+
+        JointChange inv ->
+            "pole" ++ inverted inv
 
         AutoTurnout ->
             "autoturnout_minus"

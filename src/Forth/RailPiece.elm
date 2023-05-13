@@ -155,6 +155,9 @@ getRailPiece rail =
         SingleDouble _ f ->
             flip f <| triple minusZero goStraight4 doubleTrackLeft
 
+        JointChange _ ->
+            pair minusZero goStraight1Minus
+
         AutoTurnout ->
             triple minusZero goStraight6 (Location.mul goStraight2 turnLeft45deg)
 
