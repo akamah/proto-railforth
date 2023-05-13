@@ -94,14 +94,14 @@ turnLeft90deg =
     Location.mul turnLeft45deg turnLeft45deg
 
 
-turnOut : Nonempty Location
-turnOut =
-    triple minusZero goStraight4 turnLeft45deg
+doubleTrackLeft : Location
+doubleTrackLeft =
+    Location.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 1 0) 0 Dir.e Joint.Plus
 
 
-autoTurnout : Nonempty Location
-autoTurnout =
-    triple minusZero goStraight6 (Location.mul goStraight2 turnLeft45deg)
+doubleTrackRight : Location
+doubleTrackRight =
+    Location.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 -1 0) 0 Dir.e Joint.Plus
 
 
 invert : IsInverted -> RailPiece -> RailPiece
@@ -152,6 +152,9 @@ getRailPiece rail =
 
         Turnout _ f ->
             flip f <| triple minusZero goStraight4 turnLeft45deg
+
+        SingleDouble _ f ->
+            flip f <| triple minusZero goStraight4 doubleTrackLeft
 
         AutoTurnout ->
             triple minusZero goStraight6 (Location.mul goStraight2 turnLeft45deg)

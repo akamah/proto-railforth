@@ -116,6 +116,12 @@ executeRec toks status =
                 "tr" ->
                     executePlaceRail (executeRec ts) (Turnout () Flipped) status
 
+                "dl" ->
+                    executePlaceRail (executeRec ts) (SingleDouble () NotFlipped) status
+
+                "dr" ->
+                    executePlaceRail (executeRec ts) (SingleDouble () Flipped) status
+
                 "autoturnout" ->
                     executePlaceRail (executeRec ts) AutoTurnout status
 
