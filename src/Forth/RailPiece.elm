@@ -1,4 +1,4 @@
-module Forth.RailPiece exposing (RailPiece, getAppropriateRailAndPieceForJoint, placeRailPieceAtLocation)
+module Forth.RailPiece exposing (initialLocation, placeRail)
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
@@ -6,10 +6,21 @@ import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.Rot45 as Rot45
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
+import RailPlacement exposing (RailPlacement)
 
 
 
--- -- 具体的なレールの形についての定義
+-- -- 具体的なレールの配置についてのモジュール
+
+
+initialLocation : Location
+initialLocation =
+    Location.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus
+
+
+toRailPlacement : Rail IsInverted IsFlipped -> Location -> RailPlacement
+toRailPlacement rail location =
+    RailPlacement.make rail (Location.originToVec3 location) (Dir.toRadian location.dir)
 
 
 pair : a -> a -> Nonempty a
@@ -48,9 +59,19 @@ goStraight =
     Location.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
 
 
+goStraightOneHalf : Location
+goStraightOneHalf =
+    Location.make (Rot45.make 6 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
+
+
 turnLeft : Location
 turnLeft =
     Location.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
+
+
+goStraightHalfThenTurnLeft : Location
+goStraightHalfThenTurnLeft =
+    Location.make (Rot45.make 2 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
 
 
 straight : Nonempty Location
@@ -66,6 +87,11 @@ curve =
 turnOut : Nonempty Location
 turnOut =
     triple minusZero goStraight turnLeft
+
+
+autoTurnout : Nonempty Location
+autoTurnout =
+    triple minusZero goStraightOneHalf goStraightHalfThenTurnLeft
 
 
 invert : IsInverted -> RailPiece -> RailPiece
@@ -105,6 +131,9 @@ getRailPiece rail =
         Turnout _ f ->
             flip f turnOut
 
+        AutoTurnout ->
+            autoTurnout
+
 
 getAppropriateRailAndPieceForJoint : Joint -> Rail () IsFlipped -> Maybe ( Rail IsInverted IsFlipped, RailPiece )
 getAppropriateRailAndPieceForJoint joint railType =
@@ -128,3 +157,29 @@ getAppropriateRailAndPieceForJoint joint railType =
 placeRailPieceAtLocation : Location -> RailPiece -> List Location
 placeRailPieceAtLocation base railPiece =
     List.map (Location.mul base) <| Nonempty.tail railPiece
+
+
+type alias PlaceRailParams =
+    { railType : Rail () IsFlipped
+    , location : Location
+    , rotation : Int
+    }
+
+
+type alias PlaceRailResult =
+    { rail : Rail IsInverted IsFlipped
+    , nextLocations : List Location
+    , railPlacement : RailPlacement
+    }
+
+
+placeRail : PlaceRailParams -> Maybe PlaceRailResult
+placeRail params =
+    getAppropriateRailAndPieceForJoint params.location.joint params.railType
+        |> Maybe.map
+            (\( rail, railPiece ) ->
+                { rail = rail
+                , nextLocations = placeRailPieceAtLocation params.location railPiece
+                , railPlacement = toRailPlacement rail params.location
+                }
+            )

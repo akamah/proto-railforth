@@ -85,6 +85,7 @@ allMeshNames =
     , "curve8_plus"
     , "turnout_minus"
     , "turnout_plus"
+    , "autoturnout_minus"
     ]
 
 
@@ -135,6 +136,9 @@ getMeshName rail =
 
         Turnout inv flip ->
             "turnout" ++ inverted inv ++ flipped flip
+
+        AutoTurnout ->
+            "autoturnout_minus"
 
 
 getMesh : Model -> RailPlacement -> Mesh

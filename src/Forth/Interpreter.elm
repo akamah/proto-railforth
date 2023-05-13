@@ -1,9 +1,6 @@
 module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 
-import Forth.Geometry.Dir as Dir
-import Forth.Geometry.Joint as Joint
-import Forth.Geometry.Location as Location exposing (Location)
-import Forth.Geometry.Rot45 as Rot45
+import Forth.Geometry.Location exposing (Location)
 import Forth.RailPiece as RailPiece
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import RailPlacement exposing (RailPlacement)
@@ -52,7 +49,7 @@ tokenize string =
 
 initialStatus : ExecStatus
 initialStatus =
-    { stack = [ Location.make Rot45.zero Rot45.zero 0 Dir.e Joint.Minus ]
+    { stack = [ RailPiece.initialLocation ]
     , rails = []
     }
 
@@ -103,6 +100,9 @@ executeRec toks status =
 
                 "tr" ->
                     executePlaceRail (executeRec ts) (Turnout () Flipped) status
+
+                "autoturnout" ->
+                    executePlaceRail (executeRec ts) AutoTurnout status
 
                 undefinedWord ->
                     haltWithError ("Undefined word: " ++ undefinedWord) status
@@ -203,18 +203,13 @@ executePlaceRail cont railType status =
             haltWithError "Stack empty" status
 
         top :: restOfStack ->
-            case RailPiece.getAppropriateRailAndPieceForJoint top.joint railType of
-                Just ( rail, railPiece ) ->
+            case RailPiece.placeRail { railType = railType, location = top, rotation = 0 } of
+                Just { nextLocations, railPlacement } ->
                     cont
                         { status
-                            | rails = toRailPlacement rail top :: status.rails
-                            , stack = RailPiece.placeRailPieceAtLocation top railPiece ++ restOfStack
+                            | rails = railPlacement :: status.rails
+                            , stack = nextLocations ++ restOfStack
                         }
 
                 Nothing ->
                     haltWithError "Joint mismatch" status
-
-
-toRailPlacement : Rail IsInverted IsFlipped -> Location -> RailPlacement
-toRailPlacement rail location =
-    RailPlacement.make rail (Location.originToVec3 location) (Dir.toRadian location.dir)
