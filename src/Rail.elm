@@ -30,8 +30,11 @@ invertやflipについて、そういった操作ができないようなレー�
 
 -}
 type Rail invert flip
-    = Straight invert
-    | Curve invert flip
+    = Straight1 invert
+    | Straight2 invert
+    | Straight4 invert
+    | Straight8 invert
+    | Curve45 invert flip
     | Turnout invert flip
     | AutoTurnout
 
@@ -39,10 +42,19 @@ type Rail invert flip
 canInvert : Rail invert flip -> Bool
 canInvert rail =
     case rail of
-        Straight _ ->
+        Straight1 _ ->
             True
 
-        Curve _ _ ->
+        Straight2 _ ->
+            True
+
+        Straight4 _ ->
+            True
+
+        Straight8 _ ->
+            True
+
+        Curve45 _ _ ->
             True
 
         Turnout _ _ ->
@@ -55,11 +67,20 @@ canInvert rail =
 map : (a -> b) -> Rail a flip -> Rail b flip
 map f rail =
     case rail of
-        Straight a ->
-            Straight (f a)
+        Straight1 a ->
+            Straight1 (f a)
 
-        Curve a b ->
-            Curve (f a) b
+        Straight2 a ->
+            Straight2 (f a)
+
+        Straight4 a ->
+            Straight4 (f a)
+
+        Straight8 a ->
+            Straight8 (f a)
+
+        Curve45 a b ->
+            Curve45 (f a) b
 
         Turnout a b ->
             Turnout (f a) b

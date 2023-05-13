@@ -127,10 +127,19 @@ flip flipped piece =
 getRailPiece : Rail () IsFlipped -> RailPiece
 getRailPiece rail =
     case rail of
-        Straight _ ->
+        Straight1 _ ->
+            pair minusZero goStraight1
+
+        Straight2 _ ->
+            pair minusZero goStraight2
+
+        Straight4 _ ->
             pair minusZero goStraight4
 
-        Curve _ f ->
+        Straight8 _ ->
+            pair minusZero goStraight8
+
+        Curve45 _ f ->
             flip f <| pair minusZero turnLeft45deg
 
         Turnout _ f ->

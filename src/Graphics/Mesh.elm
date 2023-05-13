@@ -79,8 +79,14 @@ buildMeshUri name =
 -}
 allMeshNames : List String
 allMeshNames =
-    [ "straight1_minus"
+    [ "straight0_minus"
+    , "straight0_plus"
+    , "straight1_minus"
     , "straight1_plus"
+    , "straight2_minus"
+    , "straight2_plus"
+    , "straight4_minus"
+    , "straight4_plus"
     , "curve8_minus"
     , "curve8_plus"
     , "turnout_minus"
@@ -128,10 +134,19 @@ flipped isFlipped =
 getMeshName : Rail IsInverted IsFlipped -> String
 getMeshName rail =
     case rail of
-        Straight inv ->
+        Straight1 inv ->
+            "straight4" ++ inverted inv
+
+        Straight2 inv ->
+            "straight2" ++ inverted inv
+
+        Straight4 inv ->
             "straight1" ++ inverted inv
 
-        Curve inv flip ->
+        Straight8 inv ->
+            "straight0" ++ inverted inv
+
+        Curve45 inv flip ->
             "curve8" ++ inverted inv ++ flipped flip
 
         Turnout inv flip ->

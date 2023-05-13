@@ -86,14 +86,23 @@ executeRec toks status =
                 "-rot" ->
                     executeInverseRot (executeRec ts) status
 
+                "q" ->
+                    executePlaceRail (executeRec ts) (Straight1 ()) status
+
+                "h" ->
+                    executePlaceRail (executeRec ts) (Straight2 ()) status
+
                 "s" ->
-                    executePlaceRail (executeRec ts) (Straight ()) status
+                    executePlaceRail (executeRec ts) (Straight4 ()) status
+
+                "ss" ->
+                    executePlaceRail (executeRec ts) (Straight8 ()) status
 
                 "l" ->
-                    executePlaceRail (executeRec ts) (Curve () NotFlipped) status
+                    executePlaceRail (executeRec ts) (Curve45 () NotFlipped) status
 
                 "r" ->
-                    executePlaceRail (executeRec ts) (Curve () Flipped) status
+                    executePlaceRail (executeRec ts) (Curve45 () Flipped) status
 
                 "tl" ->
                     executePlaceRail (executeRec ts) (Turnout () NotFlipped) status
