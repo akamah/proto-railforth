@@ -39,6 +39,7 @@ type Rail invert flip
     | Turnout invert flip
     | SingleDouble invert flip
     | AutoTurnout
+    | AutoPoint
 
 
 canInvert : Rail invert flip -> Bool
@@ -71,6 +72,9 @@ canInvert rail =
         AutoTurnout ->
             False
 
+        AutoPoint ->
+            False
+
 
 map : (a -> b) -> Rail a flip -> Rail b flip
 map f rail =
@@ -101,3 +105,6 @@ map f rail =
 
         AutoTurnout ->
             AutoTurnout
+
+        AutoPoint ->
+            AutoPoint

@@ -96,6 +96,7 @@ allMeshNames =
     , "singledouble_minus"
     , "singledouble_plus"
     , "autoturnout_minus"
+    , "autopoint_minus"
     ]
 
 
@@ -164,6 +165,9 @@ getMeshName rail =
 
         AutoTurnout ->
             "autoturnout_minus"
+
+        AutoPoint ->
+            "autopoint_minus"
 
 
 getMesh : Model -> RailPlacement -> Mesh

@@ -125,6 +125,9 @@ executeRec toks status =
                 "autoturnout" ->
                     executePlaceRail (executeRec ts) AutoTurnout status
 
+                "autopoint" ->
+                    executePlaceRail (executeRec ts) AutoPoint status
+
                 undefinedWord ->
                     haltWithError ("Undefined word: " ++ undefinedWord) status
 

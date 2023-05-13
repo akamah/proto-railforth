@@ -33,10 +33,9 @@ triple a b c =
     Nonempty a [ b, c ]
 
 
-
--- quadruple : a -> a -> a -> a -> Nonempty a
--- quadruple a b c d =
---     Nonempty a [ b, c, d ]
+quadruple : a -> a -> a -> a -> Nonempty a
+quadruple a b c d =
+    Nonempty a [ b, c, d ]
 
 
 type alias RailPiece =
@@ -158,6 +157,9 @@ getRailPiece rail =
 
         AutoTurnout ->
             triple minusZero goStraight6 (Location.mul goStraight2 turnLeft45deg)
+
+        AutoPoint ->
+            quadruple minusZero (Location.mul goStraight2 doubleTrackRight) goStraight6 (Location.mul goStraight2 turnLeft45deg)
 
 
 getAppropriateRailAndPieceForJoint : Joint -> Rail () IsFlipped -> Maybe ( Rail IsInverted IsFlipped, RailPiece )
