@@ -35,6 +35,7 @@ type Rail invert flip
     | Straight4 invert
     | Straight8 invert
     | Curve45 invert flip
+    | Curve90 invert flip
     | Turnout invert flip
     | AutoTurnout
 
@@ -55,6 +56,9 @@ canInvert rail =
             True
 
         Curve45 _ _ ->
+            True
+
+        Curve90 _ _ ->
             True
 
         Turnout _ _ ->
@@ -81,6 +85,9 @@ map f rail =
 
         Curve45 a b ->
             Curve45 (f a) b
+
+        Curve90 a b ->
+            Curve90 (f a) b
 
         Turnout a b ->
             Turnout (f a) b

@@ -101,8 +101,14 @@ executeRec toks status =
                 "l" ->
                     executePlaceRail (executeRec ts) (Curve45 () NotFlipped) status
 
+                "ll" ->
+                    executePlaceRail (executeRec ts) (Curve90 () NotFlipped) status
+
                 "r" ->
                     executePlaceRail (executeRec ts) (Curve45 () Flipped) status
+
+                "rr" ->
+                    executePlaceRail (executeRec ts) (Curve90 () Flipped) status
 
                 "tl" ->
                     executePlaceRail (executeRec ts) (Turnout () NotFlipped) status

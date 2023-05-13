@@ -89,6 +89,8 @@ allMeshNames =
     , "straight4_plus"
     , "curve8_minus"
     , "curve8_plus"
+    , "curve4_minus"
+    , "curve4_plus"
     , "turnout_minus"
     , "turnout_plus"
     , "autoturnout_minus"
@@ -148,6 +150,9 @@ getMeshName rail =
 
         Curve45 inv flip ->
             "curve8" ++ inverted inv ++ flipped flip
+
+        Curve90 inv flip ->
+            "curve4" ++ inverted inv ++ flipped flip
 
         Turnout inv flip ->
             "turnout" ++ inverted inv ++ flipped flip
