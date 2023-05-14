@@ -131,6 +131,9 @@ executeRec toks status =
                 "autopoint" ->
                     executePlaceRail (executeRec ts) AutoPoint status
 
+                "elevate" ->
+                    executeElevate (executeRec ts) 4 status
+
                 undefinedWord ->
                     haltWithError ("Undefined word: " ++ undefinedWord) status
 
@@ -240,3 +243,13 @@ executePlaceRail cont railType status =
 
                 Nothing ->
                     haltWithError "Joint mismatch" status
+
+
+executeElevate : (ExecStatus -> ExecResult) -> Int -> ExecStatus -> ExecResult
+executeElevate cont amount status =
+    case status.stack of
+        [] ->
+            haltWithError "Stack empty" status
+
+        top :: restOfStack ->
+            cont { status | stack = { top | height = top.height + amount } :: restOfStack }
