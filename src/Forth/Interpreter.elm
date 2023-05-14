@@ -87,49 +87,55 @@ executeRec toks status =
                     executeInverseRot (executeRec ts) status
 
                 "q" ->
-                    executePlaceRail (executeRec ts) (Straight1 ()) status
+                    executePlaceRail (executeRec ts) (Straight1 ()) 0 status
 
                 "h" ->
-                    executePlaceRail (executeRec ts) (Straight2 ()) status
+                    executePlaceRail (executeRec ts) (Straight2 ()) 0 status
 
                 "s" ->
-                    executePlaceRail (executeRec ts) (Straight4 ()) status
+                    executePlaceRail (executeRec ts) (Straight4 ()) 0 status
 
                 "ss" ->
-                    executePlaceRail (executeRec ts) (Straight8 ()) status
+                    executePlaceRail (executeRec ts) (Straight8 ()) 0 status
 
                 "l" ->
-                    executePlaceRail (executeRec ts) (Curve45 () NotFlipped) status
+                    executePlaceRail (executeRec ts) (Curve45 () NotFlipped) 0 status
 
                 "ll" ->
-                    executePlaceRail (executeRec ts) (Curve90 () NotFlipped) status
+                    executePlaceRail (executeRec ts) (Curve90 () NotFlipped) 0 status
 
                 "r" ->
-                    executePlaceRail (executeRec ts) (Curve45 () Flipped) status
+                    executePlaceRail (executeRec ts) (Curve45 () Flipped) 0 status
 
                 "rr" ->
-                    executePlaceRail (executeRec ts) (Curve90 () Flipped) status
+                    executePlaceRail (executeRec ts) (Curve90 () Flipped) 0 status
 
                 "tl" ->
-                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) status
+                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) 0 status
+
+                "tl1" ->
+                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) 1 status
+
+                "tl2" ->
+                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) 2 status
 
                 "tr" ->
-                    executePlaceRail (executeRec ts) (Turnout () Flipped) status
+                    executePlaceRail (executeRec ts) (Turnout () Flipped) 0 status
 
                 "dl" ->
-                    executePlaceRail (executeRec ts) (SingleDouble () NotFlipped) status
+                    executePlaceRail (executeRec ts) (SingleDouble () NotFlipped) 0 status
 
                 "dr" ->
-                    executePlaceRail (executeRec ts) (SingleDouble () Flipped) status
+                    executePlaceRail (executeRec ts) (SingleDouble () Flipped) 0 status
 
                 "j" ->
-                    executePlaceRail (executeRec ts) (JointChange ()) status
+                    executePlaceRail (executeRec ts) (JointChange ()) 0 status
 
                 "autoturnout" ->
-                    executePlaceRail (executeRec ts) AutoTurnout status
+                    executePlaceRail (executeRec ts) AutoTurnout 0 status
 
                 "autopoint" ->
-                    executePlaceRail (executeRec ts) AutoPoint status
+                    executePlaceRail (executeRec ts) AutoPoint 0 status
 
                 "elevate" ->
                     executeElevate (executeRec ts) 4 status
@@ -226,14 +232,14 @@ executeComment depth tok status =
                         executeComment depth ts status
 
 
-executePlaceRail : (ExecStatus -> ExecResult) -> Rail () IsFlipped -> ExecStatus -> ExecResult
-executePlaceRail cont railType status =
+executePlaceRail : (ExecStatus -> ExecResult) -> Rail () IsFlipped -> Int -> ExecStatus -> ExecResult
+executePlaceRail cont railType rotation status =
     case status.stack of
         [] ->
             haltWithError "Stack empty" status
 
         top :: restOfStack ->
-            case RailPiece.placeRail { railType = railType, location = top, rotation = 0 } of
+            case RailPiece.placeRail { railType = railType, location = top, rotation = rotation } of
                 Just { nextLocations, railPlacement } ->
                     cont
                         { status
