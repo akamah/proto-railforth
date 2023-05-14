@@ -6,8 +6,6 @@ module Rail exposing
     , map
     )
 
-import Forth.Geometry.Joint exposing (Joint)
-
 
 type IsInverted
     = NotInverted
