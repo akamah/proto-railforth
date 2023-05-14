@@ -1,5 +1,6 @@
 module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 
+import Dict exposing (Dict)
 import Forth.Geometry.Location exposing (Location)
 import Forth.RailPiece as RailPiece
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -54,6 +55,52 @@ initialStatus =
     }
 
 
+coreGlossary : Dict String ((ExecStatus -> ExecResult) -> ExecStatus -> ExecResult)
+coreGlossary =
+    Dict.fromList
+        [ ( "", identity {- do nothing -} )
+        , ( ".", executeDrop )
+        , ( "drop", executeDrop )
+        , ( "swap", executeSwap )
+        , ( "rot", executeRot )
+        , ( "-rot", executeInverseRot )
+        ]
+
+
+controlWords : Dict String (List String -> ExecStatus -> ExecResult)
+controlWords =
+    Dict.fromList
+        [ ( "(", executeComment 1 )
+        , ( ")", \_ -> haltWithError "extra end comment ) found" )
+        ]
+
+
+railForthGlossary : Dict String ((ExecStatus -> ExecResult) -> ExecStatus -> ExecResult)
+railForthGlossary =
+    Dict.fromList
+        [ ( "q", executePlaceRail (Straight1 ()) 0 )
+        , ( "h", executePlaceRail (Straight2 ()) 0 )
+        , ( "s", executePlaceRail (Straight4 ()) 0 )
+        , ( "ss", executePlaceRail (Straight8 ()) 0 )
+        , ( "l", executePlaceRail (Curve45 () NotFlipped) 0 )
+        , ( "ll", executePlaceRail (Curve90 () NotFlipped) 0 )
+        , ( "r", executePlaceRail (Curve45 () Flipped) 0 )
+        , ( "rr", executePlaceRail (Curve90 () Flipped) 0 )
+        , ( "tl", executePlaceRail (Turnout () NotFlipped) 0 )
+        , ( "tl1", executePlaceRail (Turnout () NotFlipped) 1 )
+        , ( "tl2", executePlaceRail (Turnout () NotFlipped) 2 )
+        , ( "tr", executePlaceRail (Turnout () Flipped) 0 )
+        , ( "tr1", executePlaceRail (Turnout () Flipped) 1 )
+        , ( "tr2", executePlaceRail (Turnout () Flipped) 2 )
+        , ( "dl", executePlaceRail (SingleDouble () NotFlipped) 0 )
+        , ( "dr", executePlaceRail (SingleDouble () Flipped) 0 )
+        , ( "j", executePlaceRail (JointChange ()) 0 )
+        , ( "autoturnout", executePlaceRail AutoTurnout 0 )
+        , ( "autopoint", executePlaceRail AutoPoint 0 )
+        , ( "elevate", executeElevate 4 )
+        ]
+
+
 executeRec : List String -> ExecStatus -> ExecResult
 executeRec toks status =
     case toks of
@@ -61,97 +108,22 @@ executeRec toks status =
             haltWithSuccess status
 
         t :: ts ->
-            case t of
-                "" ->
-                    executeRec ts status
+            case Dict.get t controlWords of
+                Just thread ->
+                    thread ts status
 
-                "(" ->
-                    executeComment 1 ts status
+                Nothing ->
+                    case Dict.get t coreGlossary of
+                        Just thread ->
+                            thread (executeRec ts) status
 
-                ")" ->
-                    haltWithError "extra end comment ) found" status
+                        Nothing ->
+                            case Dict.get t railForthGlossary of
+                                Just thread ->
+                                    thread (executeRec ts) status
 
-                "." ->
-                    executeDrop (executeRec ts) status
-
-                "drop" ->
-                    executeDrop (executeRec ts) status
-
-                "swap" ->
-                    executeSwap (executeRec ts) status
-
-                "rot" ->
-                    executeRot (executeRec ts) status
-
-                "-rot" ->
-                    executeInverseRot (executeRec ts) status
-
-                "q" ->
-                    executePlaceRail (executeRec ts) (Straight1 ()) 0 status
-
-                "h" ->
-                    executePlaceRail (executeRec ts) (Straight2 ()) 0 status
-
-                "s" ->
-                    executePlaceRail (executeRec ts) (Straight4 ()) 0 status
-
-                "ss" ->
-                    executePlaceRail (executeRec ts) (Straight8 ()) 0 status
-
-                "l" ->
-                    executePlaceRail (executeRec ts) (Curve45 () NotFlipped) 0 status
-
-                "ll" ->
-                    executePlaceRail (executeRec ts) (Curve90 () NotFlipped) 0 status
-
-                "r" ->
-                    executePlaceRail (executeRec ts) (Curve45 () Flipped) 0 status
-
-                "rr" ->
-                    executePlaceRail (executeRec ts) (Curve90 () Flipped) 0 status
-
-                "tl" ->
-                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) 0 status
-
-                "tl1" ->
-                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) 1 status
-
-                "tl2" ->
-                    executePlaceRail (executeRec ts) (Turnout () NotFlipped) 2 status
-
-                "tr" ->
-                    executePlaceRail (executeRec ts) (Turnout () Flipped) 0 status
-
-                "dl" ->
-                    executePlaceRail (executeRec ts) (SingleDouble () NotFlipped) 0 status
-
-                "dr" ->
-                    executePlaceRail (executeRec ts) (SingleDouble () Flipped) 0 status
-
-                "j" ->
-                    executePlaceRail (executeRec ts) (JointChange ()) 0 status
-
-                "autoturnout" ->
-                    executePlaceRail (executeRec ts) AutoTurnout 0 status
-
-                "autopoint" ->
-                    executePlaceRail (executeRec ts) AutoPoint 0 status
-
-                "elevate" ->
-                    executeElevate (executeRec ts) 4 status
-
-                undefinedWord ->
-                    haltWithError ("Undefined word: " ++ undefinedWord) status
-
-
-
--- requireStackTop : (Location -> ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
--- requireStackTop cont status =
---     case status.stack of
---         [] ->
---             haltWithError "Stack empty" status
---         top :: restOfStack ->
---             cont top { status | stack = restOfStack }
+                                Nothing ->
+                                    haltWithError ("Undefined word: " ++ t) status
 
 
 {-| haltWithError
@@ -232,8 +204,8 @@ executeComment depth tok status =
                         executeComment depth ts status
 
 
-executePlaceRail : (ExecStatus -> ExecResult) -> Rail () IsFlipped -> Int -> ExecStatus -> ExecResult
-executePlaceRail cont railType rotation status =
+executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executePlaceRail railType rotation cont status =
     case status.stack of
         [] ->
             haltWithError "Stack empty" status
@@ -251,8 +223,8 @@ executePlaceRail cont railType rotation status =
                     haltWithError "Joint mismatch" status
 
 
-executeElevate : (ExecStatus -> ExecResult) -> Int -> ExecStatus -> ExecResult
-executeElevate cont amount status =
+executeElevate : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeElevate amount cont status =
     case status.stack of
         [] ->
             haltWithError "Stack empty" status
