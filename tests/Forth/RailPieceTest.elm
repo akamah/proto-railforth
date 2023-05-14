@@ -39,5 +39,10 @@ suite =
                         , origin = Location.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.nw Joint.Plus
                         }
                         (rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout () NotFlipped)
+            , test "rotate Turnout three times" <|
+                \_ ->
+                    Expect.equal
+                        (getRailPiece <| Turnout () NotFlipped)
+                        (rotateRailPiece <| rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout () NotFlipped)
             ]
         ]
