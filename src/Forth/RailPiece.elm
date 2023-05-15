@@ -97,6 +97,11 @@ turnLeft45deg =
     Location.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
 
 
+turnLeftOuter45deg : Location
+turnLeftOuter45deg =
+    Location.make (Rot45.make 0 0 4 -4) (Rot45.make 0 0 1 -1) 0 Dir.ne Joint.Plus
+
+
 turnLeft90deg : Location
 turnLeft90deg =
     Location.mul turnLeft45deg turnLeft45deg
@@ -162,6 +167,9 @@ getRailPiece rail =
 
         Curve90 _ f ->
             flip f <| twoEnds minusZero turnLeft90deg
+
+        OuterCurve45 _ f ->
+            flip f <| twoEnds minusZero turnLeftOuter45deg
 
         Turnout _ f ->
             flip f <| threeEnds minusZero goStraight4 turnLeft45deg

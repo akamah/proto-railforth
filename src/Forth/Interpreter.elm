@@ -86,6 +86,8 @@ railForthGlossary =
         , ( "ll", executePlaceRail (Curve90 () NotFlipped) 0 )
         , ( "r", executePlaceRail (Curve45 () Flipped) 0 )
         , ( "rr", executePlaceRail (Curve90 () Flipped) 0 )
+        , ( "ol", executePlaceRail (OuterCurve45 () NotFlipped) 0 )
+        , ( "or", executePlaceRail (OuterCurve45 () Flipped) 0 )
         , ( "tl", executePlaceRail (Turnout () NotFlipped) 0 )
         , ( "tl1", executePlaceRail (Turnout () NotFlipped) 1 )
         , ( "tl2", executePlaceRail (Turnout () NotFlipped) 2 )
