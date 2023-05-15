@@ -39,6 +39,7 @@ type Rail invert flip
     | OuterCurve45 invert flip
     | Turnout invert flip
     | SingleDouble invert flip
+    | EightPoint invert flip
     | JointChange invert
     | Slope invert flip
     | Stop invert
@@ -74,6 +75,9 @@ canInvert rail =
             True
 
         SingleDouble _ _ ->
+            True
+
+        EightPoint _ _ ->
             True
 
         JointChange _ ->
@@ -118,6 +122,9 @@ map f rail =
 
         SingleDouble a b ->
             SingleDouble (f a) b
+
+        EightPoint a b ->
+            EightPoint (f a) b
 
         Turnout a b ->
             Turnout (f a) b

@@ -97,6 +97,8 @@ allMeshNames =
     , "turnout_plus"
     , "singledouble_minus"
     , "singledouble_plus"
+    , "eight_minus"
+    , "eight_plus"
     , "pole_minus"
     , "pole_plus"
     , "stop_minus"
@@ -173,6 +175,9 @@ getMeshName rail =
 
         SingleDouble inv flip ->
             "singledouble" ++ inverted inv ++ flipped flip
+
+        EightPoint inv flip ->
+            "eight" ++ inverted inv ++ flipped flip
 
         JointChange inv ->
             "pole" ++ inverted inv
