@@ -99,6 +99,8 @@ allMeshNames =
     , "pole_plus"
     , "stop_minus"
     , "stop_plus"
+    , "slope_minus"
+    , "slope_plus"
     , "autoturnout_minus"
     , "autopoint_minus"
     ]
@@ -169,6 +171,9 @@ getMeshName rail =
 
         JointChange inv ->
             "pole" ++ inverted inv
+
+        Slope inv flip ->
+            "slope" ++ inverted inv ++ flipped flip
 
         Stop inv ->
             "stop" ++ inverted inv

@@ -172,6 +172,9 @@ getRailPiece rail =
         JointChange _ ->
             twoEnds minusZero goStraight1Minus
 
+        Slope _ f ->
+            flip f <| twoEnds minusZero { goStraight8 | height = 4 }
+
         Stop _ ->
             twoEnds minusZero goStraight4
 

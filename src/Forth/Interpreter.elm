@@ -99,6 +99,8 @@ railForthGlossary =
         , ( "dr1", executePlaceRail (SingleDouble () Flipped) 1 )
         , ( "dr2", executePlaceRail (SingleDouble () Flipped) 2 )
         , ( "j", executePlaceRail (JointChange ()) 0 )
+        , ( "up", executePlaceRail (Slope () NotFlipped) 0 )
+        , ( "dn", executePlaceRail (Slope () Flipped) 0 )
         , ( "stop", executePlaceRail (Stop ()) 0 )
         , ( "at", executePlaceRail AutoTurnout 0 )
         , ( "at1", executePlaceRail AutoTurnout 1 )
