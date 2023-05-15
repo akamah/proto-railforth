@@ -42,6 +42,8 @@ type Rail invert flip
     | EightPoint invert flip
     | JointChange invert
     | Slope invert flip
+    | SlopeCurveA
+    | SlopeCurveB
     | Stop invert
     | AutoTurnout
     | AutoPoint
@@ -85,6 +87,12 @@ canInvert rail =
 
         Slope _ _ ->
             True
+
+        SlopeCurveA ->
+            False
+
+        SlopeCurveB ->
+            False
 
         Stop _ ->
             True
@@ -134,6 +142,12 @@ map f rail =
 
         Slope a b ->
             Slope (f a) b
+
+        SlopeCurveA ->
+            SlopeCurveA
+
+        SlopeCurveB ->
+            SlopeCurveB
 
         Stop a ->
             Stop (f a)

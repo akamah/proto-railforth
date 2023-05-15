@@ -105,6 +105,8 @@ allMeshNames =
     , "stop_plus"
     , "slope_minus"
     , "slope_plus"
+    , "slopecurveA_plus"
+    , "slopecurveB_minus"
     , "autoturnout_minus"
     , "autopoint_minus"
     ]
@@ -184,6 +186,12 @@ getMeshName rail =
 
         Slope inv flip ->
             "slope" ++ inverted inv ++ flipped flip
+
+        SlopeCurveA ->
+            "slopecurveA_plus"
+
+        SlopeCurveB ->
+            "slopecurveB_minus"
 
         Stop inv ->
             "stop" ++ inverted inv

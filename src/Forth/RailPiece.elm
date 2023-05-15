@@ -56,10 +56,9 @@ minusZero =
     Location.make Rot45.zero Rot45.zero 0 Dir.w Joint.Minus
 
 
-
--- plusZero : Location
--- plusZero =
---     Location.make Rot45.zero Rot45.zero 0 Dir.w Joint.Plus
+plusZero : Location
+plusZero =
+    Location.make Rot45.zero Rot45.zero 0 Dir.w Joint.Plus
 
 
 goStraight1 : Location
@@ -190,6 +189,12 @@ getRailPiece rail =
 
         Slope _ f ->
             flip f <| twoEnds minusZero { goStraight8 | height = 4 }
+
+        SlopeCurveA ->
+            twoEnds plusZero { turnRight45deg | height = 1, joint = Joint.Minus }
+
+        SlopeCurveB ->
+            twoEnds minusZero { turnLeft45deg | height = 1 }
 
         Stop _ ->
             twoEnds minusZero goStraight4
