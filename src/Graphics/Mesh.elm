@@ -97,6 +97,8 @@ allMeshNames =
     , "singledouble_plus"
     , "pole_minus"
     , "pole_plus"
+    , "stop_minus"
+    , "stop_plus"
     , "autoturnout_minus"
     , "autopoint_minus"
     ]
@@ -167,6 +169,9 @@ getMeshName rail =
 
         JointChange inv ->
             "pole" ++ inverted inv
+
+        Stop inv ->
+            "stop" ++ inverted inv
 
         AutoTurnout ->
             "autoturnout_minus"

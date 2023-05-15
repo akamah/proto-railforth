@@ -172,6 +172,9 @@ getRailPiece rail =
         JointChange _ ->
             twoEnds minusZero goStraight1Minus
 
+        Stop _ ->
+            twoEnds minusZero goStraight4
+
         AutoTurnout ->
             threeEnds minusZero goStraight6 (Location.mul goStraight2 turnLeft45deg)
 

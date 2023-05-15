@@ -39,6 +39,7 @@ type Rail invert flip
     | Turnout invert flip
     | SingleDouble invert flip
     | JointChange invert
+    | Stop invert
     | AutoTurnout
     | AutoPoint
 
@@ -71,6 +72,9 @@ canInvert rail =
             True
 
         JointChange _ ->
+            True
+
+        Stop _ ->
             True
 
         AutoTurnout ->
@@ -109,6 +113,9 @@ map f rail =
 
         JointChange a ->
             JointChange (f a)
+
+        Stop a ->
+            Stop (f a)
 
         AutoTurnout ->
             AutoTurnout
