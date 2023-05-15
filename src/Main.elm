@@ -287,7 +287,7 @@ update msg model =
             ( { model | splitBarDragState = Just pos }, Cmd.none )
 
         SplitBarUpdateDrag ( _, y ) ->
-            ( { model | splitBarPosition = clamp 100 1000 y }, Cmd.none )
+            ( { model | splitBarPosition = clamp 100 1200 y }, Cmd.none )
 
         SplitBarEndDrag _ ->
             ( { model | splitBarDragState = Nothing }, Cmd.none )
