@@ -3,10 +3,6 @@ module Forth.Geometry.Rot45 exposing
     , add
     , conj
     , extract
-      -- , getA
-      -- , getB
-      -- , getC
-      -- , getD
     , make
     , mul
     , negate
@@ -34,40 +30,19 @@ extract (Rot45 a b c d) f =
     f a b c d
 
 
-
--- getA : Rot45 -> Int
--- getA x =
---     extract x (\a _ _ _ -> a)
--- getB : Rot45 -> Int
--- getB x =
---     extract x (\_ b _ _ -> b)
--- getC : Rot45 -> Int
--- getC x =
---     extract x (\_ _ c _ -> c)
--- getD : Rot45 -> Int
--- getD x =
---     extract x (\_ _ d _ -> d)
-
-
 zero : Rot45
 zero =
     make 0 0 0 0
 
 
 add : Rot45 -> Rot45 -> Rot45
-add x y =
-    extract x <|
-        \xa xb xc xd ->
-            extract y <|
-                \ya yb yc yd ->
-                    make (xa + ya) (xb + yb) (xc + yc) (xd + yd)
+add (Rot45 xa xb xc xd) (Rot45 ya yb yc yd) =
+    make (xa + ya) (xb + yb) (xc + yc) (xd + yd)
 
 
 negate : Rot45 -> Rot45
-negate x =
-    extract x <|
-        \a b c d ->
-            make -a -b -c -d
+negate (Rot45 a b c d) =
+    make -a -b -c -d
 
 
 sub : Rot45 -> Rot45 -> Rot45
@@ -75,37 +50,24 @@ sub x y =
     add x (negate y)
 
 
-{-| 複素数の乗算に似ている
+{-| 複素数の乗算のように、回転操作のようなイメージ
 -}
 mul : Rot45 -> Rot45 -> Rot45
-mul x y =
-    extract x <|
-        \xa xb xc xd ->
-            extract y <|
-                \ya yb yc yd ->
-                    make
-                        (xa * ya - xb * yd - xc * yc - xd * yb)
-                        (xa * yb + xb * ya - xc * yd - xd * yc)
-                        (xa * yc + xb * yb + xc * ya - xd * yd)
-                        (xa * yd + xb * yc + xc * yb + xd * ya)
+mul (Rot45 xa xb xc xd) (Rot45 ya yb yc yd) =
+    make
+        (xa * ya - xb * yd - xc * yc - xd * yb)
+        (xa * yb + xb * ya - xc * yd - xd * yc)
+        (xa * yc + xb * yb + xc * ya - xd * yd)
+        (xa * yd + xb * yc + xc * yb + xd * ya)
 
 
 conj : Rot45 -> Rot45
-conj x =
-    extract x <|
-        \a b c d ->
-            make a -d -c -b
-
-
-sqrt1_2 : Float
-sqrt1_2 =
-    sqrt (1.0 / 2.0)
+conj (Rot45 a b c d) =
+    make a -d -c -b
 
 
 toFloat : Rot45 -> ( Float, Float )
-toFloat x =
-    extract x <|
-        \a b c d ->
-            ( Basics.toFloat a + sqrt1_2 * Basics.toFloat (b - d)
-            , Basics.toFloat c + sqrt1_2 * Basics.toFloat (b + d)
-            )
+toFloat (Rot45 a b c d) =
+    ( Basics.toFloat a + Basics.sqrt (1.0 / 2.0) * Basics.toFloat (b - d)
+    , Basics.toFloat c + Basics.sqrt (1.0 / 2.0) * Basics.toFloat (b + d)
+    )
