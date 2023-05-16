@@ -64,6 +64,7 @@ coreGlossary =
         , ( "swap", executeSwap )
         , ( "rot", executeRot )
         , ( "-rot", executeInverseRot )
+        , ( "nip", executeNip )
         ]
 
 
@@ -204,6 +205,16 @@ executeInverseRot cont status =
 
         _ ->
             haltWithError "stack should contain at least three elements" status
+
+
+executeNip : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeNip cont status =
+    case status.stack of
+        x :: _ :: restOfStack ->
+            cont { status | stack = x :: restOfStack }
+
+        _ ->
+            haltWithError "stack should contain at least two elements" status
 
 
 executeComment : Int -> List String -> ExecStatus -> ExecResult
