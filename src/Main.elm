@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
+import Dict
 import Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
@@ -150,13 +151,12 @@ view model =
           <|
             showRails model model.execResult.rails
         , Html.div
-            [ style "display" <|
-                if model.execResult.errMsg == Nothing then
-                    "none"
-
-                else
-                    "block"
-            , style "position" "absolute"
+            [ -- style "display" <|
+              -- if model.execResult.errMsg == Nothing then
+              --     "none"
+              -- else
+              --     "block"
+              style "position" "absolute"
             , style "left" (px 0)
             , style "top" (px railViewTop)
             , style "width" (px model.viewport.width)
@@ -165,7 +165,14 @@ view model =
             , style "pointer-events" "none"
             , style "z-index" "100"
             ]
-            [ Html.text <| Maybe.withDefault "" <| model.execResult.errMsg ]
+          --            [ Html.text <| Maybe.withDefault "" <| model.execResult.errMsg ]
+          <|
+            List.map
+                (\( name, count ) ->
+                    Html.p [ style "margin" "0px" ] [ Html.text <| name ++ ": " ++ String.fromInt count ]
+                )
+            <|
+                Dict.toList model.execResult.railCount
         , Html.div
             [ style "display" "block"
             , style "position" "absolute"
@@ -544,7 +551,7 @@ uniforms : Mat4 -> Vec3 -> Float -> Bool -> Uniforms
 uniforms modelTransform origin rotate flipped =
     { transform =
         Mat4.mul modelTransform (makeMeshMatrix origin rotate flipped)
-    , height = 0.0
+    , height = Vec3.getY origin
     }
 
 
@@ -629,7 +636,7 @@ railVertexShader =
 
         void main() {
             gl_Position = transform * vec4(position, 1.0);
-            contrast = 0.3 + 0.7 * normal[1] * normal[1]; // XZ face should be blue
+            contrast = 0.5 + 0.5 * normal[1] * normal[1]; // XZ face should be blue
             edge = distance(vec3(0.0, 0.0, 0.0), position);
         }
     |]
@@ -646,7 +653,7 @@ railFragmentShader =
         void main() {
             const highp vec3 blue = vec3(0.12, 0.56, 1.0);
             const highp vec3 green = vec3(0.12, 1.0, 0.56);
-            highp float ratio = clamp(height / 40.0, 0.0, 1.0);
+            highp float ratio = clamp(height / 660.0, 0.0, 1.0);
             highp vec3 color = ratio * green + (1.0 - ratio) * blue;
             highp float dist_density = min(edge / 30.0 + 0.2, 1.0);
             gl_FragColor = vec4(dist_density * contrast * color, dist_density);

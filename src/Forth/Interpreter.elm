@@ -3,6 +3,7 @@ module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 import Dict exposing (Dict)
 import Forth.Geometry.Location exposing (Location)
 import Forth.RailPiece as RailPiece
+import Forth.Statistics as Statistics
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import RailPlacement exposing (RailPlacement)
 
@@ -24,6 +25,7 @@ type alias ExecStatus =
 type alias ExecResult =
     { rails : List RailPlacement
     , errMsg : Maybe ExecError
+    , railCount : Dict String Int
 
     -- piers
     -- hukusen piers
@@ -157,6 +159,7 @@ haltWithError : ExecError -> ExecStatus -> ExecResult
 haltWithError errMsg status =
     { rails = status.rails
     , errMsg = Just errMsg
+    , railCount = Dict.empty
     }
 
 
@@ -164,6 +167,7 @@ haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
     { rails = status.rails
     , errMsg = Nothing
+    , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.rails
     }
 
 

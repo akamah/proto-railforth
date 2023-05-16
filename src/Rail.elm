@@ -3,8 +3,11 @@ module Rail exposing
     , IsInverted(..)
     , Rail(..)
     , canInvert
+    , isFlippedToString
+    , isInvertedToString
     , map
     , toString
+    , toStringWith
     )
 
 
@@ -111,7 +114,12 @@ map f rail =
 
 
 toString : Rail IsInverted IsFlipped -> String
-toString rail =
+toString =
+    toStringWith isFlippedToString isInvertedToString
+
+
+toStringWith : (flipped -> String) -> (inverted -> String) -> Rail inverted flipped -> String
+toStringWith flipped inverted rail =
     case rail of
         Straight1 inv ->
             "straight4" ++ inverted inv
@@ -165,8 +173,8 @@ toString rail =
             "autopoint_minus"
 
 
-inverted : IsInverted -> String
-inverted isInverted =
+isInvertedToString : IsInverted -> String
+isInvertedToString isInverted =
     case isInverted of
         NotInverted ->
             "_minus"
@@ -175,8 +183,8 @@ inverted isInverted =
             "_plus"
 
 
-flipped : IsFlipped -> String
-flipped isFlipped =
+isFlippedToString : IsFlipped -> String
+isFlippedToString isFlipped =
     case isFlipped of
         NotFlipped ->
             ""
