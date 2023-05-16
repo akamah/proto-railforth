@@ -4,6 +4,7 @@ module Rail exposing
     , Rail(..)
     , canInvert
     , map
+    , toString
     )
 
 
@@ -25,7 +26,7 @@ flip はそのレールを裏返す事ができるかを持つ。
 
 invertやflipについて、そういった操作ができないようなレールについてはそもそもそういうのを持たせない設計
 
-追記: 直線レールとか曲線レールとか、極性を入れ替えるのなら線路を裏返したり逆向きにつないだりすればできるんですが、
+追記: 直線レールとか曲線レールとか、極性を入れ替えるのなら線路を裏返して逆向きにつないだりすればできるんですが、
 座標の計算がマジでめんどくさいのでやめた。
 
 -}
@@ -51,57 +52,7 @@ type Rail invert flip
 
 canInvert : Rail invert flip -> Bool
 canInvert rail =
-    case rail of
-        Straight1 _ ->
-            True
-
-        Straight2 _ ->
-            True
-
-        Straight4 _ ->
-            True
-
-        Straight8 _ ->
-            True
-
-        Curve45 _ _ ->
-            True
-
-        Curve90 _ _ ->
-            True
-
-        OuterCurve45 _ _ ->
-            True
-
-        Turnout _ _ ->
-            True
-
-        SingleDouble _ _ ->
-            True
-
-        EightPoint _ _ ->
-            True
-
-        JointChange _ ->
-            True
-
-        Slope _ _ ->
-            True
-
-        SlopeCurveA ->
-            False
-
-        SlopeCurveB ->
-            False
-
-        Stop _ ->
-            True
-
-        AutoTurnout ->
-            False
-
-        AutoPoint ->
-            False
+    map (\_ -> True) rail /= map (\_ -> False) rail
 
 
 map : (a -> b) -> Rail a flip -> Rail b flip
