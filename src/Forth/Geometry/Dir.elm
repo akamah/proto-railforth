@@ -1,6 +1,5 @@
 module Forth.Geometry.Dir exposing
     ( Dir
-    , div
     , e
     , inv
     , mul
@@ -86,11 +85,6 @@ inv (Dir d) =
 
     else
         Dir (8 - d)
-
-
-div : Dir -> Dir -> Dir
-div d1 d2 =
-    mul d1 (flip d2)
 
 
 aux : Int -> Int -> Int -> Int

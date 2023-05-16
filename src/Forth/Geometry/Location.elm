@@ -7,7 +7,6 @@ module Forth.Geometry.Location exposing
     , mul
     , negate
     , originToVec3
-    , shrink
     , zero
     )
 
@@ -106,26 +105,6 @@ negate loc =
 div : Location -> Location -> Location
 div x y =
     mul x (negate y)
-
-
-shrink : Location -> Location -> Location
-shrink global local =
-    let
-        single =
-            Rot45.mul (Dir.toRot45 <| Dir.flip global.dir) <|
-                Rot45.sub local.single global.single
-
-        double =
-            Rot45.mul (Dir.toRot45 <| Dir.flip global.dir) <|
-                Rot45.sub local.double global.double
-
-        height =
-            local.height - global.height
-
-        dir =
-            Dir.div local.dir global.dir
-    in
-    make single double height dir local.joint
 
 
 originToVec3 : Location -> Vec3

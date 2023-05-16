@@ -55,11 +55,4 @@ suite =
                         (Location.make (Rot45.make 0 -1 1 0) Rot45.zero 2 Dir.se Joint.Minus)
                         (Location.negate <| Location.make (Rot45.make 0 0 1 -1) Rot45.zero -2 Dir.ne Joint.Minus)
             ]
-        , describe "div"
-            [ fuzz (Fuzz.pair location location) "div and shrink" <|
-                \( x, y ) ->
-                    Expect.equal
-                        (shrink x y)
-                        (mul (Location.negate x) y)
-            ]
         ]
