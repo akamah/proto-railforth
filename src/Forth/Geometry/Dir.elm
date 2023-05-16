@@ -11,6 +11,7 @@ module Forth.Geometry.Dir exposing
     , sw
     , toRadian
     , toRot45
+    , toString
     , w
     )
 
@@ -106,3 +107,8 @@ toRot45 (Dir d) =
         (aux 1 5 d)
         (aux 2 6 d)
         (aux 3 7 d)
+
+
+toString : Dir -> String
+toString (Dir d) =
+    "Dir " ++ String.fromInt d

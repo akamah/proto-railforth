@@ -33,7 +33,7 @@ toString : Joint -> String
 toString p =
     case p of
         Plus ->
-            "Joint@plus"
+            "Plus"
 
         Minus ->
-            "Joint@minus"
+            "Minus"

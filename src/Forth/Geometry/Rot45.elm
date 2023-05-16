@@ -8,6 +8,7 @@ module Forth.Geometry.Rot45 exposing
     , negate
     , sub
     , toFloat
+    , toString
     , zero
     )
 
@@ -71,3 +72,8 @@ toFloat (Rot45 a b c d) =
     ( Basics.toFloat a + Basics.sqrt (1.0 / 2.0) * Basics.toFloat (b - d)
     , Basics.toFloat c + Basics.sqrt (1.0 / 2.0) * Basics.toFloat (b + d)
     )
+
+
+toString : Rot45 -> String
+toString (Rot45 a b c d) =
+    String.join " " <| "Rot45" :: List.map String.fromInt [ a, b, c, d ]

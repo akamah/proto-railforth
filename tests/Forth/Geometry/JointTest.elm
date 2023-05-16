@@ -30,9 +30,9 @@ suite =
         , describe "toString"
             [ test "toString minus" <|
                 \_ ->
-                    Expect.equal "Joint@minus" (Joint.toString Joint.Minus)
+                    Expect.equal "Minus" (Joint.toString Joint.Minus)
             , test "toString plus" <|
                 \_ ->
-                    Expect.equal "Joint@plus" (Joint.toString Joint.Plus)
+                    Expect.equal "Plus" (Joint.toString Joint.Plus)
             ]
         ]
