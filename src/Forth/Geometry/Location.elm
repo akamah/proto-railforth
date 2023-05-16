@@ -59,7 +59,7 @@ flip loc =
         | single = Rot45.conj loc.single
         , double = Rot45.conj loc.double
         , height = -loc.height
-        , dir = Dir.flip loc.dir
+        , dir = Dir.inv loc.dir
     }
 
 
@@ -90,7 +90,7 @@ negate : Location -> Location
 negate loc =
     let
         flipDir =
-            Dir.flip loc.dir
+            Dir.inv loc.dir
 
         flipDirRot45 =
             Dir.toRot45 flipDir

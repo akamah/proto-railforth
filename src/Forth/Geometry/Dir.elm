@@ -2,7 +2,7 @@ module Forth.Geometry.Dir exposing
     ( Dir
     , div
     , e
-    , flip
+    , inv
     , mul
     , n
     , ne
@@ -79,8 +79,8 @@ mul (Dir d1) (Dir d2) =
         Dir (d1 + d2)
 
 
-flip : Dir -> Dir
-flip (Dir d) =
+inv : Dir -> Dir
+inv (Dir d) =
     if d == 0 then
         Dir 0
 
