@@ -166,28 +166,28 @@ getRailPiece rail =
         Straight8 _ ->
             twoEnds minusZero goStraight8
 
-        Curve45 _ f ->
+        Curve45 f _ ->
             flip f <| twoEnds minusZero turnLeft45deg
 
-        Curve90 _ f ->
+        Curve90 f _ ->
             flip f <| twoEnds minusZero turnLeft90deg
 
-        OuterCurve45 _ f ->
+        OuterCurve45 f _ ->
             flip f <| twoEnds minusZero turnLeftOuter45deg
 
-        Turnout _ f ->
+        Turnout f _ ->
             flip f <| threeEnds minusZero goStraight4 turnLeft45deg
 
-        SingleDouble _ f ->
+        SingleDouble f _ ->
             flip f <| threeEnds minusZero goStraight4 doubleTrackLeft
 
-        EightPoint _ f ->
+        EightPoint f _ ->
             flip f <| threeEnds minusZero turnRight45deg turnLeft45deg
 
         JointChange _ ->
             twoEnds minusZero goStraight1Minus
 
-        Slope _ f ->
+        Slope f _ ->
             flip f <| twoEnds minusZero { goStraight8 | height = 4 }
 
         SlopeCurveA ->

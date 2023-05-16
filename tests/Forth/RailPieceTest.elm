@@ -26,7 +26,7 @@ suite =
                                 ]
                         , origin = Location.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.w Joint.Plus
                         }
-                        (rotateRailPiece <| getRailPiece <| Turnout () NotFlipped)
+                        (rotateRailPiece <| getRailPiece <| Turnout NotFlipped ())
             , test "rotate Turnout twice" <|
                 \_ ->
                     Expect.equal
@@ -38,11 +38,11 @@ suite =
                                 ]
                         , origin = Location.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.nw Joint.Plus
                         }
-                        (rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout () NotFlipped)
+                        (rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout NotFlipped ())
             , test "rotate Turnout three times" <|
                 \_ ->
                     Expect.equal
-                        (getRailPiece <| Turnout () NotFlipped)
-                        (rotateRailPiece <| rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout () NotFlipped)
+                        (getRailPiece <| Turnout NotFlipped ())
+                        (rotateRailPiece <| rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout NotFlipped ())
             ]
         ]

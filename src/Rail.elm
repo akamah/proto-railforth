@@ -34,14 +34,14 @@ type Rail invert flip
     | Straight2 invert
     | Straight4 invert
     | Straight8 invert
-    | Curve45 invert flip
-    | Curve90 invert flip
-    | OuterCurve45 invert flip
-    | Turnout invert flip
-    | SingleDouble invert flip
-    | EightPoint invert flip
+    | Curve45 flip invert
+    | Curve90 flip invert
+    | OuterCurve45 flip invert
+    | Turnout flip invert
+    | SingleDouble flip invert
+    | EightPoint flip invert
     | JointChange invert
-    | Slope invert flip
+    | Slope flip invert
     | SlopeCurveA
     | SlopeCurveB
     | Stop invert
@@ -120,28 +120,28 @@ map f rail =
             Straight8 (f a)
 
         Curve45 a b ->
-            Curve45 (f a) b
+            Curve45 a (f b)
 
         Curve90 a b ->
-            Curve90 (f a) b
+            Curve90 a (f b)
 
         OuterCurve45 a b ->
-            OuterCurve45 (f a) b
+            OuterCurve45 a (f b)
 
         SingleDouble a b ->
-            SingleDouble (f a) b
+            SingleDouble a (f b)
 
         EightPoint a b ->
-            EightPoint (f a) b
+            EightPoint a (f b)
 
         Turnout a b ->
-            Turnout (f a) b
+            Turnout a (f b)
 
         JointChange a ->
             JointChange (f a)
 
         Slope a b ->
-            Slope (f a) b
+            Slope a (f b)
 
         SlopeCurveA ->
             SlopeCurveA

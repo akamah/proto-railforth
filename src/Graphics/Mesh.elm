@@ -163,28 +163,28 @@ getMeshName rail =
         Straight8 inv ->
             "straight0" ++ inverted inv
 
-        Curve45 inv flip ->
+        Curve45 flip inv ->
             "curve8" ++ inverted inv ++ flipped flip
 
-        Curve90 inv flip ->
+        Curve90 flip inv ->
             "curve4" ++ inverted inv ++ flipped flip
 
-        OuterCurve45 inv flip ->
+        OuterCurve45 flip inv ->
             "outercurve" ++ inverted inv ++ flipped flip
 
-        Turnout inv flip ->
+        Turnout flip inv ->
             "turnout" ++ inverted inv ++ flipped flip
 
-        SingleDouble inv flip ->
+        SingleDouble flip inv ->
             "singledouble" ++ inverted inv ++ flipped flip
 
-        EightPoint inv flip ->
+        EightPoint flip inv ->
             "eight" ++ inverted inv ++ flipped flip
 
         JointChange inv ->
             "pole" ++ inverted inv
 
-        Slope inv flip ->
+        Slope flip inv ->
             "slope" ++ inverted inv ++ flipped flip
 
         SlopeCurveA ->
