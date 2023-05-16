@@ -76,6 +76,8 @@ buildMeshUri name =
 
 
 {-| The list of mesh names. Used when loading .obj files
+TODO: change the name of 3D models and these list of names.
+since the definition of (Rail -> String) is moved to Rail module
 -}
 allMeshNames : List String
 allMeshNames =
@@ -128,84 +130,9 @@ dummyMesh =
     WebGL.triangles []
 
 
-inverted : IsInverted -> String
-inverted isInverted =
-    case isInverted of
-        NotInverted ->
-            "_minus"
-
-        Inverted ->
-            "_plus"
-
-
-flipped : IsFlipped -> String
-flipped isFlipped =
-    case isFlipped of
-        NotFlipped ->
-            ""
-
-        Flipped ->
-            "_flip"
-
-
-getMeshName : Rail IsInverted IsFlipped -> String
-getMeshName rail =
-    case rail of
-        Straight1 inv ->
-            "straight4" ++ inverted inv
-
-        Straight2 inv ->
-            "straight2" ++ inverted inv
-
-        Straight4 inv ->
-            "straight1" ++ inverted inv
-
-        Straight8 inv ->
-            "straight0" ++ inverted inv
-
-        Curve45 flip inv ->
-            "curve8" ++ inverted inv ++ flipped flip
-
-        Curve90 flip inv ->
-            "curve4" ++ inverted inv ++ flipped flip
-
-        OuterCurve45 flip inv ->
-            "outercurve" ++ inverted inv ++ flipped flip
-
-        Turnout flip inv ->
-            "turnout" ++ inverted inv ++ flipped flip
-
-        SingleDouble flip inv ->
-            "singledouble" ++ inverted inv ++ flipped flip
-
-        EightPoint flip inv ->
-            "eight" ++ inverted inv ++ flipped flip
-
-        JointChange inv ->
-            "pole" ++ inverted inv
-
-        Slope flip inv ->
-            "slope" ++ inverted inv ++ flipped flip
-
-        SlopeCurveA ->
-            "slopecurveA_plus"
-
-        SlopeCurveB ->
-            "slopecurveB_minus"
-
-        Stop inv ->
-            "stop" ++ inverted inv
-
-        AutoTurnout ->
-            "autoturnout_minus"
-
-        AutoPoint ->
-            "autopoint_minus"
-
-
 getMesh : Model -> RailPlacement -> Mesh
 getMesh model placement =
-    Dict.get (getMeshName placement.rail) model.meshes
+    Dict.get (Rail.toString placement.rail) model.meshes
         |> Maybe.withDefault dummyMesh
 
 
