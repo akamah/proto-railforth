@@ -72,12 +72,20 @@ toRadian (Dir d) =
 
 mul : Dir -> Dir -> Dir
 mul (Dir d1) (Dir d2) =
-    Dir (modBy 8 <| d1 + d2)
+    if d1 + d2 >= 8 then
+        Dir (d1 + d2 - 8)
+
+    else
+        Dir (d1 + d2)
 
 
 flip : Dir -> Dir
 flip (Dir d) =
-    Dir (modBy 8 (8 - d))
+    if d == 0 then
+        Dir 0
+
+    else
+        Dir (8 - d)
 
 
 div : Dir -> Dir -> Dir
