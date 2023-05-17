@@ -1,7 +1,7 @@
 module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 
 import Dict exposing (Dict)
-import Forth.Geometry.RailLocation exposing (RailLocation)
+import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -269,4 +269,4 @@ executeElevate amount cont status =
             haltWithError "Stack empty" status
 
         top :: restOfStack ->
-            cont { status | stack = { top | height = top.height + amount } :: restOfStack }
+            cont { status | stack = RailLocation.addHeight amount top :: restOfStack }

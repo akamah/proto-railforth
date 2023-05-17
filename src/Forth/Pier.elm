@@ -2,8 +2,7 @@ module Forth.Pier exposing (..)
 
 import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir exposing (Dir)
-import Forth.Geometry.Joint as Joint
-import Forth.Geometry.RailLocation as RailLocation
+import Forth.Geometry.Location as Location
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 import Math.Vector3 exposing (Vec3)
 
@@ -39,14 +38,10 @@ pierLocationToPlacement loc =
 
     -- STUB! very kitanai
     , position =
-        RailLocation.originToVec3
+        Location.toVec3
             { single = loc.single
             , double = loc.double
             , height = loc.height
-            , dir = loc.dir
-
-            -- dummy
-            , joint = Joint.Plus
             }
     , angle = Dir.toRadian loc.dir
     }

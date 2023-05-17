@@ -188,13 +188,17 @@ getRailPiece rail =
             twoEnds minusZero goStraight1Minus
 
         Slope f _ ->
-            flip f <| twoEnds minusZero { goStraight8 | height = 4 }
+            flip f <| twoEnds minusZero (RailLocation.setHeight 4 goStraight8)
 
         SlopeCurveA ->
-            twoEnds plusZero { turnRight45deg | height = 1, joint = Joint.Minus }
+            twoEnds plusZero
+                (turnRight45deg
+                    |> RailLocation.setHeight 1
+                    |> RailLocation.setJoint Joint.Minus
+                )
 
         SlopeCurveB ->
-            twoEnds minusZero { turnLeft45deg | height = 1 }
+            twoEnds minusZero (RailLocation.setHeight 1 turnLeft45deg)
 
         Stop _ ->
             twoEnds minusZero goStraight4
@@ -236,7 +240,7 @@ rotateRailPiece piece =
         Nonempty current (next :: _) ->
             let
                 rot =
-                    RailLocation.div current next
+                    RailLocation.mul current (RailLocation.negate next)
             in
             { origin = RailLocation.mul rot piece.origin
             , locations = rotate <| Nonempty.map (RailLocation.mul rot) piece.locations
@@ -269,7 +273,7 @@ placeRailPieceAtLocation base railPiece =
 
 toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
 toRailPlacement rail location =
-    RailPlacement.make rail (RailLocation.originToVec3 location) (Dir.toRadian location.dir)
+    RailPlacement.make rail (RailLocation.toVec3 location) (Dir.toRadian location.dir)
 
 
 type alias PlaceRailParams =
