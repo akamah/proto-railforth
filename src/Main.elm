@@ -222,7 +222,7 @@ showRails model rails =
         (\railPosition ->
             showRail
                 modelTransform
-                (Mesh.getMesh model.meshes railPosition)
+                (Mesh.getRailMesh model.meshes railPosition.rail)
                 railPosition.position
                 railPosition.angle
         )

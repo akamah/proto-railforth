@@ -3,7 +3,7 @@ module Graphics.Mesh exposing
     , Model
     , Msg
     , getErrors
-    , getMesh
+    , getRailMesh
     , init
     , loadMeshCmd
     , update
@@ -130,9 +130,9 @@ dummyMesh =
     WebGL.triangles []
 
 
-getMesh : Model -> RailPlacement -> Mesh
-getMesh model placement =
-    Dict.get (Rail.toString placement.rail) model.meshes
+getRailMesh : Model -> Rail IsInverted IsFlipped -> Mesh
+getRailMesh model rail =
+    Dict.get (Rail.toString rail) model.meshes
         |> Maybe.withDefault dummyMesh
 
 
