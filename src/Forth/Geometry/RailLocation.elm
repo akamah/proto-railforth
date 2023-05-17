@@ -1,5 +1,5 @@
-module Forth.Geometry.Location exposing
-    ( Location
+module Forth.Geometry.RailLocation exposing
+    ( RailLocation
     , div
     , flip
     , invert
@@ -23,7 +23,7 @@ type alias Height =
 {-| レールの端点を表現する。ここで言う端点とは、設置されたレールの端っこが持ちうる情報である。
 平面上の点（単線基準、複線基準）、高さ、向いている方向、および凹凸を持つ。
 -}
-type alias Location =
+type alias RailLocation =
     { single : Rot45
     , double : Rot45
     , height : Height
@@ -32,7 +32,7 @@ type alias Location =
     }
 
 
-make : Rot45 -> Rot45 -> Height -> Dir -> Joint -> Location
+make : Rot45 -> Rot45 -> Height -> Dir -> Joint -> RailLocation
 make single double height dir joint =
     { single = single
     , double = double
@@ -42,17 +42,17 @@ make single double height dir joint =
     }
 
 
-zero : Location
+zero : RailLocation
 zero =
     make Rot45.zero Rot45.zero 0 Dir.e Joint.Minus
 
 
-invert : Location -> Location
+invert : RailLocation -> RailLocation
 invert loc =
     { loc | joint = Joint.invert loc.joint }
 
 
-flip : Location -> Location
+flip : RailLocation -> RailLocation
 flip loc =
     { loc
         | single = Rot45.conj loc.single
@@ -62,7 +62,7 @@ flip loc =
     }
 
 
-mul : Location -> Location -> Location
+mul : RailLocation -> RailLocation -> RailLocation
 mul global local =
     let
         dirRot =
@@ -85,7 +85,7 @@ mul global local =
     make single double height dir local.joint
 
 
-negate : Location -> Location
+negate : RailLocation -> RailLocation
 negate loc =
     let
         flipDir =
@@ -102,12 +102,12 @@ negate loc =
         loc.joint
 
 
-div : Location -> Location -> Location
+div : RailLocation -> RailLocation -> RailLocation
 div x y =
     mul x (negate y)
 
 
-originToVec3 : Location -> Vec3
+originToVec3 : RailLocation -> Vec3
 originToVec3 tie =
     let
         singleUnit =

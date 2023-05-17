@@ -1,7 +1,7 @@
 module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 
 import Dict exposing (Dict)
-import Forth.Geometry.Location exposing (Location)
+import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -17,7 +17,7 @@ type alias ExecError =
 
 
 type alias ExecStatus =
-    { stack : List Location
+    { stack : List RailLocation
     , rails : List RailPlacement
     }
 
