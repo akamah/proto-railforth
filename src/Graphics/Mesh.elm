@@ -16,7 +16,6 @@ import Math.Vector3 as Vec3 exposing (Vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import RailPlacement exposing (RailPlacement)
 import WebGL
 
 
