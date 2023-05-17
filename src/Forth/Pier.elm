@@ -97,6 +97,19 @@ toPierPlacement list =
     singlePier <| construct list
 
 
+toString : Pier -> String
+toString pier =
+    case pier of
+        Single ->
+            "pier"
+
+        Wide ->
+            "pier_wide"
+
+        Mini ->
+            "pier_4"
+
+
 
 -- doubleTrackConstruct : Dict String ( Dir4, List PierLocation ) -> ( Dict String ( Dir4, List PierLocation ), Dict String ( Dir4, List PierLocation, List PierLocation ) )
 -- doubleTrackConstruct state = doubleTrackConstructRec state Dict.empty Dict.empty

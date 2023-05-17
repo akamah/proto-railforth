@@ -3,6 +3,7 @@ module Graphics.Mesh exposing
     , Model
     , Msg
     , getErrors
+    , getPierMesh
     , getRailMesh
     , init
     , loadMeshCmd
@@ -10,6 +11,7 @@ module Graphics.Mesh exposing
     )
 
 import Dict exposing (Dict)
+import Forth.Pier as Pier exposing (Pier)
 import Math.Vector3 as Vec3 exposing (Vec3)
 import OBJ
 import OBJ.Types exposing (MeshWith, Vertex)
@@ -111,6 +113,9 @@ allMeshNames =
     , "slopecurveB_minus"
     , "autoturnout_minus"
     , "autopoint_minus"
+    , "pier"
+    , "pier_wide"
+    , "pier_4"
     ]
 
 
@@ -133,6 +138,12 @@ dummyMesh =
 getRailMesh : Model -> Rail IsInverted IsFlipped -> Mesh
 getRailMesh model rail =
     Dict.get (Rail.toString rail) model.meshes
+        |> Maybe.withDefault dummyMesh
+
+
+getPierMesh : Model -> Pier -> Mesh
+getPierMesh model pier =
+    Dict.get (Pier.toString pier) model.meshes
         |> Maybe.withDefault dummyMesh
 
 
