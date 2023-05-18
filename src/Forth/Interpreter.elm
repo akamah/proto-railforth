@@ -2,6 +2,7 @@ module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 
 import Dict exposing (Dict)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
+import Forth.Pier as Pier exposing (PierLocation, PierPlacement)
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -19,6 +20,7 @@ type alias ExecError =
 type alias ExecStatus =
     { stack : List RailLocation
     , rails : List RailPlacement
+    , piers : List PierLocation
     }
 
 
@@ -26,8 +28,8 @@ type alias ExecResult =
     { rails : List RailPlacement
     , errMsg : Maybe ExecError
     , railCount : Dict String Int
+    , piers : List PierPlacement
 
-    -- piers
     -- hukusen piers
     -- statistics :: count of rails...
     }
@@ -54,6 +56,7 @@ initialStatus : ExecStatus
 initialStatus =
     { stack = [ RailPiece.initialLocation ]
     , rails = []
+    , piers = []
     }
 
 
@@ -160,15 +163,26 @@ haltWithError errMsg status =
     { rails = status.rails
     , errMsg = Just errMsg
     , railCount = Dict.empty
+    , piers = []
     }
 
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    { rails = status.rails
-    , errMsg = Nothing
-    , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.rails
-    }
+    case Pier.toPierPlacement status.piers of
+        Ok pierPlacement ->
+            { rails = status.rails
+            , errMsg = Nothing
+            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.rails
+            , piers = pierPlacement
+            }
+
+        Err err ->
+            { rails = status.rails
+            , errMsg = Just err
+            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.rails
+            , piers = []
+            }
 
 
 executeDrop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
