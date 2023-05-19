@@ -2,6 +2,7 @@ module Forth.RailPiece exposing (getRailPiece, initialLocation, placeRail, rotat
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
+import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
 import List.Nonempty as Nonempty exposing (Nonempty(..))
@@ -17,6 +18,10 @@ type alias RailPiece =
     { --| 反時計回りの地点の集まり。これの先頭とスタックトップをつなげるイメージ
       locations : Nonempty RailLocation
 
+    --| 同じく反時計回りの橋脚の設置地点の集まりなのだが、RailLocationとPierLocationはほとんど共通の情報を持つため、
+    --| PierLocation に含まれる PierMargin の情報だけを余分に持つこととする
+    , margins : Nonempty PierMargin
+
     --| 主に表示用として、レールの種類的にはどこに配置するべきか、の情報。回転を考慮すると、locationsの先頭のほかにこれを用意する他なかった
     --| 基本の形から回転していない場合は、locationsの先頭とちょうど逆になる。表示用なので凹凸は考慮しない
     --| TODO: 凹凸の情報を抜いた Location 型がほしい
@@ -24,31 +29,27 @@ type alias RailPiece =
     }
 
 
+makeFlatRailPiece : Nonempty RailLocation -> RailPiece
+makeFlatRailPiece list =
+    { locations = list
+    , margins = Nonempty.map (always PierLocation.flatRailMargin) list
+    , origin = RailLocation.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus
+    }
+
+
 twoEnds : RailLocation -> RailLocation -> RailPiece
 twoEnds a b =
-    { locations = Nonempty a [ b ]
-    , origin = originEast
-    }
+    makeFlatRailPiece <| Nonempty a [ b ]
 
 
 threeEnds : RailLocation -> RailLocation -> RailLocation -> RailPiece
 threeEnds a b c =
-    { locations = Nonempty a [ b, c ]
-    , origin = originEast
-    }
+    makeFlatRailPiece <| Nonempty a [ b, c ]
 
 
 fourEnds : RailLocation -> RailLocation -> RailLocation -> RailLocation -> RailPiece
 fourEnds a b c d =
-    { locations = Nonempty a [ b, c, d ]
-    , origin = originEast
-    }
-
-
-originEast : RailLocation
-originEast =
-    -- Joint is dummy
-    RailLocation.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus
+    makeFlatRailPiece <| Nonempty a [ b, c, d ]
 
 
 minusZero : RailLocation
@@ -130,7 +131,13 @@ invert inverted piece =
         Inverted ->
             { locations = Nonempty.map RailLocation.invert piece.locations
             , origin = RailLocation.invert piece.origin
+            , margins = piece.margins
             }
+
+
+reverseTail : Nonempty a -> Nonempty a
+reverseTail (Nonempty x xs) =
+    Nonempty x (List.reverse xs)
 
 
 {-| レールピースをひっくり返す。途中にList.reverseが入るのはひっくり返すと時計回りになるのを反時計回りに戻すため。
@@ -142,11 +149,8 @@ flip flipped piece =
             piece
 
         Flipped ->
-            { locations =
-                Nonempty (RailLocation.flip <| Nonempty.head piece.locations) <|
-                    List.map RailLocation.flip <|
-                        List.reverse <|
-                            Nonempty.tail piece.locations
+            { locations = Nonempty.map RailLocation.flip <| reverseTail piece.locations
+            , margins = reverseTail piece.margins
             , origin = RailLocation.flip piece.origin
             }
 
@@ -244,6 +248,7 @@ rotateRailPiece piece =
             in
             { origin = RailLocation.mul rot piece.origin
             , locations = rotate <| Nonempty.map (RailLocation.mul rot) piece.locations
+            , margins = rotate <| piece.margins
             }
 
 
@@ -255,11 +260,11 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
     in
     if Joint.match joint (Nonempty.head railPiece.locations).joint then
         -- これから置く予定のレールと、スタックトップの方向がマッチしたのでそのまま配置する
-        Just ( Rail.map (\_ -> Rail.NotInverted) railType, railPiece )
+        Just ( Rail.map (always Rail.NotInverted) railType, railPiece )
 
     else if Rail.canInvert railType then
         -- これから置くレールの凹凸を反転させることで配置することが可能である。
-        Just ( Rail.map (\_ -> Rail.Inverted) railType, invert Rail.Inverted railPiece )
+        Just ( Rail.map (always Rail.Inverted) railType, invert Rail.Inverted railPiece )
 
     else
         -- 凹凸がマッチしないため、配置することができない
@@ -287,6 +292,7 @@ type alias PlaceRailResult =
     { rail : Rail IsInverted IsFlipped
     , nextLocations : List RailLocation
     , railPlacement : RailPlacement
+    , pierLocations : List PierLocation
     }
 
 
@@ -295,9 +301,17 @@ placeRail params =
     getAppropriateRailAndPieceForJoint params.location.joint params.railType params.rotation
         |> Maybe.map
             (\( rail, railPiece ) ->
+                let
+                    nextLocations =
+                        List.map (RailLocation.mul params.location) <| Nonempty.tail railPiece.locations
+
+                    pierLocations =
+                        List.map2 PierLocation.fromRailLocation nextLocations <| Nonempty.tail railPiece.margins
+                in
                 { rail = rail
-                , nextLocations = placeRailPieceAtLocation params.location railPiece
+                , nextLocations = nextLocations
                 , railPlacement = toRailPlacement rail (RailLocation.mul params.location railPiece.origin)
+                , pierLocations = pierLocations
                 }
             )
 

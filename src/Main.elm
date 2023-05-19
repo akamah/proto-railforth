@@ -714,7 +714,7 @@ pierFragmentShader : Shader {} Uniforms {}
 pierFragmentShader =
     [glsl|
         void main() {
-            const highp vec3 yellow = vec3(0.12, 0.56, 1.0);
-            gl_FragColor = yellow;
+            const highp vec3 yellow = vec3(1.0, 1.0, 0.2);
+            gl_FragColor = vec4(yellow, 1.0);
         }
     |]

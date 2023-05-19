@@ -55,7 +55,7 @@ type Rail invert flip
 
 canInvert : Rail invert flip -> Bool
 canInvert rail =
-    map (\_ -> True) rail /= map (\_ -> False) rail
+    map (always True) rail /= map (always False) rail
 
 
 map : (a -> b) -> Rail a flip -> Rail b flip

@@ -266,11 +266,12 @@ executePlaceRail railType rotation cont status =
 
         top :: restOfStack ->
             case RailPiece.placeRail { railType = railType, location = top, rotation = rotation } of
-                Just { nextLocations, railPlacement } ->
+                Just { nextLocations, railPlacement, pierLocations } ->
                     cont
                         { status
                             | rails = railPlacement :: status.rails
                             , stack = nextLocations ++ restOfStack
+                            , piers = pierLocations ++ status.piers
                         }
 
                 Nothing ->
