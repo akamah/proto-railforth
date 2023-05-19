@@ -1,7 +1,5 @@
 module Forth.Pier exposing
-    ( Dir4
-    , Pier(..)
-    , PierLocation
+    ( Pier(..)
     , PierPlacement
     , toPierPlacement
     , toString
@@ -10,26 +8,13 @@ module Forth.Pier exposing
 import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
+import Forth.Geometry.PierLocation as PierLocation exposing (Dir4, PierLocation)
 import Forth.Geometry.Rot45 as Rot45
 import Math.Vector3 exposing (Vec3)
 
 
 
 {- 後から追加されるレールによって橋脚が単線から複線になったりすることも考えられるため、オンライン処理は諦めて最後に一括で行うことにした。 | -}
-
-
-{-| TODO: 本当は 東、北東、北、北西の4種類のみのデータ型がほしいが、いまのところスタブということで
--}
-type alias Dir4 =
-    Dir
-
-
-type alias PierLocation =
-    { location : Location
-    , dir : Dir4
-    , spaceTop : Int
-    , spaceBottom : Int
-    }
 
 
 type alias PierPlacement =
@@ -42,7 +27,7 @@ type alias PierPlacement =
 pierLocationToPlacement : PierLocation -> PierPlacement
 pierLocationToPlacement loc =
     { pier = Single -- stub!
-    , position = Location.toVec3 loc.location
+    , position = PierLocation.toVec3 loc
     , angle = Dir.toRadian loc.dir
     }
 

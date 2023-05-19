@@ -1,8 +1,9 @@
 module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 
 import Dict exposing (Dict)
+import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
-import Forth.Pier as Pier exposing (PierLocation, PierPlacement)
+import Forth.Pier as Pier exposing (PierPlacement)
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
