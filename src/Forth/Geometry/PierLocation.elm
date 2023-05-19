@@ -1,6 +1,5 @@
 module Forth.Geometry.PierLocation exposing
-    ( Dir4
-    , PierLocation
+    ( PierLocation
     , PierMargin
     , flatRailMargin
     , flip
@@ -8,17 +7,11 @@ module Forth.Geometry.PierLocation exposing
     , toVec3
     )
 
-import Forth.Geometry.Dir8 as Dir8 exposing (Dir8)
+import Forth.Geometry.Dir4 as Dir4 exposing (Dir4)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 import Math.Vector3 exposing (Vec3)
-
-
-{-| TODO: 本当は 東、北東、北、北西の4種類のみのデータ型がほしいが、いまのところスタブということで
--}
-type alias Dir4 =
-    Dir8
 
 
 {-| 橋脚の設置地点を表す。
@@ -58,7 +51,7 @@ make single double height dir4 top bottom =
 fromRailLocation : RailLocation -> PierMargin -> PierLocation
 fromRailLocation loc margin =
     { location = loc.location
-    , dir = loc.dir
+    , dir = Dir4.fromDir8 loc.dir
     , margin = margin
     }
 
@@ -67,14 +60,14 @@ flip : PierLocation -> PierLocation
 flip loc =
     { loc
         | location = Location.flip loc.location
-        , dir = Dir8.inv loc.dir
+        , dir = Dir4.inv loc.dir
     }
 
 
 moveLeftByDoubleTrackLength : PierLocation -> Location
 moveLeftByDoubleTrackLength loc =
     Location.add loc.location <|
-        Location.make Rot45.zero (Dir8.toRot45 (Dir8.mul loc.dir Dir8.n)) 0
+        Location.make Rot45.zero (Dir4.toRot45 (Dir4.mul loc.dir Dir4.n)) 0
 
 
 

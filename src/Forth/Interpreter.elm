@@ -3,9 +3,10 @@ module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 import Dict exposing (Dict)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
-import Forth.Pier as Pier exposing (PierPlacement)
+import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
+import PierPlacement exposing (PierPlacement)
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import RailPlacement exposing (RailPlacement)
 
@@ -170,7 +171,7 @@ haltWithError errMsg status =
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    case Pier.toPierPlacement status.piers of
+    case PierConstruction.toPierPlacement status.piers of
         Ok pierPlacement ->
             { rails = status.rails
             , errMsg = Nothing
