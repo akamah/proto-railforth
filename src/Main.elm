@@ -5,6 +5,7 @@ import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
 import Dict
 import Forth.Interpreter exposing (ExecResult, emptyResult, execute)
+import Forth.Pier exposing (PierPlacement)
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
@@ -150,6 +151,7 @@ view model =
             ]
           <|
             showRails model model.execResult.rails
+                ++ showPiers model model.execResult.piers
         , Html.div
             [ -- style "display" <|
               -- if model.execResult.errMsg == Nothing then
@@ -237,6 +239,39 @@ showRail modelTransform mesh origin angle =
         ]
         railVertexShader
         railFragmentShader
+        mesh
+        (uniforms modelTransform
+            origin
+            angle
+            False
+        )
+
+
+showPiers : Model -> List PierPlacement -> List Entity
+showPiers model piers =
+    let
+        modelTransform =
+            makeTransform model
+    in
+    List.map
+        (\pierPlacement ->
+            showPier
+                modelTransform
+                (Mesh.getPierMesh model.meshes pierPlacement.pier)
+                pierPlacement.position
+                pierPlacement.angle
+        )
+        piers
+
+
+showPier : Mat4 -> Mesh -> Vec3 -> Float -> Entity
+showPier modelTransform mesh origin angle =
+    WebGL.entityWith
+        [ DepthTest.default
+        , WebGL.Settings.cullFace WebGL.Settings.front
+        ]
+        pierVertexShader
+        pierFragmentShader
         mesh
         (uniforms modelTransform
             origin
@@ -657,5 +692,29 @@ railFragmentShader =
             highp vec3 color = ratio * green + (1.0 - ratio) * blue;
             highp float dist_density = min(edge / 30.0 + 0.2, 1.0);
             gl_FragColor = vec4(dist_density * contrast * color, dist_density);
+        }
+    |]
+
+
+pierVertexShader : Shader Vertex Uniforms {}
+pierVertexShader =
+    [glsl|
+        attribute vec3 position;
+        attribute vec3 normal;
+        
+        uniform mat4 transform;
+        
+        void main() {
+            gl_Position = transform * vec4(position, 1.0);
+        }
+    |]
+
+
+pierFragmentShader : Shader {} Uniforms {}
+pierFragmentShader =
+    [glsl|
+        void main() {
+            const highp vec3 yellow = vec3(0.12, 0.56, 1.0);
+            gl_FragColor = yellow;
         }
     |]
