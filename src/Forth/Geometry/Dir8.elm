@@ -1,5 +1,5 @@
 module Forth.Geometry.Dir8 exposing
-    ( Dir8
+    ( Dir8(..)
     , e
     , inv
     , mul
