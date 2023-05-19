@@ -6,7 +6,7 @@ module Forth.Pier exposing
     )
 
 import Dict exposing (Dict)
-import Forth.Geometry.Dir as Dir exposing (Dir)
+import Forth.Geometry.Dir8 as Dir8 exposing (Dir8)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.PierLocation as PierLocation exposing (Dir4, PierLocation)
 import Forth.Geometry.Rot45 as Rot45
@@ -28,7 +28,7 @@ pierLocationToPlacement : PierLocation -> PierPlacement
 pierLocationToPlacement loc =
     { pier = Single -- stub!
     , position = PierLocation.toVec3 loc
-    , angle = Dir.toRadian loc.dir
+    , angle = Dir8.toRadian loc.dir
     }
 
 

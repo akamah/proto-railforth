@@ -12,7 +12,7 @@ module Forth.Geometry.RailLocation exposing
     , zero
     )
 
-import Forth.Geometry.Dir as Dir exposing (Dir)
+import Forth.Geometry.Dir8 as Dir8 exposing (Dir8)
 import Forth.Geometry.Joint as Joint exposing (Joint)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
@@ -24,12 +24,12 @@ import Math.Vector3 exposing (Vec3)
 -}
 type alias RailLocation =
     { location : Location
-    , dir : Dir
+    , dir : Dir8
     , joint : Joint
     }
 
 
-make : Rot45 -> Rot45 -> Int -> Dir -> Joint -> RailLocation
+make : Rot45 -> Rot45 -> Int -> Dir8 -> Joint -> RailLocation
 make single double height dir joint =
     { location = Location.make single double height
     , dir = dir
@@ -39,7 +39,7 @@ make single double height dir joint =
 
 zero : RailLocation
 zero =
-    make Rot45.zero Rot45.zero 0 Dir.e Joint.Minus
+    make Rot45.zero Rot45.zero 0 Dir8.e Joint.Minus
 
 
 invert : RailLocation -> RailLocation
@@ -51,7 +51,7 @@ flip : RailLocation -> RailLocation
 flip loc =
     { loc
         | location = Location.flip loc.location
-        , dir = Dir.inv loc.dir
+        , dir = Dir8.inv loc.dir
     }
 
 
@@ -60,10 +60,10 @@ mul global local =
     let
         newLocation =
             Location.add global.location <|
-                Location.mul (Dir.toRot45 global.dir) local.location
+                Location.mul (Dir8.toRot45 global.dir) local.location
 
         dir =
-            Dir.mul local.dir global.dir
+            Dir8.mul local.dir global.dir
     in
     { location = newLocation
     , dir = dir
@@ -75,10 +75,10 @@ negate : RailLocation -> RailLocation
 negate loc =
     let
         flipDir =
-            Dir.inv loc.dir
+            Dir8.inv loc.dir
 
         newLocation =
-            Location.mul (Dir.toRot45 flipDir) (Location.negate loc.location)
+            Location.mul (Dir8.toRot45 flipDir) (Location.negate loc.location)
     in
     { location = newLocation
     , dir = flipDir
