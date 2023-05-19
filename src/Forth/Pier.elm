@@ -95,6 +95,7 @@ toPierPlacement list =
     Result.Ok list
         |> Result.andThen divideIntoDict
         |> Result.andThen singlePier
+        |> Debug.log "pier"
 
 
 toString : Pier -> String
