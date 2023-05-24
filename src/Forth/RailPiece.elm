@@ -1,6 +1,6 @@
 module Forth.RailPiece exposing (getRailPiece, initialLocation, placeRail, rotateRailPiece)
 
-import Forth.Geometry.Dir8 as Dir8
+import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
@@ -61,22 +61,22 @@ fourEnds a b c d =
 
 minusZero : RailLocation
 minusZero =
-    RailLocation.make Rot45.zero Rot45.zero 0 Dir8.w Joint.Minus
+    RailLocation.make Rot45.zero Rot45.zero 0 Dir.w Joint.Minus
 
 
 plusZero : RailLocation
 plusZero =
-    RailLocation.make Rot45.zero Rot45.zero 0 Dir8.w Joint.Plus
+    RailLocation.make Rot45.zero Rot45.zero 0 Dir.w Joint.Plus
 
 
 goStraight1 : RailLocation
 goStraight1 =
-    RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir8.e Joint.Plus
+    RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
 
 
 goStraight1Minus : RailLocation
 goStraight1Minus =
-    RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir8.e Joint.Minus
+    RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
 
 
 goStraight2 : RailLocation
@@ -101,7 +101,7 @@ goStraight8 =
 
 turnLeft45deg : RailLocation
 turnLeft45deg =
-    RailLocation.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir8.ne Joint.Plus
+    RailLocation.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
 
 
 turnRight45deg : RailLocation
@@ -111,7 +111,7 @@ turnRight45deg =
 
 turnLeftOuter45deg : RailLocation
 turnLeftOuter45deg =
-    RailLocation.make (Rot45.make 0 0 4 -4) (Rot45.make 0 0 1 -1) 0 Dir8.ne Joint.Plus
+    RailLocation.make (Rot45.make 0 0 4 -4) (Rot45.make 0 0 1 -1) 0 Dir.ne Joint.Plus
 
 
 turnLeft90deg : RailLocation
@@ -121,12 +121,12 @@ turnLeft90deg =
 
 doubleTrackLeft : RailLocation
 doubleTrackLeft =
-    RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 1 0) 0 Dir8.e Joint.Plus
+    RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 1 0) 0 Dir.e Joint.Plus
 
 
 doubleTrackRight : RailLocation
 doubleTrackRight =
-    RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 -1 0) 0 Dir8.e Joint.Plus
+    RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 -1 0) 0 Dir.e Joint.Plus
 
 
 invert : IsInverted -> RailPiece -> RailPiece
@@ -296,7 +296,7 @@ placeRailPieceAtLocation base railPiece =
 
 toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
 toRailPlacement rail location =
-    RailPlacement.make rail (RailLocation.toVec3 location) (Dir8.toRadian location.location.dir)
+    RailPlacement.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
 
 
 type alias PlaceRailParams =
@@ -336,4 +336,4 @@ placeRail params =
 
 initialLocation : RailLocation
 initialLocation =
-    RailLocation.make Rot45.zero Rot45.zero 0 Dir8.e Joint.Plus
+    RailLocation.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus

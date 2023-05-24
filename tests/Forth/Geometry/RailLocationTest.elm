@@ -1,8 +1,8 @@
 module Forth.Geometry.RailLocationTest exposing (location, suite)
 
 import Expect exposing (FloatingPointTolerance(..))
-import Forth.Geometry.Dir8 as Dir8
-import Forth.Geometry.Dir8Test exposing (dir8)
+import Forth.Geometry.Dir as Dir
+import Forth.Geometry.DirTest exposing (dir)
 import Forth.Geometry.Joint as Joint
 import Forth.Geometry.JointTest exposing (joint)
 import Forth.Geometry.RailLocation as RailLocation exposing (..)
@@ -19,7 +19,7 @@ location =
         rot45
         rot45
         (Fuzz.intRange -32768 32767)
-        dir8
+        dir
         joint
 
 
@@ -52,7 +52,7 @@ suite =
             , test "negete example" <|
                 \_ ->
                     Expect.equal
-                        (RailLocation.make (Rot45.make 0 -1 1 0) Rot45.zero 2 Dir8.se Joint.Minus)
-                        (RailLocation.inv <| RailLocation.make (Rot45.make 0 0 1 -1) Rot45.zero -2 Dir8.ne Joint.Minus)
+                        (RailLocation.make (Rot45.make 0 -1 1 0) Rot45.zero 2 Dir.se Joint.Minus)
+                        (RailLocation.inv <| RailLocation.make (Rot45.make 0 0 1 -1) Rot45.zero -2 Dir.ne Joint.Minus)
             ]
         ]

@@ -1,7 +1,7 @@
 module Forth.PierConstruction exposing (..)
 
 import Dict exposing (Dict)
-import Forth.Geometry.Dir4 as Dir4 exposing (Dir4)
+import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.Rot45 as Rot45
 import Forth.Pier as Pier
@@ -30,7 +30,7 @@ updateWithResult key f dict =
         |> Result.map (\v -> Dict.insert key v dict)
 
 
-divideIntoDict : List PierLocation -> Result String (Dict String ( Dir4, List PierLocation ))
+divideIntoDict : List PierLocation -> Result String (Dict String ( Dir, List PierLocation ))
 divideIntoDict =
     foldlResult
         (\loc ->
@@ -55,11 +55,11 @@ pierLocationToPlacement : PierLocation -> PierPlacement
 pierLocationToPlacement loc =
     { pier = Pier.Single -- stub!
     , position = PierLocation.toVec3 loc
-    , angle = Dir4.toRadian loc.location.dir
+    , angle = Dir.toRadian loc.location.dir
     }
 
 
-singlePier : Dict String ( Dir4, List PierLocation ) -> Result String (List PierPlacement)
+singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierPlacement)
 singlePier single =
     Result.Ok <|
         List.concatMap (Tuple.second >> Tuple.second >> List.map pierLocationToPlacement) <|

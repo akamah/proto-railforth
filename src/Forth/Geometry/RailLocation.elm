@@ -12,7 +12,7 @@ module Forth.Geometry.RailLocation exposing
     , zero
     )
 
-import Forth.Geometry.Dir8 as Dir8 exposing (Dir8)
+import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Joint as Joint exposing (Joint)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
@@ -23,12 +23,12 @@ import Math.Vector3 exposing (Vec3)
 平面上の点（単線基準、複線基準）、高さ、向いている方向、および凹凸を持つ。
 -}
 type alias RailLocation =
-    { location : Location Dir8
+    { location : Location
     , joint : Joint
     }
 
 
-make : Rot45 -> Rot45 -> Int -> Dir8 -> Joint -> RailLocation
+make : Rot45 -> Rot45 -> Int -> Dir -> Joint -> RailLocation
 make single double height dir joint =
     { location = Location.make single double height dir
     , joint = joint
@@ -37,7 +37,7 @@ make single double height dir joint =
 
 zero : RailLocation
 zero =
-    make Rot45.zero Rot45.zero 0 Dir8.e Joint.Minus
+    make Rot45.zero Rot45.zero 0 Dir.e Joint.Minus
 
 
 invertJoint : RailLocation -> RailLocation
@@ -47,19 +47,19 @@ invertJoint loc =
 
 flip : RailLocation -> RailLocation
 flip loc =
-    { loc | location = Location.flip Dir8.class loc.location }
+    { loc | location = Location.flip loc.location }
 
 
 mul : RailLocation -> RailLocation -> RailLocation
 mul global local =
-    { location = Location.mul Dir8.class global.location local.location
+    { location = Location.mul global.location local.location
     , joint = local.joint
     }
 
 
 inv : RailLocation -> RailLocation
 inv loc =
-    { location = Location.inv Dir8.class loc.location
+    { location = Location.inv loc.location
     , joint = loc.joint
     }
 

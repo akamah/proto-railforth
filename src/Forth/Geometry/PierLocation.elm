@@ -9,7 +9,7 @@ module Forth.Geometry.PierLocation exposing
     , toVec3
     )
 
-import Forth.Geometry.Dir4 as Dir4 exposing (Dir4)
+import Forth.Geometry.Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 exposing (Rot45)
@@ -19,7 +19,7 @@ import Math.Vector3 exposing (Vec3)
 {-| 橋脚の設置地点を表す。
 -}
 type alias PierLocation =
-    { location : Location Dir4
+    { location : Location
     , margin : PierMargin
     }
 
@@ -48,7 +48,7 @@ slopeCurveMargin =
     }
 
 
-make : Rot45 -> Rot45 -> Int -> Dir4 -> PierMargin -> PierLocation
+make : Rot45 -> Rot45 -> Int -> Dir -> PierMargin -> PierLocation
 make single double height dir4 margin =
     { location = Location.make single double height dir4
     , margin = margin
@@ -57,14 +57,14 @@ make single double height dir4 margin =
 
 fromRailLocation : PierMargin -> RailLocation -> PierLocation
 fromRailLocation margin loc =
-    { location = Location.mapDir Dir4.fromDir8 loc.location
+    { location = loc.location
     , margin = margin
     }
 
 
 flip : PierLocation -> PierLocation
 flip loc =
-    { location = Location.flip Dir4.class loc.location
+    { location = Location.flip loc.location
     , margin = loc.margin
     }
 
@@ -79,9 +79,9 @@ flip loc =
 --     let
 --         newLocation =
 --             Location.add global.location <|
---                 Location.mul (Dir8.toRot45 global.dir) local.location
+--                 Location.mul (Dir.toRot45 global.dir) local.location
 --         dir =
---             Dir8.mul local.dir global.dir
+--             Dir.mul local.dir global.dir
 --     in
 --     { location = newLocation
 --     , dir = dir
