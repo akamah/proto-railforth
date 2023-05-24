@@ -2,12 +2,9 @@ module Forth.PierConstruction exposing (..)
 
 import Dict exposing (Dict)
 import Forth.Geometry.Dir4 as Dir4 exposing (Dir4)
-import Forth.Geometry.Dir8 as Dir8 exposing (Dir8)
-import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.Rot45 as Rot45
-import Forth.Pier exposing (Pier(..))
-import Math.Vector3 exposing (Vec3)
+import Forth.Pier as Pier
 import PierPlacement exposing (PierPlacement)
 
 
@@ -56,7 +53,7 @@ divideIntoDict =
 
 pierLocationToPlacement : PierLocation -> PierPlacement
 pierLocationToPlacement loc =
-    { pier = Single -- stub!
+    { pier = Pier.Single -- stub!
     , position = PierLocation.toVec3 loc
     , angle = Dir4.toRadian loc.dir
     }
@@ -76,4 +73,3 @@ toPierPlacement list =
     Result.Ok list
         |> Result.andThen divideIntoDict
         |> Result.andThen singlePier
-        |> Debug.log "pier"
