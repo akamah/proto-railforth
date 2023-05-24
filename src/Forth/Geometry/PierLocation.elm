@@ -72,13 +72,11 @@ flip loc =
     }
 
 
-moveLeftByDoubleTrackLength : PierLocation -> Location
-moveLeftByDoubleTrackLength loc =
-    Location.add loc.location <|
-        Location.make Rot45.zero (Dir4.toRot45 (Dir4.mul loc.dir Dir4.n)) 0
 
-
-
+-- moveLeftByDoubleTrackLength : PierLocation -> Location
+-- moveLeftByDoubleTrackLength loc =
+--     Location.add loc.location <|
+--         Location.make Rot45.zero (Dir4.toRot45 (Dir4.mul loc.dir Dir4.n)) 0
 -- mul : RailLocation -> RailLocation -> RailLocation
 -- mul global local =
 --     let
