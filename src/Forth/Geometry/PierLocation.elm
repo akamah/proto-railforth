@@ -5,6 +5,7 @@ module Forth.Geometry.PierLocation exposing
     , flip
     , fromRailLocation
     , make
+    , mul
     , slopeCurveMargin
     , toVec3
     )
@@ -74,19 +75,13 @@ flip loc =
 -- moveLeftByDoubleTrackLength loc =
 --     Location.add loc.location <|
 --         Location.make Rot45.zero (Dir4.toRot45 (Dir4.mul loc.dir Dir4.n)) 0
--- mul : PierLocation -> PierLocation -> PierLocation
--- mul global local =
---     let
---         newLocation =
---             Location.add global.location <|
---                 Location.mul (Dir.toRot45 global.dir) local.location
---         dir =
---             Dir.mul local.dir global.dir
---     in
---     { location = newLocation
---     , dir = dir
---     , joint = local.joint
---     }
+
+
+mul : Location -> PierLocation -> PierLocation
+mul global local =
+    { location = Location.mul global local.location
+    , margin = local.margin
+    }
 
 
 toVec3 : PierLocation -> Vec3

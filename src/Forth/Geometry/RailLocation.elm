@@ -50,9 +50,9 @@ flip loc =
     { loc | location = Location.flip loc.location }
 
 
-mul : RailLocation -> RailLocation -> RailLocation
+mul : Location -> RailLocation -> RailLocation
 mul global local =
-    { location = Location.mul global.location local.location
+    { location = Location.mul global local.location
     , joint = local.joint
     }
 
