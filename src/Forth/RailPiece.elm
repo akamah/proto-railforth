@@ -81,22 +81,22 @@ goStraight1Minus =
 
 goStraight2 : RailLocation
 goStraight2 =
-    RailLocation.mul goStraight1 goStraight1
+    RailLocation.mul goStraight1.location goStraight1
 
 
 goStraight4 : RailLocation
 goStraight4 =
-    RailLocation.mul goStraight2 goStraight2
+    RailLocation.mul goStraight2.location goStraight2
 
 
 goStraight6 : RailLocation
 goStraight6 =
-    RailLocation.mul goStraight2 goStraight4
+    RailLocation.mul goStraight2.location goStraight4
 
 
 goStraight8 : RailLocation
 goStraight8 =
-    RailLocation.mul goStraight4 goStraight4
+    RailLocation.mul goStraight4.location goStraight4
 
 
 turnLeft45deg : RailLocation
@@ -116,7 +116,7 @@ turnLeftOuter45deg =
 
 turnLeft90deg : RailLocation
 turnLeft90deg =
-    RailLocation.mul turnLeft45deg turnLeft45deg
+    RailLocation.mul turnLeft45deg.location turnLeft45deg
 
 
 doubleTrackLeft : RailLocation
@@ -224,10 +224,10 @@ getRailPiece rail =
             twoEnds minusZero goStraight4
 
         AutoTurnout ->
-            threeEnds minusZero goStraight6 (RailLocation.mul goStraight2 turnLeft45deg)
+            threeEnds minusZero goStraight6 (RailLocation.mul goStraight2.location turnLeft45deg)
 
         AutoPoint ->
-            fourEnds minusZero (RailLocation.mul goStraight2 doubleTrackRight) goStraight6 (RailLocation.mul goStraight2 turnLeft45deg)
+            fourEnds minusZero (RailLocation.mul goStraight2.location doubleTrackRight) goStraight6 (RailLocation.mul goStraight2.location turnLeft45deg)
 
 
 {-| remove the first element from the list and append it to the end
@@ -260,13 +260,13 @@ rotateRailPiece piece =
         Nonempty current (next :: _) ->
             let
                 rot =
-                    RailLocation.mul current (RailLocation.inv next)
+                    RailLocation.mul current.location (RailLocation.inv next)
             in
-            { origin = RailLocation.mul rot piece.origin
-            , railLocations = rotate <| Nonempty.map (RailLocation.mul rot) piece.railLocations
+            { origin = RailLocation.mul rot.location piece.origin
+            , railLocations = rotate <| Nonempty.map (RailLocation.mul rot.location) piece.railLocations
 
             --            , margins = piece.margins
-            , pierLocations = piece.pierLocations -- TODO: implement multiplication for this
+            , pierLocations = List.map (PierLocation.mul rot.location) piece.pierLocations
             }
 
 
@@ -291,7 +291,7 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
 
 placeRailPieceAtLocation : RailLocation -> RailPiece -> List RailLocation
 placeRailPieceAtLocation base railPiece =
-    List.map (RailLocation.mul base) <| Nonempty.tail railPiece.railLocations
+    List.map (RailLocation.mul base.location) <| Nonempty.tail railPiece.railLocations
 
 
 toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
@@ -321,14 +321,14 @@ placeRail params =
             (\( rail, railPiece ) ->
                 let
                     nextLocations =
-                        List.map (RailLocation.mul params.location) <| Nonempty.tail railPiece.railLocations
+                        List.map (RailLocation.mul params.location.location) <| Nonempty.tail railPiece.railLocations
 
                     pierLocations =
-                        railPiece.pierLocations
+                        List.map (PierLocation.mul params.location.location) <| railPiece.pierLocations
                 in
                 { rail = rail
                 , nextLocations = nextLocations
-                , railPlacement = toRailPlacement rail (RailLocation.mul params.location railPiece.origin)
+                , railPlacement = toRailPlacement rail (RailLocation.mul params.location.location railPiece.origin)
                 , pierLocations = pierLocations
                 }
             )

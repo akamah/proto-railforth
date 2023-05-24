@@ -32,12 +32,12 @@ suite =
               <|
                 \( x, y, z ) ->
                     Expect.equal
-                        (mul (mul x y) z)
-                        (mul x (mul y z))
+                        (mul (mul x.location y).location z)
+                        (mul x.location (mul y.location z))
             , fuzz location "zero * x = x" <|
                 \x ->
                     Expect.equal
-                        (mul zero x)
+                        (mul zero.location x)
                         x
             ]
         , describe "negate"
@@ -45,7 +45,7 @@ suite =
                 \x ->
                     Expect.equal
                         (mul
-                            x
+                            x.location
                             (RailLocation.inv x)
                         )
                         { zero | joint = x.joint }

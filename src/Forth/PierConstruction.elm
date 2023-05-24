@@ -8,6 +8,18 @@ import Forth.Pier as Pier
 import PierPlacement exposing (PierPlacement)
 
 
+cleansePierPlacements : List PierLocation -> List PierLocation
+cleansePierPlacements =
+    List.map
+        (\placement ->
+            let
+                loc =
+                    placement.location
+            in
+            { placement | location = { loc | dir = Dir.toUndirectedDir loc.dir } }
+        )
+
+
 pierKey : PierLocation -> String
 pierKey loc =
     Rot45.toString loc.location.single ++ "," ++ Rot45.toString loc.location.double
@@ -45,7 +57,7 @@ divideIntoDict =
                                 Ok ( dir, loc :: lis )
 
                             else
-                                Err <| "pier direction mismatch at " ++ pierKey loc
+                                Err <| Debug.log "err" ("pier direction mismatch at " ++ pierKey loc ++ ", " ++ Dir.toString dir ++ Dir.toString loc.location.dir)
                 )
         )
         Dict.empty
@@ -71,5 +83,6 @@ singlePier single =
 toPierPlacement : List PierLocation -> Result String (List PierPlacement)
 toPierPlacement list =
     Result.Ok list
+        |> Result.map cleansePierPlacements
         |> Result.andThen divideIntoDict
         |> Result.andThen singlePier

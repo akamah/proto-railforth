@@ -12,6 +12,7 @@ module Forth.Geometry.Dir exposing
     , toRadian
     , toRot45
     , toString
+    , toUndirectedDir
     , w
     )
 
@@ -107,6 +108,15 @@ toRot45 (Dir d) =
         (aux 1 5 d)
         (aux 2 6 d)
         (aux 3 7 d)
+
+
+toUndirectedDir : Dir -> Dir
+toUndirectedDir (Dir x) =
+    if x >= 4 then
+        Dir (x - 4)
+
+    else
+        Dir x
 
 
 toString : Dir -> String
