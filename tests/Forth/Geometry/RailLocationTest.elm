@@ -46,13 +46,13 @@ suite =
                     Expect.equal
                         (mul
                             x
-                            (RailLocation.negate x)
+                            (RailLocation.inv x)
                         )
                         { zero | joint = x.joint }
             , test "negete example" <|
                 \_ ->
                     Expect.equal
                         (RailLocation.make (Rot45.make 0 -1 1 0) Rot45.zero 2 Dir8.se Joint.Minus)
-                        (RailLocation.negate <| RailLocation.make (Rot45.make 0 0 1 -1) Rot45.zero -2 Dir8.ne Joint.Minus)
+                        (RailLocation.inv <| RailLocation.make (Rot45.make 0 0 1 -1) Rot45.zero -2 Dir8.ne Joint.Minus)
             ]
         ]

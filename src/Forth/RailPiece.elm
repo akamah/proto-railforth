@@ -129,8 +129,8 @@ invert inverted piece =
             piece
 
         Inverted ->
-            { locations = Nonempty.map RailLocation.invert piece.locations
-            , origin = RailLocation.invert piece.origin
+            { locations = Nonempty.map RailLocation.invertJoint piece.locations
+            , origin = RailLocation.invertJoint piece.origin
             , margins = piece.margins
             }
 
@@ -252,7 +252,7 @@ rotateRailPiece piece =
         Nonempty current (next :: _) ->
             let
                 rot =
-                    RailLocation.mul current (RailLocation.negate next)
+                    RailLocation.mul current (RailLocation.inv next)
             in
             { origin = RailLocation.mul rot piece.origin
             , locations = rotate <| Nonempty.map (RailLocation.mul rot) piece.locations
@@ -286,7 +286,7 @@ placeRailPieceAtLocation base railPiece =
 
 toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
 toRailPlacement rail location =
-    RailPlacement.make rail (RailLocation.toVec3 location) (Dir8.toRadian location.dir)
+    RailPlacement.make rail (RailLocation.toVec3 location) (Dir8.toRadian location.location.dir)
 
 
 type alias PlaceRailParams =

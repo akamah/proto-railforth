@@ -2,10 +2,10 @@ module Forth.Geometry.RailLocation exposing
     ( RailLocation
     , addHeight
     , flip
-    , invert
+    , inv
+    , invertJoint
     , make
     , mul
-    , negate
     , setHeight
     , setJoint
     , toVec3
@@ -23,16 +23,14 @@ import Math.Vector3 exposing (Vec3)
 平面上の点（単線基準、複線基準）、高さ、向いている方向、および凹凸を持つ。
 -}
 type alias RailLocation =
-    { location : Location
-    , dir : Dir8
+    { location : Location Dir8
     , joint : Joint
     }
 
 
 make : Rot45 -> Rot45 -> Int -> Dir8 -> Joint -> RailLocation
 make single double height dir joint =
-    { location = Location.make single double height
-    , dir = dir
+    { location = Location.make single double height dir
     , joint = joint
     }
 
@@ -42,46 +40,26 @@ zero =
     make Rot45.zero Rot45.zero 0 Dir8.e Joint.Minus
 
 
-invert : RailLocation -> RailLocation
-invert loc =
+invertJoint : RailLocation -> RailLocation
+invertJoint loc =
     { loc | joint = Joint.invert loc.joint }
 
 
 flip : RailLocation -> RailLocation
 flip loc =
-    { loc
-        | location = Location.flip loc.location
-        , dir = Dir8.inv loc.dir
-    }
+    { loc | location = Location.flip Dir8.class loc.location }
 
 
 mul : RailLocation -> RailLocation -> RailLocation
 mul global local =
-    let
-        newLocation =
-            Location.add global.location <|
-                Location.mul (Dir8.toRot45 global.dir) local.location
-
-        dir =
-            Dir8.mul local.dir global.dir
-    in
-    { location = newLocation
-    , dir = dir
+    { location = Location.mul Dir8.class global.location local.location
     , joint = local.joint
     }
 
 
-negate : RailLocation -> RailLocation
-negate loc =
-    let
-        flipDir =
-            Dir8.inv loc.dir
-
-        newLocation =
-            Location.mul (Dir8.toRot45 flipDir) (Location.negate loc.location)
-    in
-    { location = newLocation
-    , dir = flipDir
+inv : RailLocation -> RailLocation
+inv loc =
+    { location = Location.inv Dir8.class loc.location
     , joint = loc.joint
     }
 

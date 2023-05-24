@@ -4,6 +4,7 @@ module Forth.Geometry.PierLocation exposing
     , flatRailMargin
     , flip
     , fromRailLocation
+    , make
     , slopeCurveMargin
     , toVec3
     )
@@ -11,15 +12,14 @@ module Forth.Geometry.PierLocation exposing
 import Forth.Geometry.Dir4 as Dir4 exposing (Dir4)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.RailLocation exposing (RailLocation)
-import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
+import Forth.Geometry.Rot45 exposing (Rot45)
 import Math.Vector3 exposing (Vec3)
 
 
 {-| 橋脚の設置地点を表す。
 -}
 type alias PierLocation =
-    { location : Location
-    , dir : Dir4
+    { location : Location Dir4
     , margin : PierMargin
     }
 
@@ -50,25 +50,22 @@ slopeCurveMargin =
 
 make : Rot45 -> Rot45 -> Int -> Dir4 -> Int -> Int -> PierLocation
 make single double height dir4 top bottom =
-    { location = Location.make single double height
-    , dir = dir4
+    { location = Location.make single double height dir4
     , margin = { top = top, bottom = bottom }
     }
 
 
 fromRailLocation : RailLocation -> PierMargin -> PierLocation
 fromRailLocation loc margin =
-    { location = loc.location
-    , dir = Dir4.fromDir8 loc.dir
+    { location = Location.mapDir Dir4.fromDir8 loc.location
     , margin = margin
     }
 
 
 flip : PierLocation -> PierLocation
 flip loc =
-    { loc
-        | location = Location.flip loc.location
-        , dir = Dir4.inv loc.dir
+    { location = Location.flip Dir4.class loc.location
+    , margin = loc.margin
     }
 
 
@@ -77,7 +74,7 @@ flip loc =
 -- moveLeftByDoubleTrackLength loc =
 --     Location.add loc.location <|
 --         Location.make Rot45.zero (Dir4.toRot45 (Dir4.mul loc.dir Dir4.n)) 0
--- mul : RailLocation -> RailLocation -> RailLocation
+-- mul : PierLocation -> PierLocation -> PierLocation
 -- mul global local =
 --     let
 --         newLocation =
@@ -90,11 +87,6 @@ flip loc =
 --     , dir = dir
 --     , joint = local.joint
 --     }
-
-
-getDir4 : PierLocation -> Dir4
-getDir4 loc =
-    loc.dir
 
 
 toVec3 : PierLocation -> Vec3

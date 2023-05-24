@@ -6,6 +6,7 @@ module Forth.Geometry.Rot45 exposing
     , make
     , mul
     , negate
+    , one
     , sub
     , toFloat
     , toString
@@ -34,6 +35,11 @@ extract (Rot45 a b c d) f =
 zero : Rot45
 zero =
     make 0 0 0 0
+
+
+one : Rot45
+one =
+    make 1 0 0 0
 
 
 add : Rot45 -> Rot45 -> Rot45

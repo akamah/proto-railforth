@@ -1,5 +1,6 @@
 module Forth.Geometry.Dir8 exposing
     ( Dir8(..)
+    , class
     , e
     , inv
     , mul
@@ -15,6 +16,7 @@ module Forth.Geometry.Dir8 exposing
     , w
     )
 
+import Forth.Geometry.Dir exposing (DirClass)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 
 
@@ -112,3 +114,12 @@ toRot45 (Dir8 d) =
 toString : Dir8 -> String
 toString (Dir8 d) =
     "Dir8 " ++ String.fromInt d
+
+
+class : DirClass Dir8
+class =
+    { unit = e
+    , mul = mul
+    , inv = inv
+    , toRot45 = toRot45
+    }

@@ -38,10 +38,10 @@ divideIntoDict =
                 (\maybe ->
                     case maybe of
                         Nothing ->
-                            Ok ( loc.dir, [ loc ] )
+                            Ok ( loc.location.dir, [ loc ] )
 
                         Just ( dir, lis ) ->
-                            if dir == loc.dir then
+                            if dir == loc.location.dir then
                                 Ok ( dir, loc :: lis )
 
                             else
@@ -55,7 +55,7 @@ pierLocationToPlacement : PierLocation -> PierPlacement
 pierLocationToPlacement loc =
     { pier = Pier.Single -- stub!
     , position = PierLocation.toVec3 loc
-    , angle = Dir4.toRadian loc.dir
+    , angle = Dir4.toRadian loc.location.dir
     }
 
 

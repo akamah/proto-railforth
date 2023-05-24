@@ -1,85 +1,102 @@
 module Forth.Geometry.Location exposing
     ( Location
-    , add
     , addHeight
     , flip
+    , inv
     , make
+    , mapDir
     , mul
-    , negate
     , setHeight
     , toVec3
-    , zero
     )
 
+import Forth.Geometry.Dir exposing (DirClass)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 import Math.Vector3 as Vec3 exposing (Vec3)
 
 
-{-| 3次元空間上での点を表現する
+{-| 3次元空間上での点を表現する。向きの情報がほしかったら型引数で指定する
 -}
-type alias Location =
+type alias Location dir =
     { single : Rot45
     , double : Rot45
     , height : Int
+    , dir : dir
     }
 
 
-make : Rot45 -> Rot45 -> Int -> Location
-make single double height =
+make : Rot45 -> Rot45 -> Int -> dir -> Location dir
+make single double height dir =
     { single = single
     , double = double
     , height = height
+    , dir = dir
     }
 
 
-zero : Location
-zero =
-    make Rot45.zero Rot45.zero 0
-
-
-flip : Location -> Location
-flip loc =
+flip : DirClass dir -> Location dir -> Location dir
+flip class loc =
     { single = Rot45.conj loc.single
     , double = Rot45.conj loc.double
     , height = -loc.height
+    , dir = class.inv loc.dir
     }
 
 
-add : Location -> Location -> Location
-add x y =
-    make
-        (Rot45.add x.single y.single)
-        (Rot45.add x.double y.double)
-        (x.height + y.height)
+mul : DirClass dir -> Location dir -> Location dir -> Location dir
+mul class global local =
+    let
+        single =
+            Rot45.add global.single <|
+                Rot45.mul (class.toRot45 global.dir) local.single
+
+        double =
+            Rot45.add global.double <|
+                Rot45.mul (class.toRot45 global.dir) local.double
+
+        dir =
+            class.mul local.dir global.dir
+    in
+    { single = single
+    , double = double
+    , height = global.height + local.height
+    , dir = dir
+    }
 
 
-negate : Location -> Location
-negate x =
-    make
-        (Rot45.negate x.single)
-        (Rot45.negate x.double)
-        -x.height
+inv : DirClass dir -> Location dir -> Location dir
+inv class x =
+    let
+        invDir =
+            class.inv x.dir
+
+        invDirRot =
+            class.toRot45 invDir
+
+        single =
+            Rot45.mul invDirRot (Rot45.negate x.single)
+
+        double =
+            Rot45.mul invDirRot (Rot45.negate x.double)
+    in
+    { single = single
+    , double = double
+    , height = -x.height
+    , dir = invDir
+    }
 
 
-mul : Rot45 -> Location -> Location
-mul rot loc =
-    make
-        (Rot45.mul rot loc.single)
-        (Rot45.mul rot loc.double)
-        loc.height
-
-
-setHeight : Int -> Location -> Location
+setHeight : Int -> Location d -> Location d
 setHeight newHeight location =
     { location | height = newHeight }
 
 
-addHeight : Int -> Location -> Location
+addHeight : Int -> Location d -> Location d
 addHeight diffHeight location =
     { location | height = location.height + diffHeight }
 
 
-toVec3 : Location -> Vec3
+toVec3 : Location d -> Vec3
 toVec3 tie =
     let
         singleUnit =
@@ -104,3 +121,12 @@ toVec3 tie =
         (singleUnit * sx + doubleUnit * dx)
         (heightUnit * h)
         -(singleUnit * sy + doubleUnit * dy)
+
+
+mapDir : (dir1 -> dir2) -> Location dir1 -> Location dir2
+mapDir f loc =
+    { single = loc.single
+    , double = loc.double
+    , height = loc.height
+    , dir = f loc.dir
+    }
