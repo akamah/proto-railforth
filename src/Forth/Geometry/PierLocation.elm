@@ -48,15 +48,15 @@ slopeCurveMargin =
     }
 
 
-make : Rot45 -> Rot45 -> Int -> Dir4 -> Int -> Int -> PierLocation
-make single double height dir4 top bottom =
+make : Rot45 -> Rot45 -> Int -> Dir4 -> PierMargin -> PierLocation
+make single double height dir4 margin =
     { location = Location.make single double height dir4
-    , margin = { top = top, bottom = bottom }
+    , margin = margin
     }
 
 
-fromRailLocation : RailLocation -> PierMargin -> PierLocation
-fromRailLocation loc margin =
+fromRailLocation : PierMargin -> RailLocation -> PierLocation
+fromRailLocation margin loc =
     { location = Location.mapDir Dir4.fromDir8 loc.location
     , margin = margin
     }

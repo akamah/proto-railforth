@@ -2,7 +2,7 @@ module Forth.RailPiece exposing (getRailPiece, initialLocation, placeRail, rotat
 
 import Forth.Geometry.Dir8 as Dir8
 import Forth.Geometry.Joint as Joint exposing (Joint)
-import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
+import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
 import List.Nonempty as Nonempty exposing (Nonempty(..))
@@ -16,11 +16,12 @@ import RailPlacement exposing (RailPlacement)
 
 type alias RailPiece =
     { --| 反時計回りの地点の集まり。これの先頭とスタックトップをつなげるイメージ
-      locations : Nonempty RailLocation
+      railLocations : Nonempty RailLocation
 
-    --| 同じく反時計回りの橋脚の設置地点の集まりなのだが、RailLocationとPierLocationはほとんど共通の情報を持つため、
-    --| PierLocation に含まれる PierMargin の情報だけを余分に持つこととする
-    , margins : Nonempty PierMargin
+    --| 同じく反時計回りの橋脚の設置地点の集まり。2倍曲線レールの真ん中にも配置したいので、必ずしも railLocations とは対応しない
+    --| また、必ずしもある必要はないはずなので通常のListで持つ
+    --| 順序は関係ないが、Setを使うのも手間なので
+    , pierLocations : List PierLocation
 
     --| 主に表示用として、レールの種類的にはどこに配置するべきか、の情報。回転を考慮すると、locationsの先頭のほかにこれを用意する他なかった
     --| 基本の形から回転していない場合は、locationsの先頭とちょうど逆になる。表示用なので凹凸は考慮しない
@@ -29,10 +30,16 @@ type alias RailPiece =
     }
 
 
+{-| レールを構成する。以下の２つの条件がある。
+
+1.  レールの端点にのみ橋脚を設置する前提
+2.  その端点も、坂曲線レールのように厚みを持たない。
+
+-}
 makeFlatRailPiece : Nonempty RailLocation -> RailPiece
 makeFlatRailPiece list =
-    { locations = list
-    , margins = Nonempty.map (always PierLocation.flatRailMargin) list
+    { railLocations = list
+    , pierLocations = List.map (PierLocation.fromRailLocation PierLocation.flatRailMargin) <| Nonempty.toList list
     , origin = RailLocation.zero
     }
 
@@ -129,9 +136,9 @@ invert inverted piece =
             piece
 
         Inverted ->
-            { locations = Nonempty.map RailLocation.invertJoint piece.locations
+            { railLocations = Nonempty.map RailLocation.invertJoint piece.railLocations
             , origin = RailLocation.invertJoint piece.origin
-            , margins = piece.margins
+            , pierLocations = piece.pierLocations
             }
 
 
@@ -149,8 +156,8 @@ flip flipped piece =
             piece
 
         Flipped ->
-            { locations = Nonempty.map RailLocation.flip <| reverseTail piece.locations
-            , margins = reverseTail piece.margins
+            { railLocations = Nonempty.map RailLocation.flip <| reverseTail piece.railLocations
+            , pierLocations = List.map PierLocation.flip piece.pierLocations
             , origin = RailLocation.flip piece.origin
             }
 
@@ -195,20 +202,21 @@ getRailPiece rail =
             flip f <| twoEnds minusZero (RailLocation.setHeight 4 goStraight8)
 
         SlopeCurveA ->
-            { locations =
+            { railLocations =
                 Nonempty plusZero
                     [ turnRight45deg
                         |> RailLocation.setHeight 1
                         |> RailLocation.setJoint Joint.Minus
                     ]
-            , margins = Nonempty PierLocation.flatRailMargin [ PierLocation.slopeCurveMargin ]
+            , pierLocations =
+                []
             , origin = RailLocation.zero
             }
 
         SlopeCurveB ->
-            { locations =
+            { railLocations =
                 Nonempty minusZero [ RailLocation.setHeight 1 turnLeft45deg ]
-            , margins = Nonempty PierLocation.flatRailMargin [ PierLocation.slopeCurveMargin ]
+            , pierLocations = []
             , origin = RailLocation.zero
             }
 
@@ -245,7 +253,7 @@ loop n f a =
 
 rotateRailPiece : RailPiece -> RailPiece
 rotateRailPiece piece =
-    case piece.locations of
+    case piece.railLocations of
         Nonempty _ [] ->
             piece
 
@@ -255,8 +263,10 @@ rotateRailPiece piece =
                     RailLocation.mul current (RailLocation.inv next)
             in
             { origin = RailLocation.mul rot piece.origin
-            , locations = rotate <| Nonempty.map (RailLocation.mul rot) piece.locations
-            , margins = piece.margins
+            , railLocations = rotate <| Nonempty.map (RailLocation.mul rot) piece.railLocations
+
+            --            , margins = piece.margins
+            , pierLocations = piece.pierLocations -- TODO: implement multiplication for this
             }
 
 
@@ -266,7 +276,7 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
         railPiece =
             loop rotation rotateRailPiece <| getRailPiece railType
     in
-    if Joint.match joint (Nonempty.head railPiece.locations).joint then
+    if Joint.match joint (Nonempty.head railPiece.railLocations).joint then
         -- これから置く予定のレールと、スタックトップの方向がマッチしたのでそのまま配置する
         Just ( Rail.map (always Rail.NotInverted) railType, railPiece )
 
@@ -281,7 +291,7 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
 
 placeRailPieceAtLocation : RailLocation -> RailPiece -> List RailLocation
 placeRailPieceAtLocation base railPiece =
-    List.map (RailLocation.mul base) <| Nonempty.tail railPiece.locations
+    List.map (RailLocation.mul base) <| Nonempty.tail railPiece.railLocations
 
 
 toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
@@ -311,10 +321,10 @@ placeRail params =
             (\( rail, railPiece ) ->
                 let
                     nextLocations =
-                        List.map (RailLocation.mul params.location) <| Nonempty.tail railPiece.locations
+                        List.map (RailLocation.mul params.location) <| Nonempty.tail railPiece.railLocations
 
                     pierLocations =
-                        List.map2 PierLocation.fromRailLocation nextLocations <| Nonempty.tail railPiece.margins
+                        railPiece.pierLocations
                 in
                 { rail = rail
                 , nextLocations = nextLocations
