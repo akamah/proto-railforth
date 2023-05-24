@@ -2,6 +2,7 @@ module Forth.Geometry.Dir8Test exposing (dir8, suite)
 
 import Expect exposing (FloatingPointTolerance(..))
 import Forth.Geometry.Dir8 as Dir8 exposing (Dir8)
+import Forth.Geometry.Rot45 as Rot45
 import Fuzz exposing (Fuzzer)
 import Test exposing (..)
 
@@ -45,5 +46,19 @@ suite =
             [ test "mul s sw --> nw" <|
                 \_ ->
                     Expect.equal Dir8.nw <| Dir8.mul Dir8.s Dir8.sw
+            ]
+        , describe "toRot45"
+            [ test "toRot45 sw" <|
+                \_ ->
+                    Expect.equal
+                        (Rot45.make 0 -1 0 0)
+                        (Dir8.toRot45 Dir8.sw)
+            ]
+        , describe "inv"
+            [ fuzz dir8 "mul x (inv x) = Dir8.e" <|
+                \x ->
+                    Expect.equal
+                        Dir8.e
+                        (Dir8.mul x (Dir8.inv x))
             ]
         ]
