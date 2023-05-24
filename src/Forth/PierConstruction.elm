@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.Rot45 as Rot45
-import Forth.Pier as Pier
+import Forth.Pier as Pier exposing (Pier)
 import PierPlacement exposing (PierPlacement)
 
 
@@ -57,15 +57,15 @@ divideIntoDict =
                                 Ok ( dir, loc :: lis )
 
                             else
-                                Err <| Debug.log "err" ("pier direction mismatch at " ++ pierKey loc ++ ", " ++ Dir.toString dir ++ Dir.toString loc.location.dir)
+                                Err <| "pier direction mismatch at " ++ pierKey loc
                 )
         )
         Dict.empty
 
 
-pierLocationToPlacement : PierLocation -> PierPlacement
-pierLocationToPlacement loc =
-    { pier = Pier.Single -- stub!
+pierLocationToPlacement : Pier -> PierLocation -> PierPlacement
+pierLocationToPlacement kind loc =
+    { pier = kind
     , position = PierLocation.toVec3 loc
     , angle = Dir.toRadian loc.location.dir
     }
@@ -74,7 +74,7 @@ pierLocationToPlacement loc =
 singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierPlacement)
 singlePier single =
     Result.Ok <|
-        List.concatMap (Tuple.second >> Tuple.second >> List.map pierLocationToPlacement) <|
+        List.concatMap (Tuple.second >> Tuple.second >> List.map (pierLocationToPlacement Pier.Single)) <|
             Dict.toList single
 
 
