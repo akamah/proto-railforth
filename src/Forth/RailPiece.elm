@@ -33,7 +33,7 @@ makeFlatRailPiece : Nonempty RailLocation -> RailPiece
 makeFlatRailPiece list =
     { locations = list
     , margins = Nonempty.map (always PierLocation.flatRailMargin) list
-    , origin = RailLocation.make Rot45.zero Rot45.zero 0 Dir8.e Joint.Plus
+    , origin = RailLocation.zero
     }
 
 
@@ -195,14 +195,22 @@ getRailPiece rail =
             flip f <| twoEnds minusZero (RailLocation.setHeight 4 goStraight8)
 
         SlopeCurveA ->
-            twoEnds plusZero
-                (turnRight45deg
-                    |> RailLocation.setHeight 1
-                    |> RailLocation.setJoint Joint.Minus
-                )
+            { locations =
+                Nonempty plusZero
+                    [ turnRight45deg
+                        |> RailLocation.setHeight 1
+                        |> RailLocation.setJoint Joint.Minus
+                    ]
+            , margins = Nonempty PierLocation.flatRailMargin [ PierLocation.slopeCurveMargin ]
+            , origin = RailLocation.zero
+            }
 
         SlopeCurveB ->
-            twoEnds minusZero (RailLocation.setHeight 1 turnLeft45deg)
+            { locations =
+                Nonempty minusZero [ RailLocation.setHeight 1 turnLeft45deg ]
+            , margins = Nonempty PierLocation.flatRailMargin [ PierLocation.slopeCurveMargin ]
+            , origin = RailLocation.zero
+            }
 
         Stop _ ->
             twoEnds minusZero goStraight4
@@ -248,7 +256,7 @@ rotateRailPiece piece =
             in
             { origin = RailLocation.mul rot piece.origin
             , locations = rotate <| Nonempty.map (RailLocation.mul rot) piece.locations
-            , margins = rotate <| piece.margins
+            , margins = piece.margins
             }
 
 

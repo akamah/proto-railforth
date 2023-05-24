@@ -4,6 +4,7 @@ module Forth.Geometry.PierLocation exposing
     , flatRailMargin
     , flip
     , fromRailLocation
+    , slopeCurveMargin
     , toVec3
     )
 
@@ -37,6 +38,13 @@ flatRailMargin : PierMargin
 flatRailMargin =
     { top = 4
     , bottom = 0
+    }
+
+
+slopeCurveMargin : PierMargin
+slopeCurveMargin =
+    { top = 4
+    , bottom = 1
     }
 
 
