@@ -129,6 +129,16 @@ doubleTrackRight =
     RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 -1 0) 0 Dir.e Joint.Plus
 
 
+slopeCurveA : RailLocation
+slopeCurveA =
+    RailLocation.make (Rot45.make 0 4 -4 0) Rot45.zero 1 Dir.se Joint.Minus
+
+
+slopeCurveB : RailLocation
+slopeCurveB =
+    RailLocation.make (Rot45.make 0 0 4 -4) Rot45.zero 1 Dir.ne Joint.Plus
+
+
 invert : IsInverted -> RailPiece -> RailPiece
 invert inverted piece =
     case inverted of
@@ -181,7 +191,11 @@ getRailPiece rail =
             flip f <| twoEnds minusZero turnLeft45deg
 
         Curve90 f _ ->
-            flip f <| twoEnds minusZero turnLeft90deg
+            flip f <|
+                { railLocations = Nonempty minusZero [ turnLeft90deg ]
+                , pierLocations = List.map (PierLocation.fromRailLocation PierLocation.flatRailMargin) [ minusZero, turnLeft45deg, turnLeft90deg ]
+                , origin = RailLocation.zero
+                }
 
         OuterCurve45 f _ ->
             flip f <| twoEnds minusZero turnLeftOuter45deg
@@ -203,20 +217,21 @@ getRailPiece rail =
 
         SlopeCurveA ->
             { railLocations =
-                Nonempty plusZero
-                    [ turnRight45deg
-                        |> RailLocation.setHeight 1
-                        |> RailLocation.setJoint Joint.Minus
-                    ]
+                Nonempty plusZero [ slopeCurveA ]
             , pierLocations =
-                []
+                [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
+                , { location = slopeCurveA.location, margin = PierLocation.slopeCurveMargin }
+                ]
             , origin = RailLocation.zero
             }
 
         SlopeCurveB ->
             { railLocations =
-                Nonempty minusZero [ RailLocation.setHeight 1 turnLeft45deg ]
-            , pierLocations = []
+                Nonempty minusZero [ slopeCurveB ]
+            , pierLocations =
+                [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
+                , { location = slopeCurveB.location, margin = PierLocation.slopeCurveMargin }
+                ]
             , origin = RailLocation.zero
             }
 
