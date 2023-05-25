@@ -25,9 +25,11 @@ suite =
                                 [ RailLocation.make (Rot45.make 4 0 -4 4) Rot45.zero 0 Dir.sw Joint.Plus
                                 , RailLocation.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
                                 ]
-                        , origin = RailLocation.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.w Joint.Plus
+                        , origin = RailLocation.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.w Joint.Minus
                         , pierLocations =
-                            [ PierLocation.make (Rot45.make 0 0 0 0) Rot45.zero 0 Dir.e PierLocation.flatRailMargin
+                            [ PierLocation.make (Rot45.make 4 0 0 0) Rot45.zero 0 Dir.e PierLocation.flatRailMargin
+                            , PierLocation.make (Rot45.make 0 0 0 0) Rot45.zero 0 Dir.w PierLocation.flatRailMargin
+                            , PierLocation.make (Rot45.make 4 0 -4 4) Rot45.zero 0 Dir.sw PierLocation.flatRailMargin
                             ]
                         }
                         (rotateRailPiece <| getRailPiece <| Turnout NotFlipped ())
@@ -40,9 +42,12 @@ suite =
                                 [ RailLocation.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.se Joint.Minus
                                 , RailLocation.make (Rot45.make 0 4 -4 4) Rot45.zero 0 Dir.nw Joint.Plus
                                 ]
-                        , origin = RailLocation.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.nw Joint.Plus
+                        , origin = RailLocation.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.nw Joint.Minus
                         , pierLocations =
-                            []
+                            [ PierLocation.make (Rot45.make 0 4 -4 0) Rot45.zero 0 Dir.se PierLocation.flatRailMargin
+                            , PierLocation.make (Rot45.make 0 4 -4 4) Rot45.zero 0 Dir.nw PierLocation.flatRailMargin
+                            , PierLocation.make (Rot45.make 0 0 0 0) Rot45.zero 0 Dir.w PierLocation.flatRailMargin
+                            ]
                         }
                         (rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout NotFlipped ())
             , test "rotate Turnout three times" <|
