@@ -15,7 +15,6 @@ import Forth.Geometry.Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 exposing (Rot45)
-import Forth.Pier exposing (Pier)
 import Math.Vector3 exposing (Vec3)
 
 

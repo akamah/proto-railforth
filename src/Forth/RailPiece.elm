@@ -304,11 +304,6 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
         Nothing
 
 
-placeRailPieceAtLocation : RailLocation -> RailPiece -> List RailLocation
-placeRailPieceAtLocation base railPiece =
-    List.map (RailLocation.mul base.location) <| Nonempty.tail railPiece.railLocations
-
-
 toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
 toRailPlacement rail location =
     RailPlacement.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
@@ -334,17 +329,13 @@ placeRail params =
     getAppropriateRailAndPieceForJoint params.location.joint params.railType params.rotation
         |> Maybe.map
             (\( rail, railPiece ) ->
-                let
-                    nextLocations =
-                        List.map (RailLocation.mul params.location.location) <| Nonempty.tail railPiece.railLocations
-
-                    pierLocations =
-                        List.map (PierLocation.mul params.location.location) <| railPiece.pierLocations
-                in
                 { rail = rail
-                , nextLocations = nextLocations
-                , railPlacement = toRailPlacement rail (RailLocation.mul params.location.location railPiece.origin)
-                , pierLocations = pierLocations
+                , nextLocations =
+                    List.map (RailLocation.mul params.location.location) <| Nonempty.tail railPiece.railLocations
+                , railPlacement =
+                    toRailPlacement rail (RailLocation.mul params.location.location railPiece.origin)
+                , pierLocations =
+                    List.map (PierLocation.mul params.location.location) <| railPiece.pierLocations
                 }
             )
 
