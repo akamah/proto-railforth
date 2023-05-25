@@ -122,7 +122,7 @@ railForthGlossary =
         , ( "ap1", executePlaceRail AutoPoint 1 )
         , ( "ap2", executePlaceRail AutoPoint 2 )
         , ( "ap3", executePlaceRail AutoPoint 3 )
-        , ( "elevate", executeElevate 4 )
+        , ( "ascend", executeAscend 4 )
         ]
 
 
@@ -272,8 +272,8 @@ executePlaceRail railType rotation cont status =
                     haltWithError "Joint mismatch" status
 
 
-executeElevate : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeElevate amount cont status =
+executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeAscend amount cont status =
     case status.stack of
         [] ->
             haltWithError "Stack empty" status
