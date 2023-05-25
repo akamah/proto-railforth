@@ -232,6 +232,11 @@ showRails model rails =
         rails
 
 
+lightFromAbove : Vec3
+lightFromAbove =
+    vec3 (2.0 / 27.0) (26.0 / 27.0) (7.0 / 27.0)
+
+
 showRail : Mat4 -> Mat4 -> Mesh -> Vec3 -> Float -> Entity
 showRail projectionTransform viewTransform mesh origin angle =
     let
@@ -248,6 +253,7 @@ showRail projectionTransform viewTransform mesh origin angle =
         { projectionTransform = projectionTransform
         , viewTransform = viewTransform
         , modelTransform = modelTransform
+        , light = lightFromAbove
         }
 
 
@@ -288,6 +294,7 @@ showPier projectionTransform viewTransform mesh origin angle =
         { projectionTransform = projectionTransform
         , viewTransform = viewTransform
         , modelTransform = modelTransform
+        , light = lightFromAbove
         }
 
 
@@ -605,6 +612,7 @@ type alias Uniforms =
     { modelTransform : Mat4
     , viewTransform : Mat4
     , projectionTransform : Mat4
+    , light : Vec3
     }
 
 
@@ -655,7 +663,7 @@ makeLookAt azimuth altitude target =
     Mat4.makeLookAt (Vec3.add target (vec3 x y z)) target (vec3 0 1 0)
 
 
-railVertexShader : Shader Vertex Uniforms { contrast : Float, edge : Float, color : Vec3 }
+railVertexShader : Shader Vertex Uniforms { edge : Float, color : Vec3 }
 railVertexShader =
     [glsl|
         attribute vec3 position;
@@ -664,44 +672,46 @@ railVertexShader =
         uniform mat4 modelTransform;
         uniform mat4 viewTransform;
         uniform mat4 projectionTransform;
+        uniform vec3 light;
         
-        varying highp float contrast;
         varying highp float edge;
         varying highp vec3 color;
 
         void main() {
             highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
+            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
             // blue to green ratio. 0 <--- blue   green ---> 1.0
             highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);
-            gl_Position = projectionTransform * viewTransform * worldPosition;
 
             const highp vec3 blue = vec3(0.12, 0.56, 1.0);
             const highp vec3 green = vec3(0.12, 1.0, 0.56);
 
-            color = ratio * green + (1.0 - ratio) * blue;
+            highp float lambertFactor = dot(worldNormal, vec4(light, 0));
+            highp float intensity = 0.3 + 0.7 * lambertFactor;
+            color = intensity * (ratio * green + (1.0 - ratio) * blue);
 
-            contrast = 0.5 + 0.5 * normal[1] * normal[1]; // XZ face should be blue
             edge = distance(vec3(0.0, 0.0, 0.0), position);
+
+            gl_Position = projectionTransform * viewTransform * worldPosition;
         }
     |]
 
 
-railFragmentShader : Shader {} Uniforms { contrast : Float, edge : Float, color : Vec3 }
+railFragmentShader : Shader {} Uniforms { edge : Float, color : Vec3 }
 railFragmentShader =
     [glsl|
-        varying highp float contrast;
         varying highp float edge;
         varying highp vec3 color;
 
         void main() {
             highp float dist_density = min(edge / 30.0 + 0.2, 1.0);
-            gl_FragColor = vec4(dist_density * contrast * color, dist_density);
+            gl_FragColor = vec4(color, dist_density);
         }
     |]
 
 
-pierVertexShader : Shader Vertex Uniforms {}
+pierVertexShader : Shader Vertex Uniforms { color : Vec3 }
 pierVertexShader =
     [glsl|
         attribute vec3 position;
@@ -710,18 +720,30 @@ pierVertexShader =
         uniform mat4 modelTransform;
         uniform mat4 viewTransform;
         uniform mat4 projectionTransform;
-        
+        uniform vec3 light;
+
+        varying highp vec3 color;
+
         void main() {
-            gl_Position = projectionTransform * viewTransform * modelTransform * vec4(position, 1.0);
+            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
+            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
+
+            const highp vec3 yellow = vec3(1.0, 1.0, 0.3);
+            highp float lambertFactor = dot(worldNormal, vec4(light, 0));
+            highp float intensity = 0.5 + 0.5 * lambertFactor;
+            color = intensity * yellow;
+
+            gl_Position = projectionTransform * viewTransform * worldPosition;
         }
     |]
 
 
-pierFragmentShader : Shader {} Uniforms {}
+pierFragmentShader : Shader {} Uniforms { color : Vec3 }
 pierFragmentShader =
     [glsl|
+        varying highp vec3 color;
+
         void main() {
-            const highp vec3 yellow = vec3(0.9, 0.9, 0.2);
-            gl_FragColor = vec4(yellow, 1.0);
+            gl_FragColor = vec4(color, 1.0);
         }
     |]
