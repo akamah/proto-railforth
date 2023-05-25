@@ -3,8 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport, getViewport)
 import Browser.Events as BE exposing (onResize)
-import Dict
-import Forth.Interpreter exposing (ExecResult, emptyResult, execute)
+import Forth.Interpreter as Interpreter
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
@@ -56,7 +55,9 @@ type alias Model =
     , target : Vec3
     , draggingState : Maybe DraggingState
     , program : String
-    , execResult : ExecResult
+    , rails : List RailPlacement
+    , piers : List PierPlacement
+    , errMsg : Maybe String
     , splitBarDragState : Maybe ( Float, Float )
     , splitBarPosition : Float
     }
@@ -82,7 +83,9 @@ initModel =
     , target = vec3 1000 0 -500
     , draggingState = Nothing
     , program = ""
-    , execResult = emptyResult
+    , rails = []
+    , piers = []
+    , errMsg = Nothing
     , splitBarDragState = Nothing
     , splitBarPosition = 1000.0
     }
@@ -150,15 +153,16 @@ view model =
             , onWheelHandler model
             ]
           <|
-            showRails model model.execResult.rails
-                ++ showPiers model model.execResult.piers
+            showRails model model.rails
+                ++ showPiers model model.piers
         , Html.div
-            [ -- style "display" <|
-              -- if model.execResult.errMsg == Nothing then
-              --     "none"
-              -- else
-              --     "block"
-              style "position" "absolute"
+            [ style "display" <|
+                if model.errMsg == Nothing then
+                    "none"
+
+                else
+                    "block"
+            , style "position" "absolute"
             , style "left" (px 0)
             , style "top" (px railViewTop)
             , style "width" (px model.viewport.width)
@@ -167,14 +171,7 @@ view model =
             , style "pointer-events" "none"
             , style "z-index" "100"
             ]
-          --            [ Html.text <| Maybe.withDefault "" <| model.execResult.errMsg ]
-          <|
-            List.map
-                (\( name, count ) ->
-                    Html.p [ style "margin" "0px" ] [ Html.text <| name ++ ": " ++ String.fromInt count ]
-                )
-            <|
-                Dict.toList model.execResult.railCount
+            [ Html.text <| Maybe.withDefault "" <| model.errMsg ]
         , Html.div
             [ style "display" "block"
             , style "position" "absolute"
@@ -318,10 +315,24 @@ update msg model =
             ( updateViewport width height model, Cmd.none )
 
         UpdateScript program ->
-            ( { model
-                | program = program
-                , execResult = execute program
-              }
+            let
+                execResult =
+                    Interpreter.execute program
+            in
+            ( case execResult.errMsg of
+                Nothing ->
+                    { model
+                        | program = program
+                        , rails = execResult.rails
+                        , piers = execResult.piers
+                        , errMsg = Nothing
+                    }
+
+                Just errMsg ->
+                    { model
+                        | program = program
+                        , errMsg = Just errMsg
+                    }
             , Storage.save program
             )
 
