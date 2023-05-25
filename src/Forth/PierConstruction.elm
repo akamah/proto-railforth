@@ -71,24 +71,24 @@ pierLocationToPlacement kind loc =
     }
 
 
-constructSinglePier : List PierLocation -> List PierPlacement
+constructSinglePier : List PierLocation -> Result String (List PierPlacement)
 constructSinglePier list =
     constructSinglePierRec [] 0 <| mergePierLocations list
 
 
-constructSinglePierRec : List PierPlacement -> Int -> List ( Int, PierLocation ) -> List PierPlacement
+constructSinglePierRec : List PierPlacement -> Int -> List ( Int, PierLocation ) -> Result String (List PierPlacement)
 constructSinglePierRec accum current locs =
     case locs of
         [] ->
-            accum
+            Ok accum
 
         [ ( h, l ) ] ->
-            buildSingleUpto l accum (h - l.margin.bottom) current
+            Ok <| buildSingleUpto l accum (h - l.margin.bottom) current
 
         ( h0, l0 ) :: ( h1, l1 ) :: ls ->
             if h0 + l0.margin.top > h1 - l1.margin.bottom then
                 -- もし交差していて設置できなかったらエラーとする
-                Debug.todo "error"
+                Err "error on pier construction"
 
             else
                 -- current から h0 - l0.margin.bottom まで建設する。
@@ -145,9 +145,13 @@ mergePierLocations list =
 
 singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierPlacement)
 singlePier single =
-    Result.Ok <|
-        List.concatMap (Tuple.second >> Tuple.second >> constructSinglePier) <|
-            Dict.toList single
+    foldlResult
+        (\( _, ( _, pierLocs ) ) result ->
+            Result.map (\r1 -> List.append r1 result) (constructSinglePier pierLocs)
+        )
+        []
+    <|
+        Dict.toList single
 
 
 {-| the main function of pier-construction
