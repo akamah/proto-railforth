@@ -1,4 +1,3 @@
-module Forth.Interpreter exposing (ExecResult, emptyResult, execute)
 
 import Dict exposing (Dict)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
@@ -35,13 +34,6 @@ type alias ExecResult =
     -- hukusen piers
     -- statistics :: count of rails...
     }
-
-
-{-| エディタなどで何もしていないときに最初に表示されることを想定
--}
-emptyResult : ExecResult
-emptyResult =
-    execute ""
 
 
 execute : String -> ExecResult
