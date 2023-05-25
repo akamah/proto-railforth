@@ -608,18 +608,6 @@ type alias Uniforms =
     }
 
 
-makeTransform : Model -> Mat4
-makeTransform model =
-    let
-        ortho =
-            makeOrtho model.viewport.width model.splitBarPosition model.pixelPerUnit
-
-        lookat =
-            makeLookAt model.azimuth model.altitude model.target
-    in
-    Mat4.mul ortho lookat
-
-
 makeMeshMatrix : Vec3 -> Float -> Mat4
 makeMeshMatrix origin angle =
     let
