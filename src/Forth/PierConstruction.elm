@@ -74,29 +74,27 @@ pierLocationToPlacement kind loc =
 
 constructSinglePier : List PierLocation -> Result String (List PierPlacement)
 constructSinglePier list =
-    constructSinglePierRec [] 0 <| mergePierLocations list
+    constructSinglePierRec [] 0 0 <| mergePierLocations list
 
 
-constructSinglePierRec : List PierPlacement -> Int -> List ( Int, PierLocation ) -> Result String (List PierPlacement)
-constructSinglePierRec accum current locs =
+constructSinglePierRec : List PierPlacement -> Int -> Int -> List ( Int, PierLocation ) -> Result String (List PierPlacement)
+constructSinglePierRec accum current top locs =
     case locs of
         [] ->
             Ok accum
 
-        [ ( h, l ) ] ->
-            Ok <| buildSingleUpto l accum (h - l.margin.bottom) current
-
-        ( h0, l0 ) :: ( h1, l1 ) :: ls ->
-            if h0 + l0.margin.top > h1 - l1.margin.bottom then
+        ( h, l ) :: ls ->
+            if top > h - l.margin.bottom then
                 -- もし交差していて設置できなかったらエラーとする
                 Err "error on pier construction"
 
             else
                 -- current から h0 - l0.margin.bottom まで建設する。
                 constructSinglePierRec
-                    (buildSingleUpto l0 accum (h0 - l0.margin.bottom) current)
-                    h0
-                    (( h1, l1 ) :: ls)
+                    (buildSingleUpto l accum (h - l.margin.bottom) current)
+                    h
+                    (h + l.margin.top)
+                    ls
 
 
 buildSingleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
@@ -172,12 +170,12 @@ doubleTrackPiersRec single double open list =
             Ok ( single, double )
 
         ( key, ( dir, pierLocs ) ) :: xs ->
-            case pierLocs of
-                [] ->
+            case List.head pierLocs of
+                Nothing ->
                     Err "pier list is empty"
 
                 -- something is wrong
-                pierLoc :: _ ->
+                Just pierLoc ->
                     -- 巡回済みでないことを確認する
                     if Dict.member key open then
                         let
@@ -224,8 +222,64 @@ doubleTrackPiersRec single double open list =
 
 
 doublePier : Dict String ( Dir, List PierLocation, List PierLocation ) -> Result String (List PierPlacement)
-doublePier dict =
-    Ok []
+doublePier double =
+    foldlResult
+        (\( _, ( _, centerLocs, leftLocs ) ) result ->
+            Result.map (\r1 -> List.append r1 result) (constructDoublePier centerLocs leftLocs)
+        )
+        []
+    <|
+        Dict.toList double
+
+
+{-| 現状では、複線橋脚だけで建設することにする
+-}
+constructDoublePier : List PierLocation -> List PierLocation -> Result String (List PierPlacement)
+constructDoublePier center left =
+    let
+        maxHeight =
+            Basics.max (maximumHeight center) (maximumHeight left)
+    in
+    case List.head center of
+        Nothing ->
+            Err "center position of double track pier is empty"
+
+        Just loc ->
+            Ok <| buildDoubleUpto loc [] maxHeight 0
+
+
+buildDoubleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
+buildDoubleUpto template accum to from =
+    if from >= to then
+        Debug.log "accum" accum
+
+    else
+        buildDoubleUpto
+            template
+            (pierLocationToPlacement Pier.Wide (PierLocation.setHeight from template) :: accum)
+            to
+            (from + Pier.getHeight Pier.Wide)
+
+
+maximumHeight : List PierLocation -> Int
+maximumHeight ls =
+    List.foldl (\loc -> Basics.max loc.location.height) 0 ls
+
+
+
+-- {-| 現状では、複線橋脚だけで建設することにする
+-- -}
+-- constructDoublePierRec : List PierPlacement -> Int -> Int -> List ( Int, PierLocation ) -> List ( Int, PierLocation ) -> Result String (List PierPlacement)
+-- constructDoublePierRec accum current top centers lefts =
+--     case ( centers, lefts ) of
+--         ( [], [] ) ->
+--             Ok accum
+--         ( [], ( h1, l1 ) :: ys ) ->
+--             ys
+--         ( ( h0, l0 ) :: xs, [] ) ->
+--             ys
+--         ( [], ( h1, l1 ) :: ys ) ->
+--             ys
 
 
 {-| the main function of pier-construction
