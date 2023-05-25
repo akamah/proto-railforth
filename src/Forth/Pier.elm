@@ -37,9 +37,3 @@ getHeight pier =
 
         Mini ->
             1
-
-
-
--- doubleTrackConstruct : Dict String ( Dir4, List PierLocation ) -> ( Dict String ( Dir4, List PierLocation ), Dict String ( Dir4, List PierLocation, List PierLocation ) )
--- doubleTrackConstruct state = doubleTrackConstructRec state Dict.empty Dict.empty
--- doubleTrackConstructRec state single double =
