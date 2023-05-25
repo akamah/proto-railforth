@@ -214,13 +214,17 @@ view model =
 showRails : Model -> List RailPlacement -> List Entity
 showRails model rails =
     let
-        modelTransform =
-            makeTransform model
+        projectionTransform =
+            makeOrtho model.viewport.width model.splitBarPosition model.pixelPerUnit
+
+        viewTransform =
+            makeLookAt model.azimuth model.altitude model.target
     in
     List.map
         (\railPosition ->
             showRail
-                modelTransform
+                projectionTransform
+                viewTransform
                 (Mesh.getRailMesh model.meshes railPosition.rail)
                 railPosition.position
                 railPosition.angle
@@ -228,8 +232,12 @@ showRails model rails =
         rails
 
 
-showRail : Mat4 -> Mesh -> Vec3 -> Float -> Entity
-showRail modelTransform mesh origin angle =
+showRail : Mat4 -> Mat4 -> Mesh -> Vec3 -> Float -> Entity
+showRail projectionTransform viewTransform mesh origin angle =
+    let
+        modelTransform =
+            makeMeshMatrix origin angle
+    in
     WebGL.entityWith
         [ DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
@@ -237,23 +245,26 @@ showRail modelTransform mesh origin angle =
         railVertexShader
         railFragmentShader
         mesh
-        (uniforms modelTransform
-            origin
-            angle
-            False
-        )
+        { projectionTransform = projectionTransform
+        , viewTransform = viewTransform
+        , modelTransform = modelTransform
+        }
 
 
 showPiers : Model -> List PierPlacement -> List Entity
 showPiers model piers =
     let
-        modelTransform =
-            makeTransform model
+        projectionTransform =
+            makeOrtho model.viewport.width model.splitBarPosition model.pixelPerUnit
+
+        viewTransform =
+            makeLookAt model.azimuth model.altitude model.target
     in
     List.map
         (\pierPlacement ->
             showPier
-                modelTransform
+                projectionTransform
+                viewTransform
                 (Mesh.getPierMesh model.meshes pierPlacement.pier)
                 pierPlacement.position
                 pierPlacement.angle
@@ -261,8 +272,12 @@ showPiers model piers =
         piers
 
 
-showPier : Mat4 -> Mesh -> Vec3 -> Float -> Entity
-showPier modelTransform mesh origin angle =
+showPier : Mat4 -> Mat4 -> Mesh -> Vec3 -> Float -> Entity
+showPier projectionTransform viewTransform mesh origin angle =
+    let
+        modelTransform =
+            makeMeshMatrix origin angle
+    in
     WebGL.entityWith
         [ DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
@@ -270,11 +285,10 @@ showPier modelTransform mesh origin angle =
         pierVertexShader
         pierFragmentShader
         mesh
-        (uniforms modelTransform
-            origin
-            angle
-            False
-        )
+        { projectionTransform = projectionTransform
+        , viewTransform = viewTransform
+        , modelTransform = modelTransform
+        }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -588,26 +602,10 @@ doPanning model ( x0, y0 ) ( x, y ) =
 
 
 type alias Uniforms =
-    { transform : Mat4
-    , height : Float
+    { modelTransform : Mat4
+    , viewTransform : Mat4
+    , projectionTransform : Mat4
     }
-
-
-uniforms : Mat4 -> Vec3 -> Float -> Bool -> Uniforms
-uniforms modelTransform origin rotate flipped =
-    { transform =
-        Mat4.mul modelTransform (makeMeshMatrix origin rotate flipped)
-    , height = Vec3.getY origin
-    }
-
-
-makeFlip : Bool -> Mat4
-makeFlip flipped =
-    if flipped then
-        Mat4.makeRotate Basics.pi (vec3 1.0 0.0 0.0)
-
-    else
-        Mat4.identity
 
 
 makeTransform : Model -> Mat4
@@ -622,8 +620,8 @@ makeTransform model =
     Mat4.mul ortho lookat
 
 
-makeMeshMatrix : Vec3 -> Float -> Bool -> Mat4
-makeMeshMatrix origin angle flipped =
+makeMeshMatrix : Vec3 -> Float -> Mat4
+makeMeshMatrix origin angle =
     let
         position =
             Mat4.makeTranslate origin
@@ -631,7 +629,7 @@ makeMeshMatrix origin angle flipped =
         rotate =
             Mat4.makeRotate angle (vec3 0 1 0)
     in
-    Mat4.mul position <| Mat4.mul rotate (makeFlip flipped)
+    Mat4.mul position rotate
 
 
 orthoScale : Float -> Float
@@ -669,38 +667,46 @@ makeLookAt azimuth altitude target =
     Mat4.makeLookAt (Vec3.add target (vec3 x y z)) target (vec3 0 1 0)
 
 
-railVertexShader : Shader Vertex Uniforms { contrast : Float, edge : Float }
+railVertexShader : Shader Vertex Uniforms { contrast : Float, edge : Float, color : Vec3 }
 railVertexShader =
     [glsl|
         attribute vec3 position;
         attribute vec3 normal;
         
-        uniform mat4 transform;
+        uniform mat4 modelTransform;
+        uniform mat4 viewTransform;
+        uniform mat4 projectionTransform;
         
         varying highp float contrast;
         varying highp float edge;
+        varying highp vec3 color;
 
         void main() {
-            gl_Position = transform * vec4(position, 1.0);
+            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
+
+            // blue to green ratio. 0 <--- blue   green ---> 1.0
+            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);
+            gl_Position = projectionTransform * viewTransform * worldPosition;
+
+            const highp vec3 blue = vec3(0.12, 0.56, 1.0);
+            const highp vec3 green = vec3(0.12, 1.0, 0.56);
+
+            color = ratio * green + (1.0 - ratio) * blue;
+
             contrast = 0.5 + 0.5 * normal[1] * normal[1]; // XZ face should be blue
             edge = distance(vec3(0.0, 0.0, 0.0), position);
         }
     |]
 
 
-railFragmentShader : Shader {} Uniforms { contrast : Float, edge : Float }
+railFragmentShader : Shader {} Uniforms { contrast : Float, edge : Float, color : Vec3 }
 railFragmentShader =
     [glsl|
         varying highp float contrast;
         varying highp float edge;
-
-        uniform highp float height;
+        varying highp vec3 color;
 
         void main() {
-            const highp vec3 blue = vec3(0.12, 0.56, 1.0);
-            const highp vec3 green = vec3(0.12, 1.0, 0.56);
-            highp float ratio = clamp(height / 660.0, 0.0, 1.0);
-            highp vec3 color = ratio * green + (1.0 - ratio) * blue;
             highp float dist_density = min(edge / 30.0 + 0.2, 1.0);
             gl_FragColor = vec4(dist_density * contrast * color, dist_density);
         }
@@ -713,10 +719,12 @@ pierVertexShader =
         attribute vec3 position;
         attribute vec3 normal;
         
-        uniform mat4 transform;
+        uniform mat4 modelTransform;
+        uniform mat4 viewTransform;
+        uniform mat4 projectionTransform;
         
         void main() {
-            gl_Position = transform * vec4(position, 1.0);
+            gl_Position = projectionTransform * viewTransform * modelTransform * vec4(position, 1.0);
         }
     |]
 
