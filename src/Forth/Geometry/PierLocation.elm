@@ -76,13 +76,6 @@ setHeight newHeight loc =
     { loc | location = Location.setHeight newHeight loc.location }
 
 
-
--- moveLeftByDoubleTrackLength : PierLocation -> Location
--- moveLeftByDoubleTrackLength loc =
---     Location.add loc.location <|
---         Location.make Rot45.zero (Dir4.toRot45 (Dir4.mul loc.dir Dir4.n)) 0
-
-
 mul : Location -> PierLocation -> PierLocation
 mul global local =
     { location = Location.mul global local.location

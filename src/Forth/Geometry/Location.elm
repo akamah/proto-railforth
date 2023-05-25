@@ -4,6 +4,7 @@ module Forth.Geometry.Location exposing
     , flip
     , inv
     , make
+    , moveLeftByDoubleTrackLength
     , mul
     , setHeight
     , toVec3
@@ -93,6 +94,12 @@ setHeight newHeight location =
 addHeight : Int -> Location -> Location
 addHeight diffHeight location =
     { location | height = location.height + diffHeight }
+
+
+moveLeftByDoubleTrackLength : Location -> Location
+moveLeftByDoubleTrackLength loc =
+    mul loc <|
+        make Rot45.zero (Dir.toRot45 Dir.n) 0 Dir.e
 
 
 toVec3 : Location -> Vec3

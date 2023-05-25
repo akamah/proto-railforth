@@ -2,6 +2,7 @@ module Forth.PierConstruction exposing (toPierPlacement)
 
 import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir exposing (Dir)
+import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
 import Forth.Geometry.Rot45 as Rot45
 import Forth.Pier as Pier exposing (Pier)
@@ -20,9 +21,9 @@ cleansePierPlacements =
         )
 
 
-pierKey : PierLocation -> String
+pierKey : Location -> String
 pierKey loc =
-    Rot45.toString loc.location.single ++ "," ++ Rot45.toString loc.location.double
+    Rot45.toString loc.single ++ "," ++ Rot45.toString loc.double
 
 
 foldlResult : (a -> b -> Result err b) -> b -> List a -> Result err b
@@ -46,7 +47,7 @@ divideIntoDict : List PierLocation -> Result String (Dict String ( Dir, List Pie
 divideIntoDict =
     foldlResult
         (\loc ->
-            updateWithResult (pierKey loc)
+            updateWithResult (pierKey loc.location)
                 (\maybe ->
                     case maybe of
                         Nothing ->
@@ -57,7 +58,7 @@ divideIntoDict =
                                 Ok ( dir, loc :: lis )
 
                             else
-                                Err <| "pier direction mismatch at " ++ pierKey loc
+                                Err <| "pier direction mismatch at " ++ pierKey loc.location
                 )
         )
         Dict.empty
@@ -154,6 +155,79 @@ singlePier single =
         Dict.toList single
 
 
+doubleTrackPiers : Dict String ( Dir, List PierLocation ) -> Result String ( Dict String ( Dir, List PierLocation ), Dict String ( Dir, List PierLocation, List PierLocation ) )
+doubleTrackPiers dict =
+    doubleTrackPiersRec Dict.empty Dict.empty dict (Dict.toList dict)
+
+
+doubleTrackPiersRec :
+    Dict String ( Dir, List PierLocation )
+    -> Dict String ( Dir, List PierLocation, List PierLocation )
+    -> Dict String ( Dir, List PierLocation )
+    -> List ( String, ( Dir, List PierLocation ) )
+    -> Result String ( Dict String ( Dir, List PierLocation ), Dict String ( Dir, List PierLocation, List PierLocation ) )
+doubleTrackPiersRec single double open list =
+    case list of
+        [] ->
+            Ok ( single, double )
+
+        ( key, ( dir, pierLocs ) ) :: xs ->
+            case pierLocs of
+                [] ->
+                    Err "pier list is empty"
+
+                -- something is wrong
+                pierLoc :: _ ->
+                    -- 巡回済みでないことを確認する
+                    if Dict.member key open then
+                        let
+                            leftKey =
+                                pierKey (Location.moveLeftByDoubleTrackLength pierLoc.location)
+                        in
+                        case Dict.get leftKey single of
+                            Just ( dir2, pierLocs2 ) ->
+                                -- single　の方にすでに入れられたものと併合する。
+                                if dir == dir2 then
+                                    doubleTrackPiersRec
+                                        (Dict.remove leftKey single)
+                                        (Dict.insert key ( dir, pierLocs, pierLocs2 ) double)
+                                        (Dict.remove key open)
+                                        xs
+
+                                else
+                                    Err "direction mismatch with neighbor"
+
+                            Nothing ->
+                                case Dict.get leftKey open of
+                                    Just ( dir2, pierLocs2 ) ->
+                                        -- open の方にまだ残っていたものと併合する
+                                        if dir == dir2 then
+                                            doubleTrackPiersRec
+                                                single
+                                                (Dict.insert key ( dir, pierLocs, pierLocs2 ) double)
+                                                (Dict.remove leftKey <| Dict.remove key open)
+                                                xs
+
+                                        else
+                                            Err "direction mismatch with neighbor"
+
+                                    Nothing ->
+                                        -- 横方向にはなさそうなので、singleに追加する
+                                        doubleTrackPiersRec
+                                            (Dict.insert key ( dir, pierLocs ) single)
+                                            double
+                                            (Dict.remove key open)
+                                            xs
+
+                    else
+                        doubleTrackPiersRec single double open xs
+
+
+doublePier : Dict String ( Dir, List PierLocation, List PierLocation ) -> Result String (List PierPlacement)
+doublePier dict =
+    Ok []
+
+
 {-| the main function of pier-construction
 -}
 toPierPlacement : List PierLocation -> Result String (List PierPlacement)
@@ -161,4 +235,10 @@ toPierPlacement list =
     Result.Ok list
         |> Result.map cleansePierPlacements
         |> Result.andThen divideIntoDict
-        |> Result.andThen singlePier
+        |> Result.andThen doubleTrackPiers
+        |> Result.andThen
+            (\( single, double ) ->
+                Result.map2 (\s d -> s ++ d)
+                    (singlePier single)
+                    (doublePier double)
+            )
