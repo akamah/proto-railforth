@@ -1,5 +1,6 @@
 module Forth.Pier exposing
     ( Pier(..)
+    , getHeight
     , toString
     )
 
@@ -23,6 +24,19 @@ toString pier =
 
         Mini ->
             "pier_4"
+
+
+getHeight : Pier -> Int
+getHeight pier =
+    case pier of
+        Single ->
+            4
+
+        Wide ->
+            4
+
+        Mini ->
+            1
 
 
 

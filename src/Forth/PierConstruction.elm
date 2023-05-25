@@ -1,8 +1,8 @@
-module Forth.PierConstruction exposing (..)
+module Forth.PierConstruction exposing (toPierPlacement)
 
 import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir exposing (Dir)
-import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
+import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
 import Forth.Geometry.Rot45 as Rot45
 import Forth.Pier as Pier exposing (Pier)
 import PierPlacement exposing (PierPlacement)
@@ -71,10 +71,82 @@ pierLocationToPlacement kind loc =
     }
 
 
+constructSinglePier : List PierLocation -> List PierPlacement
+constructSinglePier list =
+    constructSinglePierRec [] 0 <| mergePierLocations list
+
+
+constructSinglePierRec : List PierPlacement -> Int -> List ( Int, PierLocation ) -> List PierPlacement
+constructSinglePierRec accum current locs =
+    case locs of
+        [] ->
+            accum
+
+        [ ( h, l ) ] ->
+            buildSingleUpto l accum (h - l.margin.bottom) current
+
+        ( h0, l0 ) :: ( h1, l1 ) :: ls ->
+            if h0 + l0.margin.top > h1 - l1.margin.bottom then
+                -- もし交差していて設置できなかったらエラーとする
+                Debug.todo "error"
+
+            else
+                -- current から h0 - l0.margin.bottom まで建設する。
+                constructSinglePierRec
+                    (buildSingleUpto l0 accum (h0 - l0.margin.bottom) current)
+                    h0
+                    (( h1, l1 ) :: ls)
+
+
+buildSingleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
+buildSingleUpto template accum to from =
+    if from >= to then
+        accum
+
+    else if to >= from + Pier.getHeight Pier.Single then
+        buildSingleUpto
+            template
+            (pierLocationToPlacement Pier.Single (PierLocation.setHeight from template) :: accum)
+            to
+            (from + Pier.getHeight Pier.Single)
+
+    else
+        buildSingleUpto
+            template
+            (pierLocationToPlacement Pier.Mini (PierLocation.setHeight from template) :: accum)
+            to
+            (from + Pier.getHeight Pier.Mini)
+
+
+mergeMargin : PierMargin -> PierMargin -> PierMargin
+mergeMargin x y =
+    { top = max x.top y.top
+    , bottom = max x.bottom y.bottom
+    }
+
+
+mergePierLocations : List PierLocation -> List ( Int, PierLocation )
+mergePierLocations list =
+    Dict.toList <|
+        List.foldl
+            (\loc ->
+                Dict.update loc.location.height <|
+                    \elem ->
+                        case elem of
+                            Nothing ->
+                                Just loc
+
+                            Just x ->
+                                Just { x | margin = mergeMargin x.margin loc.margin }
+            )
+            Dict.empty
+            list
+
+
 singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierPlacement)
 singlePier single =
     Result.Ok <|
-        List.concatMap (Tuple.second >> Tuple.second >> List.map (pierLocationToPlacement Pier.Single)) <|
+        List.concatMap (Tuple.second >> Tuple.second >> constructSinglePier) <|
             Dict.toList single
 
 

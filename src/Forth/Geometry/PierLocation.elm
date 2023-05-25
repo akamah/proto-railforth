@@ -6,6 +6,7 @@ module Forth.Geometry.PierLocation exposing
     , fromRailLocation
     , make
     , mul
+    , setHeight
     , slopeCurveMargin
     , toVec3
     )
@@ -14,6 +15,7 @@ import Forth.Geometry.Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 exposing (Rot45)
+import Forth.Pier exposing (Pier)
 import Math.Vector3 exposing (Vec3)
 
 
@@ -68,6 +70,11 @@ flip loc =
     { location = Location.flip loc.location
     , margin = loc.margin
     }
+
+
+setHeight : Int -> PierLocation -> PierLocation
+setHeight newHeight loc =
+    { loc | location = Location.setHeight newHeight loc.location }
 
 
 
