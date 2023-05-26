@@ -86,17 +86,17 @@ init flags =
     in
     ( { meshes = Mesh.init
       , viewport = { width = 0, height = 0 }
-      , azimuth = degrees -90
+      , azimuth = degrees 0
       , altitude = degrees 90
       , pixelPerUnit = 100
-      , target = vec3 1000 0 -500
+      , target = vec3 500 0 -1000
       , draggingState = Nothing
       , program = flags.program
       , rails = execResult.rails
       , piers = execResult.piers
       , errMsg = execResult.errMsg
       , splitBarDragState = Nothing
-      , splitBarPosition = 1000.0
+      , splitBarPosition = 1100.0
       }
     , Cmd.batch
         [ Task.perform SetViewport Browser.Dom.getViewport
