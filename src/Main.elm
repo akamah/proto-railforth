@@ -1,8 +1,8 @@
 module Main exposing (main)
 
 import Browser
-import Browser.Dom exposing (Viewport, getViewport)
-import Browser.Events as BE exposing (onResize)
+import Browser.Dom exposing (Viewport)
+import Browser.Events
 import Forth.Interpreter as Interpreter
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
@@ -18,7 +18,7 @@ import Storage
 import Task
 import WebGL exposing (Entity, Shader)
 import WebGL.Settings
-import WebGL.Settings.DepthTest as DepthTest
+import WebGL.Settings.DepthTest
 
 
 type Msg
@@ -63,40 +63,46 @@ type alias Model =
     }
 
 
-main : Program () Model Msg
+type alias Flags =
+    { program : String
+    }
+
+
+main : Program Flags Model Msg
 main =
     Browser.document
-        { init = always ( initModel, initCmd )
+        { init = init
         , view = document
         , subscriptions = subscriptions
         , update = update
         }
 
 
-initModel : Model
-initModel =
-    { meshes = Mesh.init
-    , viewport = { width = 0, height = 0 }
-    , azimuth = degrees -90
-    , altitude = degrees 90
-    , pixelPerUnit = 100
-    , target = vec3 1000 0 -500
-    , draggingState = Nothing
-    , program = ""
-    , rails = []
-    , piers = []
-    , errMsg = Nothing
-    , splitBarDragState = Nothing
-    , splitBarPosition = 1000.0
-    }
-
-
-initCmd : Cmd Msg
-initCmd =
-    Cmd.batch
-        [ Task.perform SetViewport getViewport
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    let
+        execResult =
+            Interpreter.execute flags.program
+    in
+    ( { meshes = Mesh.init
+      , viewport = { width = 0, height = 0 }
+      , azimuth = degrees -90
+      , altitude = degrees 90
+      , pixelPerUnit = 100
+      , target = vec3 1000 0 -500
+      , draggingState = Nothing
+      , program = flags.program
+      , rails = execResult.rails
+      , piers = execResult.piers
+      , errMsg = execResult.errMsg
+      , splitBarDragState = Nothing
+      , splitBarPosition = 1000.0
+      }
+    , Cmd.batch
+        [ Task.perform SetViewport Browser.Dom.getViewport
         , Mesh.loadMeshCmd LoadMesh
         ]
+    )
 
 
 document : Model -> Browser.Document Msg
@@ -244,7 +250,7 @@ showRail projectionTransform viewTransform mesh origin angle =
             makeMeshMatrix origin angle
     in
     WebGL.entityWith
-        [ DepthTest.default
+        [ WebGL.Settings.DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
         ]
         railVertexShader
@@ -285,7 +291,7 @@ showPier projectionTransform viewTransform mesh origin angle =
             makeMeshMatrix origin angle
     in
     WebGL.entityWith
-        [ DepthTest.default
+        [ WebGL.Settings.DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.front
         ]
         pierVertexShader
@@ -522,8 +528,7 @@ onWheelHandler _ =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Storage.load UpdateScript
-        , onResize (\w h -> Resize (toFloat w) (toFloat h))
+        [ Browser.Events.onResize (\w h -> Resize (toFloat w) (toFloat h))
         , subscriptionPan model
         , subscriptionRotate model
         , subscriptionSplitBar model
@@ -535,8 +540,8 @@ subscriptionPan model =
     case model.draggingState of
         Just (Panning _) ->
             Sub.batch
-                [ BE.onMouseMove <| Decode.map UpdatePan mouseEventDecoder
-                , BE.onMouseUp <| Decode.map EndPan mouseEventDecoder
+                [ Browser.Events.onMouseMove <| Decode.map UpdatePan mouseEventDecoder
+                , Browser.Events.onMouseUp <| Decode.map EndPan mouseEventDecoder
                 ]
 
         _ ->
@@ -548,8 +553,8 @@ subscriptionRotate model =
     case model.draggingState of
         Just (Panning _) ->
             Sub.batch
-                [ BE.onMouseMove <| Decode.map UpdateRotate mouseEventDecoder
-                , BE.onMouseUp <| Decode.map EndRotate mouseEventDecoder
+                [ Browser.Events.onMouseMove <| Decode.map UpdateRotate mouseEventDecoder
+                , Browser.Events.onMouseUp <| Decode.map EndRotate mouseEventDecoder
                 ]
 
         _ ->
@@ -561,8 +566,8 @@ subscriptionSplitBar model =
     case model.splitBarDragState of
         Just _ ->
             Sub.batch
-                [ BE.onMouseMove <| Decode.map SplitBarUpdateDrag mouseEventDecoder
-                , BE.onMouseUp <| Decode.map SplitBarEndDrag mouseEventDecoder
+                [ Browser.Events.onMouseMove <| Decode.map SplitBarUpdateDrag mouseEventDecoder
+                , Browser.Events.onMouseUp <| Decode.map SplitBarEndDrag mouseEventDecoder
                 ]
 
         Nothing ->

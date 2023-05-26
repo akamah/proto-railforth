@@ -1,4 +1,4 @@
-port module Storage exposing (load, save)
+port module Storage exposing (save)
 
 {-| LocalStrageを使うための port module.
 設定項目が増えたならここを加筆するかもしれない。
@@ -7,6 +7,3 @@ port module Storage exposing (load, save)
 
 
 port save : String -> Cmd msg
-
-
-port load : (String -> msg) -> Sub msg

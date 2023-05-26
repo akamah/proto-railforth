@@ -9,7 +9,17 @@
 
 <body>
   <script>
-    var app = Elm.Main.init();
+    const storage = window.localStorage;
+    let program = "";
+    if (storage) {
+      program = storage.getItem("program") ?? "";
+    }
+
+    var app = Elm.Main.init({
+      flags: {
+        program: program
+      }
+    });
 
     app.ports.save.subscribe(function (program) {
       const storage = window.localStorage;
@@ -17,14 +27,6 @@
         storage.setItem("program", program);
       }
     });
-
-    const storage = window.localStorage;
-    if (storage) {
-      const prog = storage.getItem("program");
-      if (prog) {
-        app.ports.load.send(prog);
-      }
-    }
   </script>
 </body>
 
