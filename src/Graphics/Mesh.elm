@@ -73,7 +73,7 @@ update msg model =
 -}
 buildMeshUri : String -> String
 buildMeshUri name =
-    "http://localhost:8080/" ++ name ++ ".obj"
+    "./assets/" ++ name ++ ".obj"
 
 
 {-| The list of mesh names. Used when loading .obj files
