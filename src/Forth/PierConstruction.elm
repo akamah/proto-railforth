@@ -249,7 +249,7 @@ constructDoublePier center left =
 buildDoubleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
 buildDoubleUpto template accum to from =
     if from >= to then
-        Debug.log "accum" accum
+        accum
 
     else
         buildDoubleUpto
