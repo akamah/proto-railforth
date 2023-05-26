@@ -12,13 +12,12 @@
     const storage = window.localStorage;
     let program = "";
     if (storage) {
-      program = storage.getItem("program") || `( Copyright 2023 AKAMA Hitoshi
+      program = storage.getItem("program") || `(
+プラレールかけ算回路 ver 1.0 
+これはプラレールでかけ算を実現するレイアウトの定義ファイルです。
+2023/05/28 に OSC 2023 Nagoya にて展示します。
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+なお、ライセンスは MIT ライセンスで提供されます。
 )
 
 ( 高さ5から始める )
@@ -30,24 +29,24 @@ s ap
   s dn ol ol dl . dl1 . ap
     ( 1階、B=1につながる経路 )
     j dn dn ol ol dn dl . dl1 . at1
-      ( まずはゴール地点 ) 
+      ( まずはゴール地点、 1 * 1 の結果を表示する場所を作る ) 
       l s rr ss ss rr s ss s ss s s s s s stop .
       ( 本筋 )
       ll ss ll ss up ll s ll up up l . ( 4階と合流することを見越して、ここで止まる。 )
     
     ( 2階、B=2につながる経路 )
     j dn dn ll ss ss at1
-      ( ゴールの方へ )
+      ( ゴールの方へ。次は 1 * 2 なので2階に向かう )
       l s rr ss ss rr tl1 . ss s ss s s s s stop .
       ( 本筋 )
-      ll ss ll ss up ll s ll up up l .
+      ll ss ll ss up ll s ll up up l . ( こちらは5階に合流します )
 
     ( 3階、B=3への経路 )
     r j ss s ll dn r l at1
-      ( ゴールの方 )
+      ( ゴールの方。1*3 の結果を出す。 3*1の結果を作る7階から合流することを見越し、一旦5階まで上がる )
       l s rr up up rr tl1 . dn s dn s s s stop .
       ( 本筋 ) 
-      ll ss ll ss up ll s ll up up l .
+      ll ss ll ss up ll s ll up up l . ( これは6階に合流する )
 
   
   ( 入力 A = 2 の経路 )
@@ -55,10 +54,10 @@ s ap
     ( 4階、入力 B = 1 につながる経路 )
     j ss ss ll dn ss at1
       ( ゴールへ )
-      l rr dn dn r .   ( 1 * 2 = 2 なので、 2階に合流 ) 
+      l rr dn dn r .   ( 2 * 1 = 2 なので、 2階に合流 ) 
       ( 本筋 )
       ll tr2 nip tr2 nip s j at nip s s s
-        ( 回転して上がっていき、5階に合流 )
+        ( 入力Aの読み込み 1 回目なので、回転して上がっていき、5階に合流して再度入力Aを読み取る )
         ll l sb sb sb sb .
 
     ( 5階、 入力 B = 2 につながる )
@@ -75,7 +74,7 @@ s ap
       l s rr ss up rr tl1 . dn s ss stop . ( 2 * 3 = 6 )
       ( 本流 )
       ll tr2 nip tr2 nip s j at nip s 
-        ( 入力Bを作る )
+        ( ここで、入力Bを作る )
         ll s ap
           ( 入力B = 1 )
           j dn ol ol ol ol dn q dl . dl1 . h r .
@@ -89,9 +88,9 @@ s ap
     ( 7 階 )
     r j ss s ll up r l at1
       ( ゴールの方へ ) 
-      l rr dn dn r . ( 3 * 1 = 3 ということで合流 )
+      l rr dn dn r . ( 3 * 1 = 3 ということで3階に合流する。 )
 
-      ( 本流 )
+      ( 本流。こちらは4階に合流する )
       ll ss ll dn dn ll ll dn ss l . 
 
     ( 8 階 )
@@ -105,11 +104,21 @@ s ap
 
     ( 9 階 )
     j up up ll up ss at1
-      ( ゴールの方へ )
+      ( ゴールの方へ。 3 * 3 = 9 )
       l rr ss ss rr ss stop .
 
       ( 本流 )
       ll ss ll dn dn ll ll dn ss l . 
+
+(
+Copyright 2023 AKAMA Hitoshi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+)
 `      ;
     }
 
