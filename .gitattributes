@@ -1,0 +1,2 @@
+# Remove build/main.js from statistics
+build/main.js linguist-vendored
