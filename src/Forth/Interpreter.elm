@@ -72,7 +72,7 @@ controlWords : Dict String (List String -> ExecStatus -> ExecResult)
 controlWords =
     Dict.fromList
         [ ( "(", executeComment 1 )
-        , ( ")", \_ -> haltWithError "extra end comment ) found" )
+        , ( ")", \_ -> haltWithError "余分なコメント終了文字 ) があります" )
         ]
 
 
@@ -148,7 +148,7 @@ executeRec toks status =
                                     thread (executeRec ts) status
 
                                 Nothing ->
-                                    haltWithError ("Undefined word: " ++ t) status
+                                    haltWithError ("未定義のワードです: " ++ t) status
 
 
 {-| haltWithError
@@ -184,7 +184,7 @@ executeDrop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
 executeDrop cont status =
     case status.stack of
         [] ->
-            haltWithError "Stack empty" status
+            haltWithError "スタックが空です" status
 
         _ :: restOfStack ->
             cont { status | stack = restOfStack }
@@ -197,7 +197,7 @@ executeSwap cont status =
             cont { status | stack = y :: x :: restOfStack }
 
         _ ->
-            haltWithError "stack should contain at least two elements" status
+            haltWithError "スタックに最低2つの要素がある必要があります" status
 
 
 executeRot : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
@@ -207,7 +207,7 @@ executeRot cont status =
             cont { status | stack = z :: x :: y :: restOfStack }
 
         _ ->
-            haltWithError "stack should contain at least three elements" status
+            haltWithError "スタックに最低3つの要素がある必要があります" status
 
 
 executeInverseRot : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
@@ -217,7 +217,7 @@ executeInverseRot cont status =
             cont { status | stack = y :: z :: x :: restOfStack }
 
         _ ->
-            haltWithError "stack should contain at least three elements" status
+            haltWithError "スタックに最低3つの要素がある必要があります" status
 
 
 executeNip : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
@@ -227,7 +227,7 @@ executeNip cont status =
             cont { status | stack = x :: restOfStack }
 
         _ ->
-            haltWithError "stack should contain at least two elements" status
+            haltWithError "スタックに最低2つの要素がある必要があります" status
 
 
 executeComment : Int -> List String -> ExecStatus -> ExecResult
@@ -238,7 +238,7 @@ executeComment depth tok status =
     else
         case tok of
             [] ->
-                haltWithError "[comment]" status
+                haltWithError "[コメント文]" status
 
             t :: ts ->
                 case t of
@@ -256,7 +256,7 @@ executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> Exe
 executePlaceRail railType rotation cont status =
     case status.stack of
         [] ->
-            haltWithError "Stack empty" status
+            haltWithError "スタックが空です" status
 
         top :: restOfStack ->
             case RailPiece.placeRail { railType = railType, location = top, rotation = rotation } of
@@ -269,14 +269,14 @@ executePlaceRail railType rotation cont status =
                         }
 
                 Nothing ->
-                    haltWithError "Joint mismatch" status
+                    haltWithError "配置するレールの凹凸が合いません" status
 
 
 executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
 executeAscend amount cont status =
     case status.stack of
         [] ->
-            haltWithError "Stack empty" status
+            haltWithError "スタックが空です" status
 
         top :: restOfStack ->
             cont { status | stack = RailLocation.addHeight amount top :: restOfStack }

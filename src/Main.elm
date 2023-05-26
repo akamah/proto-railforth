@@ -107,7 +107,7 @@ init flags =
 
 document : Model -> Browser.Document Msg
 document model =
-    { title = "RailForth prototype"
+    { title = "Railforth prototype"
     , body = [ view model ]
     }
 

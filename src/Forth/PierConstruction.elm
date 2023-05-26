@@ -58,7 +58,7 @@ divideIntoDict =
                                 Ok ( dir, loc :: lis )
 
                             else
-                                Err <| "pier direction mismatch at " ++ pierKey loc.location
+                                Err <| "橋脚の方向が一致しません " ++ pierKey loc.location
                 )
         )
         Dict.empty
@@ -86,7 +86,7 @@ constructSinglePierRec accum current top locs =
         ( h, l ) :: ls ->
             if top > h - l.margin.bottom then
                 -- もし交差していて設置できなかったらエラーとする
-                Err "error on pier construction"
+                Err "ブロックの付いたレールとかの位置関係的に配置ができません"
 
             else
                 -- current から h0 - l0.margin.bottom まで建設する。
@@ -172,7 +172,7 @@ doubleTrackPiersRec single double open list =
         ( key, ( dir, pierLocs ) ) :: xs ->
             case List.head pierLocs of
                 Nothing ->
-                    Err "pier list is empty"
+                    Err "複線橋脚の構築で内部的なエラーが発生しました"
 
                 -- something is wrong
                 Just pierLoc ->
@@ -193,7 +193,7 @@ doubleTrackPiersRec single double open list =
                                         xs
 
                                 else
-                                    Err "direction mismatch with neighbor"
+                                    Err "複線橋脚の構築時に隣のレールとの方向が合いません"
 
                             ( _, Just ( dir2, pierLocs2 ) ) ->
                                 -- open の方にまだ残っていたものと併合する
@@ -205,7 +205,7 @@ doubleTrackPiersRec single double open list =
                                         xs
 
                                 else
-                                    Err "direction mismatch with neighbor"
+                                    Err "複線橋脚の構築時に隣のレールとの方向が合いません"
 
                             ( _, _ ) ->
                                 -- 横方向にはなさそうなので、singleに追加する
@@ -240,7 +240,7 @@ constructDoublePier center left =
     in
     case List.head center of
         Nothing ->
-            Err "center position of double track pier is empty"
+            Err "複線橋脚の構築で内部的なエラーが発生しました"
 
         Just loc ->
             Ok <| buildDoubleUpto loc [] maxHeight 0
