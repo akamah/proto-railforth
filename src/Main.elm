@@ -16,6 +16,7 @@ import PierPlacement exposing (PierPlacement)
 import RailPlacement exposing (RailPlacement)
 import Storage
 import Task
+import Touch
 import WebGL exposing (Entity, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest
@@ -36,6 +37,10 @@ type Msg
     | SplitBarBeginDrag ( Float, Float )
     | SplitBarUpdateDrag ( Float, Float )
     | SplitBarEndDrag ( Float, Float )
+    | OnTouchRotate Float Float
+    | OnTouchMove Float Float
+    | OnTouchPinch Float
+    | TouchEvent Touch.Msg
 
 
 type DraggingState
@@ -53,6 +58,7 @@ type alias Model =
     , altitude : Float
     , pixelPerUnit : Float
     , target : Vec3
+    , touchModel : Touch.Model Msg
     , draggingState : Maybe DraggingState
     , program : String
     , rails : List RailPlacement
@@ -91,6 +97,12 @@ init flags =
       , pixelPerUnit = 100
       , target = vec3 500 0 -1000
       , draggingState = Nothing
+      , touchModel =
+            Touch.initModel
+                [ Touch.onMove { fingers = 1 } OnTouchRotate
+                , Touch.onMove { fingers = 2 } OnTouchMove
+                , Touch.onPinch OnTouchPinch
+                ]
       , program = flags.program
       , rails = execResult.rails
       , piers = execResult.piers
@@ -153,14 +165,24 @@ view model =
             , style "top" (px railViewTop)
             , style "width" (px model.viewport.width)
             , style "height" (px railViewHeight)
+            ]
+          <|
+            showRails model model.rails
+                ++ showPiers model model.piers
+        , Touch.element
+            [ style "display" "block"
+            , style "position" "absolute"
+            , style "left" (px 0)
+            , style "top" (px railViewTop)
+            , style "width" (px model.viewport.width)
+            , style "height" (px railViewHeight)
+            , style "z-index" "10"
             , onMouseUpHandler model
             , onMouseMoveHandler model
             , onMouseDownHandler model
             , onWheelHandler model
             ]
-          <|
-            showRails model model.rails
-                ++ showPiers model model.piers
+            TouchEvent
         , Html.div
             [ style "display" <|
                 if model.errMsg == Nothing then
@@ -372,10 +394,27 @@ update msg model =
         SplitBarEndDrag _ ->
             ( { model | splitBarDragState = Nothing }, Cmd.none )
 
+        OnTouchRotate x y ->
+            ( doRotation model model.draggingState ( 0, 0 ) ( x, y ), Cmd.none )
+
+        OnTouchMove x y ->
+            ( doPanning model model.draggingState ( 0, 0 ) ( x, y ), Cmd.none )
+
+        OnTouchPinch r ->
+            ( doDolly model r, Cmd.none )
+
+        TouchEvent touchMsg ->
+            Touch.update touchMsg
+                model.touchModel
+                (\newTouchModel -> { model | touchModel = newTouchModel })
+
 
 updateViewport : Float -> Float -> Model -> Model
 updateViewport w h model =
-    { model | viewport = { width = w, height = h } }
+    { model
+        | viewport = { width = w, height = h }
+        , splitBarPosition = clamp 10 (h - 10) (h * 0.8)
+    }
 
 
 updateMouseDown : Model -> ( Float, Float ) -> Model
@@ -395,14 +434,14 @@ updateMouseMove model newPoint =
             model
 
         Just (Rotating oldPoint) ->
-            doRotation model oldPoint newPoint
+            doRotation model (Just <| Rotating newPoint) oldPoint newPoint
 
         Just (Panning oldPoint) ->
-            doPanning model oldPoint newPoint
+            doPanning model (Just <| Panning newPoint) oldPoint newPoint
 
 
-doRotation : Model -> ( Float, Float ) -> ( Float, Float ) -> Model
-doRotation model ( x0, y0 ) ( x, y ) =
+doRotation : Model -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> Model
+doRotation model newState ( x0, y0 ) ( x, y ) =
     let
         dx =
             x - x0
@@ -420,7 +459,7 @@ doRotation model ( x0, y0 ) ( x, y ) =
                 |> clamp (degrees 0) (degrees 90)
     in
     { model
-        | draggingState = Just (Rotating ( x, y ))
+        | draggingState = newState
         , azimuth = azimuth
         , altitude = altitude
     }
@@ -433,9 +472,14 @@ updateMouseUp model _ =
 
 updateWheel : Model -> ( Float, Float ) -> Model
 updateWheel model ( _, dy ) =
+    doDolly model dy
+
+
+doDolly : Model -> Float -> Model
+doDolly model dy =
     let
         multiplier =
-            1.05
+            1.02
 
         delta =
             if dy < 0 then
@@ -574,8 +618,8 @@ subscriptionSplitBar model =
             Sub.none
 
 
-doPanning : Model -> ( Float, Float ) -> ( Float, Float ) -> Model
-doPanning model ( x0, y0 ) ( x, y ) =
+doPanning : Model -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> Model
+doPanning model newState ( x0, y0 ) ( x, y ) =
     let
         dx =
             x - x0
@@ -608,7 +652,7 @@ doPanning model ( x0, y0 ) ( x, y ) =
             Vec3.add model.target (Vec3.add tanx tany)
     in
     { model
-        | draggingState = Just (Panning ( x, y ))
+        | draggingState = newState
         , target = trans
     }
 
