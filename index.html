@@ -12,7 +12,107 @@
     const storage = window.localStorage;
     let program = "";
     if (storage) {
-      program = storage.getItem("program") ?? "";
+      program = storage.getItem("program") ?? `
+      (
+Copyright 2023 AKAMA Hitoshi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+)
+
+( 高さ5から始める )
+ascend ascend ascend ascend ascend
+
+( 入力Aを作る )
+s ap
+  ( 入力 A = 1の経路 )
+  s dn ol ol dl . dl1 . ap
+    ( 1階、B=1につながる経路 )
+    j dn dn ol ol dn dl . dl1 . at1
+      ( まずはゴール地点 ) 
+      l s rr ss ss rr s ss s ss s s s s s stop .
+      ( 本筋 )
+      ll ss ll ss up ll s ll up up l . ( 4階と合流することを見越して、ここで止まる。 )
+    
+    ( 2階、B=2につながる経路 )
+    j dn dn ll ss ss at1
+      ( ゴールの方へ )
+      l s rr ss ss rr tl1 . ss s ss s s s s stop .
+      ( 本筋 )
+      ll ss ll ss up ll s ll up up l .
+
+    ( 3階、B=3への経路 )
+    r j ss s ll dn r l at1
+      ( ゴールの方 )
+      l s rr up up rr tl1 . dn s dn s s s stop .
+      ( 本筋 ) 
+      ll ss ll ss up ll s ll up up l .
+
+  
+  ( 入力 A = 2 の経路 )
+  s ss ll ss ap -rot ( 思うところがあり、 2, 3, 1 の順番でやっていく )
+    ( 4階、入力 B = 1 につながる経路 )
+    j ss ss ll dn ss at1
+      ( ゴールへ )
+      l rr dn dn r .   ( 1 * 2 = 2 なので、 2階に合流 ) 
+      ( 本筋 )
+      ll tr2 nip tr2 nip s j at nip s s s
+        ( 回転して上がっていき、5階に合流 )
+        ll l sb sb sb sb .
+
+    ( 5階、 入力 B = 2 につながる )
+    r j ss s ll ss r l at1
+      ( ゴールの方へ )
+      l s rr ss up rr s  dn s dn s s stop . ( 2 * 2 = 4 )
+
+      ( 本流。4階と合流してから再度入力Aを読み取る )
+      ll tr2 nip tr2 nip s j at nip s s tr2 nip ll .
+
+    ( 6階、 入力 B = 3 につながる )
+    j ss ss ol ol up dl . dl1 . at1
+      ( ゴールの方へ )   
+      l s rr ss up rr tl1 . dn s ss stop . ( 2 * 3 = 6 )
+      ( 本流 )
+      ll tr2 nip tr2 nip s j at nip s 
+        ( 入力Bを作る )
+        ll s ap
+          ( 入力B = 1 )
+          j dn ol ol ol ol dn q dl . dl1 . h r .
+          ( 入力B = 2 )
+          j dn ll ll ss q ss h r .
+          ( 入力B = 3 )
+          l ll s q j r .
+
+  ( 戻り戻って 入力 A = 3 )
+  r up ll r l ap rot (  3 -> 1 -> 2 にしたかったので rot を行う )
+    ( 7 階 )
+    r j ss s ll up r l at1
+      ( ゴールの方へ ) 
+      l rr dn dn r . ( 3 * 1 = 3 ということで合流 )
+
+      ( 本流 )
+      ll ss ll dn dn ll ll dn ss l . 
+
+    ( 8 階 )
+    j up up ol ol ss dl . dl1 . at1
+      ( ゴール地点へ。 3 * 2 = 6 )
+      l rr dn ss r .
+
+      ( 本流 )
+      ll ss ll dn dn ll ll dn ss l . 
+
+
+    ( 9 階 )
+    j up up ll up ss at1
+      ( ゴールの方へ )
+      l rr ss ss rr ss stop .
+
+      ( 本流 )
+      ll ss ll dn dn ll ll dn ss l . 
+`      ;
     }
 
     var app = Elm.Main.init({
