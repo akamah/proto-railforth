@@ -182,8 +182,8 @@ doubleTrackPiersRec single double open list =
                             leftKey =
                                 pierKey (Location.moveLeftByDoubleTrackLength pierLoc.location)
                         in
-                        case Dict.get leftKey single of
-                            Just ( dir2, pierLocs2 ) ->
+                        case ( Dict.get leftKey single, Dict.get leftKey open ) of
+                            ( Just ( dir2, pierLocs2 ), _ ) ->
                                 -- single　の方にすでに入れられたものと併合する。
                                 if dir == dir2 then
                                     doubleTrackPiersRec
@@ -195,27 +195,25 @@ doubleTrackPiersRec single double open list =
                                 else
                                     Err "direction mismatch with neighbor"
 
-                            Nothing ->
-                                case Dict.get leftKey open of
-                                    Just ( dir2, pierLocs2 ) ->
-                                        -- open の方にまだ残っていたものと併合する
-                                        if dir == dir2 then
-                                            doubleTrackPiersRec
-                                                single
-                                                (Dict.insert key ( dir, pierLocs, pierLocs2 ) double)
-                                                (Dict.remove leftKey <| Dict.remove key open)
-                                                xs
+                            ( _, Just ( dir2, pierLocs2 ) ) ->
+                                -- open の方にまだ残っていたものと併合する
+                                if dir == dir2 then
+                                    doubleTrackPiersRec
+                                        single
+                                        (Dict.insert key ( dir, pierLocs, pierLocs2 ) double)
+                                        (Dict.remove leftKey <| Dict.remove key open)
+                                        xs
 
-                                        else
-                                            Err "direction mismatch with neighbor"
+                                else
+                                    Err "direction mismatch with neighbor"
 
-                                    Nothing ->
-                                        -- 横方向にはなさそうなので、singleに追加する
-                                        doubleTrackPiersRec
-                                            (Dict.insert key ( dir, pierLocs ) single)
-                                            double
-                                            (Dict.remove key open)
-                                            xs
+                            ( _, _ ) ->
+                                -- 横方向にはなさそうなので、singleに追加する
+                                doubleTrackPiersRec
+                                    (Dict.insert key ( dir, pierLocs ) single)
+                                    double
+                                    (Dict.remove key open)
+                                    xs
 
                     else
                         doubleTrackPiersRec single double open xs
