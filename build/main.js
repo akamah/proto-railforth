@@ -8190,7 +8190,7 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
 						A2($elm$html$Html$Attributes$style, 'font-size', 'large'),
 						A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
-						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+						A2($elm$html$Html$Attributes$style, 'touch-action', 'pan-x pan-y'),
 						$elm$html$Html$Attributes$spellcheck(false),
 						$elm$html$Html$Attributes$autocomplete(false),
 						$elm$html$Html$Events$onInput($author$project$Main$UpdateScript)
