@@ -8121,6 +8121,7 @@ var $author$project$Main$view = function (model) {
 						$author$project$Main$px(railViewHeight)),
 						A2($elm$html$Html$Attributes$style, 'font-size', '2rem'),
 						A2($elm$html$Html$Attributes$style, 'pointer-events', 'none'),
+						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
 						A2($elm$html$Html$Attributes$style, 'z-index', '100')
 					]),
 				_List_fromArray(
@@ -8155,6 +8156,7 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'background-color', 'lightgrey'),
 						A2($elm$html$Html$Attributes$style, 'border-style', 'outset'),
 						A2($elm$html$Html$Attributes$style, 'border-width', '1px'),
+						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
 						$author$project$Main$onSplitBarDragBegin(model)
 					]),
 				_List_Nil),
@@ -8188,6 +8190,7 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
 						A2($elm$html$Html$Attributes$style, 'font-size', 'large'),
 						A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
+						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
 						$elm$html$Html$Attributes$spellcheck(false),
 						$elm$html$Html$Attributes$autocomplete(false),
 						$elm$html$Html$Events$onInput($author$project$Main$UpdateScript)

@@ -197,6 +197,7 @@ view model =
             , style "height" (px railViewHeight)
             , style "font-size" "2rem"
             , style "pointer-events" "none"
+            , style "touch-action" "none"
             , style "z-index" "100"
             ]
             [ Html.text <| Maybe.withDefault "" <| model.errMsg ]
@@ -212,6 +213,7 @@ view model =
             , style "background-color" "lightgrey"
             , style "border-style" "outset"
             , style "border-width" "1px"
+            , style "touch-action" "none"
             , onSplitBarDragBegin model
             ]
             []
@@ -230,6 +232,7 @@ view model =
             , style "font-family" "monospace"
             , style "font-size" "large"
             , style "box-sizing" "border-box"
+            , style "touch-action" "none"
             , spellcheck False
             , autocomplete False
             , HE.onInput UpdateScript
