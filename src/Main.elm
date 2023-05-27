@@ -232,7 +232,7 @@ view model =
             , style "font-family" "monospace"
             , style "font-size" "large"
             , style "box-sizing" "border-box"
-            , style "touch-action" "none"
+            , style "touch-action" "pan-x pan-y"
             , spellcheck False
             , autocomplete False
             , HE.onInput UpdateScript
