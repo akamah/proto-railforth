@@ -29,13 +29,16 @@ type alias ExecError =
     String
 
 
+type alias ForthError =
+    String
+
+
 type alias ExecStatus =
-    { stack : List RailLocation
-    , global :
+    ForthStatus
+        RailLocation
         { rails : List RailPlacement
         , piers : List PierLocation
         }
-    }
 
 
 type alias ExecResult =
@@ -69,10 +72,17 @@ initialStatus =
     }
 
 
-coreGlossary : Dict String ((ExecStatus -> ExecResult) -> ExecStatus -> ExecResult)
+type alias CoreWord result stack global =
+    (ForthStatus stack global -> result)
+    -> (ForthStatus stack global -> ForthError -> result)
+    -> ForthStatus stack global
+    -> result
+
+
+coreGlossary : Dict String (CoreWord result stack global)
 coreGlossary =
     Dict.fromList
-        [ ( "", identity {- do nothing -} )
+        [ ( "", \cont _ status -> cont status {- do nothing -} )
         , ( ".", executeDrop )
         , ( "drop", executeDrop )
         , ( "swap", executeSwap )
@@ -86,7 +96,7 @@ controlWords : Dict String (List String -> ExecStatus -> ExecResult)
 controlWords =
     Dict.fromList
         [ ( "(", executeComment 1 )
-        , ( ")", \_ -> haltWithError "余分なコメント終了文字 ) があります" )
+        , ( ")", \_ status -> haltWithError status "余分なコメント終了文字 ) があります" )
         ]
 
 
@@ -154,7 +164,7 @@ executeRec toks status =
                 Nothing ->
                     case Dict.get t coreGlossary of
                         Just thread ->
-                            thread (executeRec ts) status
+                            thread (executeRec ts) haltWithError status
 
                         Nothing ->
                             case Dict.get t railForthGlossary of
@@ -162,13 +172,13 @@ executeRec toks status =
                                     thread (executeRec ts) status
 
                                 Nothing ->
-                                    haltWithError ("未定義のワードです: " ++ t) status
+                                    haltWithError status ("未定義のワードです: " ++ t)
 
 
 {-| haltWithError
 -}
-haltWithError : ExecError -> ExecStatus -> ExecResult
-haltWithError errMsg status =
+haltWithError : ExecStatus -> ExecError -> ExecResult
+haltWithError status errMsg =
     { rails = status.global.rails
     , errMsg = Just errMsg
     , railCount = Dict.empty
@@ -194,54 +204,54 @@ haltWithSuccess status =
             }
 
 
-executeDrop : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeDrop cont status =
+executeDrop : CoreWord result stack global
+executeDrop cont err status =
     case status.stack of
         [] ->
-            haltWithError "スタックが空です" status
+            err status "スタックが空です"
 
         _ :: restOfStack ->
             cont { status | stack = restOfStack }
 
 
-executeSwap : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeSwap cont status =
+executeSwap : CoreWord result stack global
+executeSwap cont err status =
     case status.stack of
         x :: y :: restOfStack ->
             cont { status | stack = y :: x :: restOfStack }
 
         _ ->
-            haltWithError "スタックに最低2つの要素がある必要があります" status
+            err status "スタックに最低2つの要素がある必要があります"
 
 
-executeRot : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeRot cont status =
+executeRot : CoreWord result stack global
+executeRot cont err status =
     case status.stack of
         x :: y :: z :: restOfStack ->
             cont { status | stack = z :: x :: y :: restOfStack }
 
         _ ->
-            haltWithError "スタックに最低3つの要素がある必要があります" status
+            err status "スタックに最低3つの要素がある必要があります"
 
 
-executeInverseRot : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeInverseRot cont status =
+executeInverseRot : CoreWord result stack global
+executeInverseRot cont err status =
     case status.stack of
         x :: y :: z :: restOfStack ->
             cont { status | stack = y :: z :: x :: restOfStack }
 
         _ ->
-            haltWithError "スタックに最低3つの要素がある必要があります" status
+            err status "スタックに最低3つの要素がある必要があります"
 
 
-executeNip : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeNip cont status =
+executeNip : CoreWord result stack global
+executeNip cont err status =
     case status.stack of
         x :: _ :: restOfStack ->
             cont { status | stack = x :: restOfStack }
 
         _ ->
-            haltWithError "スタックに最低2つの要素がある必要があります" status
+            err status "スタックに最低2つの要素がある必要があります"
 
 
 executeComment : Int -> List String -> ExecStatus -> ExecResult
@@ -252,7 +262,7 @@ executeComment depth tok status =
     else
         case tok of
             [] ->
-                haltWithError "[コメント文]" status
+                haltWithError status "[コメント文]"
 
             t :: ts ->
                 case t of
@@ -270,7 +280,7 @@ executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> Exe
 executePlaceRail railType rotation cont status =
     case status.stack of
         [] ->
-            haltWithError "スタックが空です" status
+            haltWithError status "スタックが空です"
 
         top :: restOfStack ->
             case RailPiece.placeRail { railType = railType, location = top, rotation = rotation } of
@@ -285,14 +295,14 @@ executePlaceRail railType rotation cont status =
                         }
 
                 Nothing ->
-                    haltWithError "配置するレールの凹凸が合いません" status
+                    haltWithError status "配置するレールの凹凸が合いません"
 
 
 executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
 executeAscend amount cont status =
     case status.stack of
         [] ->
-            haltWithError "スタックが空です" status
+            haltWithError status "スタックが空です"
 
         top :: restOfStack ->
             cont { status | stack = RailLocation.addHeight amount top :: restOfStack }
