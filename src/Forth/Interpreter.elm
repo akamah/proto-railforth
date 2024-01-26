@@ -11,8 +11,18 @@ import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import RailPlacement exposing (RailPlacement)
 
 
+{-| Forthの辞書。意味的には次の継続と現在の状態を与えられたら結果が得られる、というもの。
+-}
+type alias ForthDict result status =
+    Dict String ((status -> result) -> (status -> result))
 
--- -- インタープリタの定義
+
+{-| Forthの状態。スタックがあり、そのほか余計な情報がある。
+-}
+type alias ForthStatus stack global =
+    { stack : List stack
+    , global : global
+    }
 
 
 type alias ExecError =
@@ -21,8 +31,10 @@ type alias ExecError =
 
 type alias ExecStatus =
     { stack : List RailLocation
-    , rails : List RailPlacement
-    , piers : List PierLocation
+    , global :
+        { rails : List RailPlacement
+        , piers : List PierLocation
+        }
     }
 
 
@@ -50,8 +62,10 @@ tokenize string =
 initialStatus : ExecStatus
 initialStatus =
     { stack = [ RailPiece.initialLocation ]
-    , rails = []
-    , piers = []
+    , global =
+        { rails = []
+        , piers = []
+        }
     }
 
 
@@ -155,7 +169,7 @@ executeRec toks status =
 -}
 haltWithError : ExecError -> ExecStatus -> ExecResult
 haltWithError errMsg status =
-    { rails = status.rails
+    { rails = status.global.rails
     , errMsg = Just errMsg
     , railCount = Dict.empty
     , piers = []
@@ -164,18 +178,18 @@ haltWithError errMsg status =
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    case PierConstruction.toPierPlacement status.piers of
+    case PierConstruction.toPierPlacement status.global.piers of
         Ok pierPlacement ->
-            { rails = status.rails
+            { rails = status.global.rails
             , errMsg = Nothing
-            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.rails
+            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
             , piers = pierPlacement
             }
 
         Err err ->
-            { rails = status.rails
+            { rails = status.global.rails
             , errMsg = Just err
-            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.rails
+            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
             , piers = []
             }
 
@@ -263,9 +277,11 @@ executePlaceRail railType rotation cont status =
                 Just { nextLocations, railPlacement, pierLocations } ->
                     cont
                         { status
-                            | rails = railPlacement :: status.rails
-                            , stack = nextLocations ++ restOfStack
-                            , piers = pierLocations ++ status.piers
+                            | stack = nextLocations ++ restOfStack
+                            , global =
+                                { rails = railPlacement :: status.global.rails
+                                , piers = pierLocations ++ status.global.piers
+                                }
                         }
 
                 Nothing ->
