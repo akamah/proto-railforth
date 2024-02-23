@@ -7657,6 +7657,7 @@ var $author$project$Main$onWheelHandler = function (_v0) {
 		$author$project$Main$preventDefaultDecoder(
 			A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
 };
+var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $author$project$Main$px = function (x) {
 	return $elm$core$String$fromFloat(x) + 'px';
 };
@@ -7968,7 +7969,7 @@ var $author$project$Main$railFragmentShader = {
 	uniforms: {}
 };
 var $author$project$Main$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法\n            if (abs(position[1] - 1.0) < 0.05) {\n                color *= 0.85;\n            }\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position'},
 	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
 };
@@ -8107,7 +8108,7 @@ var $author$project$Main$view = function (model) {
 					]),
 				$author$project$Main$TouchEvent),
 				A2(
-				$elm$html$Html$div,
+				$elm$html$Html$pre,
 				_List_fromArray(
 					[
 						A2(
@@ -8131,7 +8132,7 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$Attributes$style,
 						'height',
 						$author$project$Main$px(railViewHeight)),
-						A2($elm$html$Html$Attributes$style, 'font-size', '2rem'),
+						A2($elm$html$Html$Attributes$style, 'font-size', '1rem'),
 						A2($elm$html$Html$Attributes$style, 'pointer-events', 'none'),
 						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
 						A2($elm$html$Html$Attributes$style, 'z-index', '100')

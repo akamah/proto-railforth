@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Events
+import Dict
 import Forth.Interpreter as Interpreter
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Html exposing (Html, div)
@@ -106,7 +107,7 @@ init flags =
       , program = flags.program
       , rails = execResult.rails
       , piers = execResult.piers
-      , errMsg = execResult.errMsg
+      , errMsg = execResult.errMsg -- Just <| formatRailCount execResult.railCount
       , splitBarDragState = Nothing
       , splitBarPosition = 1100.0
       }
@@ -115,6 +116,13 @@ init flags =
         , Mesh.loadMeshCmd LoadMesh
         ]
     )
+
+
+formatRailCount : Dict.Dict String Int -> String
+formatRailCount dict =
+    Dict.foldl (\name count accum -> accum ++ "\n" ++ name ++ ": " ++ String.fromInt count) "" dict
+        ++ "\nTotal: "
+        ++ String.fromInt (Dict.foldl (\_ count accum -> count + accum) 0 dict)
 
 
 document : Model -> Browser.Document Msg
@@ -183,7 +191,7 @@ view model =
             , onWheelHandler model
             ]
             TouchEvent
-        , Html.div
+        , Html.pre
             [ style "display" <|
                 if model.errMsg == Nothing then
                     "none"
@@ -195,7 +203,7 @@ view model =
             , style "top" (px railViewTop)
             , style "width" (px model.viewport.width)
             , style "height" (px railViewHeight)
-            , style "font-size" "2rem"
+            , style "font-size" "1rem"
             , style "pointer-events" "none"
             , style "touch-action" "none"
             , style "z-index" "100"
@@ -742,6 +750,11 @@ railVertexShader =
             highp float lambertFactor = dot(worldNormal, vec4(light, 0));
             highp float intensity = 0.3 + 0.7 * lambertFactor;
             color = intensity * (ratio * green + (1.0 - ratio) * blue);
+
+            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法
+            if (abs(position[1] - 1.0) < 0.05) {
+                color *= 0.85;
+            }
 
             edge = distance(vec3(0.0, 0.0, 0.0), position);
 
