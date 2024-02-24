@@ -1,6 +1,7 @@
 module Graphics.OFF exposing (parse)
 
 import Math.Vector3 exposing (Vec3, vec3)
+import Parser exposing ((|.), (|=), Parser)
 import String
 
 
@@ -10,126 +11,95 @@ type alias Mesh =
     }
 
 
-parse : String -> Result Error Mesh
+parse : String -> Result String Mesh
 parse input =
-    parseHeaderLine (String.lines input)
-        |> Result.andThen
-            (\( ( nv, nf, _ ), restHeader ) ->
-                parseVertex nv restHeader
-                    |> Result.andThen
-                        (\( vertices, restVertices ) ->
-                            parseFacet nf restVertices
-                                |> Result.map
-                                    (\( facets, _ ) ->
-                                        { vertices = vertices, indices = facets }
-                                    )
-                        )
+    Parser.run parser input
+        |> Result.mapError Parser.deadEndsToString
+
+
+parser : Parser Mesh
+parser =
+    header
+        |> Parser.andThen
+            (\( nv, nf, _ ) ->
+                Parser.succeed (\vs fs -> { vertices = vs, indices = fs })
+                    |= vertices nv
+                    |= facets nf
             )
 
 
-type alias Error =
-    String
+header : Parser ( Int, Int, Int )
+header =
+    Parser.succeed (\nv nf ne -> ( nv, nf, ne ))
+        |. Parser.keyword "OFF"
+        |. whitespaces
+        |= Parser.int
+        |. whitespaces
+        |= Parser.int
+        |. whitespaces
+        |= Parser.int
+        |. Parser.spaces
 
 
-parseHeaderLine : List String -> Result Error ( ( Int, Int, Int ), List String )
-parseHeaderLine lines =
-    case lines of
-        [] ->
-            Err "unexpected EOF"
-
-        line :: rest ->
-            case String.words line of
-                [ "OFF", nv, nf, ne ] ->
-                    Result.map (\vfe -> ( vfe, rest )) <|
-                        Result.fromMaybe "the header contains non-integer values" <|
-                            Maybe.map3 (\v f e -> ( v, f, e ))
-                                (String.toInt nv)
-                                (String.toInt nf)
-                                (String.toInt ne)
-
-                _ ->
-                    Err "the header format is invalid"
+vertices : Int -> Parser (List Vec3)
+vertices n =
+    replicate n vertexLine
 
 
-parseVertex : Int -> List String -> Result Error ( List Vec3, List String )
-parseVertex n lines =
-    parseVertexHelper n [] lines
+vertexLine : Parser Vec3
+vertexLine =
+    Parser.succeed vec3
+        |= Parser.float
+        |. whitespaces
+        |= Parser.float
+        |. whitespaces
+        |= Parser.float
+        |. Parser.spaces
 
 
-parseVertexHelper : Int -> List Vec3 -> List String -> Result Error ( List Vec3, List String )
-parseVertexHelper n accum lines =
-    if n <= 0 then
-        Ok ( List.reverse accum, lines )
-
-    else
-        case parseVertexLine lines of
-            Ok ( v, rest ) ->
-                parseVertexHelper (n - 1) (v :: accum) rest
-
-            Err msg ->
-                Err msg
+facets : Int -> Parser (List ( Int, Int, Int ))
+facets n =
+    replicate n facetLine
 
 
-parseVertexLine : List String -> Result Error ( Vec3, List String )
-parseVertexLine lines =
-    case lines of
-        [] ->
-            Err "unexpected EOF"
-
-        line :: rest ->
-            case String.words line of
-                sx :: sy :: sz :: _ ->
-                    Result.map (\xyz -> ( xyz, rest )) <|
-                        Result.fromMaybe "the vertex contains non-float values" <|
-                            Maybe.map3 vec3
-                                (String.toFloat sx)
-                                (String.toFloat sy)
-                                (String.toFloat sz)
-
-                _ ->
-                    Err "the vertex format is invalid"
+facetLine : Parser ( Int, Int, Int )
+facetLine =
+    Parser.succeed (\a b c -> ( a, b, c ))
+        |. intOf 3
+        |. whitespaces
+        |= Parser.int
+        |. whitespaces
+        |= Parser.int
+        |. whitespaces
+        |= Parser.int
+        |. Parser.spaces
 
 
-parseFacet : Int -> List String -> Result Error ( List ( Int, Int, Int ), List String )
-parseFacet n lines =
-    parseFacetHelper n [] lines
+intOf : Int -> Parser Int
+intOf n =
+    Parser.int
+        |> Parser.andThen
+            (\x ->
+                if x == n then
+                    Parser.succeed n
+
+                else
+                    Parser.problem <| "required " ++ String.fromInt n ++ " but got " ++ String.fromInt x
+            )
 
 
-parseFacetHelper : Int -> List ( Int, Int, Int ) -> List String -> Result Error ( List ( Int, Int, Int ), List String )
-parseFacetHelper n accum lines =
-    if n <= 0 then
-        Ok ( List.reverse accum, lines )
+replicate : Int -> Parser a -> Parser (List a)
+replicate n p =
+    Parser.loop ( 0, [] )
+        (\( i, revAccum ) ->
+            if i < n then
+                Parser.map (\a -> Parser.Loop ( i + 1, a :: revAccum )) p
 
-    else
-        case parseFacetLine lines of
-            Ok ( v, rest ) ->
-                parseFacetHelper (n - 1) (v :: accum) rest
-
-            Err msg ->
-                Err msg
+            else
+                Parser.succeed (Parser.Done (List.reverse revAccum))
+        )
 
 
-parseFacetLine : List String -> Result Error ( ( Int, Int, Int ), List String )
-parseFacetLine lines =
-    case lines of
-        [] ->
-            Err "unexpected EOF"
-
-        line :: rest ->
-            case String.words line of
-                "3" :: sa :: sb :: sc :: _ ->
-                    Result.map (\xyz -> ( xyz, rest )) <|
-                        Result.fromMaybe "the facet contains non-integer values" <|
-                            Maybe.map3 (\a b c -> ( a, b, c ))
-                                (String.toInt sa)
-                                (String.toInt sb)
-                                (String.toInt sc)
-
-                _ ->
-                    Err "the facet format is invalid"
-
-
-
--- loadMesh : (Result Http.Error Mesh -> msg) -> String -> Cmd msg
--- loadMesh msg url =
---     Http.send (\body -> msg (Result.map parse body)) (Http.getString url)
+whitespaces : Parser ()
+whitespaces =
+    Parser.chompWhile (\c -> c == ' ' || c == '\t')
