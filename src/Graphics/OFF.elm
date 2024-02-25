@@ -1,5 +1,6 @@
-module Graphics.OFF exposing (parse)
+module Graphics.OFF exposing (loadFromURL, parse)
 
+import Http
 import Math.Vector3 exposing (Vec3, vec3)
 import Parser exposing ((|.), (|=), Parser)
 import String
@@ -9,6 +10,18 @@ type alias Mesh =
     { vertices : List Vec3
     , indices : List ( Int, Int, Int )
     }
+
+
+load : String -> (Result String Mesh -> msg) -> Cmd msg
+load url msg =
+    Http.send
+        (\result ->
+            result
+                |> Result.mapError (\_ -> "HTTP Error")
+                |> Result.andThen parse
+                |> msg
+        )
+        (Http.getString url)
 
 
 parse : String -> Result String Mesh
