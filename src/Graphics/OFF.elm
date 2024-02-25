@@ -1,4 +1,4 @@
-module Graphics.OFF exposing (loadFromURL, parse)
+module Graphics.OFF exposing (load, parse)
 
 import Http
 import Math.Vector3 exposing (Vec3, vec3)
@@ -45,11 +45,11 @@ header : Parser ( Int, Int, Int )
 header =
     Parser.succeed (\nv nf ne -> ( nv, nf, ne ))
         |. Parser.keyword "OFF"
-        |. whitespaces
+        |. Parser.spaces
         |= Parser.int
-        |. whitespaces
+        |. Parser.spaces
         |= Parser.int
-        |. whitespaces
+        |. Parser.spaces
         |= Parser.int
         |. Parser.spaces
 
