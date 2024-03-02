@@ -6392,144 +6392,6 @@ function _Http_multipart(parts)
 
 	return $elm$http$Http$Internal$FormDataBody(formData);
 }
-
-
-
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-
-
-// CREATE
-
-var _Regex_never = /.^/;
-
-var _Regex_fromStringWith = F2(function(options, string)
-{
-	var flags = 'g';
-	if (options.multiline) { flags += 'm'; }
-	if (options.caseInsensitive) { flags += 'i'; }
-
-	try
-	{
-		return $elm$core$Maybe$Just(new RegExp(string, flags));
-	}
-	catch(error)
-	{
-		return $elm$core$Maybe$Nothing;
-	}
-});
-
-
-// USE
-
-var _Regex_contains = F2(function(re, string)
-{
-	return string.match(re) !== null;
-});
-
-
-var _Regex_findAtMost = F3(function(n, re, str)
-{
-	var out = [];
-	var number = 0;
-	var string = str;
-	var lastIndex = re.lastIndex;
-	var prevLastIndex = -1;
-	var result;
-	while (number++ < n && (result = re.exec(string)))
-	{
-		if (prevLastIndex == re.lastIndex) break;
-		var i = result.length - 1;
-		var subs = new Array(i);
-		while (i > 0)
-		{
-			var submatch = result[i];
-			subs[--i] = submatch
-				? $elm$core$Maybe$Just(submatch)
-				: $elm$core$Maybe$Nothing;
-		}
-		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
-		prevLastIndex = re.lastIndex;
-	}
-	re.lastIndex = lastIndex;
-	return _List_fromArray(out);
-});
-
-
-var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
-{
-	var count = 0;
-	function jsReplacer(match)
-	{
-		if (count++ >= n)
-		{
-			return match;
-		}
-		var i = arguments.length - 3;
-		var submatches = new Array(i);
-		while (i > 0)
-		{
-			var submatch = arguments[i];
-			submatches[--i] = submatch
-				? $elm$core$Maybe$Just(submatch)
-				: $elm$core$Maybe$Nothing;
-		}
-		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
-	}
-	return string.replace(re, jsReplacer);
-});
-
-var _Regex_splitAtMost = F3(function(n, re, str)
-{
-	var string = str;
-	var out = [];
-	var start = re.lastIndex;
-	var restoreLastIndex = re.lastIndex;
-	while (n--)
-	{
-		var result = re.exec(string);
-		if (!result) break;
-		out.push(string.slice(start, result.index));
-		start = re.lastIndex;
-	}
-	out.push(string.slice(start));
-	re.lastIndex = restoreLastIndex;
-	return _List_fromArray(out);
-});
-
-var _Regex_infinity = Infinity;
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
@@ -7843,8 +7705,8 @@ var $author$project$Main$pierFragmentShader = {
 	uniforms: {}
 };
 var $author$project$Main$pierVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            const highp vec3 yellow = vec3(1.0, 1.0, 0.3);\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.5 + 0.5 * lambertFactor;\n            color = intensity * yellow;\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
-	attributes: {normal: 'normal', position: 'position'},
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            const highp vec3 yellow = vec3(1.0, 1.0, 0.3);\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.5 + 0.5 * lambertFactor;\n            color = intensity * yellow;\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
 	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
 };
 var $author$project$Main$showPier = F5(
@@ -7969,8 +7831,8 @@ var $author$project$Main$railFragmentShader = {
 	uniforms: {}
 };
 var $author$project$Main$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法\n            if (abs(position[1] - 1.0) < 0.05) {\n                color *= 0.85;\n            }\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
-	attributes: {normal: 'normal', position: 'position'},
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法\n            if (abs(position[1] - 1.0) < 0.05) {\n                color *= 0.85;\n            }\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
 	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
 };
 var $author$project$Main$showRail = F5(
@@ -10681,33 +10543,8 @@ var $author$project$Graphics$Mesh$LoadMesh = F2(
 var $author$project$Graphics$Mesh$allMeshNames = _List_fromArray(
 	['straight0_minus', 'straight0_plus', 'straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'curve8_minus', 'curve8_plus', 'curve4_minus', 'curve4_plus', 'outercurve_minus', 'outercurve_plus', 'turnout_minus', 'turnout_plus', 'singledouble_minus', 'singledouble_plus', 'eight_minus', 'eight_plus', 'pole_minus', 'pole_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'autoturnout_minus', 'autopoint_minus', 'pier', 'pier_wide', 'pier_4']);
 var $author$project$Graphics$Mesh$buildMeshUri = function (name) {
-	return './assets/' + (name + '.obj');
+	return './assets/' + (name + '.json');
 };
-var $declension$elm_obj_loader$OBJ$defaultSettings = {withTangents: false};
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
-var $elm$core$Task$onError = _Scheduler_onError;
-var $elm$core$Task$attempt = F2(
-	function (resultToMessage, task) {
-		return $elm$core$Task$command(
-			$elm$core$Task$Perform(
-				A2(
-					$elm$core$Task$onError,
-					A2(
-						$elm$core$Basics$composeL,
-						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
-						$elm$core$Result$Err),
-					A2(
-						$elm$core$Task$andThen,
-						A2(
-							$elm$core$Basics$composeL,
-							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
-							$elm$core$Result$Ok),
-						task))));
-	});
 var $elm$http$Http$Internal$EmptyBody = {$: 'EmptyBody'};
 var $elm$http$Http$emptyBody = $elm$http$Http$Internal$EmptyBody;
 var $elm$http$Http$BadPayload = F2(
@@ -10752,1848 +10589,138 @@ var $elm$http$Http$getString = function (url) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: $elm$http$Http$expectString, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, url: url, withCredentials: false});
 };
-var $declension$elm_obj_loader$OBJ$httpErrorFor = function (e) {
-	switch (e.$) {
-		case 'BadUrl':
-			var url = e.a;
-			return 'Bad URL: ' + url;
-		case 'Timeout':
-			return 'Timed out';
-		case 'NetworkError':
-			return 'Network error';
-		case 'BadStatus':
-			var response = e.a;
-			return 'Failed';
-		default:
-			var string = e.a;
-			var response = e.b;
-			return $elm$core$String$fromInt(response.status.code) + (': invalid request in ' + response.body);
-	}
-};
-var $elm$core$Dict$isEmpty = function (dict) {
-	if (dict.$ === 'RBEmpty_elm_builtin') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $declension$elm_obj_loader$OBJ$Assembler$addCurrentGroup = function (state) {
-	return $elm$core$Dict$isEmpty(state.currentGroup) ? state : _Utils_update(
-		state,
-		{
-			currentGroup: $elm$core$Dict$empty,
-			groups: A3($elm$core$Dict$insert, state.currentGroupName, state.currentGroup, state.groups)
-		});
-};
-var $declension$elm_obj_loader$OBJ$Types$WithTexture = function (a) {
-	return {$: 'WithTexture', a: a};
-};
-var $declension$elm_obj_loader$OBJ$Types$WithTextureAndTangent = function (a) {
-	return {$: 'WithTextureAndTangent', a: a};
-};
-var $declension$elm_obj_loader$OBJ$Types$WithoutTexture = function (a) {
-	return {$: 'WithoutTexture', a: a};
-};
-var $elm_explorations$linear_algebra$Math$Vector3$cross = _MJS_v3cross;
-var $elm_explorations$linear_algebra$Math$Vector3$dot = _MJS_v3dot;
-var $elm_explorations$linear_algebra$Math$Vector3$lengthSquared = _MJS_v3lengthSquared;
-var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
-var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
-var $elm_explorations$linear_algebra$Math$Vector3$sub = _MJS_v3sub;
-var $elm_explorations$linear_algebra$Math$Vector3$toRecord = _MJS_v3toRecord;
-var $elm_explorations$linear_algebra$Math$Vector4$vec4 = _MJS_v4;
-var $declension$elm_obj_loader$OBJ$Assembler$reducer = F2(
-	function (_v0, acc) {
-		var position = _v0.position;
-		var texCoord = _v0.texCoord;
-		var normal = _v0.normal;
-		var sdir = _v0.sdir;
-		var tdir = _v0.tdir;
-		var w = (A2(
-			$elm_explorations$linear_algebra$Math$Vector3$dot,
-			A2($elm_explorations$linear_algebra$Math$Vector3$cross, normal, sdir),
-			tdir) < 0) ? (-1) : 1;
-		var _v1 = (!(!$elm_explorations$linear_algebra$Math$Vector3$lengthSquared(sdir))) ? $elm_explorations$linear_algebra$Math$Vector3$toRecord(
-			$elm_explorations$linear_algebra$Math$Vector3$normalize(
-				A2(
-					$elm_explorations$linear_algebra$Math$Vector3$sub,
-					sdir,
-					A2(
-						$elm_explorations$linear_algebra$Math$Vector3$scale,
-						A2($elm_explorations$linear_algebra$Math$Vector3$dot, normal, sdir),
-						normal)))) : $elm_explorations$linear_algebra$Math$Vector3$toRecord(
-			A2(
-				$elm_explorations$linear_algebra$Math$Vector3$cross,
-				$elm_explorations$linear_algebra$Math$Vector3$normalize(
-					A2(
-						$elm_explorations$linear_algebra$Math$Vector3$sub,
-						tdir,
-						A2(
-							$elm_explorations$linear_algebra$Math$Vector3$scale,
-							A2($elm_explorations$linear_algebra$Math$Vector3$dot, normal, tdir),
-							normal))),
-				normal));
-		var x = _v1.x;
-		var y = _v1.y;
-		var z = _v1.z;
-		return A2(
-			$elm$core$List$cons,
-			{
-				normal: normal,
-				position: position,
-				tangent: A4($elm_explorations$linear_algebra$Math$Vector4$vec4, x, y, z, w),
-				texCoord: texCoord
-			},
-			acc);
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$finalizeMesh = function (mesh) {
-	switch (mesh.$) {
-		case 'WithTextureT':
-			var m = mesh.a;
-			return $declension$elm_obj_loader$OBJ$Types$WithTexture(m);
-		case 'WithoutTextureT':
-			var m = mesh.a;
-			return $declension$elm_obj_loader$OBJ$Types$WithoutTexture(m);
-		default:
-			var m = mesh.a;
-			return $declension$elm_obj_loader$OBJ$Types$WithTextureAndTangent(
-				{
-					indices: m.indices,
-					vertices: A3($elm$core$Array$foldr, $declension$elm_obj_loader$OBJ$Assembler$reducer, _List_Nil, m.vertices)
-				});
-	}
-};
-var $declension$elm_obj_loader$OBJ$Assembler$addCurrentMesh = function (state) {
-	var _v0 = state.currentMesh;
-	if (_v0.$ === 'Just') {
-		var m = _v0.a;
-		return _Utils_update(
-			state,
-			{
-				currentGroup: A3(
-					$elm$core$Dict$insert,
-					state.currentMaterialName,
-					$declension$elm_obj_loader$OBJ$Assembler$finalizeMesh(m),
-					state.currentGroup),
-				currentMesh: $elm$core$Maybe$Nothing,
-				knownVertex: $elm$core$Dict$empty,
-				knownVertexTextures: $elm$core$Dict$empty,
-				knownVertexTexturesTangents: $elm$core$Dict$empty
-			});
-	} else {
-		return state;
-	}
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$WithTextureAndTangentT = function (a) {
-	return {$: 'WithTextureAndTangentT', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$WithTextureT = function (a) {
-	return {$: 'WithTextureT', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$WithoutTextureT = function (a) {
-	return {$: 'WithoutTextureT', a: a};
-};
-var $elm$core$Elm$JsArray$appendN = _JsArray_appendN;
-var $elm$core$Elm$JsArray$slice = _JsArray_slice;
-var $elm$core$Array$appendHelpBuilder = F2(
-	function (tail, builder) {
-		var tailLen = $elm$core$Elm$JsArray$length(tail);
-		var notAppended = ($elm$core$Array$branchFactor - $elm$core$Elm$JsArray$length(builder.tail)) - tailLen;
-		var appended = A3($elm$core$Elm$JsArray$appendN, $elm$core$Array$branchFactor, builder.tail, tail);
-		return (notAppended < 0) ? {
-			nodeList: A2(
-				$elm$core$List$cons,
-				$elm$core$Array$Leaf(appended),
-				builder.nodeList),
-			nodeListSize: builder.nodeListSize + 1,
-			tail: A3($elm$core$Elm$JsArray$slice, notAppended, tailLen, tail)
-		} : ((!notAppended) ? {
-			nodeList: A2(
-				$elm$core$List$cons,
-				$elm$core$Array$Leaf(appended),
-				builder.nodeList),
-			nodeListSize: builder.nodeListSize + 1,
-			tail: $elm$core$Elm$JsArray$empty
-		} : {nodeList: builder.nodeList, nodeListSize: builder.nodeListSize, tail: appended});
-	});
-var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
-var $elm$core$Elm$JsArray$push = _JsArray_push;
-var $elm$core$Elm$JsArray$singleton = _JsArray_singleton;
-var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
-var $elm$core$Array$insertTailInTree = F4(
-	function (shift, index, tail, tree) {
-		var pos = $elm$core$Array$bitMask & (index >>> shift);
-		if (_Utils_cmp(
-			pos,
-			$elm$core$Elm$JsArray$length(tree)) > -1) {
-			if (shift === 5) {
-				return A2(
-					$elm$core$Elm$JsArray$push,
-					$elm$core$Array$Leaf(tail),
-					tree);
-			} else {
-				var newSub = $elm$core$Array$SubTree(
-					A4($elm$core$Array$insertTailInTree, shift - $elm$core$Array$shiftStep, index, tail, $elm$core$Elm$JsArray$empty));
-				return A2($elm$core$Elm$JsArray$push, newSub, tree);
-			}
-		} else {
-			var value = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (value.$ === 'SubTree') {
-				var subTree = value.a;
-				var newSub = $elm$core$Array$SubTree(
-					A4($elm$core$Array$insertTailInTree, shift - $elm$core$Array$shiftStep, index, tail, subTree));
-				return A3($elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
-			} else {
-				var newSub = $elm$core$Array$SubTree(
-					A4(
-						$elm$core$Array$insertTailInTree,
-						shift - $elm$core$Array$shiftStep,
-						index,
-						tail,
-						$elm$core$Elm$JsArray$singleton(value)));
-				return A3($elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
-			}
-		}
-	});
-var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-var $elm$core$Array$unsafeReplaceTail = F2(
-	function (newTail, _v0) {
-		var len = _v0.a;
-		var startShift = _v0.b;
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var originalTailLen = $elm$core$Elm$JsArray$length(tail);
-		var newTailLen = $elm$core$Elm$JsArray$length(newTail);
-		var newArrayLen = len + (newTailLen - originalTailLen);
-		if (_Utils_eq(newTailLen, $elm$core$Array$branchFactor)) {
-			var overflow = _Utils_cmp(newArrayLen >>> $elm$core$Array$shiftStep, 1 << startShift) > 0;
-			if (overflow) {
-				var newShift = startShift + $elm$core$Array$shiftStep;
-				var newTree = A4(
-					$elm$core$Array$insertTailInTree,
-					newShift,
-					len,
-					newTail,
-					$elm$core$Elm$JsArray$singleton(
-						$elm$core$Array$SubTree(tree)));
-				return A4($elm$core$Array$Array_elm_builtin, newArrayLen, newShift, newTree, $elm$core$Elm$JsArray$empty);
-			} else {
-				return A4(
-					$elm$core$Array$Array_elm_builtin,
-					newArrayLen,
-					startShift,
-					A4($elm$core$Array$insertTailInTree, startShift, len, newTail, tree),
-					$elm$core$Elm$JsArray$empty);
-			}
-		} else {
-			return A4($elm$core$Array$Array_elm_builtin, newArrayLen, startShift, tree, newTail);
-		}
-	});
-var $elm$core$Array$appendHelpTree = F2(
-	function (toAppend, array) {
-		var len = array.a;
-		var tree = array.c;
-		var tail = array.d;
-		var itemsToAppend = $elm$core$Elm$JsArray$length(toAppend);
-		var notAppended = ($elm$core$Array$branchFactor - $elm$core$Elm$JsArray$length(tail)) - itemsToAppend;
-		var appended = A3($elm$core$Elm$JsArray$appendN, $elm$core$Array$branchFactor, tail, toAppend);
-		var newArray = A2($elm$core$Array$unsafeReplaceTail, appended, array);
-		if (notAppended < 0) {
-			var nextTail = A3($elm$core$Elm$JsArray$slice, notAppended, itemsToAppend, toAppend);
-			return A2($elm$core$Array$unsafeReplaceTail, nextTail, newArray);
-		} else {
-			return newArray;
-		}
-	});
-var $elm$core$Elm$JsArray$foldl = _JsArray_foldl;
-var $elm$core$Array$builderFromArray = function (_v0) {
-	var len = _v0.a;
-	var tree = _v0.c;
-	var tail = _v0.d;
-	var helper = F2(
-		function (node, acc) {
-			if (node.$ === 'SubTree') {
-				var subTree = node.a;
-				return A3($elm$core$Elm$JsArray$foldl, helper, acc, subTree);
-			} else {
-				return A2($elm$core$List$cons, node, acc);
-			}
-		});
-	return {
-		nodeList: A3($elm$core$Elm$JsArray$foldl, helper, _List_Nil, tree),
-		nodeListSize: (len / $elm$core$Array$branchFactor) | 0,
-		tail: tail
-	};
-};
-var $elm$core$Array$append = F2(
-	function (a, _v0) {
-		var aTail = a.d;
-		var bLen = _v0.a;
-		var bTree = _v0.c;
-		var bTail = _v0.d;
-		if (_Utils_cmp(bLen, $elm$core$Array$branchFactor * 4) < 1) {
-			var foldHelper = F2(
-				function (node, array) {
-					if (node.$ === 'SubTree') {
-						var tree = node.a;
-						return A3($elm$core$Elm$JsArray$foldl, foldHelper, array, tree);
-					} else {
-						var leaf = node.a;
-						return A2($elm$core$Array$appendHelpTree, leaf, array);
-					}
-				});
-			return A2(
-				$elm$core$Array$appendHelpTree,
-				bTail,
-				A3($elm$core$Elm$JsArray$foldl, foldHelper, a, bTree));
-		} else {
-			var foldHelper = F2(
-				function (node, builder) {
-					if (node.$ === 'SubTree') {
-						var tree = node.a;
-						return A3($elm$core$Elm$JsArray$foldl, foldHelper, builder, tree);
-					} else {
-						var leaf = node.a;
-						return A2($elm$core$Array$appendHelpBuilder, leaf, builder);
-					}
-				});
-			return A2(
-				$elm$core$Array$builderToArray,
-				true,
-				A2(
-					$elm$core$Array$appendHelpBuilder,
-					bTail,
-					A3(
-						$elm$core$Elm$JsArray$foldl,
-						foldHelper,
-						$elm$core$Array$builderFromArray(a),
-						bTree)));
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$applyForFace = F3(
-	function (f, _v0, s_0) {
-		var i1 = _v0.a;
-		var i2 = _v0.b;
-		var i3 = _v0.c;
-		var _v1 = A2(f, i1, s_0);
-		var s_1 = _v1.a;
-		var vs_1 = _v1.b;
-		var i_1 = _v1.c;
-		var _v2 = A2(f, i2, s_1);
-		var s_2 = _v2.a;
-		var vs_2 = _v2.b;
-		var i_2 = _v2.c;
-		var _v3 = A2(f, i3, s_2);
-		var s_3 = _v3.a;
-		var vs_3 = _v3.b;
-		var i_3 = _v3.c;
-		return _Utils_Tuple3(
-			s_3,
-			_Utils_ap(
-				vs_1,
-				_Utils_ap(vs_2, vs_3)),
-			_Utils_Tuple3(i_3, i_2, i_1));
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$applyForFaceA = F3(
-	function (f, _v0, s_0) {
-		var i1 = _v0.a;
-		var i2 = _v0.b;
-		var i3 = _v0.c;
-		var _v1 = A2(f, i1, s_0);
-		var s_1 = _v1.a;
-		var vs_1 = _v1.b;
-		var i_1 = _v1.c;
-		var _v2 = A2(f, i2, s_1);
-		var s_2 = _v2.a;
-		var vs_2 = _v2.b;
-		var i_2 = _v2.c;
-		var _v3 = A2(f, i3, s_2);
-		var s_3 = _v3.a;
-		var vs_3 = _v3.b;
-		var i_3 = _v3.c;
-		return _Utils_Tuple3(
-			s_3,
-			A2(
-				$elm$core$Array$append,
-				A2($elm$core$Array$append, vs_1, vs_2),
-				vs_3),
-			_Utils_Tuple3(i_3, i_2, i_1));
-	});
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $elm$core$Array$getHelp = F3(
-	function (shift, index, tree) {
-		getHelp:
-		while (true) {
-			var pos = $elm$core$Array$bitMask & (index >>> shift);
-			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (_v0.$ === 'SubTree') {
-				var subTree = _v0.a;
-				var $temp$shift = shift - $elm$core$Array$shiftStep,
-					$temp$index = index,
-					$temp$tree = subTree;
-				shift = $temp$shift;
-				index = $temp$index;
-				tree = $temp$tree;
-				continue getHelp;
-			} else {
-				var values = _v0.a;
-				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
-			}
-		}
-	});
-var $elm$core$Array$tailIndex = function (len) {
-	return (len >>> 5) << 5;
-};
-var $elm$core$Array$get = F2(
-	function (index, _v0) {
-		var len = _v0.a;
-		var startShift = _v0.b;
-		var tree = _v0.c;
-		var tail = _v0.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
-			index,
-			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
-			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
-			A3($elm$core$Array$getHelp, startShift, index, tree)));
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$get3 = F4(
-	function (_v0, a1, a2, a3) {
-		var a = _v0.a;
-		var b = _v0.b;
-		var c = _v0.c;
-		var _v1 = _Utils_Tuple3(
-			A2($elm$core$Array$get, a - 1, a1),
-			A2($elm$core$Array$get, b - 1, a2),
-			A2($elm$core$Array$get, c - 1, a3));
-		if (((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) && (_v1.c.$ === 'Just')) {
-			var a_ = _v1.a.a;
-			var b_ = _v1.b.a;
-			var c_ = _v1.c.a;
-			return $elm$core$Maybe$Just(
-				_Utils_Tuple3(a_, b_, c_));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$t3map = F2(
-	function (f, _v0) {
-		var a = _v0.a;
-		var b = _v0.b;
-		var c = _v0.c;
-		return _Utils_Tuple3(
-			f(a),
-			f(b),
-			f(c));
-	});
-var $elm_explorations$linear_algebra$Math$Vector2$toRecord = _MJS_v2toRecord;
-var $declension$elm_obj_loader$OBJ$Assembler$getFaceTangent = F2(
-	function (index, _v3) {
-		var _v0 = index.a;
-		var pi1 = _v0.a;
-		var ti1 = _v0.b;
-		var ni1 = _v0.c;
-		var _v1 = index.b;
-		var pi2 = _v1.a;
-		var ti2 = _v1.b;
-		var ni2 = _v1.c;
-		var _v2 = index.c;
-		var pi3 = _v2.a;
-		var ti3 = _v2.b;
-		var ni3 = _v2.c;
-		var vs = _v3.vs;
-		var vts = _v3.vts;
-		var vns = _v3.vns;
-		var _v4 = _Utils_Tuple2(
-			A4(
-				$declension$elm_obj_loader$OBJ$Assembler$get3,
-				_Utils_Tuple3(pi1, pi2, pi3),
-				vs,
-				vs,
-				vs),
-			A4(
-				$declension$elm_obj_loader$OBJ$Assembler$get3,
-				_Utils_Tuple3(ti1, ti2, ti3),
-				vts,
-				vts,
-				vts));
-		if ((_v4.a.$ === 'Just') && (_v4.b.$ === 'Just')) {
-			var _v5 = _v4.a.a;
-			var v1 = _v5.a;
-			var v2 = _v5.b;
-			var v3 = _v5.c;
-			var _v6 = _v4.b.a;
-			var w1 = _v6.a;
-			var w2 = _v6.b;
-			var w3 = _v6.c;
-			var _v7 = A2(
-				$declension$elm_obj_loader$OBJ$Assembler$t3map,
-				$elm_explorations$linear_algebra$Math$Vector2$toRecord,
-				_Utils_Tuple3(w1, w2, w3));
-			var ww1 = _v7.a;
-			var ww2 = _v7.b;
-			var ww3 = _v7.c;
-			var _v8 = A2(
-				$declension$elm_obj_loader$OBJ$Assembler$t3map,
-				$elm_explorations$linear_algebra$Math$Vector3$toRecord,
-				_Utils_Tuple3(v1, v2, v3));
-			var vv1 = _v8.a;
-			var vv2 = _v8.b;
-			var vv3 = _v8.c;
-			var _v9 = _Utils_Tuple3(
-				_Utils_Tuple2(vv2.x - vv1.x, vv3.x - vv1.x),
-				_Utils_Tuple2(vv2.y - vv1.y, vv3.y - vv1.y),
-				_Utils_Tuple2(vv2.z - vv1.z, vv3.z - vv1.z));
-			var _v10 = _v9.a;
-			var x1 = _v10.a;
-			var x2 = _v10.b;
-			var _v11 = _v9.b;
-			var y1 = _v11.a;
-			var y2 = _v11.b;
-			var _v12 = _v9.c;
-			var z1 = _v12.a;
-			var z2 = _v12.b;
-			var _v13 = _Utils_Tuple2(
-				_Utils_Tuple2(ww2.x - ww1.x, ww3.x - ww1.x),
-				_Utils_Tuple2(ww2.y - ww1.y, ww3.y - ww1.y));
-			var _v14 = _v13.a;
-			var s1 = _v14.a;
-			var s2 = _v14.b;
-			var _v15 = _v13.b;
-			var t1 = _v15.a;
-			var t2 = _v15.b;
-			var denom = (s1 * t2) - (s2 * t1);
-			var r = ($elm$core$Basics$abs(denom) <= 0.000001) ? 0.1 : (1 / denom);
-			var tdir = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ((s1 * x2) - (s2 * x1)) * r, ((s1 * y2) - (s2 * y1)) * r, ((s1 * z2) - (s2 * z1)) * r);
-			var sdir = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ((t2 * x1) - (t1 * x2)) * r, ((t2 * y1) - (t1 * y2)) * r, ((t2 * z1) - (t1 * z2)) * r);
-			return _Utils_Tuple2(sdir, tdir);
-		} else {
-			return _Utils_Tuple2(
-				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, -999, -999, -999),
-				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, -999, -999, -999));
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Types$Vertex = F2(
-	function (position, normal) {
-		return {normal: normal, position: position};
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$get2 = F3(
-	function (_v0, a1, a2) {
-		var a = _v0.a;
-		var b = _v0.b;
-		var _v1 = _Utils_Tuple2(
-			A2($elm$core$Array$get, a - 1, a1),
-			A2($elm$core$Array$get, b - 1, a2));
-		if ((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) {
-			var a_ = _v1.a.a;
-			var b_ = _v1.b.a;
-			return $elm$core$Maybe$Just(
-				_Utils_Tuple2(a_, b_));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$getOrInsertVN = F2(
-	function (index, state) {
-		var vs = state.vs;
-		var vns = state.vns;
-		var knownVertex = state.knownVertex;
-		var currentIndex = state.currentIndex;
-		var _v0 = A2($elm$core$Dict$get, index, knownVertex);
-		if (_v0.$ === 'Just') {
-			var i = _v0.a;
-			return _Utils_Tuple3(state, _List_Nil, i);
-		} else {
-			var _v1 = A3($declension$elm_obj_loader$OBJ$Assembler$get2, index, vs, vns);
-			if (_v1.$ === 'Just') {
-				var _v2 = _v1.a;
-				var p = _v2.a;
-				var n = _v2.b;
-				return _Utils_Tuple3(
-					_Utils_update(
-						state,
-						{
-							currentIndex: currentIndex + 1,
-							knownVertex: A3($elm$core$Dict$insert, index, currentIndex, knownVertex)
-						}),
-					_List_fromArray(
-						[
-							A2($declension$elm_obj_loader$OBJ$Types$Vertex, p, n)
-						]),
-					currentIndex);
-			} else {
-				return _Utils_Tuple3(state, _List_Nil, -999);
-			}
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Types$VertexWithTexture = F3(
-	function (position, texCoord, normal) {
-		return {normal: normal, position: position, texCoord: texCoord};
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$getOrInsertVTN = F2(
-	function (index, state) {
-		var vs = state.vs;
-		var vts = state.vts;
-		var vns = state.vns;
-		var knownVertexTextures = state.knownVertexTextures;
-		var currentIndex = state.currentIndex;
-		var _v0 = A2($elm$core$Dict$get, index, knownVertexTextures);
-		if (_v0.$ === 'Just') {
-			var i = _v0.a;
-			return _Utils_Tuple3(state, _List_Nil, i);
-		} else {
-			var _v1 = A4($declension$elm_obj_loader$OBJ$Assembler$get3, index, vs, vts, vns);
-			if (_v1.$ === 'Just') {
-				var _v2 = _v1.a;
-				var p = _v2.a;
-				var t = _v2.b;
-				var n = _v2.c;
-				return _Utils_Tuple3(
-					_Utils_update(
-						state,
-						{
-							currentIndex: currentIndex + 1,
-							knownVertexTextures: A3($elm$core$Dict$insert, index, currentIndex, knownVertexTextures)
-						}),
-					_List_fromArray(
-						[
-							A3($declension$elm_obj_loader$OBJ$Types$VertexWithTexture, p, t, n)
-						]),
-					currentIndex);
-			} else {
-				return _Utils_Tuple3(state, _List_Nil, -999);
-			}
-		}
-	});
-var $declension$elm_obj_loader$OBJ$InternalTypes$VertexWithTextureAndTangentT = F5(
-	function (position, texCoord, normal, sdir, tdir) {
-		return {normal: normal, position: position, sdir: sdir, tdir: tdir, texCoord: texCoord};
-	});
-var $elm$core$Array$fromListHelp = F3(
-	function (list, nodeList, nodeListSize) {
-		fromListHelp:
-		while (true) {
-			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
-			var jsArray = _v0.a;
-			var remainingItems = _v0.b;
-			if (_Utils_cmp(
-				$elm$core$Elm$JsArray$length(jsArray),
-				$elm$core$Array$branchFactor) < 0) {
-				return A2(
-					$elm$core$Array$builderToArray,
-					true,
-					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
-			} else {
-				var $temp$list = remainingItems,
-					$temp$nodeList = A2(
-					$elm$core$List$cons,
-					$elm$core$Array$Leaf(jsArray),
-					nodeList),
-					$temp$nodeListSize = nodeListSize + 1;
-				list = $temp$list;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue fromListHelp;
-			}
-		}
-	});
-var $elm$core$Array$fromList = function (list) {
-	if (!list.b) {
-		return $elm$core$Array$empty;
-	} else {
-		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
-	}
-};
-var $elm$core$Array$setHelp = F4(
-	function (shift, index, value, tree) {
-		var pos = $elm$core$Array$bitMask & (index >>> shift);
-		var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-		if (_v0.$ === 'SubTree') {
-			var subTree = _v0.a;
-			var newSub = A4($elm$core$Array$setHelp, shift - $elm$core$Array$shiftStep, index, value, subTree);
-			return A3(
-				$elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				$elm$core$Array$SubTree(newSub),
-				tree);
-		} else {
-			var values = _v0.a;
-			var newLeaf = A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, values);
-			return A3(
-				$elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				$elm$core$Array$Leaf(newLeaf),
-				tree);
-		}
-	});
-var $elm$core$Array$set = F3(
-	function (index, value, array) {
-		var len = array.a;
-		var startShift = array.b;
-		var tree = array.c;
-		var tail = array.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
-			index,
-			$elm$core$Array$tailIndex(len)) > -1) ? A4(
-			$elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			tree,
-			A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, tail)) : A4(
-			$elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			A4($elm$core$Array$setHelp, startShift, index, value, tree),
-			tail));
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$updateArray = F3(
-	function (i, f, a) {
-		var _v0 = A2($elm$core$Array$get, i, a);
-		if (_v0.$ === 'Just') {
-			var v = _v0.a;
-			return A3(
-				$elm$core$Array$set,
-				i,
-				f(v),
-				a);
-		} else {
-			return a;
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$getOrInsertVTNT = F3(
-	function (_v0, index, state) {
-		var s_dir = _v0.a;
-		var t_dir = _v0.b;
-		var vs = state.vs;
-		var vts = state.vts;
-		var vns = state.vns;
-		var knownVertexTexturesTangents = state.knownVertexTexturesTangents;
-		var currentIndex = state.currentIndex;
-		var _v1 = A2($elm$core$Dict$get, index, knownVertexTexturesTangents);
-		if (_v1.$ === 'Just') {
-			var i = _v1.a;
-			var _v2 = state.currentMesh;
-			if ((_v2.$ === 'Just') && (_v2.a.$ === 'WithTextureAndTangentT')) {
-				var m = _v2.a.a;
-				return _Utils_Tuple3(
-					_Utils_update(
-						state,
-						{
-							currentMesh: $elm$core$Maybe$Just(
-								$declension$elm_obj_loader$OBJ$InternalTypes$WithTextureAndTangentT(
-									_Utils_update(
-										m,
-										{
-											vertices: A3(
-												$declension$elm_obj_loader$OBJ$Assembler$updateArray,
-												i,
-												function (v) {
-													var sdir = v.sdir;
-													var tdir = v.tdir;
-													return _Utils_update(
-														v,
-														{
-															sdir: A2($elm_explorations$linear_algebra$Math$Vector3$add, sdir, s_dir),
-															tdir: A2($elm_explorations$linear_algebra$Math$Vector3$add, tdir, t_dir)
-														});
-												},
-												m.vertices)
-										})))
-						}),
-					$elm$core$Array$empty,
-					i);
-			} else {
-				return _Utils_Tuple3(state, $elm$core$Array$empty, i);
-			}
-		} else {
-			var _v3 = A4($declension$elm_obj_loader$OBJ$Assembler$get3, index, vs, vts, vns);
-			if (_v3.$ === 'Just') {
-				var _v4 = _v3.a;
-				var p = _v4.a;
-				var t = _v4.b;
-				var n = _v4.c;
-				return _Utils_Tuple3(
-					_Utils_update(
-						state,
-						{
-							currentIndex: currentIndex + 1,
-							knownVertexTexturesTangents: A3($elm$core$Dict$insert, index, currentIndex, knownVertexTexturesTangents)
-						}),
-					$elm$core$Array$fromList(
-						_List_fromArray(
-							[
-								A5($declension$elm_obj_loader$OBJ$InternalTypes$VertexWithTextureAndTangentT, p, t, n, s_dir, t_dir)
-							])),
-					currentIndex);
-			} else {
-				return _Utils_Tuple3(state, $elm$core$Array$empty, -999);
-			}
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$addFaceToMesh = F3(
-	function (f, mesh, state) {
-		var vs = state.vs;
-		var vts = state.vts;
-		var vns = state.vns;
-		var currentIndex = state.currentIndex;
-		var _v0 = _Utils_Tuple2(f, mesh);
-		_v0$3:
-		while (true) {
-			if (_v0.a.$ === 'FTVertexTextureNormal') {
-				switch (_v0.b.$) {
-					case 'WithTextureT':
-						var _v1 = _v0.a.a;
-						var v1 = _v1.a;
-						var v2 = _v1.b;
-						var v3 = _v1.c;
-						var m = _v0.b.a;
-						var _v2 = A3(
-							$declension$elm_obj_loader$OBJ$Assembler$applyForFace,
-							$declension$elm_obj_loader$OBJ$Assembler$getOrInsertVTN,
-							_Utils_Tuple3(v1, v2, v3),
-							state);
-						var newState = _v2.a;
-						var newVs = _v2.b;
-						var newIs = _v2.c;
-						var newMesh = $declension$elm_obj_loader$OBJ$InternalTypes$WithTextureT(
-							_Utils_update(
-								m,
-								{
-									indices: A2($elm$core$List$cons, newIs, m.indices),
-									vertices: _Utils_ap(m.vertices, newVs)
-								}));
-						return _Utils_update(
-							newState,
-							{
-								currentMesh: $elm$core$Maybe$Just(newMesh)
-							});
-					case 'WithTextureAndTangentT':
-						var _v3 = _v0.a.a;
-						var v1 = _v3.a;
-						var v2 = _v3.b;
-						var v3 = _v3.c;
-						var m = _v0.b.a;
-						var tangents = A2(
-							$declension$elm_obj_loader$OBJ$Assembler$getFaceTangent,
-							_Utils_Tuple3(v1, v2, v3),
-							state);
-						var _v4 = A3(
-							$declension$elm_obj_loader$OBJ$Assembler$applyForFaceA,
-							$declension$elm_obj_loader$OBJ$Assembler$getOrInsertVTNT(tangents),
-							_Utils_Tuple3(v1, v2, v3),
-							state);
-						var newState = _v4.a;
-						var newVs = _v4.b;
-						var newIs = _v4.c;
-						var newMesh = $declension$elm_obj_loader$OBJ$InternalTypes$WithTextureAndTangentT(
-							_Utils_update(
-								m,
-								{
-									indices: A2($elm$core$List$cons, newIs, m.indices),
-									vertices: A2($elm$core$Array$append, m.vertices, newVs)
-								}));
-						return _Utils_update(
-							newState,
-							{
-								currentMesh: $elm$core$Maybe$Just(newMesh)
-							});
-					default:
-						break _v0$3;
-				}
-			} else {
-				if (_v0.b.$ === 'WithoutTextureT') {
-					var _v5 = _v0.a.a;
-					var v1 = _v5.a;
-					var v2 = _v5.b;
-					var v3 = _v5.c;
-					var m = _v0.b.a;
-					var _v6 = A3(
-						$declension$elm_obj_loader$OBJ$Assembler$applyForFace,
-						$declension$elm_obj_loader$OBJ$Assembler$getOrInsertVN,
-						_Utils_Tuple3(v1, v2, v3),
-						state);
-					var newState = _v6.a;
-					var newVs = _v6.b;
-					var newIs = _v6.c;
-					var newMesh = $declension$elm_obj_loader$OBJ$InternalTypes$WithoutTextureT(
-						_Utils_update(
-							m,
-							{
-								indices: A2($elm$core$List$cons, newIs, m.indices),
-								vertices: _Utils_ap(m.vertices, newVs)
-							}));
-					return _Utils_update(
-						newState,
-						{
-							currentMesh: $elm$core$Maybe$Just(newMesh)
-						});
-				} else {
-					break _v0$3;
-				}
-			}
-		}
-		return {
-			config: {withTangents: false},
-			currentGroup: $elm$core$Dict$empty,
-			currentGroupName: '(error)',
-			currentIndex: 0,
-			currentMaterialName: '(error)',
-			currentMesh: $elm$core$Maybe$Nothing,
-			groups: $elm$core$Dict$empty,
-			knownVertex: $elm$core$Dict$empty,
-			knownVertexTextures: $elm$core$Dict$empty,
-			knownVertexTexturesTangents: $elm$core$Dict$empty,
-			vns: $elm$core$Array$empty,
-			vs: $elm$core$Array$empty,
-			vts: $elm$core$Array$empty
-		};
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$createMesh = F2(
-	function (withTangents, f) {
-		var emptyMeshT = {indices: _List_Nil, vertices: $elm$core$Array$empty};
-		var emptyMesh = {indices: _List_Nil, vertices: _List_Nil};
-		if (f.$ === 'FTVertexTextureNormal') {
-			return withTangents ? $declension$elm_obj_loader$OBJ$InternalTypes$WithTextureAndTangentT(emptyMeshT) : $declension$elm_obj_loader$OBJ$InternalTypes$WithTextureT(emptyMesh);
-		} else {
-			return $declension$elm_obj_loader$OBJ$InternalTypes$WithoutTextureT(emptyMesh);
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$addFace = F2(
-	function (f, state) {
-		var _v0 = state.currentMesh;
-		if (_v0.$ === 'Nothing') {
-			return A3(
-				$declension$elm_obj_loader$OBJ$Assembler$addFaceToMesh,
-				f,
-				A2($declension$elm_obj_loader$OBJ$Assembler$createMesh, state.config.withTangents, f),
-				_Utils_update(
-					state,
-					{currentIndex: 0}));
-		} else {
-			var m = _v0.a;
-			return A3($declension$elm_obj_loader$OBJ$Assembler$addFaceToMesh, f, m, state);
-		}
-	});
-var $elm$core$Array$push = F2(
-	function (a, array) {
-		var tail = array.d;
-		return A2(
-			$elm$core$Array$unsafeReplaceTail,
-			A2($elm$core$Elm$JsArray$push, a, tail),
-			array);
-	});
-var $declension$elm_obj_loader$OBJ$InternalTypes$FTVertexNormal = function (a) {
-	return {$: 'FTVertexNormal', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$FTVertexTextureNormal = function (a) {
-	return {$: 'FTVertexTextureNormal', a: a};
-};
-var $declension$elm_obj_loader$OBJ$Assembler$triangulate = function (threeOrFour) {
-	if (threeOrFour.$ === 'Three') {
-		var a = threeOrFour.a.a;
-		var b = threeOrFour.a.b;
-		var c = threeOrFour.a.c;
-		return _List_fromArray(
-			[
-				_Utils_Tuple3(a, b, c)
-			]);
-	} else {
-		var a = threeOrFour.a.a;
-		var b = threeOrFour.a.b;
-		var c = threeOrFour.a.c;
-		var d = threeOrFour.a.d;
-		return _List_fromArray(
-			[
-				_Utils_Tuple3(a, b, c),
-				_Utils_Tuple3(d, a, c)
-			]);
-	}
-};
-var $declension$elm_obj_loader$OBJ$Assembler$triangulateFace = function (f) {
-	if (f.$ === 'FVertexTextureNormal') {
-		var a = f.a;
-		return A2(
-			$elm$core$List$map,
-			$declension$elm_obj_loader$OBJ$InternalTypes$FTVertexTextureNormal,
-			$declension$elm_obj_loader$OBJ$Assembler$triangulate(a));
-	} else {
-		var a = f.a;
-		return A2(
-			$elm$core$List$map,
-			$declension$elm_obj_loader$OBJ$InternalTypes$FTVertexNormal,
-			$declension$elm_obj_loader$OBJ$Assembler$triangulate(a));
-	}
-};
-var $declension$elm_obj_loader$OBJ$Assembler$insertLine = F2(
-	function (line, state) {
-		switch (line.$) {
-			case 'Object':
-				var s = line.a;
-				return function (st) {
-					return _Utils_update(
-						st,
-						{currentGroupName: s});
-				}(
-					$declension$elm_obj_loader$OBJ$Assembler$addCurrentGroup(state));
-			case 'MtlLib':
-				var s = line.a;
-				return state;
-			case 'Group':
-				var s = line.a;
-				return function (st) {
-					return _Utils_update(
-						st,
-						{currentGroupName: s});
-				}(
-					$declension$elm_obj_loader$OBJ$Assembler$addCurrentGroup(state));
-			case 'Smooth':
-				var s = line.a;
-				return state;
-			case 'UseMtl':
-				var s = line.a;
-				return function (st) {
-					return _Utils_update(
-						st,
-						{currentMaterialName: s});
-				}(
-					$declension$elm_obj_loader$OBJ$Assembler$addCurrentMesh(state));
-			case 'V':
-				var v = line.a;
-				return _Utils_update(
-					state,
-					{
-						vs: A2($elm$core$Array$push, v, state.vs)
-					});
-			case 'Vt':
-				var v = line.a;
-				return _Utils_update(
-					state,
-					{
-						vts: A2($elm$core$Array$push, v, state.vts)
-					});
-			case 'Vn':
-				var v = line.a;
-				return _Utils_update(
-					state,
-					{
-						vns: A2($elm$core$Array$push, v, state.vns)
-					});
-			default:
-				var f = line.a;
-				return A3(
-					$elm$core$List$foldr,
-					$declension$elm_obj_loader$OBJ$Assembler$addFace,
-					state,
-					$declension$elm_obj_loader$OBJ$Assembler$triangulateFace(f));
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$compileHelper = F2(
-	function (state, lines) {
-		compileHelper:
-		while (true) {
-			if (!lines.b) {
-				return state;
-			} else {
-				var l = lines.a;
-				var ls = lines.b;
-				var $temp$state = A2($declension$elm_obj_loader$OBJ$Assembler$insertLine, l, state),
-					$temp$lines = ls;
-				state = $temp$state;
-				lines = $temp$lines;
-				continue compileHelper;
-			}
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Assembler$emptyCompileState = function (config) {
-	return {config: config, currentGroup: $elm$core$Dict$empty, currentGroupName: '__default__', currentIndex: 0, currentMaterialName: '__default__', currentMesh: $elm$core$Maybe$Nothing, groups: $elm$core$Dict$empty, knownVertex: $elm$core$Dict$empty, knownVertexTextures: $elm$core$Dict$empty, knownVertexTexturesTangents: $elm$core$Dict$empty, vns: $elm$core$Array$empty, vs: $elm$core$Array$empty, vts: $elm$core$Array$empty};
-};
-var $declension$elm_obj_loader$OBJ$Assembler$compile = F2(
-	function (config, lines) {
-		return $declension$elm_obj_loader$OBJ$Assembler$addCurrentGroup(
-			$declension$elm_obj_loader$OBJ$Assembler$addCurrentMesh(
-				A2(
-					$declension$elm_obj_loader$OBJ$Assembler$compileHelper,
-					$declension$elm_obj_loader$OBJ$Assembler$emptyCompileState(config),
-					lines))).groups;
-	});
-var $elm$regex$Regex$Match = F4(
-	function (match, index, number, submatches) {
-		return {index: index, match: match, number: number, submatches: submatches};
-	});
-var $elm$regex$Regex$contains = _Regex_contains;
-var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-var $elm$regex$Regex$fromString = function (string) {
-	return A2(
-		$elm$regex$Regex$fromStringWith,
-		{caseInsensitive: false, multiline: false},
-		string);
-};
-var $declension$elm_obj_loader$OBJ$Parser$regexMatches = F2(
-	function (regexStr, str) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			false,
-			A2(
-				$elm$core$Maybe$map,
-				function (regex) {
-					return A2($elm$regex$Regex$contains, regex, str);
-				},
-				$elm$regex$Regex$fromString(regexStr)));
-	});
-var $declension$elm_obj_loader$OBJ$Parser$canSkip = $declension$elm_obj_loader$OBJ$Parser$regexMatches('^((\\s*)|(\\s*#.*\\r?))$');
-var $andre_dietrich$parser_combinators$Combine$ParseLocation = F3(
-	function (source, line, column) {
-		return {column: column, line: line, source: source};
-	});
-var $andre_dietrich$parser_combinators$Combine$currentLocation = function (stream) {
-	var find = F3(
-		function (position, currentLine_, lines) {
-			find:
-			while (true) {
-				if (!lines.b) {
-					return A3($andre_dietrich$parser_combinators$Combine$ParseLocation, '', currentLine_, position);
-				} else {
-					var line = lines.a;
-					var rest = lines.b;
-					var length = $elm$core$String$length(line);
-					var lengthPlusNL = length + 1;
-					if (_Utils_eq(position, length)) {
-						return A3($andre_dietrich$parser_combinators$Combine$ParseLocation, line, currentLine_, position);
-					} else {
-						if (_Utils_cmp(position, length) > 0) {
-							var $temp$position = position - lengthPlusNL,
-								$temp$currentLine_ = currentLine_ + 1,
-								$temp$lines = rest;
-							position = $temp$position;
-							currentLine_ = $temp$currentLine_;
-							lines = $temp$lines;
-							continue find;
-						} else {
-							return A3($andre_dietrich$parser_combinators$Combine$ParseLocation, line, currentLine_, position);
-						}
-					}
-				}
-			}
-		});
-	return A3(
-		find,
-		stream.position,
-		0,
-		A2($elm$core$String$split, '\n', stream.data));
-};
-var $elm$core$String$cons = _String_cons;
-var $elm$core$String$fromChar = function (_char) {
-	return A2($elm$core$String$cons, _char, '');
-};
-var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
-var $elm$core$String$repeatHelp = F3(
-	function (n, chunk, result) {
-		return (n <= 0) ? result : A3(
-			$elm$core$String$repeatHelp,
-			n >> 1,
-			_Utils_ap(chunk, chunk),
-			(!(n & 1)) ? result : _Utils_ap(result, chunk));
-	});
-var $elm$core$String$repeat = F2(
-	function (n, chunk) {
-		return A3($elm$core$String$repeatHelp, n, chunk, '');
-	});
-var $elm$core$String$padLeft = F3(
-	function (n, _char, string) {
-		return _Utils_ap(
-			A2(
-				$elm$core$String$repeat,
-				n - $elm$core$String$length(string),
-				$elm$core$String$fromChar(_char)),
-			string);
-	});
-var $declension$elm_obj_loader$OBJ$Parser$formatError = F2(
-	function (ms, stream) {
-		var separator = '| ';
-		var separatorOffset = $elm$core$String$length(separator);
-		var location = $andre_dietrich$parser_combinators$Combine$currentLocation(stream);
-		var padding = (location.column + separatorOffset) + 2;
-		var lineNumberOffset = $elm$core$Basics$floor(
-			A2($elm$core$Basics$logBase, 10, location.line)) + 1;
-		var expectationSeparator = '\n  * ';
-		return 'Parse error around line:\n\n' + ($elm$core$String$fromInt(location.line) + (separator + (location.source + ('\n' + (A3(
-			$elm$core$String$padLeft,
-			padding,
-			_Utils_chr(' '),
-			'^') + ('\nI expected one of the following:\n' + (expectationSeparator + A2($elm$core$String$join, expectationSeparator, ms))))))));
-	});
-var $declension$elm_obj_loader$OBJ$InternalTypes$F = function (a) {
-	return {$: 'F', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$Group = function (a) {
-	return {$: 'Group', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$MtlLib = function (a) {
-	return {$: 'MtlLib', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$Object = function (a) {
-	return {$: 'Object', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$Smooth = function (a) {
-	return {$: 'Smooth', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$UseMtl = function (a) {
-	return {$: 'UseMtl', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$V = function (a) {
-	return {$: 'V', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$Vn = function (a) {
-	return {$: 'Vn', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$Vt = function (a) {
-	return {$: 'Vt', a: a};
-};
-var $andre_dietrich$parser_combinators$Combine$Parser = function (a) {
-	return {$: 'Parser', a: a};
-};
-var $andre_dietrich$parser_combinators$Combine$emptyErr = $andre_dietrich$parser_combinators$Combine$Parser(
-	F2(
-		function (state, stream) {
-			return _Utils_Tuple3(
-				state,
-				stream,
-				$elm$core$Result$Err(_List_Nil));
-		}));
-var $andre_dietrich$parser_combinators$Combine$app = function (_v0) {
-	var inner = _v0.a;
-	return inner;
-};
-var $andre_dietrich$parser_combinators$Combine$or = F2(
-	function (lp, rp) {
-		return $andre_dietrich$parser_combinators$Combine$Parser(
-			F2(
-				function (state, stream) {
-					var _v0 = A3($andre_dietrich$parser_combinators$Combine$app, lp, state, stream);
-					if (_v0.c.$ === 'Ok') {
-						var res = _v0;
-						return res;
-					} else {
-						var lms = _v0.c.a;
-						var _v1 = A3($andre_dietrich$parser_combinators$Combine$app, rp, state, stream);
-						if (_v1.c.$ === 'Ok') {
-							var res = _v1;
-							return res;
-						} else {
-							var rms = _v1.c.a;
-							return _Utils_Tuple3(
-								state,
-								stream,
-								$elm$core$Result$Err(
-									_Utils_ap(lms, rms)));
-						}
-					}
-				}));
-	});
-var $andre_dietrich$parser_combinators$Combine$choice = function (xs) {
-	return A3($elm$core$List$foldr, $andre_dietrich$parser_combinators$Combine$or, $andre_dietrich$parser_combinators$Combine$emptyErr, xs);
-};
-var $andre_dietrich$parser_combinators$Combine$fail = function (m) {
-	return $andre_dietrich$parser_combinators$Combine$Parser(
-		F2(
-			function (state, stream) {
-				return _Utils_Tuple3(
-					state,
-					stream,
-					$elm$core$Result$Err(
-						_List_fromArray(
-							[m])));
-			}));
-};
-var $andre_dietrich$parser_combinators$Combine$andThen = F2(
-	function (f, p) {
-		return $andre_dietrich$parser_combinators$Combine$Parser(
-			F2(
-				function (state, stream) {
-					var _v0 = A3($andre_dietrich$parser_combinators$Combine$app, p, state, stream);
-					if (_v0.c.$ === 'Ok') {
-						var rstate = _v0.a;
-						var rstream = _v0.b;
-						var res = _v0.c.a;
-						return A3(
-							$andre_dietrich$parser_combinators$Combine$app,
-							f(res),
-							rstate,
-							rstream);
-					} else {
-						var estate = _v0.a;
-						var estream = _v0.b;
-						var ms = _v0.c.a;
-						return _Utils_Tuple3(
-							estate,
-							estream,
-							$elm$core$Result$Err(ms));
-					}
-				}));
-	});
-var $andre_dietrich$parser_combinators$Combine$bimap = F3(
-	function (fok, ferr, p) {
-		return $andre_dietrich$parser_combinators$Combine$Parser(
-			F2(
-				function (state, stream) {
-					var _v0 = A3($andre_dietrich$parser_combinators$Combine$app, p, state, stream);
-					if (_v0.c.$ === 'Ok') {
-						var rstate = _v0.a;
-						var rstream = _v0.b;
-						var res = _v0.c.a;
-						return _Utils_Tuple3(
-							rstate,
-							rstream,
-							$elm$core$Result$Ok(
-								fok(res)));
-					} else {
-						var estate = _v0.a;
-						var estream = _v0.b;
-						var ms = _v0.c.a;
-						return _Utils_Tuple3(
-							estate,
-							estream,
-							$elm$core$Result$Err(
-								ferr(ms)));
-					}
-				}));
-	});
-var $andre_dietrich$parser_combinators$Combine$map = F2(
-	function (f, p) {
-		return A3($andre_dietrich$parser_combinators$Combine$bimap, f, $elm$core$Basics$identity, p);
-	});
-var $andre_dietrich$parser_combinators$Combine$mapError = $andre_dietrich$parser_combinators$Combine$bimap($elm$core$Basics$identity);
-var $andre_dietrich$parser_combinators$Combine$onerror = F2(
-	function (m, p) {
-		return A2(
-			$andre_dietrich$parser_combinators$Combine$mapError,
-			$elm$core$Basics$always(
-				_List_fromArray(
-					[m])),
-			p);
-	});
-var $elm$regex$Regex$findAtMost = _Regex_findAtMost;
-var $elm$regex$Regex$never = _Regex_never;
-var $andre_dietrich$parser_combinators$Combine$regexer = F5(
-	function (input, output, pat, state, stream) {
-		var pattern = A2($elm$core$String$startsWith, '^', pat) ? pat : ('^' + pat);
-		var _v0 = A3(
-			$elm$regex$Regex$findAtMost,
-			1,
-			A2(
-				$elm$core$Maybe$withDefault,
-				$elm$regex$Regex$never,
-				input(pattern)),
-			stream.input);
-		if (_v0.b && (!_v0.b.b)) {
-			var match = _v0.a;
-			var len = $elm$core$String$length(match.match);
-			var pos = stream.position + len;
-			var rem = A2($elm$core$String$dropLeft, len, stream.input);
-			return _Utils_Tuple3(
-				state,
-				_Utils_update(
-					stream,
-					{input: rem, position: pos}),
-				$elm$core$Result$Ok(
-					output(match)));
-		} else {
-			return _Utils_Tuple3(
-				state,
-				stream,
-				$elm$core$Result$Err(
-					_List_fromArray(
-						['expected input matching Regexp /' + (pattern + '/')])));
-		}
-	});
-var $andre_dietrich$parser_combinators$Combine$regex = A2(
-	$elm$core$Basics$composeR,
-	A2(
-		$andre_dietrich$parser_combinators$Combine$regexer,
-		$elm$regex$Regex$fromString,
-		function ($) {
-			return $.match;
-		}),
-	$andre_dietrich$parser_combinators$Combine$Parser);
-var $andre_dietrich$parser_combinators$Combine$succeed = function (res) {
-	return $andre_dietrich$parser_combinators$Combine$Parser(
-		F2(
-			function (state, stream) {
-				return _Utils_Tuple3(
-					state,
-					stream,
-					$elm$core$Result$Ok(res));
-			}));
-};
-var $andre_dietrich$parser_combinators$Combine$Num$unwrap = function (value) {
-	if (value.$ === 'Just') {
-		var v = value.a;
-		return $andre_dietrich$parser_combinators$Combine$succeed(v);
-	} else {
-		return $andre_dietrich$parser_combinators$Combine$fail('impossible state in Combine.Num.unwrap');
-	}
-};
-var $andre_dietrich$parser_combinators$Combine$Num$int = A2(
-	$andre_dietrich$parser_combinators$Combine$onerror,
-	'expected an int',
-	A2(
-		$andre_dietrich$parser_combinators$Combine$andThen,
-		$andre_dietrich$parser_combinators$Combine$Num$unwrap,
-		A2(
-			$andre_dietrich$parser_combinators$Combine$map,
-			$elm$core$String$toInt,
-			$andre_dietrich$parser_combinators$Combine$regex('-?(?:0|[1-9]\\d*)'))));
-var $pilatch$flip$Flip$flip = F3(
-	function (_function, argB, argA) {
-		return A2(_function, argA, argB);
-	});
-var $andre_dietrich$parser_combinators$Combine$andMap = F2(
-	function (rp, lp) {
-		return A2(
-			$andre_dietrich$parser_combinators$Combine$andThen,
-			A2($pilatch$flip$Flip$flip, $andre_dietrich$parser_combinators$Combine$map, rp),
-			lp);
-	});
-var $andre_dietrich$parser_combinators$Combine$keep = F2(
-	function (p1, p2) {
-		return A2(
-			$andre_dietrich$parser_combinators$Combine$andMap,
-			p1,
-			A2(
-				$andre_dietrich$parser_combinators$Combine$map,
-				$pilatch$flip$Flip$flip($elm$core$Basics$always),
-				p2));
-	});
-var $declension$elm_obj_loader$OBJ$InternalTypes$Four = function (a) {
-	return {$: 'Four', a: a};
-};
-var $declension$elm_obj_loader$OBJ$InternalTypes$Three = function (a) {
-	return {$: 'Three', a: a};
-};
-var $declension$elm_obj_loader$OBJ$Parser$spaces = $andre_dietrich$parser_combinators$Combine$regex('[ \t]+');
-var $declension$elm_obj_loader$OBJ$Parser$fourValues = F2(
-	function (tagger, parser) {
-		return A2(
-			$andre_dietrich$parser_combinators$Combine$andMap,
-			A2($andre_dietrich$parser_combinators$Combine$keep, parser, $declension$elm_obj_loader$OBJ$Parser$spaces),
-			A2(
-				$andre_dietrich$parser_combinators$Combine$andMap,
-				A2($andre_dietrich$parser_combinators$Combine$keep, parser, $declension$elm_obj_loader$OBJ$Parser$spaces),
-				A2(
-					$andre_dietrich$parser_combinators$Combine$andMap,
-					A2($andre_dietrich$parser_combinators$Combine$keep, parser, $declension$elm_obj_loader$OBJ$Parser$spaces),
-					A2($andre_dietrich$parser_combinators$Combine$map, tagger, parser))));
-	});
-var $declension$elm_obj_loader$OBJ$Parser$threeValues = F2(
-	function (tagger, parser) {
-		return A2(
-			$andre_dietrich$parser_combinators$Combine$andMap,
-			A2($andre_dietrich$parser_combinators$Combine$keep, parser, $declension$elm_obj_loader$OBJ$Parser$spaces),
-			A2(
-				$andre_dietrich$parser_combinators$Combine$andMap,
-				A2($andre_dietrich$parser_combinators$Combine$keep, parser, $declension$elm_obj_loader$OBJ$Parser$spaces),
-				A2($andre_dietrich$parser_combinators$Combine$map, tagger, parser)));
-	});
-var $declension$elm_obj_loader$OBJ$Parser$threeOrFourValues = function (elementType) {
-	return A2(
-		$andre_dietrich$parser_combinators$Combine$or,
-		A2(
-			$andre_dietrich$parser_combinators$Combine$map,
-			$declension$elm_obj_loader$OBJ$InternalTypes$Four,
-			A2(
-				$declension$elm_obj_loader$OBJ$Parser$fourValues,
-				F4(
-					function (a, b, c, d) {
-						return {a: a, b: b, c: c, d: d};
-					}),
-				elementType)),
-		A2(
-			$andre_dietrich$parser_combinators$Combine$map,
-			$declension$elm_obj_loader$OBJ$InternalTypes$Three,
-			A2(
-				$declension$elm_obj_loader$OBJ$Parser$threeValues,
-				F3(
-					function (a, b, c) {
-						return {a: a, b: b, c: c};
-					}),
-				elementType)));
-};
-var $declension$elm_obj_loader$OBJ$Parser$fVertex = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$fail('Models with no precalculated vertex normals are not supported!'),
-	$declension$elm_obj_loader$OBJ$Parser$threeOrFourValues($andre_dietrich$parser_combinators$Combine$Num$int));
-var $declension$elm_obj_loader$OBJ$InternalTypes$FVertexNormal = function (a) {
-	return {$: 'FVertexNormal', a: a};
-};
-var $andre_dietrich$parser_combinators$Combine$string = function (s) {
-	return $andre_dietrich$parser_combinators$Combine$Parser(
-		F2(
-			function (state, stream) {
-				if (A2($elm$core$String$startsWith, s, stream.input)) {
-					var len = $elm$core$String$length(s);
-					var pos = stream.position + len;
-					var rem = A2($elm$core$String$dropLeft, len, stream.input);
-					return _Utils_Tuple3(
-						state,
-						_Utils_update(
-							stream,
-							{input: rem, position: pos}),
-						$elm$core$Result$Ok(s));
-				} else {
-					return _Utils_Tuple3(
-						state,
-						stream,
-						$elm$core$Result$Err(
-							_List_fromArray(
-								['expected \"' + (s + '\"')])));
-				}
-			}));
-};
-var $declension$elm_obj_loader$OBJ$Parser$tuple2 = F2(
-	function (a, b) {
-		return _Utils_Tuple2(a, b);
-	});
-var $declension$elm_obj_loader$OBJ$Parser$int__int = A2(
-	$andre_dietrich$parser_combinators$Combine$andMap,
-	A2(
-		$andre_dietrich$parser_combinators$Combine$keep,
-		$andre_dietrich$parser_combinators$Combine$Num$int,
-		$andre_dietrich$parser_combinators$Combine$string('//')),
-	A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$Parser$tuple2, $andre_dietrich$parser_combinators$Combine$Num$int));
-var $declension$elm_obj_loader$OBJ$Parser$fVertexNormal = A2(
-	$andre_dietrich$parser_combinators$Combine$map,
-	$declension$elm_obj_loader$OBJ$InternalTypes$FVertexNormal,
-	$declension$elm_obj_loader$OBJ$Parser$threeOrFourValues($declension$elm_obj_loader$OBJ$Parser$int__int));
-var $declension$elm_obj_loader$OBJ$Parser$int_int = A2(
-	$andre_dietrich$parser_combinators$Combine$andMap,
-	A2(
-		$andre_dietrich$parser_combinators$Combine$keep,
-		$andre_dietrich$parser_combinators$Combine$Num$int,
-		$andre_dietrich$parser_combinators$Combine$string('/')),
-	A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$Parser$tuple2, $andre_dietrich$parser_combinators$Combine$Num$int));
-var $declension$elm_obj_loader$OBJ$Parser$fVertexTexture = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$fail('Models with no precalculated vertex normals are not supported!'),
-	$declension$elm_obj_loader$OBJ$Parser$threeOrFourValues($declension$elm_obj_loader$OBJ$Parser$int_int));
-var $declension$elm_obj_loader$OBJ$InternalTypes$FVertexTextureNormal = function (a) {
-	return {$: 'FVertexTextureNormal', a: a};
-};
-var $declension$elm_obj_loader$OBJ$Parser$tuple3 = F3(
-	function (a, b, c) {
-		return _Utils_Tuple3(a, b, c);
-	});
-var $declension$elm_obj_loader$OBJ$Parser$int_int_int = A2(
-	$andre_dietrich$parser_combinators$Combine$andMap,
-	A2(
-		$andre_dietrich$parser_combinators$Combine$keep,
-		$andre_dietrich$parser_combinators$Combine$Num$int,
-		$andre_dietrich$parser_combinators$Combine$string('/')),
-	A2(
-		$andre_dietrich$parser_combinators$Combine$andMap,
-		A2(
-			$andre_dietrich$parser_combinators$Combine$keep,
-			$andre_dietrich$parser_combinators$Combine$Num$int,
-			$andre_dietrich$parser_combinators$Combine$string('/')),
-		A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$Parser$tuple3, $andre_dietrich$parser_combinators$Combine$Num$int)));
-var $declension$elm_obj_loader$OBJ$Parser$fVertexTextureNormal = A2(
-	$andre_dietrich$parser_combinators$Combine$map,
-	$declension$elm_obj_loader$OBJ$InternalTypes$FVertexTextureNormal,
-	$declension$elm_obj_loader$OBJ$Parser$threeOrFourValues($declension$elm_obj_loader$OBJ$Parser$int_int_int));
-var $declension$elm_obj_loader$OBJ$Parser$face = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$choice(
-		_List_fromArray(
-			[$declension$elm_obj_loader$OBJ$Parser$fVertexTextureNormal, $declension$elm_obj_loader$OBJ$Parser$fVertexNormal, $declension$elm_obj_loader$OBJ$Parser$fVertex, $declension$elm_obj_loader$OBJ$Parser$fVertexTexture])),
-	$andre_dietrich$parser_combinators$Combine$regex('f[ \t]+'));
-var $andre_dietrich$parser_combinators$Combine$primitive = $andre_dietrich$parser_combinators$Combine$Parser;
-var $andre_dietrich$parser_combinators$Combine$Char$satisfy = function (pred) {
-	return $andre_dietrich$parser_combinators$Combine$primitive(
-		F2(
-			function (state, stream) {
-				var message = 'could not satisfy predicate';
-				var _v0 = $elm$core$String$uncons(stream.input);
-				if (_v0.$ === 'Just') {
-					var _v1 = _v0.a;
-					var h = _v1.a;
-					var rest = _v1.b;
-					return pred(h) ? _Utils_Tuple3(
-						state,
-						_Utils_update(
-							stream,
-							{input: rest, position: stream.position + 1}),
-						$elm$core$Result$Ok(h)) : _Utils_Tuple3(
-						state,
-						stream,
-						$elm$core$Result$Err(
-							_List_fromArray(
-								[message])));
-				} else {
-					return _Utils_Tuple3(
-						state,
-						stream,
-						$elm$core$Result$Err(
-							_List_fromArray(
-								[message])));
-				}
-			}));
-};
-var $andre_dietrich$parser_combinators$Combine$Char$char = function (c) {
-	return A2(
-		$andre_dietrich$parser_combinators$Combine$onerror,
-		'expected ' + $elm$core$String$fromChar(c),
-		$andre_dietrich$parser_combinators$Combine$Char$satisfy(
-			$elm$core$Basics$eq(c)));
-};
-var $declension$elm_obj_loader$OBJ$Parser$group = A2(
-	$andre_dietrich$parser_combinators$Combine$or,
-	A2(
-		$andre_dietrich$parser_combinators$Combine$keep,
-		$andre_dietrich$parser_combinators$Combine$regex('.+'),
-		$andre_dietrich$parser_combinators$Combine$regex('g[ \t]+')),
-	A2(
-		$andre_dietrich$parser_combinators$Combine$keep,
-		$andre_dietrich$parser_combinators$Combine$succeed(''),
-		$andre_dietrich$parser_combinators$Combine$Char$char(
-			_Utils_chr('g'))));
-var $declension$elm_obj_loader$OBJ$Parser$mtllib = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$regex('.+'),
-	$andre_dietrich$parser_combinators$Combine$regex('mtllib[ \t]+'));
-var $declension$elm_obj_loader$OBJ$Parser$objectName = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$regex('.+'),
-	$andre_dietrich$parser_combinators$Combine$regex('o[ \t]+'));
-var $declension$elm_obj_loader$OBJ$Parser$smooth = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$regex('.+'),
-	$andre_dietrich$parser_combinators$Combine$regex('s[ \t]+'));
-var $declension$elm_obj_loader$OBJ$Parser$usemtl = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$regex('.+'),
-	$andre_dietrich$parser_combinators$Combine$regex('usemtl[ \t]+'));
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
-var $elm$core$Result$withDefault = F2(
-	function (def, result) {
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
 		if (result.$ === 'Ok') {
-			var a = result.a;
-			return a;
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
 		} else {
-			return def;
-		}
-	});
-var $declension$elm_obj_loader$OBJ$Parser$parseFloatOrZero = function (s) {
-	return A2(
-		$elm$core$Result$withDefault,
-		0,
-		A2($elm$json$Json$Decode$decodeString, $elm$json$Json$Decode$float, s));
-};
-var $declension$elm_obj_loader$OBJ$Parser$betterFloat = A2(
-	$andre_dietrich$parser_combinators$Combine$map,
-	$declension$elm_obj_loader$OBJ$Parser$parseFloatOrZero,
-	$andre_dietrich$parser_combinators$Combine$regex('[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?'));
-var $declension$elm_obj_loader$OBJ$Parser$vector3 = A2($declension$elm_obj_loader$OBJ$Parser$threeValues, $elm_explorations$linear_algebra$Math$Vector3$vec3, $declension$elm_obj_loader$OBJ$Parser$betterFloat);
-var $declension$elm_obj_loader$OBJ$Parser$vertex = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$declension$elm_obj_loader$OBJ$Parser$vector3,
-	$andre_dietrich$parser_combinators$Combine$regex('v[ \t]+'));
-var $declension$elm_obj_loader$OBJ$Parser$vertexNormal = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	A2($andre_dietrich$parser_combinators$Combine$map, $elm_explorations$linear_algebra$Math$Vector3$normalize, $declension$elm_obj_loader$OBJ$Parser$vector3),
-	$andre_dietrich$parser_combinators$Combine$regex('vn[ \t]+'));
-var $elm_explorations$linear_algebra$Math$Vector2$vec2 = _MJS_v2;
-var $declension$elm_obj_loader$OBJ$Parser$ignoreZ = function (v) {
-	var _v0 = $elm_explorations$linear_algebra$Math$Vector3$toRecord(v);
-	var x = _v0.x;
-	var y = _v0.y;
-	var z = _v0.z;
-	return A2($elm_explorations$linear_algebra$Math$Vector2$vec2, x, y);
-};
-var $declension$elm_obj_loader$OBJ$Parser$vector2 = A2(
-	$andre_dietrich$parser_combinators$Combine$andMap,
-	A2($andre_dietrich$parser_combinators$Combine$keep, $declension$elm_obj_loader$OBJ$Parser$betterFloat, $declension$elm_obj_loader$OBJ$Parser$spaces),
-	A2($andre_dietrich$parser_combinators$Combine$map, $elm_explorations$linear_algebra$Math$Vector2$vec2, $declension$elm_obj_loader$OBJ$Parser$betterFloat));
-var $declension$elm_obj_loader$OBJ$Parser$vertexTexture = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	A2(
-		$andre_dietrich$parser_combinators$Combine$or,
-		A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$Parser$ignoreZ, $declension$elm_obj_loader$OBJ$Parser$vector3),
-		$declension$elm_obj_loader$OBJ$Parser$vector2),
-	$andre_dietrich$parser_combinators$Combine$regex('vt[ \t]+'));
-var $declension$elm_obj_loader$OBJ$Parser$line = A2(
-	$andre_dietrich$parser_combinators$Combine$keep,
-	$andre_dietrich$parser_combinators$Combine$choice(
-		_List_fromArray(
-			[
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$V, $declension$elm_obj_loader$OBJ$Parser$vertex),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$Vt, $declension$elm_obj_loader$OBJ$Parser$vertexTexture),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$Vn, $declension$elm_obj_loader$OBJ$Parser$vertexNormal),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$F, $declension$elm_obj_loader$OBJ$Parser$face),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$Object, $declension$elm_obj_loader$OBJ$Parser$objectName),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$Group, $declension$elm_obj_loader$OBJ$Parser$group),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$Smooth, $declension$elm_obj_loader$OBJ$Parser$smooth),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$UseMtl, $declension$elm_obj_loader$OBJ$Parser$usemtl),
-				A2($andre_dietrich$parser_combinators$Combine$map, $declension$elm_obj_loader$OBJ$InternalTypes$MtlLib, $declension$elm_obj_loader$OBJ$Parser$mtllib)
-			])),
-	$andre_dietrich$parser_combinators$Combine$regex('[ \t]*'));
-var $andre_dietrich$parser_combinators$Combine$InputStream = F3(
-	function (data, input, position) {
-		return {data: data, input: input, position: position};
-	});
-var $andre_dietrich$parser_combinators$Combine$initStream = function (s) {
-	return A3($andre_dietrich$parser_combinators$Combine$InputStream, s, s, 0);
-};
-var $andre_dietrich$parser_combinators$Combine$runParser = F3(
-	function (p, st, s) {
-		var _v0 = A3(
-			$andre_dietrich$parser_combinators$Combine$app,
-			p,
-			st,
-			$andre_dietrich$parser_combinators$Combine$initStream(s));
-		if (_v0.c.$ === 'Ok') {
-			var state = _v0.a;
-			var stream = _v0.b;
-			var res = _v0.c.a;
-			return $elm$core$Result$Ok(
-				_Utils_Tuple3(state, stream, res));
-		} else {
-			var state = _v0.a;
-			var stream = _v0.b;
-			var ms = _v0.c.a;
+			var e = result.a;
 			return $elm$core$Result$Err(
-				_Utils_Tuple3(state, stream, ms));
+				f(e));
 		}
 	});
-var $andre_dietrich$parser_combinators$Combine$parse = function (p) {
-	return A2($andre_dietrich$parser_combinators$Combine$runParser, p, _Utils_Tuple0);
-};
-var $declension$elm_obj_loader$OBJ$Parser$parseLine = function (l) {
-	var _v0 = A2($andre_dietrich$parser_combinators$Combine$parse, $declension$elm_obj_loader$OBJ$Parser$line, l);
-	if (_v0.$ === 'Ok') {
-		var _v1 = _v0.a;
-		var stream = _v1.b;
-		var result = _v1.c;
-		return $elm$core$Result$Ok(result);
-	} else {
-		var _v2 = _v0.a;
-		var stream = _v2.b;
-		var errors = _v2.c;
-		return $elm$core$Result$Err(
-			A2($declension$elm_obj_loader$OBJ$Parser$formatError, errors, stream));
-	}
-};
-var $declension$elm_obj_loader$OBJ$Parser$parseLineAcc = F2(
-	function (line_, acc) {
-		if (acc.$ === 'Ok') {
-			var lines = acc.a;
-			return $declension$elm_obj_loader$OBJ$Parser$canSkip(line_) ? $elm$core$Result$Ok(lines) : A2(
-				$elm$core$Result$andThen,
-				function (l) {
-					return $elm$core$Result$Ok(
-						A2($elm$core$List$cons, l, lines));
-				},
-				$declension$elm_obj_loader$OBJ$Parser$parseLine(line_));
-		} else {
-			var e = acc.a;
-			return $elm$core$Result$Err(e);
-		}
+var $author$project$Graphics$MeshWithScalingVector$MeshAndFace = F2(
+	function (vertices, faces) {
+		return {faces: faces, vertices: vertices};
 	});
-var $declension$elm_obj_loader$OBJ$Parser$parse = function (input) {
-	return A3(
-		$elm$core$List$foldr,
-		$declension$elm_obj_loader$OBJ$Parser$parseLineAcc,
-		$elm$core$Result$Ok(_List_Nil),
-		A2($elm$core$String$split, '\n', input));
-};
-var $declension$elm_obj_loader$OBJ$parseObjStringWith = F2(
-	function (config, input) {
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Graphics$MeshWithScalingVector$list3 = F2(
+	function (f, decoder) {
 		return A2(
-			$elm$core$Result$map,
-			$declension$elm_obj_loader$OBJ$Assembler$compile(config),
-			$declension$elm_obj_loader$OBJ$Parser$parse(input));
+			$elm$json$Json$Decode$andThen,
+			function (lis) {
+				if (((lis.b && lis.b.b) && lis.b.b.b) && (!lis.b.b.b.b)) {
+					var x = lis.a;
+					var _v1 = lis.b;
+					var y = _v1.a;
+					var _v2 = _v1.b;
+					var z = _v2.a;
+					return $elm$json$Json$Decode$succeed(
+						A3(f, x, y, z));
+				} else {
+					return $elm$json$Json$Decode$fail(
+						'list3: list count be 3 but got ' + $elm$core$String$fromInt(
+							$elm$core$List$length(lis)));
+				}
+			},
+			$elm$json$Json$Decode$list(decoder));
+	});
+var $author$project$Graphics$MeshWithScalingVector$face = A2(
+	$author$project$Graphics$MeshWithScalingVector$list3,
+	F3(
+		function (a, b, c) {
+			return _Utils_Tuple3(a, b, c);
+		}),
+	$elm$json$Json$Decode$int);
+var $author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector = F3(
+	function (position, normal, scalingVector) {
+		return {normal: normal, position: position, scalingVector: scalingVector};
+	});
+var $author$project$Graphics$MeshWithScalingVector$vertex = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector,
+	A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float),
+	A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float),
+	A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float));
+var $author$project$Graphics$MeshWithScalingVector$decodeMeshWithScalingVector = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Graphics$MeshWithScalingVector$MeshAndFace,
+	A2(
+		$elm$json$Json$Decode$field,
+		'vertices',
+		$elm$json$Json$Decode$list($author$project$Graphics$MeshWithScalingVector$vertex)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'faces',
+		$elm$json$Json$Decode$list($author$project$Graphics$MeshWithScalingVector$face)));
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $author$project$Graphics$MeshWithScalingVector$parse = function (s) {
+	return A2(
+		$elm$core$Result$mapError,
+		function (_v0) {
+			return 'Parse Error';
+		},
+		A2($elm$json$Json$Decode$decodeString, $author$project$Graphics$MeshWithScalingVector$decodeMeshWithScalingVector, s));
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$core$Task$onError = _Scheduler_onError;
+var $elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return $elm$core$Task$command(
+			$elm$core$Task$Perform(
+				A2(
+					$elm$core$Task$onError,
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+						$elm$core$Result$Err),
+					A2(
+						$elm$core$Task$andThen,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+							$elm$core$Result$Ok),
+						task))));
 	});
 var $elm$http$Http$toTask = function (_v0) {
 	var request_ = _v0.a;
 	return A2(_Http_toTask, request_, $elm$core$Maybe$Nothing);
 };
-var $declension$elm_obj_loader$OBJ$loadObjFileWith = F3(
-	function (settings, url, msg) {
+var $elm$http$Http$send = F2(
+	function (resultToMessage, request_) {
 		return A2(
 			$elm$core$Task$attempt,
-			function (r) {
-				if (r.$ === 'Ok') {
-					if (r.a.$ === 'Ok') {
-						var m = r.a.a;
-						return msg(
-							$elm$core$Result$Ok(m));
-					} else {
-						var e = r.a.a;
-						return msg(
-							$elm$core$Result$Err(e));
-					}
-				} else {
-					var e = r.a;
-					return msg(
-						$elm$core$Result$Err(e));
-				}
-			},
-			A2(
-				$elm$core$Task$onError,
-				function (e) {
-					return $elm$core$Task$succeed(
-						$elm$core$Result$Err(
-							$declension$elm_obj_loader$OBJ$httpErrorFor(e)));
-				},
-				A2(
-					$elm$core$Task$andThen,
-					function (s) {
-						return $elm$core$Task$succeed(
-							A2($declension$elm_obj_loader$OBJ$parseObjStringWith, settings, s));
-					},
-					$elm$http$Http$toTask(
-						$elm$http$Http$getString(url)))));
+			resultToMessage,
+			$elm$http$Http$toTask(request_));
 	});
-var $declension$elm_obj_loader$OBJ$loadObjFile = $declension$elm_obj_loader$OBJ$loadObjFileWith($declension$elm_obj_loader$OBJ$defaultSettings);
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $declension$elm_obj_loader$OBJ$loadMeshWithoutTexture = F2(
+var $author$project$Graphics$MeshWithScalingVector$load = F2(
 	function (url, msg) {
 		return A2(
-			$declension$elm_obj_loader$OBJ$loadObjFile,
-			url,
-			function (res) {
-				if (res.$ === 'Ok') {
-					var f = res.a;
-					var _v1 = A2(
-						$elm$core$List$map,
-						$elm$core$Dict$values,
-						$elm$core$Dict$values(f));
-					if ((((_v1.b && _v1.a.b) && (_v1.a.a.$ === 'WithoutTexture')) && (!_v1.a.b.b)) && (!_v1.b.b)) {
-						var _v2 = _v1.a;
-						var m = _v2.a.a;
-						return msg(
-							$elm$core$Result$Ok(m));
-					} else {
-						return msg(
-							$elm$core$Result$Err('file loaded correctly, but there were more than one models.'));
-					}
-				} else {
-					var e = res.a;
-					return msg(
-						$elm$core$Result$Err(e));
-				}
-			});
+			$elm$http$Http$send,
+			function (result) {
+				return msg(
+					A2(
+						$elm$core$Result$mapError,
+						function (_v1) {
+							return 'Parse Error';
+						},
+						A2(
+							$elm$core$Result$andThen,
+							$author$project$Graphics$MeshWithScalingVector$parse,
+							A2(
+								$elm$core$Result$mapError,
+								function (_v0) {
+									return 'HTTP Error';
+								},
+								result))));
+			},
+			$elm$http$Http$getString(url));
 	});
 var $elm$core$Platform$Cmd$map = _Platform_map;
 var $author$project$Graphics$Mesh$loadMeshCmd = function (f) {
@@ -12605,7 +10732,7 @@ var $author$project$Graphics$Mesh$loadMeshCmd = function (f) {
 				$elm$core$List$map,
 				function (name) {
 					return A2(
-						$declension$elm_obj_loader$OBJ$loadMeshWithoutTexture,
+						$author$project$Graphics$MeshWithScalingVector$load,
 						$author$project$Graphics$Mesh$buildMeshUri(name),
 						$author$project$Graphics$Mesh$LoadMesh(name));
 				},
@@ -13042,6 +11169,7 @@ var $author$project$Main$doDolly = F2(
 			model,
 			{pixelPerUnit: next});
 	});
+var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
 var $author$project$Main$doPanning = F4(
 	function (model, newState, _v0, _v1) {
 		var x0 = _v0.a;
@@ -13105,13 +11233,14 @@ var $author$project$Graphics$Mesh$flipVec3 = function (v) {
 var $author$project$Graphics$Mesh$flipVertex = function (vertex) {
 	return {
 		normal: $author$project$Graphics$Mesh$flipVec3(vertex.normal),
-		position: $author$project$Graphics$Mesh$flipVec3(vertex.position)
+		position: $author$project$Graphics$Mesh$flipVec3(vertex.position),
+		scalingVector: $author$project$Graphics$Mesh$flipVec3(vertex.scalingVector)
 	};
 };
-var $author$project$Graphics$Mesh$flipMesh = function (meshWith) {
+var $author$project$Graphics$Mesh$flipMesh = function (mesh) {
 	return {
-		indices: meshWith.indices,
-		vertices: A2($elm$core$List$map, $author$project$Graphics$Mesh$flipVertex, meshWith.vertices)
+		faces: mesh.faces,
+		vertices: A2($elm$core$List$map, $author$project$Graphics$Mesh$flipVertex, mesh.vertices)
 	};
 };
 var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
@@ -13133,16 +11262,16 @@ var $author$project$Graphics$Mesh$update = F2(
 				});
 		} else {
 			var meshWith = meshOrErr.a;
-			var mesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, meshWith.vertices, meshWith.indices);
+			var glMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, meshWith.vertices, meshWith.faces);
 			var flippedMeshWith = $author$project$Graphics$Mesh$flipMesh(meshWith);
-			var flippedMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, flippedMeshWith.vertices, flippedMeshWith.indices);
+			var flippedMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, flippedMeshWith.vertices, flippedMeshWith.faces);
 			var updatedMeshes = A2(
 				$elm$core$Dict$union,
 				model.meshes,
 				$elm$core$Dict$fromList(
 					_List_fromArray(
 						[
-							_Utils_Tuple2(name, mesh),
+							_Utils_Tuple2(name, glMesh),
 							_Utils_Tuple2(
 							A2($elm$core$String$append, name, '_flip'),
 							flippedMesh)
@@ -13159,6 +11288,9 @@ var $elm$core$Tuple$pair = F2(
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
+};
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
 };
 var $elm$core$List$sum = function (numbers) {
 	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
@@ -13224,6 +11356,16 @@ var $elm$core$Maybe$map2 = F3(
 			}
 		}
 	});
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
 var $dullbananas$elm_touch$Touch$Internal$triggerListener = F2(
 	function (model, listener) {
 		var touchPositions = A2(

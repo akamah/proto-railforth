@@ -6,13 +6,13 @@ import Browser.Events
 import Dict
 import Forth.Interpreter as Interpreter
 import Graphics.Mesh as Mesh exposing (Mesh)
+import Graphics.MeshWithScalingVector as SV
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
-import OBJ.Types exposing (Vertex)
 import PierPlacement exposing (PierPlacement)
 import RailPlacement exposing (RailPlacement)
 import Storage
@@ -723,11 +723,12 @@ makeLookAt azimuth altitude target =
     Mat4.makeLookAt (Vec3.add target (vec3 x y z)) target (vec3 0 1 0)
 
 
-railVertexShader : Shader Vertex Uniforms { edge : Float, color : Vec3 }
+railVertexShader : Shader SV.VertexWithScalingVector Uniforms { edge : Float, color : Vec3 }
 railVertexShader =
     [glsl|
         attribute vec3 position;
         attribute vec3 normal;
+        attribute vec3 scalingVector;
         
         uniform mat4 modelTransform;
         uniform mat4 viewTransform;
@@ -776,11 +777,12 @@ railFragmentShader =
     |]
 
 
-pierVertexShader : Shader Vertex Uniforms { color : Vec3 }
+pierVertexShader : Shader SV.VertexWithScalingVector Uniforms { color : Vec3 }
 pierVertexShader =
     [glsl|
         attribute vec3 position;
         attribute vec3 normal;
+        attribute vec3 scalingVector;
         
         uniform mat4 modelTransform;
         uniform mat4 viewTransform;

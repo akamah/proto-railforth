@@ -1,38 +1,34 @@
-module Graphics.MeshWithScalingVector exposing (Mesh, Vertex, load, parse)
+module Graphics.MeshWithScalingVector exposing (MeshAndFace, VertexWithScalingVector, load, parse)
 
 import Http
 import Json.Decode as JD
 import Math.Vector3 as Vec3 exposing (Vec3)
-import WebGL
 
 
-type alias Vertex =
+type alias VertexWithScalingVector =
     { position : Vec3
     , normal : Vec3
     , scalingVector : Vec3
     }
 
 
-type alias Mesh =
-    WebGL.Mesh Vertex
+type alias MeshAndFace =
+    { vertices : List VertexWithScalingVector
+    , faces : List ( Int, Int, Int )
+    }
 
 
-decodeMeshWithScalingVector : JD.Decoder Mesh
+decodeMeshWithScalingVector : JD.Decoder MeshAndFace
 decodeMeshWithScalingVector =
-    JD.map2 WebGL.indexedTriangles
+    JD.map2 MeshAndFace
         (JD.field "vertices" <| JD.list vertex)
         (JD.field "faces" <| JD.list face)
 
 
-vertex : JD.Decoder Vertex
+vertex : JD.Decoder VertexWithScalingVector
 vertex =
     JD.map3
-        (\p n s ->
-            { position = p
-            , normal = n
-            , scalingVector = s
-            }
-        )
+        VertexWithScalingVector
         (list3 Vec3.vec3 JD.float)
         (list3 Vec3.vec3 JD.float)
         (list3 Vec3.vec3 JD.float)
@@ -57,13 +53,13 @@ list3 f decoder =
             )
 
 
-parse : String -> Result String Mesh
+parse : String -> Result String MeshAndFace
 parse s =
     JD.decodeString decodeMeshWithScalingVector s
         |> Result.mapError (\_ -> "Parse Error")
 
 
-load : String -> (Result String Mesh -> msg) -> Cmd msg
+load : String -> (Result String MeshAndFace -> msg) -> Cmd msg
 load url msg =
     Http.send
         (\result ->
