@@ -1,5 +1,6 @@
-module Graphics.MeshWithScalingVector exposing (..)
+module Graphics.MeshWithScalingVector exposing (Mesh, Vertex, load, parse)
 
+import Http
 import Json.Decode as JD
 import Math.Vector3 as Vec3 exposing (Vec3)
 import WebGL
@@ -54,3 +55,22 @@ list3 f decoder =
                     _ ->
                         JD.fail <| "list3: list count be 3 but got " ++ String.fromInt (List.length lis)
             )
+
+
+parse : String -> Result String Mesh
+parse s =
+    JD.decodeString decodeMeshWithScalingVector s
+        |> Result.mapError (\_ -> "Parse Error")
+
+
+load : String -> (Result String Mesh -> msg) -> Cmd msg
+load url msg =
+    Http.send
+        (\result ->
+            result
+                |> Result.mapError (\_ -> "HTTP Error")
+                |> Result.andThen parse
+                |> Result.mapError (\_ -> "Parse Error")
+                |> msg
+        )
+        (Http.getString url)
