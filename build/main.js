@@ -7825,13 +7825,14 @@ var $author$project$Graphics$Mesh$getRailMesh = F2(
 				$author$project$Rail$toString(rail),
 				model.meshes));
 	});
+var $elm_explorations$webgl$WebGL$Settings$back = $elm_explorations$webgl$WebGL$Settings$FaceMode(1029);
 var $author$project$Main$railFragmentShader = {
 	src: '\n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);\n            gl_FragColor = vec4(color, dist_density);\n        }\n    ',
 	attributes: {},
 	uniforms: {}
 };
 var $author$project$Main$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法\n            if (abs(position[1] - 1.0) < 0.05) {\n                color *= 0.85;\n            }\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position + 30.0 * scalingVector, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法\n            if (abs(position[1] - 1.0) < 0.05) {\n                color *= 0.85;\n            }\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
 	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
 };
@@ -7843,7 +7844,7 @@ var $author$project$Main$showRail = F5(
 			_List_fromArray(
 				[
 					$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-					$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$front)
+					$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
 				]),
 			$author$project$Main$railVertexShader,
 			$author$project$Main$railFragmentShader,
@@ -10641,9 +10642,18 @@ var $author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector = F3(
 var $author$project$Graphics$MeshWithScalingVector$vertex = A4(
 	$elm$json$Json$Decode$map3,
 	$author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector,
-	A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float),
-	A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float),
-	A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float));
+	A2(
+		$elm$json$Json$Decode$field,
+		'position',
+		A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'normal',
+		A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'scaling_vector',
+		A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float)));
 var $author$project$Graphics$MeshWithScalingVector$decodeMeshWithScalingVector = A3(
 	$elm$json$Json$Decode$map2,
 	$author$project$Graphics$MeshWithScalingVector$MeshAndFace,
@@ -10659,9 +10669,7 @@ var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $author$project$Graphics$MeshWithScalingVector$parse = function (s) {
 	return A2(
 		$elm$core$Result$mapError,
-		function (_v0) {
-			return 'Parse Error';
-		},
+		$elm$json$Json$Decode$errorToString,
 		A2($elm$json$Json$Decode$decodeString, $author$project$Graphics$MeshWithScalingVector$decodeMeshWithScalingVector, s));
 };
 var $elm$core$Basics$composeL = F3(
@@ -10706,19 +10714,14 @@ var $author$project$Graphics$MeshWithScalingVector$load = F2(
 			function (result) {
 				return msg(
 					A2(
-						$elm$core$Result$mapError,
-						function (_v1) {
-							return 'Parse Error';
-						},
+						$elm$core$Result$andThen,
+						$author$project$Graphics$MeshWithScalingVector$parse,
 						A2(
-							$elm$core$Result$andThen,
-							$author$project$Graphics$MeshWithScalingVector$parse,
-							A2(
-								$elm$core$Result$mapError,
-								function (_v0) {
-									return 'HTTP Error';
-								},
-								result))));
+							$elm$core$Result$mapError,
+							function (_v0) {
+								return 'HTTP Error';
+							},
+							result)));
 			},
 			$elm$http$Http$getString(url));
 	});
@@ -11164,7 +11167,7 @@ var $author$project$Main$doDolly = F2(
 	function (model, dy) {
 		var multiplier = 1.02;
 		var delta = (dy < 0) ? (1 / multiplier) : ((dy > 0) ? (1 * multiplier) : 1);
-		var next = A3($elm$core$Basics$clamp, 20, 1000, model.pixelPerUnit * delta);
+		var next = A3($elm$core$Basics$clamp, 20, 10000, model.pixelPerUnit * delta);
 		return _Utils_update(
 			model,
 			{pixelPerUnit: next});
@@ -11249,6 +11252,7 @@ var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 	});
 var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
 	{elemSize: 1, indexSize: 3, mode: 4});
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Graphics$Mesh$update = F2(
 	function (msg, model) {
 		var name = msg.a;
@@ -11258,7 +11262,10 @@ var $author$project$Graphics$Mesh$update = F2(
 			return _Utils_update(
 				model,
 				{
-					errors: A2($elm$core$List$cons, e, model.errors)
+					errors: A2(
+						$elm$core$List$cons,
+						A2($elm$core$Debug$log, 'load mesh error', e),
+						model.errors)
 				});
 		} else {
 			var meshWith = meshOrErr.a;

@@ -284,7 +284,7 @@ showRail projectionTransform viewTransform mesh origin angle =
     in
     WebGL.entityWith
         [ WebGL.Settings.DepthTest.default
-        , WebGL.Settings.cullFace WebGL.Settings.front
+        , WebGL.Settings.cullFace WebGL.Settings.back
         ]
         railVertexShader
         railFragmentShader
@@ -507,7 +507,7 @@ doDolly model dy =
         next =
             model.pixelPerUnit
                 * delta
-                |> clamp 20 1000
+                |> clamp 20 10000
     in
     { model | pixelPerUnit = next }
 
@@ -739,7 +739,7 @@ railVertexShader =
         varying highp vec3 color;
 
         void main() {
-            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
+            highp vec4 worldPosition = modelTransform * vec4(position + 30.0 * scalingVector, 1.0);
             highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
             // blue to green ratio. 0 <--- blue   green ---> 1.0

@@ -45,7 +45,7 @@ update msg model =
         LoadMesh name meshOrErr ->
             case meshOrErr of
                 Err e ->
-                    { model | errors = e :: model.errors }
+                    { model | errors = Debug.log "load mesh error" e :: model.errors }
 
                 Ok meshWith ->
                     let

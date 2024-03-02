@@ -29,9 +29,9 @@ vertex : JD.Decoder VertexWithScalingVector
 vertex =
     JD.map3
         VertexWithScalingVector
-        (list3 Vec3.vec3 JD.float)
-        (list3 Vec3.vec3 JD.float)
-        (list3 Vec3.vec3 JD.float)
+        (JD.field "position" <| list3 Vec3.vec3 JD.float)
+        (JD.field "normal" <| list3 Vec3.vec3 JD.float)
+        (JD.field "scaling_vector" <| list3 Vec3.vec3 JD.float)
 
 
 face : JD.Decoder ( Int, Int, Int )
@@ -56,7 +56,7 @@ list3 f decoder =
 parse : String -> Result String MeshAndFace
 parse s =
     JD.decodeString decodeMeshWithScalingVector s
-        |> Result.mapError (\_ -> "Parse Error")
+        |> Result.mapError JD.errorToString
 
 
 load : String -> (Result String MeshAndFace -> msg) -> Cmd msg
@@ -66,7 +66,6 @@ load url msg =
             result
                 |> Result.mapError (\_ -> "HTTP Error")
                 |> Result.andThen parse
-                |> Result.mapError (\_ -> "Parse Error")
                 |> msg
         )
         (Http.getString url)
