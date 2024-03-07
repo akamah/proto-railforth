@@ -7741,6 +7741,22 @@ var $author$project$Main$showPiers = F2(
 			},
 			piers);
 	});
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$concatMap = F2(
+	function (f, list) {
+		return $elm$core$List$concat(
+			A2($elm$core$List$map, f, list));
+	});
 var $author$project$Rail$isFlippedToString = function (isFlipped) {
 	if (isFlipped.$ === 'NotFlipped') {
 		return '';
@@ -7826,37 +7842,61 @@ var $author$project$Graphics$Mesh$getRailMesh = F2(
 				model.meshes));
 	});
 var $elm_explorations$webgl$WebGL$Settings$back = $elm_explorations$webgl$WebGL$Settings$FaceMode(1029);
+var $author$project$Main$outlineFragmentShader = {
+	src: '\n        void main() {\n            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n        }\n    ',
+	attributes: {},
+	uniforms: {}
+};
+var $author$project$Main$outlineVertexShader = {
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
+	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
+};
 var $author$project$Main$railFragmentShader = {
 	src: '\n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);\n            gl_FragColor = vec4(color, dist_density);\n        }\n    ',
 	attributes: {},
 	uniforms: {}
 };
 var $author$project$Main$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position + 30.0 * scalingVector, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法\n            if (abs(position[1] - 1.0) < 0.05) {\n                color *= 0.85;\n            }\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position - 1.0 * scalingVector, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
 	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
 };
 var $author$project$Main$showRail = F5(
 	function (projectionTransform, viewTransform, mesh, origin, angle) {
 		var modelTransform = A2($author$project$Main$makeMeshMatrix, origin, angle);
-		return A5(
-			$elm_explorations$webgl$WebGL$entityWith,
-			_List_fromArray(
-				[
-					$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-					$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
-				]),
-			$author$project$Main$railVertexShader,
-			$author$project$Main$railFragmentShader,
-			mesh,
-			{light: $author$project$Main$lightFromAbove, modelTransform: modelTransform, projectionTransform: projectionTransform, viewTransform: viewTransform});
+		return _List_fromArray(
+			[
+				A5(
+				$elm_explorations$webgl$WebGL$entityWith,
+				_List_fromArray(
+					[
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
+						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
+					]),
+				$author$project$Main$railVertexShader,
+				$author$project$Main$railFragmentShader,
+				mesh,
+				{light: $author$project$Main$lightFromAbove, modelTransform: modelTransform, projectionTransform: projectionTransform, viewTransform: viewTransform}),
+				A5(
+				$elm_explorations$webgl$WebGL$entityWith,
+				_List_fromArray(
+					[
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
+						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$front)
+					]),
+				$author$project$Main$outlineVertexShader,
+				$author$project$Main$outlineFragmentShader,
+				mesh,
+				{light: $author$project$Main$lightFromAbove, modelTransform: modelTransform, projectionTransform: projectionTransform, viewTransform: viewTransform})
+			]);
 	});
 var $author$project$Main$showRails = F2(
 	function (model, rails) {
 		var viewTransform = A3($author$project$Main$makeLookAt, model.azimuth, model.altitude, model.target);
 		var projectionTransform = A3($author$project$Main$makeOrtho, model.viewport.width, model.splitBarPosition, model.pixelPerUnit);
 		return A2(
-			$elm$core$List$map,
+			$elm$core$List$concatMap,
 			function (railPosition) {
 				return A5(
 					$author$project$Main$showRail,
@@ -8872,14 +8912,6 @@ var $author$project$Forth$PierConstruction$divideIntoDict = A2(
 			});
 	},
 	$elm$core$Dict$empty);
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
 var $author$project$Forth$Pier$Wide = {$: 'Wide'};
 var $author$project$Forth$Pier$getHeight = function (pier) {
 	switch (pier.$) {

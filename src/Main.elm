@@ -259,7 +259,7 @@ showRails model rails =
         viewTransform =
             makeLookAt model.azimuth model.altitude model.target
     in
-    List.map
+    List.concatMap
         (\railPosition ->
             showRail
                 projectionTransform
@@ -276,13 +276,13 @@ lightFromAbove =
     vec3 (2.0 / 27.0) (26.0 / 27.0) (7.0 / 27.0)
 
 
-showRail : Mat4 -> Mat4 -> Mesh -> Vec3 -> Float -> Entity
+showRail : Mat4 -> Mat4 -> Mesh -> Vec3 -> Float -> List Entity
 showRail projectionTransform viewTransform mesh origin angle =
     let
         modelTransform =
             makeMeshMatrix origin angle
     in
-    WebGL.entityWith
+    [ WebGL.entityWith
         [ WebGL.Settings.DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.back
         ]
@@ -294,6 +294,19 @@ showRail projectionTransform viewTransform mesh origin angle =
         , modelTransform = modelTransform
         , light = lightFromAbove
         }
+    , WebGL.entityWith
+        [ WebGL.Settings.DepthTest.default
+        , WebGL.Settings.cullFace WebGL.Settings.front
+        ]
+        outlineVertexShader
+        outlineFragmentShader
+        mesh
+        { projectionTransform = projectionTransform
+        , viewTransform = viewTransform
+        , modelTransform = modelTransform
+        , light = lightFromAbove
+        }
+    ]
 
 
 showPiers : Model -> List PierPlacement -> List Entity
@@ -739,7 +752,7 @@ railVertexShader =
         varying highp vec3 color;
 
         void main() {
-            highp vec4 worldPosition = modelTransform * vec4(position + 30.0 * scalingVector, 1.0);
+            highp vec4 worldPosition = modelTransform * vec4(position - 1.0 * scalingVector, 1.0);
             highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
             // blue to green ratio. 0 <--- blue   green ---> 1.0
@@ -751,11 +764,6 @@ railVertexShader =
             highp float lambertFactor = dot(worldNormal, vec4(light, 0));
             highp float intensity = 0.3 + 0.7 * lambertFactor;
             color = intensity * (ratio * green + (1.0 - ratio) * blue);
-
-            // 溝のところは高さが1mmなのでその付近だけ色を暗くさせるという寸法
-            if (abs(position[1] - 1.0) < 0.05) {
-                color *= 0.85;
-            }
 
             edge = distance(vec3(0.0, 0.0, 0.0), position);
 
@@ -773,6 +781,35 @@ railFragmentShader =
         void main() {
             highp float dist_density = min(edge / 30.0 + 0.2, 1.0);
             gl_FragColor = vec4(color, dist_density);
+        }
+    |]
+
+
+outlineVertexShader : Shader SV.VertexWithScalingVector Uniforms {}
+outlineVertexShader =
+    [glsl|
+        attribute vec3 position;
+        attribute vec3 normal;
+        attribute vec3 scalingVector;
+        
+        uniform mat4 modelTransform;
+        uniform mat4 viewTransform;
+        uniform mat4 projectionTransform;
+        uniform vec3 light;
+
+        void main() {
+            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
+
+            gl_Position = projectionTransform * viewTransform * worldPosition;
+        }
+    |]
+
+
+outlineFragmentShader : Shader {} Uniforms {}
+outlineFragmentShader =
+    [glsl|
+        void main() {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
         }
     |]
 
