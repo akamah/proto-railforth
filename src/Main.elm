@@ -4,7 +4,7 @@ import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Events
 import Dict
-import Forth.Interpreter as Interpreter
+import Forth
 import Graphics.Mesh as Mesh exposing (Mesh)
 import Graphics.MeshWithScalingVector as SV
 import Html exposing (Html, div)
@@ -91,7 +91,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         execResult =
-            Interpreter.execute flags.program
+            Forth.execute flags.program
     in
     ( { meshes = Mesh.init
       , viewport = { width = 0, height = 0 }
@@ -456,7 +456,7 @@ update msg model =
         UpdateScript program ->
             let
                 execResult =
-                    Interpreter.execute program
+                    Forth.execute program
             in
             ( case execResult.errMsg of
                 Nothing ->

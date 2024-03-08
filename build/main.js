@@ -10661,6 +10661,7 @@ var $author$project$Forth$Interpreter$execute = function (src) {
 		$author$project$Forth$Interpreter$tokenize(src),
 		$author$project$Forth$Interpreter$initialStatus);
 };
+var $author$project$Forth$execute = $author$project$Forth$Interpreter$execute;
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $author$project$Graphics$Mesh$init = {errors: _List_Nil, meshes: $elm$core$Dict$empty};
 var $dullbananas$elm_touch$Touch$Model = function (a) {
@@ -10884,7 +10885,7 @@ var $dullbananas$elm_touch$Touch$Internal$OnPinch = function (a) {
 };
 var $dullbananas$elm_touch$Touch$onPinch = $dullbananas$elm_touch$Touch$Internal$OnPinch;
 var $author$project$Main$init = function (flags) {
-	var execResult = $author$project$Forth$Interpreter$execute(flags.program);
+	var execResult = $author$project$Forth$execute(flags.program);
 	return _Utils_Tuple2(
 		{
 			altitude: $elm$core$Basics$degrees(90),
@@ -11776,7 +11777,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'UpdateScript':
 				var program = msg.a;
-				var execResult = $author$project$Forth$Interpreter$execute(program);
+				var execResult = $author$project$Forth$execute(program);
 				return _Utils_Tuple2(
 					function () {
 						var _v1 = execResult.errMsg;
