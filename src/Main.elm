@@ -5,7 +5,7 @@ import Browser.Dom exposing (Viewport)
 import Browser.Events
 import Dict
 import Forth
-import Graphics.Mesh as Mesh exposing (Mesh)
+import Graphics.MeshLoader as MeshLoader exposing (Mesh)
 import Graphics.MeshWithScalingVector as SV
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
@@ -26,7 +26,7 @@ import WebGL.Settings.StencilTest
 
 
 type Msg
-    = LoadMesh Mesh.Msg
+    = LoadMesh MeshLoader.Msg
     | BeginPan ( Float, Float )
     | UpdatePan ( Float, Float )
     | EndPan ( Float, Float )
@@ -52,7 +52,7 @@ type DraggingState
 
 
 type alias Model =
-    { meshes : Mesh.Model
+    { meshes : MeshLoader.Model
     , viewport :
         { width : Float
         , height : Float
@@ -93,7 +93,7 @@ init flags =
         execResult =
             Forth.execute flags.program
     in
-    ( { meshes = Mesh.init
+    ( { meshes = MeshLoader.init
       , viewport = { width = 0, height = 0 }
       , azimuth = degrees 0
       , altitude = degrees 90
@@ -115,7 +115,7 @@ init flags =
       }
     , Cmd.batch
         [ Task.perform SetViewport Browser.Dom.getViewport
-        , Mesh.loadMeshCmd LoadMesh
+        , MeshLoader.loadMeshCmd LoadMesh
         ]
     )
 
@@ -267,7 +267,7 @@ showRails model rails =
             showRail
                 projectionTransform
                 viewTransform
-                (Mesh.getRailMesh model.meshes railPosition.rail)
+                (MeshLoader.getRailMesh model.meshes railPosition.rail)
                 railPosition.position
                 railPosition.angle
         )
@@ -389,7 +389,7 @@ showPiers model piers =
             showPier
                 projectionTransform
                 viewTransform
-                (Mesh.getPierMesh model.meshes pierPlacement.pier)
+                (MeshLoader.getPierMesh model.meshes pierPlacement.pier)
                 pierPlacement.position
                 pierPlacement.angle
         )
@@ -420,7 +420,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         LoadMesh meshMsg ->
-            ( { model | meshes = Mesh.update meshMsg model.meshes }, Cmd.none )
+            ( { model | meshes = MeshLoader.update meshMsg model.meshes }, Cmd.none )
 
         BeginPan pos ->
             ( updateMouseDown model pos, Cmd.none )

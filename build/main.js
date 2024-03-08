@@ -7545,7 +7545,7 @@ var $elm_explorations$webgl$WebGL$Mesh3 = F2(
 	});
 var $elm_explorations$webgl$WebGL$triangles = $elm_explorations$webgl$WebGL$Mesh3(
 	{elemSize: 3, indexSize: 0, mode: 4});
-var $author$project$Graphics$Mesh$dummyMesh = $elm_explorations$webgl$WebGL$triangles(_List_Nil);
+var $author$project$Graphics$MeshLoader$dummyMesh = $elm_explorations$webgl$WebGL$triangles(_List_Nil);
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -7597,11 +7597,11 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$Graphics$Mesh$getPierMesh = F2(
+var $author$project$Graphics$MeshLoader$getPierMesh = F2(
 	function (model, pier) {
 		return A2(
 			$elm$core$Maybe$withDefault,
-			$author$project$Graphics$Mesh$dummyMesh,
+			$author$project$Graphics$MeshLoader$dummyMesh,
 			A2(
 				$elm$core$Dict$get,
 				$author$project$Types$Pier$toString(pier),
@@ -7750,7 +7750,7 @@ var $author$project$Main$showPiers = F2(
 					$author$project$Main$showPier,
 					projectionTransform,
 					viewTransform,
-					A2($author$project$Graphics$Mesh$getPierMesh, model.meshes, pierPlacement.pier),
+					A2($author$project$Graphics$MeshLoader$getPierMesh, model.meshes, pierPlacement.pier),
 					pierPlacement.position,
 					pierPlacement.angle);
 			},
@@ -7846,11 +7846,11 @@ var $author$project$Types$Rail$toStringWith = F3(
 		}
 	});
 var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
-var $author$project$Graphics$Mesh$getRailMesh = F2(
+var $author$project$Graphics$MeshLoader$getRailMesh = F2(
 	function (model, rail) {
 		return A2(
 			$elm$core$Maybe$withDefault,
-			$author$project$Graphics$Mesh$dummyMesh,
+			$author$project$Graphics$MeshLoader$dummyMesh,
 			A2(
 				$elm$core$Dict$get,
 				$author$project$Types$Rail$toString(rail),
@@ -7998,7 +7998,7 @@ var $author$project$Main$showRails = F2(
 					$author$project$Main$showRail,
 					projectionTransform,
 					viewTransform,
-					A2($author$project$Graphics$Mesh$getRailMesh, model.meshes, railPosition.rail),
+					A2($author$project$Graphics$MeshLoader$getRailMesh, model.meshes, railPosition.rail),
 					railPosition.position,
 					railPosition.angle);
 			},
@@ -10663,7 +10663,7 @@ var $author$project$Forth$Interpreter$execute = function (src) {
 };
 var $author$project$Forth$execute = $author$project$Forth$Interpreter$execute;
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
-var $author$project$Graphics$Mesh$init = {errors: _List_Nil, meshes: $elm$core$Dict$empty};
+var $author$project$Graphics$MeshLoader$init = {errors: _List_Nil, meshes: $elm$core$Dict$empty};
 var $dullbananas$elm_touch$Touch$Model = function (a) {
 	return {$: 'Model', a: a};
 };
@@ -10671,13 +10671,13 @@ var $dullbananas$elm_touch$Touch$Internal$initModel = function (listeners) {
 	return {currentTouches: $elm$core$Dict$empty, listeners: listeners, previousTouches: $elm$core$Dict$empty};
 };
 var $dullbananas$elm_touch$Touch$initModel = A2($elm$core$Basics$composeR, $dullbananas$elm_touch$Touch$Internal$initModel, $dullbananas$elm_touch$Touch$Model);
-var $author$project$Graphics$Mesh$LoadMesh = F2(
+var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 	function (a, b) {
 		return {$: 'LoadMesh', a: a, b: b};
 	});
-var $author$project$Graphics$Mesh$allMeshNames = _List_fromArray(
+var $author$project$Graphics$MeshLoader$allMeshNames = _List_fromArray(
 	['straight0_minus', 'straight0_plus', 'straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'curve8_minus', 'curve8_plus', 'curve4_minus', 'curve4_plus', 'outercurve_minus', 'outercurve_plus', 'turnout_minus', 'turnout_plus', 'singledouble_minus', 'singledouble_plus', 'eight_minus', 'eight_plus', 'pole_minus', 'pole_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'autoturnout_minus', 'autopoint_minus', 'pier', 'pier_wide', 'pier_4']);
-var $author$project$Graphics$Mesh$buildMeshUri = function (name) {
+var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.json');
 };
 var $elm$http$Http$Internal$EmptyBody = {$: 'EmptyBody'};
@@ -10860,7 +10860,7 @@ var $author$project$Graphics$MeshWithScalingVector$load = F2(
 			$elm$http$Http$getString(url));
 	});
 var $elm$core$Platform$Cmd$map = _Platform_map;
-var $author$project$Graphics$Mesh$loadMeshCmd = function (f) {
+var $author$project$Graphics$MeshLoader$loadMeshCmd = function (f) {
 	return A2(
 		$elm$core$Platform$Cmd$map,
 		f,
@@ -10870,10 +10870,10 @@ var $author$project$Graphics$Mesh$loadMeshCmd = function (f) {
 				function (name) {
 					return A2(
 						$author$project$Graphics$MeshWithScalingVector$load,
-						$author$project$Graphics$Mesh$buildMeshUri(name),
-						$author$project$Graphics$Mesh$LoadMesh(name));
+						$author$project$Graphics$MeshLoader$buildMeshUri(name),
+						$author$project$Graphics$MeshLoader$LoadMesh(name));
 				},
-				$author$project$Graphics$Mesh$allMeshNames)));
+				$author$project$Graphics$MeshLoader$allMeshNames)));
 };
 var $dullbananas$elm_touch$Touch$Internal$OnMove = F2(
 	function (a, b) {
@@ -10892,7 +10892,7 @@ var $author$project$Main$init = function (flags) {
 			azimuth: $elm$core$Basics$degrees(0),
 			draggingState: $elm$core$Maybe$Nothing,
 			errMsg: execResult.errMsg,
-			meshes: $author$project$Graphics$Mesh$init,
+			meshes: $author$project$Graphics$MeshLoader$init,
 			piers: execResult.piers,
 			pixelPerUnit: 100,
 			program: flags.program,
@@ -10919,7 +10919,7 @@ var $author$project$Main$init = function (flags) {
 			_List_fromArray(
 				[
 					A2($elm$core$Task$perform, $author$project$Main$SetViewport, $elm$browser$Browser$Dom$getViewport),
-					$author$project$Graphics$Mesh$loadMeshCmd($author$project$Main$LoadMesh)
+					$author$project$Graphics$MeshLoader$loadMeshCmd($author$project$Main$LoadMesh)
 				])));
 };
 var $author$project$Main$Resize = F2(
@@ -11360,24 +11360,24 @@ var $elm$core$String$append = _String_append;
 var $elm_explorations$linear_algebra$Math$Vector3$getX = _MJS_v3getX;
 var $elm_explorations$linear_algebra$Math$Vector3$getY = _MJS_v3getY;
 var $elm_explorations$linear_algebra$Math$Vector3$getZ = _MJS_v3getZ;
-var $author$project$Graphics$Mesh$flipVec3 = function (v) {
+var $author$project$Graphics$MeshLoader$flipVec3 = function (v) {
 	return A3(
 		$elm_explorations$linear_algebra$Math$Vector3$vec3,
 		$elm_explorations$linear_algebra$Math$Vector3$getX(v),
 		-$elm_explorations$linear_algebra$Math$Vector3$getY(v),
 		-$elm_explorations$linear_algebra$Math$Vector3$getZ(v));
 };
-var $author$project$Graphics$Mesh$flipVertex = function (vertex) {
+var $author$project$Graphics$MeshLoader$flipVertex = function (vertex) {
 	return {
-		normal: $author$project$Graphics$Mesh$flipVec3(vertex.normal),
-		position: $author$project$Graphics$Mesh$flipVec3(vertex.position),
-		scalingVector: $author$project$Graphics$Mesh$flipVec3(vertex.scalingVector)
+		normal: $author$project$Graphics$MeshLoader$flipVec3(vertex.normal),
+		position: $author$project$Graphics$MeshLoader$flipVec3(vertex.position),
+		scalingVector: $author$project$Graphics$MeshLoader$flipVec3(vertex.scalingVector)
 	};
 };
-var $author$project$Graphics$Mesh$flipMesh = function (mesh) {
+var $author$project$Graphics$MeshLoader$flipMesh = function (mesh) {
 	return {
 		faces: mesh.faces,
-		vertices: A2($elm$core$List$map, $author$project$Graphics$Mesh$flipVertex, mesh.vertices)
+		vertices: A2($elm$core$List$map, $author$project$Graphics$MeshLoader$flipVertex, mesh.vertices)
 	};
 };
 var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
@@ -11387,7 +11387,7 @@ var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
 	{elemSize: 1, indexSize: 3, mode: 4});
 var $elm$core$Debug$log = _Debug_log;
-var $author$project$Graphics$Mesh$update = F2(
+var $author$project$Graphics$MeshLoader$update = F2(
 	function (msg, model) {
 		var name = msg.a;
 		var meshOrErr = msg.b;
@@ -11404,7 +11404,7 @@ var $author$project$Graphics$Mesh$update = F2(
 		} else {
 			var meshWith = meshOrErr.a;
 			var glMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, meshWith.vertices, meshWith.faces);
-			var flippedMeshWith = $author$project$Graphics$Mesh$flipMesh(meshWith);
+			var flippedMeshWith = $author$project$Graphics$MeshLoader$flipMesh(meshWith);
 			var flippedMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, flippedMeshWith.vertices, flippedMeshWith.faces);
 			var updatedMeshes = A2(
 				$elm$core$Dict$union,
@@ -11726,7 +11726,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							meshes: A2($author$project$Graphics$Mesh$update, meshMsg, model.meshes)
+							meshes: A2($author$project$Graphics$MeshLoader$update, meshMsg, model.meshes)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'BeginPan':
