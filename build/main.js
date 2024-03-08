@@ -1874,19 +1874,19 @@ function _Platform_initialize(flagDecoder, args, init, update, subscriptions, st
 	var result = A2(_Json_run, flagDecoder, _Json_wrap(args ? args['flags'] : undefined));
 	$elm$core$Result$isOk(result) || _Debug_crash(2 /**/, _Json_errorToString(result.a) /**/);
 	var managers = {};
-	result = init(result.a);
-	var model = result.a;
+	var initPair = init(result.a);
+	var model = initPair.a;
 	var stepper = stepperBuilder(sendToApp, model);
 	var ports = _Platform_setupEffects(managers, sendToApp);
 
 	function sendToApp(msg, viewMetadata)
 	{
-		result = A2(update, msg, model);
-		stepper(model = result.a, viewMetadata);
-		_Platform_enqueueEffects(managers, result.b, subscriptions(model));
+		var pair = A2(update, msg, model);
+		stepper(model = pair.a, viewMetadata);
+		_Platform_enqueueEffects(managers, pair.b, subscriptions(model));
 	}
 
-	_Platform_enqueueEffects(managers, result.b, subscriptions(model));
+	_Platform_enqueueEffects(managers, initPair.b, subscriptions(model));
 
 	return ports ? { ports: ports } : {};
 }
@@ -2618,16 +2618,33 @@ var _VirtualDom_attributeNS = F3(function(namespace, key, value)
 
 
 // XSS ATTACK VECTOR CHECKS
+//
+// For some reason, tabs can appear in href protocols and it still works.
+// So '\tjava\tSCRIPT:alert("!!!")' and 'javascript:alert("!!!")' are the same
+// in practice. That is why _VirtualDom_RE_js and _VirtualDom_RE_js_html look
+// so freaky.
+//
+// Pulling the regular expressions out to the top level gives a slight speed
+// boost in small benchmarks (4-10%) but hoisting values to reduce allocation
+// can be unpredictable in large programs where JIT may have a harder time with
+// functions are not fully self-contained. The benefit is more that the js and
+// js_html ones are so weird that I prefer to see them near each other.
+
+
+var _VirtualDom_RE_script = /^script$/i;
+var _VirtualDom_RE_on_formAction = /^(on|formAction$)/i;
+var _VirtualDom_RE_js = /^\s*j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:/i;
+var _VirtualDom_RE_js_html = /^\s*(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:|d\s*a\s*t\s*a\s*:\s*t\s*e\s*x\s*t\s*\/\s*h\s*t\s*m\s*l\s*(,|;))/i;
 
 
 function _VirtualDom_noScript(tag)
 {
-	return tag == 'script' ? 'p' : tag;
+	return _VirtualDom_RE_script.test(tag) ? 'p' : tag;
 }
 
 function _VirtualDom_noOnOrFormAction(key)
 {
-	return /^(on|formAction$)/i.test(key) ? 'data-' + key : key;
+	return _VirtualDom_RE_on_formAction.test(key) ? 'data-' + key : key;
 }
 
 function _VirtualDom_noInnerHtmlOrFormAction(key)
@@ -2635,28 +2652,26 @@ function _VirtualDom_noInnerHtmlOrFormAction(key)
 	return key == 'innerHTML' || key == 'formAction' ? 'data-' + key : key;
 }
 
-function _VirtualDom_noJavaScriptUri_UNUSED(value)
-{
-	return /^javascript:/i.test(value.replace(/\s/g,'')) ? '' : value;
-}
-
 function _VirtualDom_noJavaScriptUri(value)
 {
-	return /^javascript:/i.test(value.replace(/\s/g,''))
-		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
+	return _VirtualDom_RE_js.test(value)
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		: value;
-}
-
-function _VirtualDom_noJavaScriptOrHtmlUri_UNUSED(value)
-{
-	return /^\s*(javascript:|data:text\/html)/i.test(value) ? '' : value;
 }
 
 function _VirtualDom_noJavaScriptOrHtmlUri(value)
 {
-	return /^\s*(javascript:|data:text\/html)/i.test(value)
-		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
+	return _VirtualDom_RE_js_html.test(value)
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		: value;
+}
+
+function _VirtualDom_noJavaScriptOrHtmlJson(value)
+{
+	return (typeof _Json_unwrap(value) === 'string' && _VirtualDom_RE_js_html.test(_Json_unwrap(value)))
+		? _Json_wrap(
+			/**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+		) : value;
 }
 
 

@@ -13,7 +13,7 @@ import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
-import Math.Vector4 as Vec4 exposing (Vec4, vec4)
+import Math.Vector4 exposing (Vec4, vec4)
 import PierPlacement exposing (PierPlacement)
 import RailPlacement exposing (RailPlacement)
 import Storage
