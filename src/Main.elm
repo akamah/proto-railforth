@@ -14,11 +14,11 @@ import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Math.Vector4 exposing (Vec4, vec4)
-import PierPlacement exposing (PierPlacement)
-import RailPlacement exposing (RailPlacement)
 import Storage
 import Task
 import Touch
+import Types.PierPlacement exposing (PierPlacement)
+import Types.RailPlacement exposing (RailPlacement)
 import WebGL exposing (Entity, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest

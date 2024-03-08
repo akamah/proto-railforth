@@ -7578,7 +7578,7 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $author$project$Forth$Pier$toString = function (pier) {
+var $author$project$Types$Pier$toString = function (pier) {
 	switch (pier.$) {
 		case 'Single':
 			return 'pier';
@@ -7604,7 +7604,7 @@ var $author$project$Graphics$Mesh$getPierMesh = F2(
 			$author$project$Graphics$Mesh$dummyMesh,
 			A2(
 				$elm$core$Dict$get,
-				$author$project$Forth$Pier$toString(pier),
+				$author$project$Types$Pier$toString(pier),
 				model.meshes));
 	});
 var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
@@ -7772,21 +7772,21 @@ var $elm$core$List$concatMap = F2(
 		return $elm$core$List$concat(
 			A2($elm$core$List$map, f, list));
 	});
-var $author$project$Rail$isFlippedToString = function (isFlipped) {
+var $author$project$Types$Rail$isFlippedToString = function (isFlipped) {
 	if (isFlipped.$ === 'NotFlipped') {
 		return '';
 	} else {
 		return '_flip';
 	}
 };
-var $author$project$Rail$isInvertedToString = function (isInverted) {
+var $author$project$Types$Rail$isInvertedToString = function (isInverted) {
 	if (isInverted.$ === 'NotInverted') {
 		return '_minus';
 	} else {
 		return '_plus';
 	}
 };
-var $author$project$Rail$toStringWith = F3(
+var $author$project$Types$Rail$toStringWith = F3(
 	function (flipped, inverted, rail) {
 		switch (rail.$) {
 			case 'Straight1':
@@ -7845,7 +7845,7 @@ var $author$project$Rail$toStringWith = F3(
 				return 'autopoint_minus';
 		}
 	});
-var $author$project$Rail$toString = A2($author$project$Rail$toStringWith, $author$project$Rail$isFlippedToString, $author$project$Rail$isInvertedToString);
+var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
 var $author$project$Graphics$Mesh$getRailMesh = F2(
 	function (model, rail) {
 		return A2(
@@ -7853,7 +7853,7 @@ var $author$project$Graphics$Mesh$getRailMesh = F2(
 			$author$project$Graphics$Mesh$dummyMesh,
 			A2(
 				$elm$core$Dict$get,
-				$author$project$Rail$toString(rail),
+				$author$project$Types$Rail$toString(rail),
 				model.meshes));
 	});
 var $elm_explorations$webgl$WebGL$Settings$StencilTest$Test = function (a) {
@@ -8501,11 +8501,11 @@ var $author$project$Forth$Interpreter$haltWithError = F2(
 	});
 var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
 	return A3(
-		$author$project$Rail$toStringWith,
+		$author$project$Types$Rail$toStringWith,
 		function (_v0) {
 			return '';
 		},
-		$author$project$Rail$isInvertedToString,
+		$author$project$Types$Rail$isInvertedToString,
 		rail);
 };
 var $elm$core$Dict$getMin = function (dict) {
@@ -9013,8 +9013,8 @@ var $author$project$Forth$PierConstruction$divideIntoDict = A2(
 			});
 	},
 	$elm$core$Dict$empty);
-var $author$project$Forth$Pier$Wide = {$: 'Wide'};
-var $author$project$Forth$Pier$getHeight = function (pier) {
+var $author$project$Types$Pier$Wide = {$: 'Wide'};
+var $author$project$Types$Pier$getHeight = function (pier) {
 	switch (pier.$) {
 		case 'Single':
 			return 4;
@@ -9088,11 +9088,11 @@ var $author$project$Forth$PierConstruction$buildDoubleUpto = F4(
 					$elm$core$List$cons,
 					A2(
 						$author$project$Forth$PierConstruction$pierLocationToPlacement,
-						$author$project$Forth$Pier$Wide,
+						$author$project$Types$Pier$Wide,
 						A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 					accum),
 					$temp$to = to,
-					$temp$from = from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Wide);
+					$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide);
 				template = $temp$template;
 				accum = $temp$accum;
 				to = $temp$to;
@@ -9376,8 +9376,8 @@ var $elm$core$Result$map2 = F3(
 			}
 		}
 	});
-var $author$project$Forth$Pier$Mini = {$: 'Mini'};
-var $author$project$Forth$Pier$Single = {$: 'Single'};
+var $author$project$Types$Pier$Mini = {$: 'Mini'};
+var $author$project$Types$Pier$Single = {$: 'Single'};
 var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 	function (template, accum, to, from) {
 		buildSingleUpto:
@@ -9387,17 +9387,17 @@ var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 			} else {
 				if (_Utils_cmp(
 					to,
-					from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Single)) > -1) {
+					from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single)) > -1) {
 					var $temp$template = template,
 						$temp$accum = A2(
 						$elm$core$List$cons,
 						A2(
 							$author$project$Forth$PierConstruction$pierLocationToPlacement,
-							$author$project$Forth$Pier$Single,
+							$author$project$Types$Pier$Single,
 							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 						accum),
 						$temp$to = to,
-						$temp$from = from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Single);
+						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single);
 					template = $temp$template;
 					accum = $temp$accum;
 					to = $temp$to;
@@ -9409,11 +9409,11 @@ var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 						$elm$core$List$cons,
 						A2(
 							$author$project$Forth$PierConstruction$pierLocationToPlacement,
-							$author$project$Forth$Pier$Mini,
+							$author$project$Types$Pier$Mini,
 							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 						accum),
 						$temp$to = to,
-						$temp$from = from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Mini);
+						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Mini);
 					template = $temp$template;
 					accum = $temp$accum;
 					to = $temp$to;
@@ -9565,55 +9565,55 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 		};
 	}
 };
-var $author$project$Rail$AutoPoint = {$: 'AutoPoint'};
-var $author$project$Rail$AutoTurnout = {$: 'AutoTurnout'};
-var $author$project$Rail$Curve45 = F2(
+var $author$project$Types$Rail$AutoPoint = {$: 'AutoPoint'};
+var $author$project$Types$Rail$AutoTurnout = {$: 'AutoTurnout'};
+var $author$project$Types$Rail$Curve45 = F2(
 	function (a, b) {
 		return {$: 'Curve45', a: a, b: b};
 	});
-var $author$project$Rail$Curve90 = F2(
+var $author$project$Types$Rail$Curve90 = F2(
 	function (a, b) {
 		return {$: 'Curve90', a: a, b: b};
 	});
-var $author$project$Rail$EightPoint = F2(
+var $author$project$Types$Rail$EightPoint = F2(
 	function (a, b) {
 		return {$: 'EightPoint', a: a, b: b};
 	});
-var $author$project$Rail$Flipped = {$: 'Flipped'};
-var $author$project$Rail$JointChange = function (a) {
+var $author$project$Types$Rail$Flipped = {$: 'Flipped'};
+var $author$project$Types$Rail$JointChange = function (a) {
 	return {$: 'JointChange', a: a};
 };
-var $author$project$Rail$NotFlipped = {$: 'NotFlipped'};
-var $author$project$Rail$OuterCurve45 = F2(
+var $author$project$Types$Rail$NotFlipped = {$: 'NotFlipped'};
+var $author$project$Types$Rail$OuterCurve45 = F2(
 	function (a, b) {
 		return {$: 'OuterCurve45', a: a, b: b};
 	});
-var $author$project$Rail$SingleDouble = F2(
+var $author$project$Types$Rail$SingleDouble = F2(
 	function (a, b) {
 		return {$: 'SingleDouble', a: a, b: b};
 	});
-var $author$project$Rail$Slope = F2(
+var $author$project$Types$Rail$Slope = F2(
 	function (a, b) {
 		return {$: 'Slope', a: a, b: b};
 	});
-var $author$project$Rail$SlopeCurveA = {$: 'SlopeCurveA'};
-var $author$project$Rail$SlopeCurveB = {$: 'SlopeCurveB'};
-var $author$project$Rail$Stop = function (a) {
+var $author$project$Types$Rail$SlopeCurveA = {$: 'SlopeCurveA'};
+var $author$project$Types$Rail$SlopeCurveB = {$: 'SlopeCurveB'};
+var $author$project$Types$Rail$Stop = function (a) {
 	return {$: 'Stop', a: a};
 };
-var $author$project$Rail$Straight1 = function (a) {
+var $author$project$Types$Rail$Straight1 = function (a) {
 	return {$: 'Straight1', a: a};
 };
-var $author$project$Rail$Straight2 = function (a) {
+var $author$project$Types$Rail$Straight2 = function (a) {
 	return {$: 'Straight2', a: a};
 };
-var $author$project$Rail$Straight4 = function (a) {
+var $author$project$Types$Rail$Straight4 = function (a) {
 	return {$: 'Straight4', a: a};
 };
-var $author$project$Rail$Straight8 = function (a) {
+var $author$project$Types$Rail$Straight8 = function (a) {
 	return {$: 'Straight8', a: a};
 };
-var $author$project$Rail$Turnout = F2(
+var $author$project$Types$Rail$Turnout = F2(
 	function (a, b) {
 		return {$: 'Turnout', a: a, b: b};
 	});
@@ -9650,107 +9650,107 @@ var $author$project$Forth$Interpreter$executeAscend = F3(
 					}));
 		}
 	});
-var $author$project$Rail$Inverted = {$: 'Inverted'};
-var $author$project$Rail$NotInverted = {$: 'NotInverted'};
+var $author$project$Types$Rail$Inverted = {$: 'Inverted'};
+var $author$project$Types$Rail$NotInverted = {$: 'NotInverted'};
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
 	});
-var $author$project$Rail$map = F2(
+var $author$project$Types$Rail$map = F2(
 	function (f, rail) {
 		switch (rail.$) {
 			case 'Straight1':
 				var a = rail.a;
-				return $author$project$Rail$Straight1(
+				return $author$project$Types$Rail$Straight1(
 					f(a));
 			case 'Straight2':
 				var a = rail.a;
-				return $author$project$Rail$Straight2(
+				return $author$project$Types$Rail$Straight2(
 					f(a));
 			case 'Straight4':
 				var a = rail.a;
-				return $author$project$Rail$Straight4(
+				return $author$project$Types$Rail$Straight4(
 					f(a));
 			case 'Straight8':
 				var a = rail.a;
-				return $author$project$Rail$Straight8(
+				return $author$project$Types$Rail$Straight8(
 					f(a));
 			case 'Curve45':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Curve45,
+					$author$project$Types$Rail$Curve45,
 					a,
 					f(b));
 			case 'Curve90':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Curve90,
+					$author$project$Types$Rail$Curve90,
 					a,
 					f(b));
 			case 'OuterCurve45':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$OuterCurve45,
+					$author$project$Types$Rail$OuterCurve45,
 					a,
 					f(b));
 			case 'SingleDouble':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$SingleDouble,
+					$author$project$Types$Rail$SingleDouble,
 					a,
 					f(b));
 			case 'EightPoint':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$EightPoint,
+					$author$project$Types$Rail$EightPoint,
 					a,
 					f(b));
 			case 'Turnout':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Turnout,
+					$author$project$Types$Rail$Turnout,
 					a,
 					f(b));
 			case 'JointChange':
 				var a = rail.a;
-				return $author$project$Rail$JointChange(
+				return $author$project$Types$Rail$JointChange(
 					f(a));
 			case 'Slope':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Slope,
+					$author$project$Types$Rail$Slope,
 					a,
 					f(b));
 			case 'SlopeCurveA':
-				return $author$project$Rail$SlopeCurveA;
+				return $author$project$Types$Rail$SlopeCurveA;
 			case 'SlopeCurveB':
-				return $author$project$Rail$SlopeCurveB;
+				return $author$project$Types$Rail$SlopeCurveB;
 			case 'Stop':
 				var a = rail.a;
-				return $author$project$Rail$Stop(
+				return $author$project$Types$Rail$Stop(
 					f(a));
 			case 'AutoTurnout':
-				return $author$project$Rail$AutoTurnout;
+				return $author$project$Types$Rail$AutoTurnout;
 			default:
-				return $author$project$Rail$AutoPoint;
+				return $author$project$Types$Rail$AutoPoint;
 		}
 	});
 var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Rail$canInvert = function (rail) {
+var $author$project$Types$Rail$canInvert = function (rail) {
 	return !_Utils_eq(
 		A2(
-			$author$project$Rail$map,
+			$author$project$Types$Rail$map,
 			$elm$core$Basics$always(true),
 			rail),
 		A2(
-			$author$project$Rail$map,
+			$author$project$Types$Rail$map,
 			$elm$core$Basics$always(false),
 			rail));
 };
@@ -10217,16 +10217,16 @@ var $author$project$Forth$RailPiece$getAppropriateRailAndPieceForJoint = F3(
 			$mgold$elm_nonempty_list$List$Nonempty$head(railPiece.railLocations).joint) ? $elm$core$Maybe$Just(
 			_Utils_Tuple2(
 				A2(
-					$author$project$Rail$map,
-					$elm$core$Basics$always($author$project$Rail$NotInverted),
+					$author$project$Types$Rail$map,
+					$elm$core$Basics$always($author$project$Types$Rail$NotInverted),
 					railType),
-				railPiece)) : ($author$project$Rail$canInvert(railType) ? $elm$core$Maybe$Just(
+				railPiece)) : ($author$project$Types$Rail$canInvert(railType) ? $elm$core$Maybe$Just(
 			_Utils_Tuple2(
 				A2(
-					$author$project$Rail$map,
-					$elm$core$Basics$always($author$project$Rail$Inverted),
+					$author$project$Types$Rail$map,
+					$elm$core$Basics$always($author$project$Types$Rail$Inverted),
 					railType),
-				A2($author$project$Forth$RailPiece$invert, $author$project$Rail$Inverted, railPiece))) : $elm$core$Maybe$Nothing);
+				A2($author$project$Forth$RailPiece$invert, $author$project$Types$Rail$Inverted, railPiece))) : $elm$core$Maybe$Nothing);
 	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
@@ -10243,7 +10243,7 @@ var $mgold$elm_nonempty_list$List$Nonempty$tail = function (_v0) {
 	var xs = _v0.b;
 	return xs;
 };
-var $author$project$RailPlacement$make = F3(
+var $author$project$Types$RailPlacement$make = F3(
 	function (rail, position, angle) {
 		return {angle: angle, position: position, rail: rail};
 	});
@@ -10253,7 +10253,7 @@ var $author$project$Forth$Geometry$RailLocation$toVec3 = function (loc) {
 var $author$project$Forth$RailPiece$toRailPlacement = F2(
 	function (rail, location) {
 		return A3(
-			$author$project$RailPlacement$make,
+			$author$project$Types$RailPlacement$make,
 			rail,
 			$author$project$Forth$Geometry$RailLocation$toVec3(location),
 			$author$project$Forth$Geometry$Dir$toRadian(location.location.dir));
@@ -10318,227 +10318,227 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			'q',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight1(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight1(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'h',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight2(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight2(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			's',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight4(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight4(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'ss',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight8(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight8(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'l',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve45, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve45, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'll',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve90, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve90, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'r',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve45, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve45, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'rr',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve90, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve90, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'ol',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$OuterCurve45, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$OuterCurve45, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'or',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$OuterCurve45, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$OuterCurve45, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'tl',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'tl1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'tl2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'tr',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'tr1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'tr2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'dl',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'dl1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'dl2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'dr',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'dr1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'dr2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'el',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'el1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'el2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'er',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'er1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'er2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'j',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$JointChange(_Utils_Tuple0),
+				$author$project$Types$Rail$JointChange(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'up',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Slope, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Slope, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'dn',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Slope, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Slope, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'sa',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveA, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveA, 0)),
 			_Utils_Tuple2(
 			'sa1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveA, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveA, 1)),
 			_Utils_Tuple2(
 			'sb',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveB, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveB, 0)),
 			_Utils_Tuple2(
 			'sb1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveB, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveB, 1)),
 			_Utils_Tuple2(
 			'stop',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Stop(_Utils_Tuple0),
+				$author$project$Types$Rail$Stop(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'at',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoTurnout, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoTurnout, 0)),
 			_Utils_Tuple2(
 			'at1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoTurnout, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoTurnout, 1)),
 			_Utils_Tuple2(
 			'at2',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoTurnout, 2)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoTurnout, 2)),
 			_Utils_Tuple2(
 			'ap',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 0)),
 			_Utils_Tuple2(
 			'ap1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 1)),
 			_Utils_Tuple2(
 			'ap2',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 2)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 2)),
 			_Utils_Tuple2(
 			'ap3',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 3)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 3)),
 			_Utils_Tuple2(
 			'ascend',
 			$author$project$Forth$Interpreter$executeAscend(4))

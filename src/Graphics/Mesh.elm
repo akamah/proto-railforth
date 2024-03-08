@@ -11,10 +11,10 @@ module Graphics.Mesh exposing
     )
 
 import Dict exposing (Dict)
-import Forth.Pier as Pier exposing (Pier)
 import Graphics.MeshWithScalingVector as SV
 import Math.Vector3 as Vec3 exposing (Vec3)
-import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
+import Types.Pier as Pier exposing (Pier)
+import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import WebGL
 
 
@@ -135,7 +135,7 @@ dummyMesh =
 
 getRailMesh : Model -> Rail IsInverted IsFlipped -> Mesh
 getRailMesh model rail =
-    Dict.get (Rail.toString rail) model.meshes
+    Dict.get (Types.Rail.toString rail) model.meshes
         |> Maybe.withDefault dummyMesh
 
 

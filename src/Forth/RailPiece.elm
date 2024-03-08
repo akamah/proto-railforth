@@ -6,8 +6,8 @@ import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
 import List.Nonempty as Nonempty exposing (Nonempty(..))
-import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import RailPlacement exposing (RailPlacement)
+import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
+import Types.RailPlacement exposing (RailPlacement)
 
 
 
@@ -306,7 +306,7 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
 
 toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
 toRailPlacement rail location =
-    RailPlacement.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
+    Types.RailPlacement.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
 
 
 type alias PlaceRailParams =
