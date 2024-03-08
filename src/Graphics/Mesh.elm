@@ -12,19 +12,18 @@ module Graphics.Mesh exposing
 
 import Dict exposing (Dict)
 import Forth.Pier as Pier exposing (Pier)
+import Graphics.MeshWithScalingVector as SV
 import Math.Vector3 as Vec3 exposing (Vec3)
-import OBJ
-import OBJ.Types exposing (MeshWith, Vertex)
 import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import WebGL
 
 
 type alias Mesh =
-    WebGL.Mesh Vertex
+    WebGL.Mesh SV.VertexWithScalingVector
 
 
 type Msg
-    = LoadMesh String (Result String (MeshWith Vertex))
+    = LoadMesh String (Result String SV.MeshAndFace)
 
 
 type alias Model =
@@ -46,23 +45,23 @@ update msg model =
         LoadMesh name meshOrErr ->
             case meshOrErr of
                 Err e ->
-                    { model | errors = e :: model.errors }
+                    { model | errors = Debug.log "load mesh error" e :: model.errors }
 
                 Ok meshWith ->
                     let
-                        mesh =
-                            WebGL.indexedTriangles meshWith.vertices meshWith.indices
+                        glMesh =
+                            WebGL.indexedTriangles meshWith.vertices meshWith.faces
 
                         flippedMeshWith =
                             flipMesh meshWith
 
                         flippedMesh =
-                            WebGL.indexedTriangles flippedMeshWith.vertices flippedMeshWith.indices
+                            WebGL.indexedTriangles flippedMeshWith.vertices flippedMeshWith.faces
 
                         updatedMeshes =
                             Dict.union model.meshes <|
                                 Dict.fromList
-                                    [ ( name, mesh )
+                                    [ ( name, glMesh )
                                     , ( String.append name "_flip", flippedMesh )
                                     ]
                     in
@@ -73,7 +72,7 @@ update msg model =
 -}
 buildMeshUri : String -> String
 buildMeshUri name =
-    "./assets/" ++ name ++ ".obj"
+    "./assets/" ++ name ++ ".json"
 
 
 {-| The list of mesh names. Used when loading .obj files
@@ -124,7 +123,7 @@ loadMeshCmd f =
         Cmd.batch <|
             List.map
                 (\name ->
-                    OBJ.loadMeshWithoutTexture (buildMeshUri name) (LoadMesh name)
+                    SV.load (buildMeshUri name) (LoadMesh name)
                 )
                 allMeshNames
 
@@ -151,17 +150,18 @@ getErrors model =
     model.errors
 
 
-flipMesh : MeshWith Vertex -> MeshWith Vertex
-flipMesh meshWith =
-    { indices = meshWith.indices
-    , vertices = List.map flipVertex meshWith.vertices
+flipMesh : SV.MeshAndFace -> SV.MeshAndFace
+flipMesh mesh =
+    { faces = mesh.faces
+    , vertices = List.map flipVertex mesh.vertices
     }
 
 
-flipVertex : Vertex -> Vertex
+flipVertex : SV.VertexWithScalingVector -> SV.VertexWithScalingVector
 flipVertex vertex =
     { position = flipVec3 vertex.position
     , normal = flipVec3 vertex.normal
+    , scalingVector = flipVec3 vertex.scalingVector
     }
 
 

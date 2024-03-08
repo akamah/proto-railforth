@@ -9,7 +9,7 @@ ARGF.each do |line|
   case c
   when 'v'
     abort('broken vertex: ' ++ args.to_s) if args.size != 3
-    vertices << args.map(&:to_f)
+    vertices << args.map {|s| BigDecimal(s).round(2).to_s('f') }
   when 'f'
     abort('broken facet: ' ++ args.to_s) if args.size != 3
     facets << args.map {|s| s.split('/')[0].to_i - 1}
