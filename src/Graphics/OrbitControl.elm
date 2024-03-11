@@ -32,7 +32,11 @@ import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 
 
-type alias Model =
+type Model
+    = Model ModelImpl
+
+
+type alias ModelImpl =
     { draggingState : Maybe DraggingState
     , viewportWidth : Float
     , viewportHeight : Float
@@ -49,57 +53,58 @@ type DraggingState
 
 
 init : Float -> Float -> Float -> Vec3 -> Model
-init azimuth altitude scale target =
-    { draggingState = Nothing
-    , viewportWidth = 0
-    , viewportHeight = 0
-    , azimuth = azimuth
-    , altitude = altitude
-    , scale = scale
-    , target = target
-    }
+init azimuth altitude scale eyeTarget =
+    Model
+        { draggingState = Nothing
+        , viewportWidth = 0
+        , viewportHeight = 0
+        , azimuth = azimuth
+        , altitude = altitude
+        , scale = scale
+        , target = eyeTarget
+        }
 
 
 updateMouseDown : Model -> ( Float, Float ) -> Model
-updateMouseDown model pos =
-    { model | draggingState = Just (Rotating pos) }
+updateMouseDown (Model model) pos =
+    Model { model | draggingState = Just (Rotating pos) }
 
 
 updateMouseDownWithShift : Model -> ( Float, Float ) -> Model
-updateMouseDownWithShift model pos =
-    { model | draggingState = Just (Panning pos) }
+updateMouseDownWithShift (Model model) pos =
+    Model { model | draggingState = Just (Panning pos) }
 
 
 updateMouseMove : Model -> ( Float, Float ) -> Model
-updateMouseMove model newPoint =
+updateMouseMove (Model model) newPoint =
     case model.draggingState of
         Nothing ->
-            model
+            Model model
 
         Just (Rotating oldPoint) ->
-            doRotation model (Just <| Rotating newPoint) oldPoint newPoint
+            Model <| doRotation model (Just <| Rotating newPoint) oldPoint newPoint
 
         Just (Panning oldPoint) ->
-            doPanning model (Just <| Panning newPoint) oldPoint newPoint
+            Model <| doPanning model (Just <| Panning newPoint) oldPoint newPoint
 
 
 updateMouseUp : Model -> ( Float, Float ) -> Model
-updateMouseUp model _ =
-    { model | draggingState = Nothing }
+updateMouseUp (Model model) _ =
+    Model { model | draggingState = Nothing }
 
 
 updateWheel : Model -> ( Float, Float ) -> Model
-updateWheel model ( _, dy ) =
-    doDolly model dy
+updateWheel (Model model) ( _, dy ) =
+    Model <| doDolly model dy
 
 
 updateViewport : Float -> Float -> Model -> Model
-updateViewport w h model =
-    { model | viewportWidth = w, viewportHeight = h }
+updateViewport w h (Model model) =
+    Model { model | viewportWidth = w, viewportHeight = h }
 
 
 makeTransform : Model -> Mat4
-makeTransform model =
+makeTransform (Model model) =
     let
         w =
             model.scale * model.viewportWidth / 2
@@ -128,7 +133,7 @@ makeTransform model =
 
 
 isDragging : Model -> Bool
-isDragging model =
+isDragging (Model model) =
     case model.draggingState of
         Just _ ->
             True
@@ -141,7 +146,7 @@ isDragging model =
 -- module private functions
 
 
-doRotation : Model -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> Model
+doRotation : ModelImpl -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> ModelImpl
 doRotation model newState ( x0, y0 ) ( x, y ) =
     let
         dx =
@@ -166,7 +171,7 @@ doRotation model newState ( x0, y0 ) ( x, y ) =
     }
 
 
-doPanning : Model -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> Model
+doPanning : ModelImpl -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> ModelImpl
 doPanning model newState ( x0, y0 ) ( x, y ) =
     let
         dx =
@@ -205,7 +210,7 @@ doPanning model newState ( x0, y0 ) ( x, y ) =
     }
 
 
-doDolly : Model -> Float -> Model
+doDolly : ModelImpl -> Float -> ModelImpl
 doDolly model dy =
     let
         multiplier =
