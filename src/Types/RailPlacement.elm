@@ -1,7 +1,7 @@
-module RailPlacement exposing (RailPlacement, make)
+module Types.RailPlacement exposing (RailPlacement, make)
 
 import Math.Vector3 exposing (Vec3)
-import Rail exposing (IsFlipped, IsInverted, Rail)
+import Types.Rail exposing (IsFlipped, IsInverted, Rail)
 
 
 {-| 一本のレールを配置するための型。

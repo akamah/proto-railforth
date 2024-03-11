@@ -7197,9 +7197,6 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$document = _Browser_document;
-var $author$project$Main$TouchEvent = function (a) {
-	return {$: 'TouchEvent', a: a};
-};
 var $author$project$Main$UpdateScript = function (a) {
 	return {$: 'UpdateScript', a: a};
 };
@@ -7233,165 +7230,6 @@ var $elm_explorations$webgl$WebGL$Internal$Depth = function (a) {
 };
 var $elm_explorations$webgl$WebGL$depth = $elm_explorations$webgl$WebGL$Internal$Depth;
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $dullbananas$elm_touch$Touch$Msg = function (a) {
-	return {$: 'Msg', a: a};
-};
-var $dullbananas$elm_touch$Touch$Internal$Event = function (a) {
-	return {$: 'Event', a: a};
-};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$defaultOptions = {preventDefault: true, stopPropagation: false};
-var $elm$virtual_dom$VirtualDom$Custom = function (a) {
-	return {$: 'Custom', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$custom = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Custom(decoder));
-	});
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Event = F4(
-	function (keys, changedTouches, targetTouches, touches) {
-		return {changedTouches: changedTouches, keys: keys, targetTouches: targetTouches, touches: touches};
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $mpizenberg$elm_pointer_events$Internal$Decode$Keys = F3(
-	function (alt, ctrl, shift) {
-		return {alt: alt, ctrl: ctrl, shift: shift};
-	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $mpizenberg$elm_pointer_events$Internal$Decode$keys = A4(
-	$elm$json$Json$Decode$map3,
-	$mpizenberg$elm_pointer_events$Internal$Decode$Keys,
-	A2($elm$json$Json$Decode$field, 'altKey', $elm$json$Json$Decode$bool),
-	A2($elm$json$Json$Decode$field, 'ctrlKey', $elm$json$Json$Decode$bool),
-	A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool));
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Touch = F4(
-	function (identifier, clientPos, pagePos, screenPos) {
-		return {clientPos: clientPos, identifier: identifier, pagePos: pagePos, screenPos: screenPos};
-	});
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $mpizenberg$elm_pointer_events$Internal$Decode$clientPos = A3(
-	$elm$json$Json$Decode$map2,
-	F2(
-		function (a, b) {
-			return _Utils_Tuple2(a, b);
-		}),
-	A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float));
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $mpizenberg$elm_pointer_events$Internal$Decode$pagePos = A3(
-	$elm$json$Json$Decode$map2,
-	F2(
-		function (a, b) {
-			return _Utils_Tuple2(a, b);
-		}),
-	A2($elm$json$Json$Decode$field, 'pageX', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'pageY', $elm$json$Json$Decode$float));
-var $mpizenberg$elm_pointer_events$Internal$Decode$screenPos = A3(
-	$elm$json$Json$Decode$map2,
-	F2(
-		function (a, b) {
-			return _Utils_Tuple2(a, b);
-		}),
-	A2($elm$json$Json$Decode$field, 'screenX', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'screenY', $elm$json$Json$Decode$float));
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder = A5(
-	$elm$json$Json$Decode$map4,
-	$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Touch,
-	A2($elm$json$Json$Decode$field, 'identifier', $elm$json$Json$Decode$int),
-	$mpizenberg$elm_pointer_events$Internal$Decode$clientPos,
-	$mpizenberg$elm_pointer_events$Internal$Decode$pagePos,
-	$mpizenberg$elm_pointer_events$Internal$Decode$screenPos);
-var $mpizenberg$elm_pointer_events$Internal$Decode$all = A2(
-	$elm$core$List$foldr,
-	$elm$json$Json$Decode$map2($elm$core$List$cons),
-	$elm$json$Json$Decode$succeed(_List_Nil));
-var $mpizenberg$elm_pointer_events$Internal$Decode$dynamicListOf = function (itemDecoder) {
-	var decodeOne = function (n) {
-		return A2(
-			$elm$json$Json$Decode$field,
-			$elm$core$String$fromInt(n),
-			itemDecoder);
-	};
-	var decodeN = function (n) {
-		return $mpizenberg$elm_pointer_events$Internal$Decode$all(
-			A2(
-				$elm$core$List$map,
-				decodeOne,
-				A2($elm$core$List$range, 0, n - 1)));
-	};
-	return A2(
-		$elm$json$Json$Decode$andThen,
-		decodeN,
-		A2($elm$json$Json$Decode$field, 'length', $elm$json$Json$Decode$int));
-};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder = $mpizenberg$elm_pointer_events$Internal$Decode$dynamicListOf;
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$eventDecoder = A5(
-	$elm$json$Json$Decode$map4,
-	$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$Event,
-	$mpizenberg$elm_pointer_events$Internal$Decode$keys,
-	A2(
-		$elm$json$Json$Decode$field,
-		'changedTouches',
-		$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder($mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'targetTouches',
-		$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder($mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'touches',
-		$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchListDecoder($mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$touchDecoder)));
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onWithOptions = F3(
-	function (event, options, tag) {
-		return A2(
-			$elm$html$Html$Events$custom,
-			event,
-			A2(
-				$elm$json$Json$Decode$map,
-				function (ev) {
-					return {
-						message: tag(ev),
-						preventDefault: options.preventDefault,
-						stopPropagation: options.stopPropagation
-					};
-				},
-				$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$eventDecoder));
-	});
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onCancel = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onWithOptions, 'touchcancel', $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$defaultOptions);
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onEnd = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onWithOptions, 'touchend', $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$defaultOptions);
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onMove = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onWithOptions, 'touchmove', $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$defaultOptions);
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onStart = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onWithOptions, 'touchstart', $mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$defaultOptions);
-var $dullbananas$elm_touch$Touch$Internal$attrs = _List_fromArray(
-	[
-		$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onStart($dullbananas$elm_touch$Touch$Internal$Event),
-		$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onMove($dullbananas$elm_touch$Touch$Internal$Event),
-		$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onEnd($dullbananas$elm_touch$Touch$Internal$Event),
-		$mpizenberg$elm_pointer_events$Html$Events$Extra$Touch$onCancel($dullbananas$elm_touch$Touch$Internal$Event)
-	]);
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm$virtual_dom$VirtualDom$mapAttribute = _VirtualDom_mapAttribute;
-var $elm$html$Html$Attributes$map = $elm$virtual_dom$VirtualDom$mapAttribute;
-var $dullbananas$elm_touch$Touch$element = F2(
-	function (customAttrs, msgWrapper) {
-		var attrs = A2(
-			$elm$core$List$map,
-			$elm$html$Html$Attributes$map(
-				A2($elm$core$Basics$composeR, $dullbananas$elm_touch$Touch$Msg, msgWrapper)),
-			$dullbananas$elm_touch$Touch$Internal$attrs);
-		return A2(
-			$elm$html$Html$div,
-			_Utils_ap(customAttrs, attrs),
-			_List_Nil);
-	});
 var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm$html$Html$Attributes$height = function (n) {
 	return A2(
@@ -7405,6 +7243,7 @@ var $elm$html$Html$Events$alwaysStop = function (x) {
 var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
 	return {$: 'MayStopPropagation', a: a};
 };
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var $elm$html$Html$Events$stopPropagationOn = F2(
 	function (event, decoder) {
 		return A2(
@@ -7412,6 +7251,7 @@ var $elm$html$Html$Events$stopPropagationOn = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
 	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
@@ -7431,12 +7271,14 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $author$project$Main$BeginPan = function (a) {
-	return {$: 'BeginPan', a: a};
+var $author$project$Main$MouseDown = function (a) {
+	return {$: 'MouseDown', a: a};
 };
-var $author$project$Main$BeginRotate = function (a) {
-	return {$: 'BeginRotate', a: a};
+var $author$project$Main$MouseDownWithShift = function (a) {
+	return {$: 'MouseDownWithShift', a: a};
 };
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Main$mouseEventDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	F2(
@@ -7474,10 +7316,10 @@ var $author$project$Main$onMouseDownHandler = function (_v0) {
 		$elm$html$Html$Events$preventDefaultOn,
 		'mousedown',
 		$author$project$Main$preventDefaultDecoder(
-			A2($author$project$Main$mouseEventDecoderWithModifier, $author$project$Main$BeginPan, $author$project$Main$BeginRotate)));
+			A2($author$project$Main$mouseEventDecoderWithModifier, $author$project$Main$MouseDown, $author$project$Main$MouseDownWithShift)));
 };
-var $author$project$Main$UpdateRotate = function (a) {
-	return {$: 'UpdateRotate', a: a};
+var $author$project$Main$MouseUp = function (a) {
+	return {$: 'MouseUp', a: a};
 };
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -7489,20 +7331,11 @@ var $elm$html$Html$Events$on = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
-var $author$project$Main$onMouseMoveHandler = function (_v0) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mousemove',
-		A2($elm$json$Json$Decode$map, $author$project$Main$UpdateRotate, $author$project$Main$mouseEventDecoder));
-};
-var $author$project$Main$EndRotate = function (a) {
-	return {$: 'EndRotate', a: a};
-};
 var $author$project$Main$onMouseUpHandler = function (_v0) {
 	return A2(
 		$elm$html$Html$Events$on,
 		'mouseup',
-		A2($elm$json$Json$Decode$map, $author$project$Main$EndRotate, $author$project$Main$mouseEventDecoder));
+		A2($elm$json$Json$Decode$map, $author$project$Main$MouseUp, $author$project$Main$mouseEventDecoder));
 };
 var $author$project$Main$SplitBarBeginDrag = function (a) {
 	return {$: 'SplitBarBeginDrag', a: a};
@@ -7545,7 +7378,7 @@ var $elm_explorations$webgl$WebGL$Mesh3 = F2(
 	});
 var $elm_explorations$webgl$WebGL$triangles = $elm_explorations$webgl$WebGL$Mesh3(
 	{elemSize: 3, indexSize: 0, mode: 4});
-var $author$project$Graphics$Mesh$dummyMesh = $elm_explorations$webgl$WebGL$triangles(_List_Nil);
+var $author$project$Graphics$MeshLoader$dummyMesh = $elm_explorations$webgl$WebGL$triangles(_List_Nil);
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -7578,7 +7411,7 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $author$project$Forth$Pier$toString = function (pier) {
+var $author$project$Types$Pier$toString = function (pier) {
 	switch (pier.$) {
 		case 'Single':
 			return 'pier';
@@ -7597,46 +7430,44 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$Graphics$Mesh$getPierMesh = F2(
+var $author$project$Graphics$MeshLoader$getPierMesh = F2(
 	function (model, pier) {
 		return A2(
 			$elm$core$Maybe$withDefault,
-			$author$project$Graphics$Mesh$dummyMesh,
+			$author$project$Graphics$MeshLoader$dummyMesh,
 			A2(
 				$elm$core$Dict$get,
-				$author$project$Forth$Pier$toString(pier),
+				$author$project$Types$Pier$toString(pier),
 				model.meshes));
 	});
+var $elm_explorations$linear_algebra$Math$Matrix4$identity = _MJS_m4x4identity;
 var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
 var $elm$core$Basics$cos = _Basics_cos;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
+var $elm_explorations$linear_algebra$Math$Matrix4$makeOrtho = _MJS_m4x4makeOrtho;
+var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
 var $elm$core$Basics$sin = _Basics_sin;
 var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
-var $author$project$Main$makeLookAt = F3(
-	function (azimuth, altitude, target) {
-		var distance = 10000;
-		var x = (distance * $elm$core$Basics$cos(altitude)) * $elm$core$Basics$cos(azimuth);
-		var y = distance * $elm$core$Basics$sin(altitude);
-		var z = (distance * $elm$core$Basics$cos(altitude)) * (-$elm$core$Basics$sin(azimuth));
-		return A3(
+var $author$project$Graphics$OrbitControl$makeTransform = function (model) {
+	var w = (model.scale * model.viewportWidth) / 2;
+	var h = (model.scale * model.viewportHeight) / 2;
+	var eyeDistance = 10000;
+	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
+	var y = eyeDistance * $elm$core$Basics$sin(model.altitude);
+	var z = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * (-$elm$core$Basics$sin(model.azimuth));
+	var cameraClipDistance = 100000;
+	return A2(
+		$elm_explorations$linear_algebra$Math$Matrix4$mul,
+		A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -cameraClipDistance, cameraClipDistance),
+		A3(
 			$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
 			A2(
 				$elm_explorations$linear_algebra$Math$Vector3$add,
-				target,
+				model.target,
 				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
-			target,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0));
-	});
-var $elm_explorations$linear_algebra$Math$Matrix4$makeOrtho = _MJS_m4x4makeOrtho;
-var $author$project$Main$orthoScale = function (ppu) {
-	return 216.0 / ppu;
+			model.target,
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0)));
 };
-var $author$project$Main$makeOrtho = F3(
-	function (width, height, ppu) {
-		var w = ($author$project$Main$orthoScale(ppu) * width) / 2;
-		var h = ($author$project$Main$orthoScale(ppu) * height) / 2;
-		return A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -100000, 100000);
-	});
 var $elm_explorations$webgl$WebGL$Internal$CullFace = function (a) {
 	return {$: 'CullFace', a: a};
 };
@@ -7704,7 +7535,6 @@ var $elm_explorations$webgl$WebGL$Settings$front = $elm_explorations$webgl$WebGL
 var $author$project$Main$lightFromAbove = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2.0 / 27.0, 26.0 / 27.0, 7.0 / 27.0);
 var $elm_explorations$linear_algebra$Math$Matrix4$makeRotate = _MJS_m4x4makeRotate;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate = _MJS_m4x4makeTranslate;
-var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
 var $author$project$Main$makeMeshMatrix = F2(
 	function (origin, angle) {
 		var rotate = A2(
@@ -7741,16 +7571,14 @@ var $author$project$Main$showPier = F5(
 	});
 var $author$project$Main$showPiers = F2(
 	function (model, piers) {
-		var viewTransform = A3($author$project$Main$makeLookAt, model.azimuth, model.altitude, model.target);
-		var projectionTransform = A3($author$project$Main$makeOrtho, model.viewport.width, model.splitBarPosition, model.pixelPerUnit);
 		return A2(
 			$elm$core$List$map,
 			function (pierPlacement) {
 				return A5(
 					$author$project$Main$showPier,
-					projectionTransform,
-					viewTransform,
-					A2($author$project$Graphics$Mesh$getPierMesh, model.meshes, pierPlacement.pier),
+					$elm_explorations$linear_algebra$Math$Matrix4$identity,
+					$author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
+					A2($author$project$Graphics$MeshLoader$getPierMesh, model.meshes, pierPlacement.pier),
 					pierPlacement.position,
 					pierPlacement.angle);
 			},
@@ -7772,21 +7600,21 @@ var $elm$core$List$concatMap = F2(
 		return $elm$core$List$concat(
 			A2($elm$core$List$map, f, list));
 	});
-var $author$project$Rail$isFlippedToString = function (isFlipped) {
+var $author$project$Types$Rail$isFlippedToString = function (isFlipped) {
 	if (isFlipped.$ === 'NotFlipped') {
 		return '';
 	} else {
 		return '_flip';
 	}
 };
-var $author$project$Rail$isInvertedToString = function (isInverted) {
+var $author$project$Types$Rail$isInvertedToString = function (isInverted) {
 	if (isInverted.$ === 'NotInverted') {
 		return '_minus';
 	} else {
 		return '_plus';
 	}
 };
-var $author$project$Rail$toStringWith = F3(
+var $author$project$Types$Rail$toStringWith = F3(
 	function (flipped, inverted, rail) {
 		switch (rail.$) {
 			case 'Straight1':
@@ -7845,15 +7673,15 @@ var $author$project$Rail$toStringWith = F3(
 				return 'autopoint_minus';
 		}
 	});
-var $author$project$Rail$toString = A2($author$project$Rail$toStringWith, $author$project$Rail$isFlippedToString, $author$project$Rail$isInvertedToString);
-var $author$project$Graphics$Mesh$getRailMesh = F2(
+var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
+var $author$project$Graphics$MeshLoader$getRailMesh = F2(
 	function (model, rail) {
 		return A2(
 			$elm$core$Maybe$withDefault,
-			$author$project$Graphics$Mesh$dummyMesh,
+			$author$project$Graphics$MeshLoader$dummyMesh,
 			A2(
 				$elm$core$Dict$get,
-				$author$project$Rail$toString(rail),
+				$author$project$Types$Rail$toString(rail),
 				model.meshes));
 	});
 var $elm_explorations$webgl$WebGL$Settings$StencilTest$Test = function (a) {
@@ -7899,6 +7727,11 @@ var $elm_explorations$webgl$WebGL$Internal$StencilTest = function (a) {
 		};
 	};
 };
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var $elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate = F3(
 	function (_v0, options1, options2) {
 		var ref = _v0.ref;
@@ -7989,16 +7822,15 @@ var $author$project$Main$showRail = F5(
 	});
 var $author$project$Main$showRails = F2(
 	function (model, rails) {
-		var viewTransform = A3($author$project$Main$makeLookAt, model.azimuth, model.altitude, model.target);
-		var projectionTransform = A3($author$project$Main$makeOrtho, model.viewport.width, model.splitBarPosition, model.pixelPerUnit);
+		var transform = $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl);
 		return A2(
 			$elm$core$List$concatMap,
 			function (railPosition) {
 				return A5(
 					$author$project$Main$showRail,
-					projectionTransform,
-					viewTransform,
-					A2($author$project$Graphics$Mesh$getRailMesh, model.meshes, railPosition.rail),
+					$elm_explorations$linear_algebra$Math$Matrix4$identity,
+					transform,
+					A2($author$project$Graphics$MeshLoader$getRailMesh, model.meshes, railPosition.rail),
 					railPosition.position,
 					railPosition.angle);
 			},
@@ -8077,40 +7909,14 @@ var $author$project$Main$view = function (model) {
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
-						$author$project$Main$px(railViewHeight))
+						$author$project$Main$px(railViewHeight)),
+						$author$project$Main$onMouseDownHandler(model),
+						$author$project$Main$onMouseUpHandler(model),
+						$author$project$Main$onWheelHandler(model)
 					]),
 				_Utils_ap(
 					A2($author$project$Main$showRails, model, model.rails),
 					A2($author$project$Main$showPiers, model, model.piers))),
-				A2(
-				$dullbananas$elm_touch$Touch$element,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'display', 'block'),
-						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'left',
-						$author$project$Main$px(0)),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'top',
-						$author$project$Main$px(railViewTop)),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'width',
-						$author$project$Main$px(model.viewport.width)),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'height',
-						$author$project$Main$px(railViewHeight)),
-						A2($elm$html$Html$Attributes$style, 'z-index', '10'),
-						$author$project$Main$onMouseUpHandler(model),
-						$author$project$Main$onMouseMoveHandler(model),
-						$author$project$Main$onMouseDownHandler(model),
-						$author$project$Main$onWheelHandler(model)
-					]),
-				$author$project$Main$TouchEvent),
 				A2(
 				$elm$html$Html$pre,
 				_List_fromArray(
@@ -8230,17 +8036,6 @@ var $author$project$Main$document = function (model) {
 var $author$project$Main$LoadMesh = function (a) {
 	return {$: 'LoadMesh', a: a};
 };
-var $author$project$Main$OnTouchMove = F2(
-	function (a, b) {
-		return {$: 'OnTouchMove', a: a, b: b};
-	});
-var $author$project$Main$OnTouchPinch = function (a) {
-	return {$: 'OnTouchPinch', a: a};
-};
-var $author$project$Main$OnTouchRotate = F2(
-	function (a, b) {
-		return {$: 'OnTouchRotate', a: a, b: b};
-	});
 var $author$project$Main$SetViewport = function (a) {
 	return {$: 'SetViewport', a: a};
 };
@@ -8501,11 +8296,11 @@ var $author$project$Forth$Interpreter$haltWithError = F2(
 	});
 var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
 	return A3(
-		$author$project$Rail$toStringWith,
+		$author$project$Types$Rail$toStringWith,
 		function (_v0) {
 			return '';
 		},
-		$author$project$Rail$isInvertedToString,
+		$author$project$Types$Rail$isInvertedToString,
 		rail);
 };
 var $elm$core$Dict$getMin = function (dict) {
@@ -9013,8 +8808,8 @@ var $author$project$Forth$PierConstruction$divideIntoDict = A2(
 			});
 	},
 	$elm$core$Dict$empty);
-var $author$project$Forth$Pier$Wide = {$: 'Wide'};
-var $author$project$Forth$Pier$getHeight = function (pier) {
+var $author$project$Types$Pier$Wide = {$: 'Wide'};
+var $author$project$Types$Pier$getHeight = function (pier) {
 	switch (pier.$) {
 		case 'Single':
 			return 4;
@@ -9088,11 +8883,11 @@ var $author$project$Forth$PierConstruction$buildDoubleUpto = F4(
 					$elm$core$List$cons,
 					A2(
 						$author$project$Forth$PierConstruction$pierLocationToPlacement,
-						$author$project$Forth$Pier$Wide,
+						$author$project$Types$Pier$Wide,
 						A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 					accum),
 					$temp$to = to,
-					$temp$from = from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Wide);
+					$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide);
 				template = $temp$template;
 				accum = $temp$accum;
 				to = $temp$to;
@@ -9376,8 +9171,8 @@ var $elm$core$Result$map2 = F3(
 			}
 		}
 	});
-var $author$project$Forth$Pier$Mini = {$: 'Mini'};
-var $author$project$Forth$Pier$Single = {$: 'Single'};
+var $author$project$Types$Pier$Mini = {$: 'Mini'};
+var $author$project$Types$Pier$Single = {$: 'Single'};
 var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 	function (template, accum, to, from) {
 		buildSingleUpto:
@@ -9387,17 +9182,17 @@ var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 			} else {
 				if (_Utils_cmp(
 					to,
-					from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Single)) > -1) {
+					from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single)) > -1) {
 					var $temp$template = template,
 						$temp$accum = A2(
 						$elm$core$List$cons,
 						A2(
 							$author$project$Forth$PierConstruction$pierLocationToPlacement,
-							$author$project$Forth$Pier$Single,
+							$author$project$Types$Pier$Single,
 							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 						accum),
 						$temp$to = to,
-						$temp$from = from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Single);
+						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single);
 					template = $temp$template;
 					accum = $temp$accum;
 					to = $temp$to;
@@ -9409,11 +9204,11 @@ var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 						$elm$core$List$cons,
 						A2(
 							$author$project$Forth$PierConstruction$pierLocationToPlacement,
-							$author$project$Forth$Pier$Mini,
+							$author$project$Types$Pier$Mini,
 							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 						accum),
 						$temp$to = to,
-						$temp$from = from + $author$project$Forth$Pier$getHeight($author$project$Forth$Pier$Mini);
+						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Mini);
 					template = $temp$template;
 					accum = $temp$accum;
 					to = $temp$to;
@@ -9565,55 +9360,55 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 		};
 	}
 };
-var $author$project$Rail$AutoPoint = {$: 'AutoPoint'};
-var $author$project$Rail$AutoTurnout = {$: 'AutoTurnout'};
-var $author$project$Rail$Curve45 = F2(
+var $author$project$Types$Rail$AutoPoint = {$: 'AutoPoint'};
+var $author$project$Types$Rail$AutoTurnout = {$: 'AutoTurnout'};
+var $author$project$Types$Rail$Curve45 = F2(
 	function (a, b) {
 		return {$: 'Curve45', a: a, b: b};
 	});
-var $author$project$Rail$Curve90 = F2(
+var $author$project$Types$Rail$Curve90 = F2(
 	function (a, b) {
 		return {$: 'Curve90', a: a, b: b};
 	});
-var $author$project$Rail$EightPoint = F2(
+var $author$project$Types$Rail$EightPoint = F2(
 	function (a, b) {
 		return {$: 'EightPoint', a: a, b: b};
 	});
-var $author$project$Rail$Flipped = {$: 'Flipped'};
-var $author$project$Rail$JointChange = function (a) {
+var $author$project$Types$Rail$Flipped = {$: 'Flipped'};
+var $author$project$Types$Rail$JointChange = function (a) {
 	return {$: 'JointChange', a: a};
 };
-var $author$project$Rail$NotFlipped = {$: 'NotFlipped'};
-var $author$project$Rail$OuterCurve45 = F2(
+var $author$project$Types$Rail$NotFlipped = {$: 'NotFlipped'};
+var $author$project$Types$Rail$OuterCurve45 = F2(
 	function (a, b) {
 		return {$: 'OuterCurve45', a: a, b: b};
 	});
-var $author$project$Rail$SingleDouble = F2(
+var $author$project$Types$Rail$SingleDouble = F2(
 	function (a, b) {
 		return {$: 'SingleDouble', a: a, b: b};
 	});
-var $author$project$Rail$Slope = F2(
+var $author$project$Types$Rail$Slope = F2(
 	function (a, b) {
 		return {$: 'Slope', a: a, b: b};
 	});
-var $author$project$Rail$SlopeCurveA = {$: 'SlopeCurveA'};
-var $author$project$Rail$SlopeCurveB = {$: 'SlopeCurveB'};
-var $author$project$Rail$Stop = function (a) {
+var $author$project$Types$Rail$SlopeCurveA = {$: 'SlopeCurveA'};
+var $author$project$Types$Rail$SlopeCurveB = {$: 'SlopeCurveB'};
+var $author$project$Types$Rail$Stop = function (a) {
 	return {$: 'Stop', a: a};
 };
-var $author$project$Rail$Straight1 = function (a) {
+var $author$project$Types$Rail$Straight1 = function (a) {
 	return {$: 'Straight1', a: a};
 };
-var $author$project$Rail$Straight2 = function (a) {
+var $author$project$Types$Rail$Straight2 = function (a) {
 	return {$: 'Straight2', a: a};
 };
-var $author$project$Rail$Straight4 = function (a) {
+var $author$project$Types$Rail$Straight4 = function (a) {
 	return {$: 'Straight4', a: a};
 };
-var $author$project$Rail$Straight8 = function (a) {
+var $author$project$Types$Rail$Straight8 = function (a) {
 	return {$: 'Straight8', a: a};
 };
-var $author$project$Rail$Turnout = F2(
+var $author$project$Types$Rail$Turnout = F2(
 	function (a, b) {
 		return {$: 'Turnout', a: a, b: b};
 	});
@@ -9650,107 +9445,107 @@ var $author$project$Forth$Interpreter$executeAscend = F3(
 					}));
 		}
 	});
-var $author$project$Rail$Inverted = {$: 'Inverted'};
-var $author$project$Rail$NotInverted = {$: 'NotInverted'};
+var $author$project$Types$Rail$Inverted = {$: 'Inverted'};
+var $author$project$Types$Rail$NotInverted = {$: 'NotInverted'};
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
 	});
-var $author$project$Rail$map = F2(
+var $author$project$Types$Rail$map = F2(
 	function (f, rail) {
 		switch (rail.$) {
 			case 'Straight1':
 				var a = rail.a;
-				return $author$project$Rail$Straight1(
+				return $author$project$Types$Rail$Straight1(
 					f(a));
 			case 'Straight2':
 				var a = rail.a;
-				return $author$project$Rail$Straight2(
+				return $author$project$Types$Rail$Straight2(
 					f(a));
 			case 'Straight4':
 				var a = rail.a;
-				return $author$project$Rail$Straight4(
+				return $author$project$Types$Rail$Straight4(
 					f(a));
 			case 'Straight8':
 				var a = rail.a;
-				return $author$project$Rail$Straight8(
+				return $author$project$Types$Rail$Straight8(
 					f(a));
 			case 'Curve45':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Curve45,
+					$author$project$Types$Rail$Curve45,
 					a,
 					f(b));
 			case 'Curve90':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Curve90,
+					$author$project$Types$Rail$Curve90,
 					a,
 					f(b));
 			case 'OuterCurve45':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$OuterCurve45,
+					$author$project$Types$Rail$OuterCurve45,
 					a,
 					f(b));
 			case 'SingleDouble':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$SingleDouble,
+					$author$project$Types$Rail$SingleDouble,
 					a,
 					f(b));
 			case 'EightPoint':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$EightPoint,
+					$author$project$Types$Rail$EightPoint,
 					a,
 					f(b));
 			case 'Turnout':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Turnout,
+					$author$project$Types$Rail$Turnout,
 					a,
 					f(b));
 			case 'JointChange':
 				var a = rail.a;
-				return $author$project$Rail$JointChange(
+				return $author$project$Types$Rail$JointChange(
 					f(a));
 			case 'Slope':
 				var a = rail.a;
 				var b = rail.b;
 				return A2(
-					$author$project$Rail$Slope,
+					$author$project$Types$Rail$Slope,
 					a,
 					f(b));
 			case 'SlopeCurveA':
-				return $author$project$Rail$SlopeCurveA;
+				return $author$project$Types$Rail$SlopeCurveA;
 			case 'SlopeCurveB':
-				return $author$project$Rail$SlopeCurveB;
+				return $author$project$Types$Rail$SlopeCurveB;
 			case 'Stop':
 				var a = rail.a;
-				return $author$project$Rail$Stop(
+				return $author$project$Types$Rail$Stop(
 					f(a));
 			case 'AutoTurnout':
-				return $author$project$Rail$AutoTurnout;
+				return $author$project$Types$Rail$AutoTurnout;
 			default:
-				return $author$project$Rail$AutoPoint;
+				return $author$project$Types$Rail$AutoPoint;
 		}
 	});
 var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Rail$canInvert = function (rail) {
+var $author$project$Types$Rail$canInvert = function (rail) {
 	return !_Utils_eq(
 		A2(
-			$author$project$Rail$map,
+			$author$project$Types$Rail$map,
 			$elm$core$Basics$always(true),
 			rail),
 		A2(
-			$author$project$Rail$map,
+			$author$project$Types$Rail$map,
 			$elm$core$Basics$always(false),
 			rail));
 };
@@ -10217,16 +10012,16 @@ var $author$project$Forth$RailPiece$getAppropriateRailAndPieceForJoint = F3(
 			$mgold$elm_nonempty_list$List$Nonempty$head(railPiece.railLocations).joint) ? $elm$core$Maybe$Just(
 			_Utils_Tuple2(
 				A2(
-					$author$project$Rail$map,
-					$elm$core$Basics$always($author$project$Rail$NotInverted),
+					$author$project$Types$Rail$map,
+					$elm$core$Basics$always($author$project$Types$Rail$NotInverted),
 					railType),
-				railPiece)) : ($author$project$Rail$canInvert(railType) ? $elm$core$Maybe$Just(
+				railPiece)) : ($author$project$Types$Rail$canInvert(railType) ? $elm$core$Maybe$Just(
 			_Utils_Tuple2(
 				A2(
-					$author$project$Rail$map,
-					$elm$core$Basics$always($author$project$Rail$Inverted),
+					$author$project$Types$Rail$map,
+					$elm$core$Basics$always($author$project$Types$Rail$Inverted),
 					railType),
-				A2($author$project$Forth$RailPiece$invert, $author$project$Rail$Inverted, railPiece))) : $elm$core$Maybe$Nothing);
+				A2($author$project$Forth$RailPiece$invert, $author$project$Types$Rail$Inverted, railPiece))) : $elm$core$Maybe$Nothing);
 	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
@@ -10243,7 +10038,7 @@ var $mgold$elm_nonempty_list$List$Nonempty$tail = function (_v0) {
 	var xs = _v0.b;
 	return xs;
 };
-var $author$project$RailPlacement$make = F3(
+var $author$project$Types$RailPlacement$make = F3(
 	function (rail, position, angle) {
 		return {angle: angle, position: position, rail: rail};
 	});
@@ -10253,7 +10048,7 @@ var $author$project$Forth$Geometry$RailLocation$toVec3 = function (loc) {
 var $author$project$Forth$RailPiece$toRailPlacement = F2(
 	function (rail, location) {
 		return A3(
-			$author$project$RailPlacement$make,
+			$author$project$Types$RailPlacement$make,
 			rail,
 			$author$project$Forth$Geometry$RailLocation$toVec3(location),
 			$author$project$Forth$Geometry$Dir$toRadian(location.location.dir));
@@ -10318,227 +10113,227 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			'q',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight1(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight1(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'h',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight2(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight2(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			's',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight4(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight4(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'ss',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Straight8(_Utils_Tuple0),
+				$author$project$Types$Rail$Straight8(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'l',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve45, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve45, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'll',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve90, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve90, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'r',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve45, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve45, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'rr',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Curve90, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Curve90, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'ol',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$OuterCurve45, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$OuterCurve45, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'or',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$OuterCurve45, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$OuterCurve45, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'tl',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'tl1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'tl2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'tr',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'tr1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'tr2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Turnout, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Turnout, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'dl',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'dl1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'dl2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'dr',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'dr1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'dr2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$SingleDouble, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$SingleDouble, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'el',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'el1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'el2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'er',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'er1',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				1)),
 			_Utils_Tuple2(
 			'er2',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$EightPoint, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$EightPoint, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				2)),
 			_Utils_Tuple2(
 			'j',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$JointChange(_Utils_Tuple0),
+				$author$project$Types$Rail$JointChange(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'up',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Slope, $author$project$Rail$NotFlipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Slope, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'dn',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				A2($author$project$Rail$Slope, $author$project$Rail$Flipped, _Utils_Tuple0),
+				A2($author$project$Types$Rail$Slope, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'sa',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveA, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveA, 0)),
 			_Utils_Tuple2(
 			'sa1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveA, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveA, 1)),
 			_Utils_Tuple2(
 			'sb',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveB, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveB, 0)),
 			_Utils_Tuple2(
 			'sb1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$SlopeCurveB, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveB, 1)),
 			_Utils_Tuple2(
 			'stop',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
-				$author$project$Rail$Stop(_Utils_Tuple0),
+				$author$project$Types$Rail$Stop(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
 			'at',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoTurnout, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoTurnout, 0)),
 			_Utils_Tuple2(
 			'at1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoTurnout, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoTurnout, 1)),
 			_Utils_Tuple2(
 			'at2',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoTurnout, 2)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoTurnout, 2)),
 			_Utils_Tuple2(
 			'ap',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 0)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 0)),
 			_Utils_Tuple2(
 			'ap1',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 1)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 1)),
 			_Utils_Tuple2(
 			'ap2',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 2)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 2)),
 			_Utils_Tuple2(
 			'ap3',
-			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Rail$AutoPoint, 3)),
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 3)),
 			_Utils_Tuple2(
 			'ascend',
 			$author$project$Forth$Interpreter$executeAscend(4))
@@ -10661,22 +10456,20 @@ var $author$project$Forth$Interpreter$execute = function (src) {
 		$author$project$Forth$Interpreter$tokenize(src),
 		$author$project$Forth$Interpreter$initialStatus);
 };
+var $author$project$Forth$execute = $author$project$Forth$Interpreter$execute;
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
-var $author$project$Graphics$Mesh$init = {errors: _List_Nil, meshes: $elm$core$Dict$empty};
-var $dullbananas$elm_touch$Touch$Model = function (a) {
-	return {$: 'Model', a: a};
-};
-var $dullbananas$elm_touch$Touch$Internal$initModel = function (listeners) {
-	return {currentTouches: $elm$core$Dict$empty, listeners: listeners, previousTouches: $elm$core$Dict$empty};
-};
-var $dullbananas$elm_touch$Touch$initModel = A2($elm$core$Basics$composeR, $dullbananas$elm_touch$Touch$Internal$initModel, $dullbananas$elm_touch$Touch$Model);
-var $author$project$Graphics$Mesh$LoadMesh = F2(
+var $author$project$Graphics$MeshLoader$init = {errors: _List_Nil, meshes: $elm$core$Dict$empty};
+var $author$project$Graphics$OrbitControl$init = F4(
+	function (azimuth, altitude, scale, target) {
+		return {altitude: altitude, azimuth: azimuth, draggingState: $elm$core$Maybe$Nothing, scale: scale, target: target, viewportHeight: 0, viewportWidth: 0};
+	});
+var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 	function (a, b) {
 		return {$: 'LoadMesh', a: a, b: b};
 	});
-var $author$project$Graphics$Mesh$allMeshNames = _List_fromArray(
+var $author$project$Graphics$MeshLoader$allMeshNames = _List_fromArray(
 	['straight0_minus', 'straight0_plus', 'straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'curve8_minus', 'curve8_plus', 'curve4_minus', 'curve4_plus', 'outercurve_minus', 'outercurve_plus', 'turnout_minus', 'turnout_plus', 'singledouble_minus', 'singledouble_plus', 'eight_minus', 'eight_plus', 'pole_minus', 'pole_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'autoturnout_minus', 'autopoint_minus', 'pier', 'pier_wide', 'pier_4']);
-var $author$project$Graphics$Mesh$buildMeshUri = function (name) {
+var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.json');
 };
 var $elm$http$Http$Internal$EmptyBody = {$: 'EmptyBody'};
@@ -10738,6 +10531,7 @@ var $author$project$Graphics$MeshWithScalingVector$MeshAndFace = F2(
 	function (vertices, faces) {
 		return {faces: faces, vertices: vertices};
 	});
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Graphics$MeshWithScalingVector$list3 = F2(
@@ -10772,6 +10566,7 @@ var $author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector = F3(
 	function (position, normal, scalingVector) {
 		return {normal: normal, position: position, scalingVector: scalingVector};
 	});
+var $elm$json$Json$Decode$map3 = _Json_map3;
 var $author$project$Graphics$MeshWithScalingVector$vertex = A4(
 	$elm$json$Json$Decode$map3,
 	$author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector,
@@ -10859,7 +10654,7 @@ var $author$project$Graphics$MeshWithScalingVector$load = F2(
 			$elm$http$Http$getString(url));
 	});
 var $elm$core$Platform$Cmd$map = _Platform_map;
-var $author$project$Graphics$Mesh$loadMeshCmd = function (f) {
+var $author$project$Graphics$MeshLoader$loadMeshCmd = function (f) {
 	return A2(
 		$elm$core$Platform$Cmd$map,
 		f,
@@ -10869,56 +10664,35 @@ var $author$project$Graphics$Mesh$loadMeshCmd = function (f) {
 				function (name) {
 					return A2(
 						$author$project$Graphics$MeshWithScalingVector$load,
-						$author$project$Graphics$Mesh$buildMeshUri(name),
-						$author$project$Graphics$Mesh$LoadMesh(name));
+						$author$project$Graphics$MeshLoader$buildMeshUri(name),
+						$author$project$Graphics$MeshLoader$LoadMesh(name));
 				},
-				$author$project$Graphics$Mesh$allMeshNames)));
+				$author$project$Graphics$MeshLoader$allMeshNames)));
 };
-var $dullbananas$elm_touch$Touch$Internal$OnMove = F2(
-	function (a, b) {
-		return {$: 'OnMove', a: a, b: b};
-	});
-var $dullbananas$elm_touch$Touch$onMove = $dullbananas$elm_touch$Touch$Internal$OnMove;
-var $dullbananas$elm_touch$Touch$Internal$OnPinch = function (a) {
-	return {$: 'OnPinch', a: a};
-};
-var $dullbananas$elm_touch$Touch$onPinch = $dullbananas$elm_touch$Touch$Internal$OnPinch;
 var $author$project$Main$init = function (flags) {
-	var execResult = $author$project$Forth$Interpreter$execute(flags.program);
+	var execResult = $author$project$Forth$execute(flags.program);
 	return _Utils_Tuple2(
 		{
-			altitude: $elm$core$Basics$degrees(90),
-			azimuth: $elm$core$Basics$degrees(0),
-			draggingState: $elm$core$Maybe$Nothing,
 			errMsg: execResult.errMsg,
-			meshes: $author$project$Graphics$Mesh$init,
+			meshes: $author$project$Graphics$MeshLoader$init,
+			orbitControl: A4(
+				$author$project$Graphics$OrbitControl$init,
+				$elm$core$Basics$degrees(0),
+				$elm$core$Basics$degrees(90),
+				1,
+				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 0)),
 			piers: execResult.piers,
-			pixelPerUnit: 100,
 			program: flags.program,
 			rails: execResult.rails,
 			splitBarDragState: $elm$core$Maybe$Nothing,
 			splitBarPosition: 1100.0,
-			target: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 500, 0, -1000),
-			touchModel: $dullbananas$elm_touch$Touch$initModel(
-				_List_fromArray(
-					[
-						A2(
-						$dullbananas$elm_touch$Touch$onMove,
-						{fingers: 1},
-						$author$project$Main$OnTouchRotate),
-						A2(
-						$dullbananas$elm_touch$Touch$onMove,
-						{fingers: 2},
-						$author$project$Main$OnTouchMove),
-						$dullbananas$elm_touch$Touch$onPinch($author$project$Main$OnTouchPinch)
-					])),
 			viewport: {height: 0, width: 0}
 		},
 		$elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
 					A2($elm$core$Task$perform, $author$project$Main$SetViewport, $elm$browser$Browser$Dom$getViewport),
-					$author$project$Graphics$Mesh$loadMeshCmd($author$project$Main$LoadMesh)
+					$author$project$Graphics$MeshLoader$loadMeshCmd($author$project$Main$LoadMesh)
 				])));
 };
 var $author$project$Main$Resize = F2(
@@ -11217,45 +10991,30 @@ var $elm$browser$Browser$Events$onResize = function (func) {
 				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
 				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
 };
-var $author$project$Main$EndPan = function (a) {
-	return {$: 'EndPan', a: a};
+var $author$project$Main$MouseMove = function (a) {
+	return {$: 'MouseMove', a: a};
 };
-var $author$project$Main$UpdatePan = function (a) {
-	return {$: 'UpdatePan', a: a};
+var $author$project$Graphics$OrbitControl$isDragging = function (model) {
+	var _v0 = model.draggingState;
+	if (_v0.$ === 'Just') {
+		return true;
+	} else {
+		return false;
+	}
 };
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
 var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
-var $author$project$Main$subscriptionPan = function (model) {
-	var _v0 = model.draggingState;
-	if ((_v0.$ === 'Just') && (_v0.a.$ === 'Panning')) {
-		return $elm$core$Platform$Sub$batch(
-			_List_fromArray(
-				[
-					$elm$browser$Browser$Events$onMouseMove(
-					A2($elm$json$Json$Decode$map, $author$project$Main$UpdatePan, $author$project$Main$mouseEventDecoder)),
-					$elm$browser$Browser$Events$onMouseUp(
-					A2($elm$json$Json$Decode$map, $author$project$Main$EndPan, $author$project$Main$mouseEventDecoder))
-				]));
-	} else {
-		return $elm$core$Platform$Sub$none;
-	}
-};
-var $author$project$Main$subscriptionRotate = function (model) {
-	var _v0 = model.draggingState;
-	if ((_v0.$ === 'Just') && (_v0.a.$ === 'Panning')) {
-		return $elm$core$Platform$Sub$batch(
-			_List_fromArray(
-				[
-					$elm$browser$Browser$Events$onMouseMove(
-					A2($elm$json$Json$Decode$map, $author$project$Main$UpdateRotate, $author$project$Main$mouseEventDecoder)),
-					$elm$browser$Browser$Events$onMouseUp(
-					A2($elm$json$Json$Decode$map, $author$project$Main$EndRotate, $author$project$Main$mouseEventDecoder))
-				]));
-	} else {
-		return $elm$core$Platform$Sub$none;
-	}
+var $author$project$Main$subscriptionMouseEvent = function (model) {
+	return $author$project$Graphics$OrbitControl$isDragging(model.orbitControl) ? $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				$elm$browser$Browser$Events$onMouseMove(
+				A2($elm$json$Json$Decode$map, $author$project$Main$MouseMove, $author$project$Main$mouseEventDecoder)),
+				$elm$browser$Browser$Events$onMouseUp(
+				A2($elm$json$Json$Decode$map, $author$project$Main$MouseUp, $author$project$Main$mouseEventDecoder))
+			])) : $elm$core$Platform$Sub$none;
 };
 var $author$project$Main$SplitBarEndDrag = function (a) {
 	return {$: 'SplitBarEndDrag', a: a};
@@ -11287,8 +11046,7 @@ var $author$project$Main$subscriptions = function (model) {
 					function (w, h) {
 						return A2($author$project$Main$Resize, w, h);
 					})),
-				$author$project$Main$subscriptionPan(model),
-				$author$project$Main$subscriptionRotate(model),
+				$author$project$Main$subscriptionMouseEvent(model),
 				$author$project$Main$subscriptionSplitBar(model)
 			]));
 };
@@ -11296,17 +11054,100 @@ var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
-var $author$project$Main$doDolly = F2(
-	function (model, dy) {
-		var multiplier = 1.02;
-		var delta = (dy < 0) ? (1 / multiplier) : ((dy > 0) ? (1 * multiplier) : 1);
-		var next = A3($elm$core$Basics$clamp, 20, 10000, model.pixelPerUnit * delta);
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
+var $elm$core$String$append = _String_append;
+var $elm_explorations$linear_algebra$Math$Vector3$getX = _MJS_v3getX;
+var $elm_explorations$linear_algebra$Math$Vector3$getY = _MJS_v3getY;
+var $elm_explorations$linear_algebra$Math$Vector3$getZ = _MJS_v3getZ;
+var $author$project$Graphics$MeshLoader$flipVec3 = function (v) {
+	return A3(
+		$elm_explorations$linear_algebra$Math$Vector3$vec3,
+		$elm_explorations$linear_algebra$Math$Vector3$getX(v),
+		-$elm_explorations$linear_algebra$Math$Vector3$getY(v),
+		-$elm_explorations$linear_algebra$Math$Vector3$getZ(v));
+};
+var $author$project$Graphics$MeshLoader$flipVertex = function (vertex) {
+	return {
+		normal: $author$project$Graphics$MeshLoader$flipVec3(vertex.normal),
+		position: $author$project$Graphics$MeshLoader$flipVec3(vertex.position),
+		scalingVector: $author$project$Graphics$MeshLoader$flipVec3(vertex.scalingVector)
+	};
+};
+var $author$project$Graphics$MeshLoader$flipMesh = function (mesh) {
+	return {
+		faces: mesh.faces,
+		vertices: A2($elm$core$List$map, $author$project$Graphics$MeshLoader$flipVertex, mesh.vertices)
+	};
+};
+var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
+	function (a, b, c) {
+		return {$: 'MeshIndexed3', a: a, b: b, c: c};
+	});
+var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
+	{elemSize: 1, indexSize: 3, mode: 4});
+var $elm$core$Debug$log = _Debug_log;
+var $author$project$Graphics$MeshLoader$update = F2(
+	function (msg, model) {
+		var name = msg.a;
+		var meshOrErr = msg.b;
+		if (meshOrErr.$ === 'Err') {
+			var e = meshOrErr.a;
+			return _Utils_update(
+				model,
+				{
+					errors: A2(
+						$elm$core$List$cons,
+						A2($elm$core$Debug$log, 'load mesh error', e),
+						model.errors)
+				});
+		} else {
+			var meshWith = meshOrErr.a;
+			var glMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, meshWith.vertices, meshWith.faces);
+			var flippedMeshWith = $author$project$Graphics$MeshLoader$flipMesh(meshWith);
+			var flippedMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, flippedMeshWith.vertices, flippedMeshWith.faces);
+			var updatedMeshes = A2(
+				$elm$core$Dict$union,
+				model.meshes,
+				$elm$core$Dict$fromList(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(name, glMesh),
+							_Utils_Tuple2(
+							A2($elm$core$String$append, name, '_flip'),
+							flippedMesh)
+						])));
+			return _Utils_update(
+				model,
+				{meshes: updatedMeshes});
+		}
+	});
+var $author$project$Graphics$OrbitControl$Rotating = function (a) {
+	return {$: 'Rotating', a: a};
+};
+var $author$project$Graphics$OrbitControl$updateMouseDown = F2(
+	function (model, pos) {
 		return _Utils_update(
 			model,
-			{pixelPerUnit: next});
+			{
+				draggingState: $elm$core$Maybe$Just(
+					$author$project$Graphics$OrbitControl$Rotating(pos))
+			});
+	});
+var $author$project$Graphics$OrbitControl$Panning = function (a) {
+	return {$: 'Panning', a: a};
+};
+var $author$project$Graphics$OrbitControl$updateMouseDownWithShift = F2(
+	function (model, pos) {
+		return _Utils_update(
+			model,
+			{
+				draggingState: $elm$core$Maybe$Just(
+					$author$project$Graphics$OrbitControl$Panning(pos))
+			});
 	});
 var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
-var $author$project$Main$doPanning = F4(
+var $author$project$Graphics$OrbitControl$doPanning = F4(
 	function (model, newState, _v0, _v1) {
 		var x0 = _v0.a;
 		var y0 = _v0.b;
@@ -11314,7 +11155,7 @@ var $author$project$Main$doPanning = F4(
 		var y = _v1.b;
 		var sb = $elm$core$Basics$sin(model.altitude);
 		var sa = $elm$core$Basics$sin(model.azimuth);
-		var os = $author$project$Main$orthoScale(model.pixelPerUnit);
+		var os = model.scale;
 		var dy = -(y - y0);
 		var dx = x - x0;
 		var cb = $elm$core$Basics$cos(model.altitude);
@@ -11335,7 +11176,7 @@ var $author$project$Main$doPanning = F4(
 			model,
 			{draggingState: newState, target: trans});
 	});
-var $author$project$Main$doRotation = F4(
+var $author$project$Graphics$OrbitControl$doRotation = F4(
 	function (model, newState, _v0, _v1) {
 		var x0 = _v0.a;
 		var y0 = _v0.b;
@@ -11353,323 +11194,7 @@ var $author$project$Main$doRotation = F4(
 			model,
 			{altitude: altitude, azimuth: azimuth, draggingState: newState});
 	});
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
-var $elm$core$String$append = _String_append;
-var $elm_explorations$linear_algebra$Math$Vector3$getX = _MJS_v3getX;
-var $elm_explorations$linear_algebra$Math$Vector3$getY = _MJS_v3getY;
-var $elm_explorations$linear_algebra$Math$Vector3$getZ = _MJS_v3getZ;
-var $author$project$Graphics$Mesh$flipVec3 = function (v) {
-	return A3(
-		$elm_explorations$linear_algebra$Math$Vector3$vec3,
-		$elm_explorations$linear_algebra$Math$Vector3$getX(v),
-		-$elm_explorations$linear_algebra$Math$Vector3$getY(v),
-		-$elm_explorations$linear_algebra$Math$Vector3$getZ(v));
-};
-var $author$project$Graphics$Mesh$flipVertex = function (vertex) {
-	return {
-		normal: $author$project$Graphics$Mesh$flipVec3(vertex.normal),
-		position: $author$project$Graphics$Mesh$flipVec3(vertex.position),
-		scalingVector: $author$project$Graphics$Mesh$flipVec3(vertex.scalingVector)
-	};
-};
-var $author$project$Graphics$Mesh$flipMesh = function (mesh) {
-	return {
-		faces: mesh.faces,
-		vertices: A2($elm$core$List$map, $author$project$Graphics$Mesh$flipVertex, mesh.vertices)
-	};
-};
-var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
-	function (a, b, c) {
-		return {$: 'MeshIndexed3', a: a, b: b, c: c};
-	});
-var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
-	{elemSize: 1, indexSize: 3, mode: 4});
-var $elm$core$Debug$log = _Debug_log;
-var $author$project$Graphics$Mesh$update = F2(
-	function (msg, model) {
-		var name = msg.a;
-		var meshOrErr = msg.b;
-		if (meshOrErr.$ === 'Err') {
-			var e = meshOrErr.a;
-			return _Utils_update(
-				model,
-				{
-					errors: A2(
-						$elm$core$List$cons,
-						A2($elm$core$Debug$log, 'load mesh error', e),
-						model.errors)
-				});
-		} else {
-			var meshWith = meshOrErr.a;
-			var glMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, meshWith.vertices, meshWith.faces);
-			var flippedMeshWith = $author$project$Graphics$Mesh$flipMesh(meshWith);
-			var flippedMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, flippedMeshWith.vertices, flippedMeshWith.faces);
-			var updatedMeshes = A2(
-				$elm$core$Dict$union,
-				model.meshes,
-				$elm$core$Dict$fromList(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(name, glMesh),
-							_Utils_Tuple2(
-							A2($elm$core$String$append, name, '_flip'),
-							flippedMesh)
-						])));
-			return _Utils_update(
-				model,
-				{meshes: updatedMeshes});
-		}
-	});
-var $elm$core$Tuple$pair = F2(
-	function (a, b) {
-		return _Utils_Tuple2(a, b);
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $elm$core$List$sum = function (numbers) {
-	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
-};
-var $dullbananas$elm_touch$Touch$Internal$average = function (nums) {
-	return $elm$core$List$sum(nums) / $elm$core$List$length(nums);
-};
-var $elm$core$Basics$atan2 = _Basics_atan2;
-var $dullbananas$elm_touch$Touch$Internal$calcAngle = F2(
-	function (a, b) {
-		var v = {x: b.x - a.x, y: b.y - a.y};
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(v.x),
-			$elm$core$Basics$abs(v.y));
-		if (!largestComponent) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var scaledY = v.y / largestComponent;
-			var scaledX = v.x / largestComponent;
-			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
-			var angle = A2($elm$core$Basics$atan2, scaledY / scaledLength, scaledX / scaledLength);
-			return $elm$core$Maybe$Just(
-				(angle >= 0) ? angle : (angle + ($elm$core$Basics$pi * 2)));
-		}
-	});
-var $dullbananas$elm_touch$Touch$Internal$calcDistance = F2(
-	function (a, b) {
-		var c = {x: a.x - b.x, y: a.y - b.y};
-		return $elm$core$Basics$sqrt((c.x * c.x) + (c.y * c.y));
-	});
-var $elm$core$Dict$map = F2(
-	function (func, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				A2(func, key, value),
-				A2($elm$core$Dict$map, func, left),
-				A2($elm$core$Dict$map, func, right));
-		}
-	});
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
-			}
-		}
-	});
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $dullbananas$elm_touch$Touch$Internal$triggerListener = F2(
-	function (model, listener) {
-		var touchPositions = A2(
-			$elm$core$List$filterMap,
-			$elm$core$Basics$identity,
-			$elm$core$Dict$values(
-				A2(
-					$elm$core$Dict$map,
-					F2(
-						function (id, currentPoint) {
-							var _v7 = A2($elm$core$Dict$get, id, model.previousTouches);
-							if (_v7.$ === 'Nothing') {
-								return $elm$core$Maybe$Nothing;
-							} else {
-								var previousPoint = _v7.a;
-								return $elm$core$Maybe$Just(
-									{current: currentPoint, previous: previousPoint});
-							}
-						}),
-					model.currentTouches)));
-		switch (listener.$) {
-			case 'OnMove':
-				var fingers = listener.a.fingers;
-				var createMsg = listener.b;
-				var touchDeltas = A2(
-					$elm$core$List$map,
-					function (_v1) {
-						var previous = _v1.previous;
-						var current = _v1.current;
-						return {x: current.x - previous.x, y: current.y - previous.y};
-					},
-					touchPositions);
-				var averageDelta = {
-					x: $dullbananas$elm_touch$Touch$Internal$average(
-						A2(
-							$elm$core$List$map,
-							function ($) {
-								return $.x;
-							},
-							touchDeltas)),
-					y: $dullbananas$elm_touch$Touch$Internal$average(
-						A2(
-							$elm$core$List$map,
-							function ($) {
-								return $.y;
-							},
-							touchDeltas))
-				};
-				return _Utils_eq(
-					fingers,
-					$elm$core$List$length(touchDeltas)) ? $elm$core$Maybe$Just(
-					A2(createMsg, averageDelta.x, averageDelta.y)) : $elm$core$Maybe$Nothing;
-			case 'OnPinch':
-				var createMsg = listener.a;
-				if ((touchPositions.b && touchPositions.b.b) && (!touchPositions.b.b.b)) {
-					var point1 = touchPositions.a;
-					var _v3 = touchPositions.b;
-					var point2 = _v3.a;
-					var previousDistance = A2($dullbananas$elm_touch$Touch$Internal$calcDistance, point1.previous, point2.previous);
-					var currentDistance = A2($dullbananas$elm_touch$Touch$Internal$calcDistance, point1.current, point2.current);
-					var delta = currentDistance - previousDistance;
-					return $elm$core$Maybe$Just(
-						createMsg(delta));
-				} else {
-					return $elm$core$Maybe$Nothing;
-				}
-			default:
-				var createMsg = listener.a;
-				if ((touchPositions.b && touchPositions.b.b) && (!touchPositions.b.b.b)) {
-					var point1 = touchPositions.a;
-					var _v5 = touchPositions.b;
-					var point2 = _v5.a;
-					var previousAngle = A2($dullbananas$elm_touch$Touch$Internal$calcAngle, point1.previous, point2.previous);
-					var currentAngle = A2($dullbananas$elm_touch$Touch$Internal$calcAngle, point1.current, point2.current);
-					var maybeDelta = A3($elm$core$Maybe$map2, $elm$core$Basics$sub, currentAngle, previousAngle);
-					if (maybeDelta.$ === 'Just') {
-						var delta = maybeDelta.a;
-						return $elm$core$Maybe$Just(
-							createMsg(
-								(_Utils_cmp(
-									$elm$core$Basics$abs(delta),
-									$elm$core$Basics$pi) < 0) ? delta : (($elm$core$Basics$pi * 2) - $elm$core$Basics$abs(delta))));
-					} else {
-						return $elm$core$Maybe$Nothing;
-					}
-				} else {
-					return $elm$core$Maybe$Nothing;
-				}
-		}
-	});
-var $dullbananas$elm_touch$Touch$Internal$triggerMsgs = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$List$map(
-		function (msg) {
-			return A2(
-				$elm$core$Task$attempt,
-				$elm$core$Basics$always(msg),
-				$elm$core$Task$succeed(msg));
-		}),
-	$elm$core$Platform$Cmd$batch);
-var $dullbananas$elm_touch$Touch$Internal$update = F3(
-	function (msg, oldModel, updater) {
-		var touches = msg.a.touches;
-		var model = _Utils_update(
-			oldModel,
-			{
-				currentTouches: $elm$core$Dict$fromList(
-					A2(
-						$elm$core$List$map,
-						function (_v1) {
-							var identifier = _v1.identifier;
-							var clientPos = _v1.clientPos;
-							return A2(
-								$elm$core$Tuple$pair,
-								identifier,
-								{x: clientPos.a, y: clientPos.b});
-						},
-						touches)),
-				previousTouches: oldModel.currentTouches
-			});
-		return A2(
-			$elm$core$Tuple$pair,
-			updater(model),
-			$dullbananas$elm_touch$Touch$Internal$triggerMsgs(
-				A2(
-					$elm$core$List$filterMap,
-					$dullbananas$elm_touch$Touch$Internal$triggerListener(model),
-					model.listeners)));
-	});
-var $dullbananas$elm_touch$Touch$update = F3(
-	function (_v0, _v1, updater) {
-		var msg = _v0.a;
-		var model = _v1.a;
-		return A3(
-			$dullbananas$elm_touch$Touch$Internal$update,
-			msg,
-			model,
-			A2($elm$core$Basics$composeR, $dullbananas$elm_touch$Touch$Model, updater));
-	});
-var $author$project$Main$Rotating = function (a) {
-	return {$: 'Rotating', a: a};
-};
-var $author$project$Main$updateMouseDown = F2(
-	function (model, pos) {
-		return _Utils_update(
-			model,
-			{
-				draggingState: $elm$core$Maybe$Just(
-					$author$project$Main$Rotating(pos))
-			});
-	});
-var $author$project$Main$Panning = function (a) {
-	return {$: 'Panning', a: a};
-};
-var $author$project$Main$updateMouseDownWithShift = F2(
-	function (model, pos) {
-		return _Utils_update(
-			model,
-			{
-				draggingState: $elm$core$Maybe$Just(
-					$author$project$Main$Panning(pos))
-			});
-	});
-var $author$project$Main$updateMouseMove = F2(
+var $author$project$Graphics$OrbitControl$updateMouseMove = F2(
 	function (model, newPoint) {
 		var _v0 = model.draggingState;
 		if (_v0.$ === 'Nothing') {
@@ -11678,43 +11203,59 @@ var $author$project$Main$updateMouseMove = F2(
 			if (_v0.a.$ === 'Rotating') {
 				var oldPoint = _v0.a.a;
 				return A4(
-					$author$project$Main$doRotation,
+					$author$project$Graphics$OrbitControl$doRotation,
 					model,
 					$elm$core$Maybe$Just(
-						$author$project$Main$Rotating(newPoint)),
+						$author$project$Graphics$OrbitControl$Rotating(newPoint)),
 					oldPoint,
 					newPoint);
 			} else {
 				var oldPoint = _v0.a.a;
 				return A4(
-					$author$project$Main$doPanning,
+					$author$project$Graphics$OrbitControl$doPanning,
 					model,
 					$elm$core$Maybe$Just(
-						$author$project$Main$Panning(newPoint)),
+						$author$project$Graphics$OrbitControl$Panning(newPoint)),
 					oldPoint,
 					newPoint);
 			}
 		}
 	});
-var $author$project$Main$updateMouseUp = F2(
+var $author$project$Graphics$OrbitControl$updateMouseUp = F2(
 	function (model, _v0) {
 		return _Utils_update(
 			model,
 			{draggingState: $elm$core$Maybe$Nothing});
+	});
+var $author$project$Graphics$OrbitControl$updateViewport = F3(
+	function (w, h, model) {
+		return _Utils_update(
+			model,
+			{viewportHeight: h, viewportWidth: w});
 	});
 var $author$project$Main$updateViewport = F3(
 	function (w, h, model) {
 		return _Utils_update(
 			model,
 			{
+				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, w, h, model.orbitControl),
 				splitBarPosition: A3($elm$core$Basics$clamp, 10, h - 10, h * 0.8),
 				viewport: {height: h, width: w}
 			});
 	});
-var $author$project$Main$updateWheel = F2(
+var $author$project$Graphics$OrbitControl$doDolly = F2(
+	function (model, dy) {
+		var multiplier = 1.02;
+		var delta = (dy < 0) ? (1 / multiplier) : ((dy > 0) ? (1 * multiplier) : 1);
+		var next = model.scale * delta;
+		return _Utils_update(
+			model,
+			{scale: next});
+	});
+var $author$project$Graphics$OrbitControl$updateWheel = F2(
 	function (model, _v0) {
 		var dy = _v0.b;
-		return A2($author$project$Main$doDolly, model, dy);
+		return A2($author$project$Graphics$OrbitControl$doDolly, model, dy);
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
@@ -11725,43 +11266,53 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							meshes: A2($author$project$Graphics$Mesh$update, meshMsg, model.meshes)
+							meshes: A2($author$project$Graphics$MeshLoader$update, meshMsg, model.meshes)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'BeginPan':
+			case 'MouseDown':
 				var pos = msg.a;
 				return _Utils_Tuple2(
-					A2($author$project$Main$updateMouseDown, model, pos),
+					_Utils_update(
+						model,
+						{
+							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseDown, model.orbitControl, pos)
+						}),
 					$elm$core$Platform$Cmd$none);
-			case 'UpdatePan':
+			case 'MouseMove':
 				var pos = msg.a;
 				return _Utils_Tuple2(
-					A2($author$project$Main$updateMouseMove, model, pos),
+					_Utils_update(
+						model,
+						{
+							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseMove, model.orbitControl, pos)
+						}),
 					$elm$core$Platform$Cmd$none);
-			case 'EndPan':
+			case 'MouseUp':
 				var pos = msg.a;
 				return _Utils_Tuple2(
-					A2($author$project$Main$updateMouseUp, model, pos),
+					_Utils_update(
+						model,
+						{
+							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseUp, model.orbitControl, pos)
+						}),
 					$elm$core$Platform$Cmd$none);
-			case 'BeginRotate':
+			case 'MouseDownWithShift':
 				var pos = msg.a;
 				return _Utils_Tuple2(
-					A2($author$project$Main$updateMouseDownWithShift, model, pos),
-					$elm$core$Platform$Cmd$none);
-			case 'UpdateRotate':
-				var pos = msg.a;
-				return _Utils_Tuple2(
-					A2($author$project$Main$updateMouseMove, model, pos),
-					$elm$core$Platform$Cmd$none);
-			case 'EndRotate':
-				var pos = msg.a;
-				return _Utils_Tuple2(
-					A2($author$project$Main$updateMouseUp, model, pos),
+					_Utils_update(
+						model,
+						{
+							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseDownWithShift, model.orbitControl, pos)
+						}),
 					$elm$core$Platform$Cmd$none);
 			case 'Wheel':
 				var pos = msg.a;
 				return _Utils_Tuple2(
-					A2($author$project$Main$updateWheel, model, pos),
+					_Utils_update(
+						model,
+						{
+							orbitControl: A2($author$project$Graphics$OrbitControl$updateWheel, model.orbitControl, pos)
+						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SetViewport':
 				var viewport = msg.a;
@@ -11776,7 +11327,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'UpdateScript':
 				var program = msg.a;
-				var execResult = $author$project$Forth$Interpreter$execute(program);
+				var execResult = $author$project$Forth$execute(program);
 				return _Utils_Tuple2(
 					function () {
 						var _v1 = execResult.errMsg;
@@ -11814,50 +11365,12 @@ var $author$project$Main$update = F2(
 							splitBarPosition: A3($elm$core$Basics$clamp, 100, 1200, y)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'SplitBarEndDrag':
+			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{splitBarDragState: $elm$core$Maybe$Nothing}),
 					$elm$core$Platform$Cmd$none);
-			case 'OnTouchRotate':
-				var x = msg.a;
-				var y = msg.b;
-				return _Utils_Tuple2(
-					A4(
-						$author$project$Main$doRotation,
-						model,
-						model.draggingState,
-						_Utils_Tuple2(0, 0),
-						_Utils_Tuple2(x, y)),
-					$elm$core$Platform$Cmd$none);
-			case 'OnTouchMove':
-				var x = msg.a;
-				var y = msg.b;
-				return _Utils_Tuple2(
-					A4(
-						$author$project$Main$doPanning,
-						model,
-						model.draggingState,
-						_Utils_Tuple2(0, 0),
-						_Utils_Tuple2(x, y)),
-					$elm$core$Platform$Cmd$none);
-			case 'OnTouchPinch':
-				var r = msg.a;
-				return _Utils_Tuple2(
-					A2($author$project$Main$doDolly, model, r),
-					$elm$core$Platform$Cmd$none);
-			default:
-				var touchMsg = msg.a;
-				return A3(
-					$dullbananas$elm_touch$Touch$update,
-					touchMsg,
-					model.touchModel,
-					function (newTouchModel) {
-						return _Utils_update(
-							model,
-							{touchModel: newTouchModel});
-					});
 		}
 	});
 var $author$project$Main$main = $elm$browser$Browser$document(

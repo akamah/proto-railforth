@@ -6,9 +6,9 @@ import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
-import PierPlacement exposing (PierPlacement)
-import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import RailPlacement exposing (RailPlacement)
+import Types.PierPlacement exposing (PierPlacement)
+import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
+import Types.RailPlacement exposing (RailPlacement)
 
 
 {-| Forthの辞書。意味的には次の継続と現在の状態を与えられたら結果が得られる、というもの。

@@ -8,8 +8,8 @@ import Forth.Geometry.RailLocation as RailLocation
 import Forth.Geometry.Rot45 as Rot45
 import Forth.RailPiece exposing (..)
 import List.Nonempty exposing (Nonempty(..))
-import Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Test exposing (..)
+import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 
 
 suite : Test

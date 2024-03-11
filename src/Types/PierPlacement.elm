@@ -1,7 +1,7 @@
-module PierPlacement exposing (PierPlacement, make)
+module Types.PierPlacement exposing (PierPlacement, make)
 
-import Forth.Pier exposing (Pier)
 import Math.Vector3 exposing (Vec3)
+import Types.Pier exposing (Pier)
 
 
 type alias PierPlacement =

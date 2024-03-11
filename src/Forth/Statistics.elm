@@ -1,8 +1,8 @@
 module Forth.Statistics exposing (getPierCount, getRailCount)
 
 import Dict exposing (Dict)
-import Forth.Pier as Pier exposing (Pier)
-import Rail exposing (IsFlipped(..), IsInverted, Rail(..))
+import Types.Pier as Pier exposing (Pier)
+import Types.Rail exposing (IsFlipped(..), IsInverted, Rail(..))
 
 
 
@@ -29,7 +29,7 @@ getRailCount rails =
 
 railToStringRegardlessOfFlipped : Rail IsInverted a -> String
 railToStringRegardlessOfFlipped rail =
-    Rail.toStringWith (\_ -> "") Rail.isInvertedToString rail
+    Types.Rail.toStringWith (\_ -> "") Types.Rail.isInvertedToString rail
 
 
 getPierCount : List Pier -> Dict String Int

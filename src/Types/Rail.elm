@@ -1,4 +1,4 @@
-module Rail exposing
+module Types.Rail exposing
     ( IsFlipped(..)
     , IsInverted(..)
     , Rail(..)

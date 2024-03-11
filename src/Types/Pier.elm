@@ -1,4 +1,4 @@
-module Forth.Pier exposing
+module Types.Pier exposing
     ( Pier(..)
     , getHeight
     , toString

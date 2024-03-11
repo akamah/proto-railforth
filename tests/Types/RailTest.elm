@@ -1,8 +1,8 @@
-module RailTest exposing (suite)
+module Types.RailTest exposing (suite)
 
 import Expect exposing (FloatingPointTolerance(..))
-import Rail exposing (..)
 import Test exposing (..)
+import Types.Rail exposing (..)
 
 
 suite : Test

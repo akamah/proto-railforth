@@ -5,8 +5,8 @@ import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
 import Forth.Geometry.Rot45 as Rot45
-import Forth.Pier as Pier exposing (Pier)
-import PierPlacement exposing (PierPlacement)
+import Types.Pier as Pier exposing (Pier)
+import Types.PierPlacement exposing (PierPlacement)
 
 
 cleansePierPlacements : List PierLocation -> List PierLocation
