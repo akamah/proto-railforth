@@ -7,16 +7,16 @@ import Dict
 import Forth
 import Graphics.MeshLoader as MeshLoader exposing (Mesh)
 import Graphics.MeshWithScalingVector as SV
+import Graphics.OrbitControl as OC
 import Html exposing (Html, div)
 import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
-import Math.Vector3 as Vec3 exposing (Vec3, vec3)
+import Math.Vector3 exposing (Vec3, vec3)
 import Math.Vector4 exposing (Vec4, vec4)
 import Storage
 import Task
-import Touch
 import Types.PierPlacement exposing (PierPlacement)
 import Types.RailPlacement exposing (RailPlacement)
 import WebGL exposing (Entity, Shader)
@@ -27,12 +27,11 @@ import WebGL.Settings.StencilTest
 
 type Msg
     = LoadMesh MeshLoader.Msg
-    | BeginPan ( Float, Float )
-    | UpdatePan ( Float, Float )
-    | EndPan ( Float, Float )
-    | BeginRotate ( Float, Float )
-    | UpdateRotate ( Float, Float )
-    | EndRotate ( Float, Float )
+    | MouseDown ( Float, Float )
+      -- Shift だけ特別扱いするというのが漏れてるのでどうにかしたい
+    | MouseDownWithShift ( Float, Float )
+    | MouseMove ( Float, Float )
+    | MouseUp ( Float, Float )
     | Wheel ( Float, Float )
     | SetViewport Viewport
     | Resize Float Float
@@ -40,15 +39,6 @@ type Msg
     | SplitBarBeginDrag ( Float, Float )
     | SplitBarUpdateDrag ( Float, Float )
     | SplitBarEndDrag ( Float, Float )
-    | OnTouchRotate Float Float
-    | OnTouchMove Float Float
-    | OnTouchPinch Float
-    | TouchEvent Touch.Msg
-
-
-type DraggingState
-    = Panning ( Float, Float )
-    | Rotating ( Float, Float )
 
 
 type alias Model =
@@ -57,12 +47,7 @@ type alias Model =
         { width : Float
         , height : Float
         }
-    , azimuth : Float
-    , altitude : Float
-    , pixelPerUnit : Float
-    , target : Vec3
-    , touchModel : Touch.Model Msg
-    , draggingState : Maybe DraggingState
+    , orbitControl : OC.Model
     , program : String
     , rails : List RailPlacement
     , piers : List PierPlacement
@@ -95,17 +80,7 @@ init flags =
     in
     ( { meshes = MeshLoader.init
       , viewport = { width = 0, height = 0 }
-      , azimuth = degrees 0
-      , altitude = degrees 90
-      , pixelPerUnit = 100
-      , target = vec3 500 0 -1000
-      , draggingState = Nothing
-      , touchModel =
-            Touch.initModel
-                [ Touch.onMove { fingers = 1 } OnTouchRotate
-                , Touch.onMove { fingers = 2 } OnTouchMove
-                , Touch.onPinch OnTouchPinch
-                ]
+      , orbitControl = OC.init (degrees 0) (degrees 90) 1 (vec3 0 0 0)
       , program = flags.program
       , rails = execResult.rails
       , piers = execResult.piers
@@ -180,20 +155,6 @@ view model =
           <|
             showRails model model.rails
                 ++ showPiers model model.piers
-        , Touch.element
-            [ style "display" "block"
-            , style "position" "absolute"
-            , style "left" (px 0)
-            , style "top" (px railViewTop)
-            , style "width" (px model.viewport.width)
-            , style "height" (px railViewHeight)
-            , style "z-index" "10"
-            , onMouseUpHandler model
-            , onMouseMoveHandler model
-            , onMouseDownHandler model
-            , onWheelHandler model
-            ]
-            TouchEvent
         , Html.pre
             [ style "display" <|
                 if model.errMsg == Nothing then
@@ -256,17 +217,14 @@ view model =
 showRails : Model -> List RailPlacement -> List Entity
 showRails model rails =
     let
-        projectionTransform =
-            makeOrtho model.viewport.width model.splitBarPosition model.pixelPerUnit
-
-        viewTransform =
-            makeLookAt model.azimuth model.altitude model.target
+        transform =
+            OC.makeTransform model.orbitControl
     in
     List.concatMap
         (\railPosition ->
             showRail
-                projectionTransform
-                viewTransform
+                Mat4.identity
+                transform
                 (MeshLoader.getRailMesh model.meshes railPosition.rail)
                 railPosition.position
                 railPosition.angle
@@ -378,17 +336,14 @@ showRail projectionTransform viewTransform mesh origin angle =
 showPiers : Model -> List PierPlacement -> List Entity
 showPiers model piers =
     let
-        projectionTransform =
-            makeOrtho model.viewport.width model.splitBarPosition model.pixelPerUnit
-
-        viewTransform =
-            makeLookAt model.azimuth model.altitude model.target
+        transform =
+            OC.makeTransform model.orbitControl
     in
     List.map
         (\pierPlacement ->
             showPier
-                projectionTransform
-                viewTransform
+                Mat4.identity
+                transform
                 (MeshLoader.getPierMesh model.meshes pierPlacement.pier)
                 pierPlacement.position
                 pierPlacement.angle
@@ -422,26 +377,20 @@ update msg model =
         LoadMesh meshMsg ->
             ( { model | meshes = MeshLoader.update meshMsg model.meshes }, Cmd.none )
 
-        BeginPan pos ->
-            ( updateMouseDown model pos, Cmd.none )
+        MouseDown pos ->
+            ( { model | orbitControl = OC.updateMouseDown model.orbitControl pos }, Cmd.none )
 
-        UpdatePan pos ->
-            ( updateMouseMove model pos, Cmd.none )
+        MouseMove pos ->
+            ( { model | orbitControl = OC.updateMouseMove model.orbitControl pos }, Cmd.none )
 
-        EndPan pos ->
-            ( updateMouseUp model pos, Cmd.none )
+        MouseUp pos ->
+            ( { model | orbitControl = OC.updateMouseUp model.orbitControl pos }, Cmd.none )
 
-        BeginRotate pos ->
-            ( updateMouseDownWithShift model pos, Cmd.none )
-
-        UpdateRotate pos ->
-            ( updateMouseMove model pos, Cmd.none )
-
-        EndRotate pos ->
-            ( updateMouseUp model pos, Cmd.none )
+        MouseDownWithShift pos ->
+            ( { model | orbitControl = OC.updateMouseDownWithShift model.orbitControl pos }, Cmd.none )
 
         Wheel pos ->
-            ( updateWheel model pos, Cmd.none )
+            ( { model | orbitControl = OC.updateWheel model.orbitControl pos }, Cmd.none )
 
         SetViewport viewport ->
             ( updateViewport viewport.viewport.width
@@ -484,115 +433,14 @@ update msg model =
         SplitBarEndDrag _ ->
             ( { model | splitBarDragState = Nothing }, Cmd.none )
 
-        OnTouchRotate x y ->
-            ( doRotation model model.draggingState ( 0, 0 ) ( x, y ), Cmd.none )
-
-        OnTouchMove x y ->
-            ( doPanning model model.draggingState ( 0, 0 ) ( x, y ), Cmd.none )
-
-        OnTouchPinch r ->
-            ( doDolly model r, Cmd.none )
-
-        TouchEvent touchMsg ->
-            Touch.update touchMsg
-                model.touchModel
-                (\newTouchModel -> { model | touchModel = newTouchModel })
-
 
 updateViewport : Float -> Float -> Model -> Model
 updateViewport w h model =
     { model
         | viewport = { width = w, height = h }
+        , orbitControl = OC.updateViewport w h model.orbitControl
         , splitBarPosition = clamp 10 (h - 10) (h * 0.8)
     }
-
-
-updateMouseDown : Model -> ( Float, Float ) -> Model
-updateMouseDown model pos =
-    { model | draggingState = Just (Rotating pos) }
-
-
-updateMouseDownWithShift : Model -> ( Float, Float ) -> Model
-updateMouseDownWithShift model pos =
-    { model | draggingState = Just (Panning pos) }
-
-
-updateMouseMove : Model -> ( Float, Float ) -> Model
-updateMouseMove model newPoint =
-    case model.draggingState of
-        Nothing ->
-            model
-
-        Just (Rotating oldPoint) ->
-            doRotation model (Just <| Rotating newPoint) oldPoint newPoint
-
-        Just (Panning oldPoint) ->
-            doPanning model (Just <| Panning newPoint) oldPoint newPoint
-
-
-doRotation : Model -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> Model
-doRotation model newState ( x0, y0 ) ( x, y ) =
-    let
-        dx =
-            x - x0
-
-        dy =
-            y - y0
-
-        azimuth =
-            model.azimuth - dx * degrees 0.3
-
-        altitude =
-            model.altitude
-                - dy
-                * degrees 0.3
-                |> clamp (degrees 0) (degrees 90)
-    in
-    { model
-        | draggingState = newState
-        , azimuth = azimuth
-        , altitude = altitude
-    }
-
-
-updateMouseUp : Model -> ( Float, Float ) -> Model
-updateMouseUp model _ =
-    { model | draggingState = Nothing }
-
-
-updateWheel : Model -> ( Float, Float ) -> Model
-updateWheel model ( _, dy ) =
-    doDolly model dy
-
-
-doDolly : Model -> Float -> Model
-doDolly model dy =
-    let
-        multiplier =
-            1.02
-
-        delta =
-            if dy < 0 then
-                -- zoom out
-                1 / multiplier
-
-            else if dy > 0 then
-                -- zoom in
-                1 * multiplier
-
-            else
-                1
-
-        next =
-            model.pixelPerUnit
-                * delta
-                |> clamp 20 10000
-    in
-    { model | pixelPerUnit = next }
-
-
-type alias PointToMsg msg =
-    ( Float, Float ) -> msg
 
 
 mouseEventDecoder : Decoder ( Float, Float )
@@ -602,7 +450,7 @@ mouseEventDecoder =
         (Decode.field "clientY" Decode.float)
 
 
-mouseEventDecoderWithModifier : PointToMsg msg -> PointToMsg msg -> Decoder msg
+mouseEventDecoderWithModifier : (( Float, Float ) -> msg) -> (( Float, Float ) -> msg) -> Decoder msg
 mouseEventDecoderWithModifier normal shift =
     Decode.map2
         (\shiftPressed ->
@@ -631,7 +479,7 @@ preventDefaultDecoder =
 onMouseUpHandler : Model -> Html.Attribute Msg
 onMouseUpHandler _ =
     HE.on "mouseup" <|
-        Decode.map EndRotate mouseEventDecoder
+        Decode.map MouseUp mouseEventDecoder
 
 
 onSplitBarDragBegin : Model -> Html.Attribute Msg
@@ -643,14 +491,14 @@ onSplitBarDragBegin _ =
 onMouseMoveHandler : Model -> Html.Attribute Msg
 onMouseMoveHandler _ =
     HE.on "mousemove" <|
-        Decode.map UpdateRotate mouseEventDecoder
+        Decode.map MouseMove mouseEventDecoder
 
 
 onMouseDownHandler : Model -> Html.Attribute Msg
 onMouseDownHandler _ =
     HE.preventDefaultOn "mousedown" <|
         preventDefaultDecoder <|
-            mouseEventDecoderWithModifier BeginPan BeginRotate
+            mouseEventDecoderWithModifier MouseDown MouseDownWithShift
 
 
 onWheelHandler : Model -> Html.Attribute Msg
@@ -663,36 +511,23 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Browser.Events.onResize (\w h -> Resize (toFloat w) (toFloat h))
-        , subscriptionPan model
-        , subscriptionRotate model
+        , subscriptionMouseEvent model
         , subscriptionSplitBar model
         ]
 
 
-subscriptionPan : Model -> Sub Msg
-subscriptionPan model =
-    case model.draggingState of
-        Just (Panning _) ->
-            Sub.batch
-                [ Browser.Events.onMouseMove <| Decode.map UpdatePan mouseEventDecoder
-                , Browser.Events.onMouseUp <| Decode.map EndPan mouseEventDecoder
-                ]
+{-| TODO: Mouse Move 全般に対応できるようにする
+-}
+subscriptionMouseEvent : Model -> Sub Msg
+subscriptionMouseEvent model =
+    if OC.isDragging model.orbitControl then
+        Sub.batch
+            [ Browser.Events.onMouseMove <| Decode.map MouseMove mouseEventDecoder
+            , Browser.Events.onMouseUp <| Decode.map MouseUp mouseEventDecoder
+            ]
 
-        _ ->
-            Sub.none
-
-
-subscriptionRotate : Model -> Sub Msg
-subscriptionRotate model =
-    case model.draggingState of
-        Just (Panning _) ->
-            Sub.batch
-                [ Browser.Events.onMouseMove <| Decode.map UpdateRotate mouseEventDecoder
-                , Browser.Events.onMouseUp <| Decode.map EndRotate mouseEventDecoder
-                ]
-
-        _ ->
-            Sub.none
+    else
+        Sub.none
 
 
 subscriptionSplitBar : Model -> Sub Msg
@@ -706,45 +541,6 @@ subscriptionSplitBar model =
 
         Nothing ->
             Sub.none
-
-
-doPanning : Model -> Maybe DraggingState -> ( Float, Float ) -> ( Float, Float ) -> Model
-doPanning model newState ( x0, y0 ) ( x, y ) =
-    let
-        dx =
-            x - x0
-
-        dy =
-            -(y - y0)
-
-        os =
-            orthoScale model.pixelPerUnit
-
-        ca =
-            cos model.azimuth
-
-        sa =
-            sin model.azimuth
-
-        cb =
-            cos model.altitude
-
-        sb =
-            sin model.altitude
-
-        tanx =
-            Vec3.scale (os * dx) (vec3 sa 0 ca)
-
-        tany =
-            Vec3.scale (os * dy) (vec3 (ca * sb) -cb -(sa * sb))
-
-        trans =
-            Vec3.add model.target (Vec3.add tanx tany)
-    in
-    { model
-        | draggingState = newState
-        , target = trans
-    }
 
 
 type alias Uniforms =
@@ -780,36 +576,6 @@ makeMeshMatrix origin angle =
 orthoScale : Float -> Float
 orthoScale ppu =
     216.0 / ppu
-
-
-makeOrtho : Float -> Float -> Float -> Mat4
-makeOrtho width height ppu =
-    let
-        w =
-            orthoScale ppu * width / 2
-
-        h =
-            orthoScale ppu * height / 2
-    in
-    Mat4.makeOrtho -w w -h h -100000 100000
-
-
-makeLookAt : Float -> Float -> Vec3 -> Mat4
-makeLookAt azimuth altitude target =
-    let
-        distance =
-            10000
-
-        x =
-            distance * cos altitude * cos azimuth
-
-        y =
-            distance * sin altitude
-
-        z =
-            distance * cos altitude * -(sin azimuth)
-    in
-    Mat4.makeLookAt (Vec3.add target (vec3 x y z)) target (vec3 0 1 0)
 
 
 railVertexShader : Shader SV.VertexWithScalingVector Uniforms { edge : Float, color : Vec3 }
