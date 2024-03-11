@@ -11,7 +11,22 @@ module Graphics.OrbitControl exposing
     , updateWheel
     )
 
--- import Touch
+{-| The simple orbit control
+
+  - Mouse: rotation
+  - Shift+Mouse: panning
+  - Wheel: dolly
+
+
+## Usage
+
+  - use `init` to initialize the state of OrbitControl
+  - `updateMouseDown` and `updateMouseDownWithShift` begin rotation and panning w/r
+  - call `updateMouseMove`, `updateMouseUp`, and updateWheel when the user do so
+  - explicitly call `updateViewport` when the drawing area is resized.
+  - finally, makeTransform to get the matrix which is the result of viewing transform and perspective trannsform.
+
+-}
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
