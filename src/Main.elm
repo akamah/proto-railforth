@@ -9,7 +9,7 @@ import Graphics.MeshLoader as MeshLoader exposing (Mesh)
 import Graphics.MeshWithScalingVector as SV
 import Graphics.OrbitControl as OC
 import Html exposing (Html, div)
-import Html.Attributes exposing (autocomplete, height, spellcheck, style, width)
+import Html.Attributes as HA exposing (autocomplete, spellcheck, style)
 import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 as Mat4 exposing (Mat4)
@@ -17,6 +17,7 @@ import Math.Vector3 exposing (Vec3, vec3)
 import Math.Vector4 exposing (Vec4, vec4)
 import Storage
 import Task
+import Types.Pier exposing (Pier)
 import Types.PierPlacement exposing (PierPlacement)
 import Types.RailPlacement exposing (RailPlacement)
 import WebGL exposing (Entity, Shader)
@@ -72,6 +73,13 @@ main =
         }
 
 
+document : Model -> Browser.Document Msg
+document model =
+    { title = "Railforth prototype"
+    , body = [ view model ]
+    }
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
@@ -104,13 +112,6 @@ formatRailCount dict =
         ++ String.fromInt (Dict.foldl (\_ count accum -> count + accum) 0 dict)
 
 
-document : Model -> Browser.Document Msg
-document model =
-    { title = "Railforth prototype"
-    , body = [ view model ]
-    }
-
-
 px : Float -> String
 px x =
     String.fromFloat x ++ "px"
@@ -139,28 +140,19 @@ view model =
             model.viewport.height - editorTop - barHeight
     in
     div []
-        [ WebGL.toHtmlWith
-            [ WebGL.alpha True
-            , WebGL.antialias
-            , WebGL.depth 1
-            , WebGL.stencil 0
-            , WebGL.clearColor 1.0 1.0 1.0 1.0
-            ]
-            [ width (round (2.0 * model.viewport.width))
-            , height (round (2.0 * barTop))
-            , style "display" "block"
-            , style "position" "absolute"
-            , style "left" (px 0)
-            , style "top" (px railViewTop)
-            , style "width" (px model.viewport.width)
-            , style "height" (px railViewHeight)
-            , onMouseDownHandler model
-            , onMouseUpHandler model
-            , onWheelHandler model
-            ]
-          <|
-            showRails model model.rails
-                ++ showPiers model model.piers
+        [ viewCanvas
+            { width = model.viewport.width
+            , height = model.splitBarPosition
+            , top = 0
+            , left = 0
+            , onMouseDown = onMouseDownHandler model
+            , onMouseUp = onMouseUpHandler model
+            , onWheel = onWheelHandler model
+            , rails = model.rails
+            , piers = model.piers
+            , meshes = model.meshes
+            , transform = OC.makeTransform model.orbitControl
+            }
         , Html.pre
             [ style "display" <|
                 if model.errMsg == Nothing then
@@ -220,18 +212,55 @@ view model =
         ]
 
 
-showRails : Model -> List RailPlacement -> List Entity
-showRails model rails =
-    let
-        transform =
-            OC.makeTransform model.orbitControl
-    in
+viewCanvas :
+    { left : Float
+    , top : Float
+    , width : Float
+    , height : Float
+    , onMouseDown : Html.Attribute msg
+    , onMouseUp : Html.Attribute msg
+    , onWheel : Html.Attribute msg
+    , meshes : MeshLoader.Model
+    , rails : List RailPlacement
+    , piers : List PierPlacement
+    , transform : Mat4
+    }
+    -> Html msg
+viewCanvas { left, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, rails, piers, transform } =
+    WebGL.toHtmlWith
+        [ WebGL.alpha True
+        , WebGL.antialias
+        , WebGL.depth 1
+        , WebGL.stencil 0
+        , WebGL.clearColor 1.0 1.0 1.0 1.0
+        ]
+        [ HA.width (round (2.0 * width))
+        , HA.height (round (2.0 * height))
+        , HA.style "display" "block"
+        , HA.style "position" "absolute"
+        , HA.style "left" (left |> px)
+        , HA.style "top" (top |> px)
+        , HA.style "width" (width |> px)
+        , HA.style "height" (height |> px)
+        , onMouseDown
+        , onMouseUp
+        , onWheel
+        ]
+    <|
+        List.concat
+            [ showRails meshes rails transform
+            , showPiers meshes piers transform
+            ]
+
+
+showRails : MeshLoader.Model -> List RailPlacement -> Mat4 -> List Entity
+showRails meshes rails transform =
     List.concatMap
         (\railPosition ->
             showRail
                 Mat4.identity
                 transform
-                (MeshLoader.getRailMesh model.meshes railPosition.rail)
+                (MeshLoader.getRailMesh meshes railPosition.rail)
                 railPosition.position
                 railPosition.angle
         )
@@ -339,15 +368,15 @@ showRail projectionTransform viewTransform mesh origin angle =
     ]
 
 
-showPiers : Model -> List PierPlacement -> List Entity
-showPiers model piers =
+showPiers : MeshLoader.Model -> List PierPlacement -> Mat4 -> List Entity
+showPiers meshes piers transform =
     List.map
         (\pierPlacement ->
             showPier
                 Mat4.identity
                 -- identityはOCで MとVを計算することにしたので、ここがいらなくなったので仮で置いている。取り除いていい
-                (OC.makeTransform model.orbitControl)
-                (MeshLoader.getPierMesh model.meshes pierPlacement.pier)
+                transform
+                (MeshLoader.getPierMesh meshes pierPlacement.pier)
                 pierPlacement.position
                 pierPlacement.angle
         )

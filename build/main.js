@@ -7200,12 +7200,6 @@ var $elm$browser$Browser$document = _Browser_document;
 var $author$project$Main$UpdateScript = function (a) {
 	return {$: 'UpdateScript', a: a};
 };
-var $elm_explorations$webgl$WebGL$Internal$Alpha = function (a) {
-	return {$: 'Alpha', a: a};
-};
-var $elm_explorations$webgl$WebGL$alpha = $elm_explorations$webgl$WebGL$Internal$Alpha;
-var $elm_explorations$webgl$WebGL$Internal$Antialias = {$: 'Antialias'};
-var $elm_explorations$webgl$WebGL$antialias = $elm_explorations$webgl$WebGL$Internal$Antialias;
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -7220,22 +7214,38 @@ var $elm$html$Html$Attributes$autocomplete = function (bool) {
 		'autocomplete',
 		bool ? 'on' : 'off');
 };
-var $elm_explorations$webgl$WebGL$Internal$ClearColor = F4(
-	function (a, b, c, d) {
-		return {$: 'ClearColor', a: a, b: b, c: c, d: d};
-	});
-var $elm_explorations$webgl$WebGL$clearColor = $elm_explorations$webgl$WebGL$Internal$ClearColor;
-var $elm_explorations$webgl$WebGL$Internal$Depth = function (a) {
-	return {$: 'Depth', a: a};
-};
-var $elm_explorations$webgl$WebGL$depth = $elm_explorations$webgl$WebGL$Internal$Depth;
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$core$String$fromFloat = _String_fromNumber;
-var $elm$html$Html$Attributes$height = function (n) {
+var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
+var $elm$core$Basics$cos = _Basics_cos;
+var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
+var $elm_explorations$linear_algebra$Math$Matrix4$makeOrtho = _MJS_m4x4makeOrtho;
+var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$Basics$sin = _Basics_sin;
+var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
+var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
+	var model = _v0.a;
+	var w = (model.scale * model.viewportWidth) / 2;
+	var h = (model.scale * model.viewportHeight) / 2;
+	var eyeDistance = 10000;
+	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
+	var y = eyeDistance * $elm$core$Basics$sin(model.altitude);
+	var z = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * (-$elm$core$Basics$sin(model.azimuth));
+	var cameraClipDistance = 100000;
 	return A2(
-		_VirtualDom_attribute,
-		'height',
-		$elm$core$String$fromInt(n));
+		$elm_explorations$linear_algebra$Math$Matrix4$mul,
+		A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -cameraClipDistance, cameraClipDistance),
+		A3(
+			$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
+			A2(
+				$elm_explorations$linear_algebra$Math$Vector3$add,
+				model.target,
+				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
+			model.target,
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0)));
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -7349,9 +7359,6 @@ var $author$project$Main$onSplitBarDragBegin = function (_v0) {
 var $author$project$Main$Wheel = function (a) {
 	return {$: 'Wheel', a: a};
 };
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $author$project$Main$wheelEventDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	F2(
@@ -7370,6 +7377,52 @@ var $author$project$Main$onWheelHandler = function (_v0) {
 var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $author$project$Main$px = function (x) {
 	return $elm$core$String$fromFloat(x) + 'px';
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
+var $elm_explorations$webgl$WebGL$Internal$Alpha = function (a) {
+	return {$: 'Alpha', a: a};
+};
+var $elm_explorations$webgl$WebGL$alpha = $elm_explorations$webgl$WebGL$Internal$Alpha;
+var $elm_explorations$webgl$WebGL$Internal$Antialias = {$: 'Antialias'};
+var $elm_explorations$webgl$WebGL$antialias = $elm_explorations$webgl$WebGL$Internal$Antialias;
+var $elm_explorations$webgl$WebGL$Internal$ClearColor = F4(
+	function (a, b, c, d) {
+		return {$: 'ClearColor', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$clearColor = $elm_explorations$webgl$WebGL$Internal$ClearColor;
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm_explorations$webgl$WebGL$Internal$Depth = function (a) {
+	return {$: 'Depth', a: a};
+};
+var $elm_explorations$webgl$WebGL$depth = $elm_explorations$webgl$WebGL$Internal$Depth;
+var $elm$html$Html$Attributes$height = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'height',
+		$elm$core$String$fromInt(n));
 };
 var $elm$core$Basics$round = _Basics_round;
 var $elm_explorations$webgl$WebGL$Mesh3 = F2(
@@ -7441,34 +7494,6 @@ var $author$project$Graphics$MeshLoader$getPierMesh = F2(
 				model.meshes));
 	});
 var $elm_explorations$linear_algebra$Math$Matrix4$identity = _MJS_m4x4identity;
-var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
-var $elm$core$Basics$cos = _Basics_cos;
-var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
-var $elm_explorations$linear_algebra$Math$Matrix4$makeOrtho = _MJS_m4x4makeOrtho;
-var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
-var $elm$core$Basics$sin = _Basics_sin;
-var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
-var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
-	var model = _v0.a;
-	var w = (model.scale * model.viewportWidth) / 2;
-	var h = (model.scale * model.viewportHeight) / 2;
-	var eyeDistance = 10000;
-	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
-	var y = eyeDistance * $elm$core$Basics$sin(model.altitude);
-	var z = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * (-$elm$core$Basics$sin(model.azimuth));
-	var cameraClipDistance = 100000;
-	return A2(
-		$elm_explorations$linear_algebra$Math$Matrix4$mul,
-		A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -cameraClipDistance, cameraClipDistance),
-		A3(
-			$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
-			A2(
-				$elm_explorations$linear_algebra$Math$Vector3$add,
-				model.target,
-				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
-			model.target,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0)));
-};
 var $elm_explorations$webgl$WebGL$Internal$CullFace = function (a) {
 	return {$: 'CullFace', a: a};
 };
@@ -7570,32 +7595,21 @@ var $author$project$Main$showPier = F5(
 			mesh,
 			{light: $author$project$Main$lightFromAbove, modelTransform: modelTransform, projectionTransform: projectionTransform, viewTransform: viewTransform});
 	});
-var $author$project$Main$showPiers = F2(
-	function (model, piers) {
+var $author$project$Main$showPiers = F3(
+	function (meshes, piers, transform) {
 		return A2(
 			$elm$core$List$map,
 			function (pierPlacement) {
 				return A5(
 					$author$project$Main$showPier,
 					$elm_explorations$linear_algebra$Math$Matrix4$identity,
-					$author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
-					A2($author$project$Graphics$MeshLoader$getPierMesh, model.meshes, pierPlacement.pier),
+					transform,
+					A2($author$project$Graphics$MeshLoader$getPierMesh, meshes, pierPlacement.pier),
 					pierPlacement.position,
 					pierPlacement.angle);
 			},
 			piers);
 	});
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
 var $elm$core$List$concatMap = F2(
 	function (f, list) {
 		return $elm$core$List$concat(
@@ -7821,9 +7835,8 @@ var $author$project$Main$showRail = F5(
 				})
 			]);
 	});
-var $author$project$Main$showRails = F2(
-	function (model, rails) {
-		var transform = $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl);
+var $author$project$Main$showRails = F3(
+	function (meshes, rails, transform) {
 		return A2(
 			$elm$core$List$concatMap,
 			function (railPosition) {
@@ -7831,30 +7844,16 @@ var $author$project$Main$showRails = F2(
 					$author$project$Main$showRail,
 					$elm_explorations$linear_algebra$Math$Matrix4$identity,
 					transform,
-					A2($author$project$Graphics$MeshLoader$getRailMesh, model.meshes, railPosition.rail),
+					A2($author$project$Graphics$MeshLoader$getRailMesh, meshes, railPosition.rail),
 					railPosition.position,
 					railPosition.angle);
 			},
 			rails);
 	});
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
 var $elm_explorations$webgl$WebGL$Internal$Stencil = function (a) {
 	return {$: 'Stencil', a: a};
 };
 var $elm_explorations$webgl$WebGL$stencil = $elm_explorations$webgl$WebGL$Internal$Stencil;
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm_explorations$webgl$WebGL$toHtmlWith = F3(
 	function (options, attributes, entities) {
 		return A3(_WebGL_toHtml, options, attributes, entities);
@@ -7864,6 +7863,63 @@ var $elm$html$Html$Attributes$width = function (n) {
 		_VirtualDom_attribute,
 		'width',
 		$elm$core$String$fromInt(n));
+};
+var $author$project$Main$viewCanvas = function (_v0) {
+	var left = _v0.left;
+	var top = _v0.top;
+	var width = _v0.width;
+	var height = _v0.height;
+	var onMouseDown = _v0.onMouseDown;
+	var onMouseUp = _v0.onMouseUp;
+	var onWheel = _v0.onWheel;
+	var meshes = _v0.meshes;
+	var rails = _v0.rails;
+	var piers = _v0.piers;
+	var transform = _v0.transform;
+	return A3(
+		$elm_explorations$webgl$WebGL$toHtmlWith,
+		_List_fromArray(
+			[
+				$elm_explorations$webgl$WebGL$alpha(true),
+				$elm_explorations$webgl$WebGL$antialias,
+				$elm_explorations$webgl$WebGL$depth(1),
+				$elm_explorations$webgl$WebGL$stencil(0),
+				A4($elm_explorations$webgl$WebGL$clearColor, 1.0, 1.0, 1.0, 1.0)
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$width(
+				$elm$core$Basics$round(2.0 * width)),
+				$elm$html$Html$Attributes$height(
+				$elm$core$Basics$round(2.0 * height)),
+				A2($elm$html$Html$Attributes$style, 'display', 'block'),
+				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'left',
+				$author$project$Main$px(left)),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'top',
+				$author$project$Main$px(top)),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'width',
+				$author$project$Main$px(width)),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'height',
+				$author$project$Main$px(height)),
+				onMouseDown,
+				onMouseUp,
+				onWheel
+			]),
+		$elm$core$List$concat(
+			_List_fromArray(
+				[
+					A3($author$project$Main$showRails, meshes, rails, transform),
+					A3($author$project$Main$showPiers, meshes, piers, transform)
+				])));
 };
 var $author$project$Main$view = function (model) {
 	var railViewTop = 0;
@@ -7877,47 +7933,20 @@ var $author$project$Main$view = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				A3(
-				$elm_explorations$webgl$WebGL$toHtmlWith,
-				_List_fromArray(
-					[
-						$elm_explorations$webgl$WebGL$alpha(true),
-						$elm_explorations$webgl$WebGL$antialias,
-						$elm_explorations$webgl$WebGL$depth(1),
-						$elm_explorations$webgl$WebGL$stencil(0),
-						A4($elm_explorations$webgl$WebGL$clearColor, 1.0, 1.0, 1.0, 1.0)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$width(
-						$elm$core$Basics$round(2.0 * model.viewport.width)),
-						$elm$html$Html$Attributes$height(
-						$elm$core$Basics$round(2.0 * barTop)),
-						A2($elm$html$Html$Attributes$style, 'display', 'block'),
-						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'left',
-						$author$project$Main$px(0)),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'top',
-						$author$project$Main$px(railViewTop)),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'width',
-						$author$project$Main$px(model.viewport.width)),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'height',
-						$author$project$Main$px(railViewHeight)),
-						$author$project$Main$onMouseDownHandler(model),
-						$author$project$Main$onMouseUpHandler(model),
-						$author$project$Main$onWheelHandler(model)
-					]),
-				_Utils_ap(
-					A2($author$project$Main$showRails, model, model.rails),
-					A2($author$project$Main$showPiers, model, model.piers))),
+				$author$project$Main$viewCanvas(
+				{
+					height: model.splitBarPosition,
+					left: 0,
+					meshes: model.meshes,
+					onMouseDown: $author$project$Main$onMouseDownHandler(model),
+					onMouseUp: $author$project$Main$onMouseUpHandler(model),
+					onWheel: $author$project$Main$onWheelHandler(model),
+					piers: model.piers,
+					rails: model.rails,
+					top: 0,
+					transform: $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
+					width: model.viewport.width
+				}),
 				A2(
 				$elm$html$Html$pre,
 				_List_fromArray(
