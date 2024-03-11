@@ -92,22 +92,24 @@ makeTransform model =
         h =
             model.scale * model.viewportHeight / 2
 
-        distance =
+        eyeDistance =
             10000
 
+        cameraClipDistance =
+            100000
+
         x =
-            distance * cos model.altitude * cos model.azimuth
+            eyeDistance * cos model.altitude * cos model.azimuth
 
         y =
-            distance * sin model.altitude
+            eyeDistance * sin model.altitude
 
         z =
-            distance * cos model.altitude * -(sin model.azimuth)
+            eyeDistance * cos model.altitude * -(sin model.azimuth)
     in
-    Debug.log "makeTransform" <|
-        Mat4.mul
-            (Mat4.makeOrtho -w w -h h -distance distance)
-            (Mat4.makeLookAt (Vec3.add model.target (vec3 x y z)) model.target (vec3 0 1 0))
+    Mat4.mul
+        (Mat4.makeOrtho -w w -h h -cameraClipDistance cameraClipDistance)
+        (Mat4.makeLookAt (Vec3.add model.target (vec3 x y z)) model.target (vec3 0 1 0))
 
 
 isDragging : Model -> Bool

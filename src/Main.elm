@@ -97,6 +97,8 @@ init flags =
 
 formatRailCount : Dict.Dict String Int -> String
 formatRailCount dict =
+    -- TODO: HTMLElementを返す方が望ましいかもしれない
+    -- TODO: なんらかのUIでレールの数を常に表示するようにする
     Dict.foldl (\name count accum -> accum ++ "\n" ++ name ++ ": " ++ String.fromInt count) "" dict
         ++ "\nTotal: "
         ++ String.fromInt (Dict.foldl (\_ count accum -> count + accum) 0 dict)
@@ -116,6 +118,7 @@ px x =
 
 view : Model -> Html Msg
 view model =
+    -- TODO: もう少し分離する
     let
         railViewTop =
             0
@@ -151,6 +154,9 @@ view model =
             , style "top" (px railViewTop)
             , style "width" (px model.viewport.width)
             , style "height" (px railViewHeight)
+            , onMouseDownHandler model
+            , onMouseUpHandler model
+            , onWheelHandler model
             ]
           <|
             showRails model model.rails
@@ -335,15 +341,12 @@ showRail projectionTransform viewTransform mesh origin angle =
 
 showPiers : Model -> List PierPlacement -> List Entity
 showPiers model piers =
-    let
-        transform =
-            OC.makeTransform model.orbitControl
-    in
     List.map
         (\pierPlacement ->
             showPier
                 Mat4.identity
-                transform
+                -- identityはOCで MとVを計算することにしたので、ここがいらなくなったので仮で置いている。取り除いていい
+                (OC.makeTransform model.orbitControl)
                 (MeshLoader.getPierMesh model.meshes pierPlacement.pier)
                 pierPlacement.position
                 pierPlacement.angle
@@ -516,8 +519,6 @@ subscriptions model =
         ]
 
 
-{-| TODO: Mouse Move 全般に対応できるようにする
--}
 subscriptionMouseEvent : Model -> Sub Msg
 subscriptionMouseEvent model =
     if OC.isDragging model.orbitControl then
@@ -532,6 +533,8 @@ subscriptionMouseEvent model =
 
 subscriptionSplitBar : Model -> Sub Msg
 subscriptionSplitBar model =
+    -- なぜsubscriptionに埋め込んだかを思い出せないけれど、たしかちゃんとした理由があったはず。
+    -- そういうのはちゃんとコメントに書いた方がいいぞい
     case model.splitBarDragState of
         Just _ ->
             Sub.batch
@@ -573,13 +576,9 @@ makeMeshMatrix origin angle =
     Mat4.mul position rotate
 
 
-orthoScale : Float -> Float
-orthoScale ppu =
-    216.0 / ppu
-
-
 railVertexShader : Shader SV.VertexWithScalingVector Uniforms { edge : Float, color : Vec3 }
 railVertexShader =
+    -- シェーダ周り、というか描画周りはモジュールに分けてしまいたい
     [glsl|
         attribute vec3 position;
         attribute vec3 normal;

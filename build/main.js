@@ -7271,9 +7271,13 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $author$project$Main$SplitBarBeginDrag = function (a) {
-	return {$: 'SplitBarBeginDrag', a: a};
+var $author$project$Main$MouseDown = function (a) {
+	return {$: 'MouseDown', a: a};
 };
+var $author$project$Main$MouseDownWithShift = function (a) {
+	return {$: 'MouseDownWithShift', a: a};
+};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Main$mouseEventDecoder = A3(
 	$elm$json$Json$Decode$map2,
@@ -7283,6 +7287,40 @@ var $author$project$Main$mouseEventDecoder = A3(
 		}),
 	A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float),
 	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float));
+var $author$project$Main$mouseEventDecoderWithModifier = F2(
+	function (normal, shift) {
+		return A3(
+			$elm$json$Json$Decode$map2,
+			function (shiftPressed) {
+				return shiftPressed ? shift : normal;
+			},
+			A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool),
+			$author$project$Main$mouseEventDecoder);
+	});
+var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
+	function (a) {
+		return _Utils_Tuple2(a, true);
+	});
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $author$project$Main$onMouseDownHandler = function (_v0) {
+	return A2(
+		$elm$html$Html$Events$preventDefaultOn,
+		'mousedown',
+		$author$project$Main$preventDefaultDecoder(
+			A2($author$project$Main$mouseEventDecoderWithModifier, $author$project$Main$MouseDown, $author$project$Main$MouseDownWithShift)));
+};
+var $author$project$Main$MouseUp = function (a) {
+	return {$: 'MouseUp', a: a};
+};
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -7293,11 +7331,41 @@ var $elm$html$Html$Events$on = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
+var $author$project$Main$onMouseUpHandler = function (_v0) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseup',
+		A2($elm$json$Json$Decode$map, $author$project$Main$MouseUp, $author$project$Main$mouseEventDecoder));
+};
+var $author$project$Main$SplitBarBeginDrag = function (a) {
+	return {$: 'SplitBarBeginDrag', a: a};
+};
 var $author$project$Main$onSplitBarDragBegin = function (_v0) {
 	return A2(
 		$elm$html$Html$Events$on,
 		'mousedown',
 		A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarBeginDrag, $author$project$Main$mouseEventDecoder));
+};
+var $author$project$Main$Wheel = function (a) {
+	return {$: 'Wheel', a: a};
+};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $author$project$Main$wheelEventDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (x, y) {
+			return _Utils_Tuple2(x, -y);
+		}),
+	A2($elm$json$Json$Decode$field, 'deltaX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float));
+var $author$project$Main$onWheelHandler = function (_v0) {
+	return A2(
+		$elm$html$Html$Events$preventDefaultOn,
+		'wheel',
+		$author$project$Main$preventDefaultDecoder(
+			A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
 };
 var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $author$project$Main$px = function (x) {
@@ -7375,36 +7443,30 @@ var $author$project$Graphics$MeshLoader$getPierMesh = F2(
 var $elm_explorations$linear_algebra$Math$Matrix4$identity = _MJS_m4x4identity;
 var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
 var $elm$core$Basics$cos = _Basics_cos;
-var $elm$core$Debug$log = _Debug_log;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeOrtho = _MJS_m4x4makeOrtho;
 var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$Basics$sin = _Basics_sin;
 var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
 var $author$project$Graphics$OrbitControl$makeTransform = function (model) {
 	var w = (model.scale * model.viewportWidth) / 2;
 	var h = (model.scale * model.viewportHeight) / 2;
-	var distance = 10000;
-	var x = (distance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
-	var y = distance * $elm$core$Basics$sin(model.altitude);
-	var z = (distance * $elm$core$Basics$cos(model.altitude)) * (-$elm$core$Basics$sin(model.azimuth));
+	var eyeDistance = 10000;
+	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
+	var y = eyeDistance * $elm$core$Basics$sin(model.altitude);
+	var z = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * (-$elm$core$Basics$sin(model.azimuth));
+	var cameraClipDistance = 100000;
 	return A2(
-		$elm$core$Debug$log,
-		'makeTransform',
-		A2(
-			$elm_explorations$linear_algebra$Math$Matrix4$mul,
-			A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -distance, distance),
-			A3(
-				$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
-				A2(
-					$elm_explorations$linear_algebra$Math$Vector3$add,
-					model.target,
-					A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
+		$elm_explorations$linear_algebra$Math$Matrix4$mul,
+		A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -cameraClipDistance, cameraClipDistance),
+		A3(
+			$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
+			A2(
+				$elm_explorations$linear_algebra$Math$Vector3$add,
 				model.target,
-				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0))));
+				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
+			model.target,
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0)));
 };
 var $elm_explorations$webgl$WebGL$Internal$CullFace = function (a) {
 	return {$: 'CullFace', a: a};
@@ -7509,14 +7571,13 @@ var $author$project$Main$showPier = F5(
 	});
 var $author$project$Main$showPiers = F2(
 	function (model, piers) {
-		var transform = $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl);
 		return A2(
 			$elm$core$List$map,
 			function (pierPlacement) {
 				return A5(
 					$author$project$Main$showPier,
 					$elm_explorations$linear_algebra$Math$Matrix4$identity,
-					transform,
+					$author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
 					A2($author$project$Graphics$MeshLoader$getPierMesh, model.meshes, pierPlacement.pier),
 					pierPlacement.position,
 					pierPlacement.angle);
@@ -7848,7 +7909,10 @@ var $author$project$Main$view = function (model) {
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
-						$author$project$Main$px(railViewHeight))
+						$author$project$Main$px(railViewHeight)),
+						$author$project$Main$onMouseDownHandler(model),
+						$author$project$Main$onMouseUpHandler(model),
+						$author$project$Main$onWheelHandler(model)
 					]),
 				_Utils_ap(
 					A2($author$project$Main$showRails, model, model.rails),
@@ -10930,9 +10994,6 @@ var $elm$browser$Browser$Events$onResize = function (func) {
 var $author$project$Main$MouseMove = function (a) {
 	return {$: 'MouseMove', a: a};
 };
-var $author$project$Main$MouseUp = function (a) {
-	return {$: 'MouseUp', a: a};
-};
 var $author$project$Graphics$OrbitControl$isDragging = function (model) {
 	var _v0 = model.draggingState;
 	if (_v0.$ === 'Just') {
@@ -11025,6 +11086,7 @@ var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 	});
 var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
 	{elemSize: 1, indexSize: 3, mode: 4});
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Graphics$MeshLoader$update = F2(
 	function (msg, model) {
 		var name = msg.a;
