@@ -305,7 +305,16 @@ update msg model =
             ( { model | splitBarDragState = Just pos }, Cmd.none )
 
         SplitBarUpdateDrag ( _, y ) ->
-            ( { model | splitBarPosition = clamp 100 1200 y }, Cmd.none )
+            let
+                splitBarPosition =
+                    clamp 100 1200 y
+            in
+            ( { model
+                | splitBarPosition = splitBarPosition
+                , orbitControl = OC.updateViewport model.viewport.width splitBarPosition model.orbitControl
+              }
+            , Cmd.none
+            )
 
         SplitBarEndDrag _ ->
             ( { model | splitBarDragState = Nothing }, Cmd.none )
@@ -313,10 +322,14 @@ update msg model =
 
 updateViewport : Float -> Float -> Model -> Model
 updateViewport w h model =
+    let
+        splitBarPosition =
+            clamp 10 (h - 10) (h * 0.8)
+    in
     { model
         | viewport = { width = w, height = h }
-        , orbitControl = OC.updateViewport w h model.orbitControl
-        , splitBarPosition = clamp 10 (h - 10) (h * 0.8)
+        , orbitControl = OC.updateViewport w splitBarPosition model.orbitControl
+        , splitBarPosition = splitBarPosition
     }
 
 

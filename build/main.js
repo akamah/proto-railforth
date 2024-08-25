@@ -7576,7 +7576,7 @@ var $author$project$Graphics$Render$pierFragmentShader = {
 	uniforms: {}
 };
 var $author$project$Graphics$Render$pierVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            const highp vec3 yellow = vec3(1.0, 1.0, 0.3);\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.5 + 0.5 * lambertFactor;\n            color = intensity * yellow;\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            const highp vec3 yellow = vec3(1.0, 1.0, 0.3);\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.7 + 0.3 * lambertFactor;\n            color = intensity * yellow;\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
 	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
 };
@@ -7699,97 +7699,17 @@ var $author$project$Graphics$MeshLoader$getRailMesh = F2(
 				$author$project$Types$Rail$toString(rail),
 				model.meshes));
 	});
-var $elm_explorations$webgl$WebGL$Settings$StencilTest$Test = function (a) {
-	return {$: 'Test', a: a};
-};
-var $elm_explorations$webgl$WebGL$Settings$StencilTest$always = $elm_explorations$webgl$WebGL$Settings$StencilTest$Test(519);
 var $elm_explorations$webgl$WebGL$Settings$back = $elm_explorations$webgl$WebGL$Settings$FaceMode(1029);
-var $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation = function (a) {
-	return {$: 'Operation', a: a};
-};
-var $elm_explorations$webgl$WebGL$Settings$StencilTest$keep = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(7680);
-var $author$project$Graphics$Render$outlineFragmentShader = {
-	src: '\n        varying highp vec4 vertexColor;\n        void main() {\n            gl_FragColor = vertexColor;\n        }\n    ',
+var $author$project$Graphics$Render$railFragmentShader = {
+	src: '\n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);\n            gl_FragColor = vec4(color, dist_density);\n        }\n    ',
 	attributes: {},
 	uniforms: {}
 };
-var $author$project$Graphics$Render$outlineVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform highp float scalingFactor;\n        uniform highp vec4 color;\n        uniform highp vec3 light;\n\n        varying highp vec4 vertexColor;\n\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position + scalingFactor * scalingVector, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            vertexColor = intensity * color;\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
+var $author$project$Graphics$Render$railVertexShader = {
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
-	uniforms: {color: 'color', light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', scalingFactor: 'scalingFactor', viewTransform: 'viewTransform'}
+	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
 };
-var $elm_explorations$webgl$WebGL$Settings$StencilTest$replace = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(7681);
-var $elm_explorations$webgl$WebGL$Internal$StencilTest = function (a) {
-	return function (b) {
-		return function (c) {
-			return function (d) {
-				return function (e) {
-					return function (f) {
-						return function (g) {
-							return function (h) {
-								return function (i) {
-									return function (j) {
-										return function (k) {
-											return {$: 'StencilTest', a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h, i: i, j: j, k: k};
-										};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate = F3(
-	function (_v0, options1, options2) {
-		var ref = _v0.ref;
-		var mask = _v0.mask;
-		var writeMask = _v0.writeMask;
-		var expandTest = F2(
-			function (_v2, fn) {
-				var expandedTest = _v2.a;
-				return fn(expandedTest);
-			});
-		var expandOp = F2(
-			function (_v1, fn) {
-				var op = _v1.a;
-				return fn(op);
-			});
-		var expand = function (options) {
-			return A2(
-				$elm$core$Basics$composeR,
-				expandTest(options.test),
-				A2(
-					$elm$core$Basics$composeR,
-					expandOp(options.fail),
-					A2(
-						$elm$core$Basics$composeR,
-						expandOp(options.zfail),
-						expandOp(options.zpass))));
-		};
-		return A2(
-			expand,
-			options2,
-			A2(
-				expand,
-				options1,
-				A3($elm_explorations$webgl$WebGL$Internal$StencilTest, ref, mask, writeMask)));
-	});
-var $elm_explorations$webgl$WebGL$Settings$StencilTest$test = function (stencilTest) {
-	return A3(
-		$elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate,
-		{mask: stencilTest.mask, ref: stencilTest.ref, writeMask: stencilTest.writeMask},
-		{fail: stencilTest.fail, test: stencilTest.test, zfail: stencilTest.zfail, zpass: stencilTest.zpass},
-		{fail: stencilTest.fail, test: stencilTest.test, zfail: stencilTest.zfail, zpass: stencilTest.zpass});
-};
-var $elm_explorations$linear_algebra$Math$Vector4$vec4 = _MJS_v4;
 var $author$project$Graphics$Render$showRail = F5(
 	function (projectionTransform, viewTransform, mesh, origin, angle) {
 		var modelTransform = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
@@ -7800,39 +7720,12 @@ var $author$project$Graphics$Render$showRail = F5(
 				_List_fromArray(
 					[
 						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back),
-						$elm_explorations$webgl$WebGL$Settings$StencilTest$test(
-						{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, mask: 255, ref: 1, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$always, writeMask: 255, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace})
+						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
 					]),
-				$author$project$Graphics$Render$outlineVertexShader,
-				$author$project$Graphics$Render$outlineFragmentShader,
+				$author$project$Graphics$Render$railVertexShader,
+				$author$project$Graphics$Render$railFragmentShader,
 				mesh,
-				{
-					color: A4($elm_explorations$linear_algebra$Math$Vector4$vec4, 0.0, 1.0, 0.5, 1.0),
-					light: $author$project$Graphics$Render$lightFromAbove,
-					modelTransform: modelTransform,
-					projectionTransform: projectionTransform,
-					scalingFactor: -1.7,
-					viewTransform: viewTransform
-				}),
-				A5(
-				$elm_explorations$webgl$WebGL$entityWith,
-				_List_fromArray(
-					[
-						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$front)
-					]),
-				$author$project$Graphics$Render$outlineVertexShader,
-				$author$project$Graphics$Render$outlineFragmentShader,
-				mesh,
-				{
-					color: A4($elm_explorations$linear_algebra$Math$Vector4$vec4, 0.2, 0.2, 0.2, 1.0),
-					light: $author$project$Graphics$Render$lightFromAbove,
-					modelTransform: modelTransform,
-					projectionTransform: projectionTransform,
-					scalingFactor: 0.0,
-					viewTransform: viewTransform
-				})
+				{light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform, projectionTransform: projectionTransform, viewTransform: viewTransform})
 			]);
 	});
 var $author$project$Graphics$Render$showRails = F3(
@@ -11281,11 +11174,12 @@ var $author$project$Graphics$OrbitControl$updateViewport = F3(
 	});
 var $author$project$Main$updateViewport = F3(
 	function (w, h, model) {
+		var splitBarPosition = A3($elm$core$Basics$clamp, 10, h - 10, h * 0.8);
 		return _Utils_update(
 			model,
 			{
-				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, w, h, model.orbitControl),
-				splitBarPosition: A3($elm$core$Basics$clamp, 10, h - 10, h * 0.8),
+				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, w, splitBarPosition, model.orbitControl),
+				splitBarPosition: splitBarPosition,
 				viewport: {height: h, width: w}
 			});
 	});
@@ -11406,11 +11300,13 @@ var $author$project$Main$update = F2(
 			case 'SplitBarUpdateDrag':
 				var _v2 = msg.a;
 				var y = _v2.b;
+				var splitBarPosition = A3($elm$core$Basics$clamp, 100, 1200, y);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							splitBarPosition: A3($elm$core$Basics$clamp, 100, 1200, y)
+							orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, model.viewport.width, splitBarPosition, model.orbitControl),
+							splitBarPosition: splitBarPosition
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
