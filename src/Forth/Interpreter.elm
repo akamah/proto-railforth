@@ -11,12 +11,6 @@ import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailPlacement exposing (RailPlacement)
 
 
-{-| Forthの辞書。意味的には次の継続と現在の状態を与えられたら結果が得られる、というもの。
--}
-type alias ForthDict result status =
-    Dict String ((status -> result) -> (status -> result))
-
-
 {-| Forthの状態。スタックがあり、そのほか余計な情報がある。
 -}
 type alias ForthStatus stack global =
