@@ -54,24 +54,25 @@ type alias ExecResult =
 
 execute : String -> ExecResult
 execute src =
+    let
+        tokenize : String -> List String
+        tokenize string =
+            String.words string
+
+        initialStatus : ExecStatus
+        initialStatus =
+            { stack = [ RailPiece.initialLocation ]
+            , global =
+                { rails = []
+                , piers = []
+                }
+            }
+    in
     executeRec (tokenize src) initialStatus
 
 
-tokenize : String -> List String
-tokenize string =
-    String.words string
-
-
-initialStatus : ExecStatus
-initialStatus =
-    { stack = [ RailPiece.initialLocation ]
-    , global =
-        { rails = []
-        , piers = []
-        }
-    }
-
-
+{-| Forthの普遍的なワードで、Railforthとしてのワードではないもの。スタック操作など
+-}
 type alias CoreWord result stack global =
     (ForthStatus stack global -> result)
     -> (ForthStatus stack global -> ForthError -> result)
@@ -92,6 +93,7 @@ coreGlossary =
         ]
 
 
+{-| -}
 controlWords : Dict String (List String -> ExecStatus -> ExecResult)
 controlWords =
     Dict.fromList

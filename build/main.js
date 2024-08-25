@@ -10471,20 +10471,20 @@ try {
 } catch ($) {
 	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    controlWords\n  │     ↓\n  │    executeComment\n  │     ↓\n  │    executeRec\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $author$project$Forth$RailPiece$initialLocation = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$e, $author$project$Forth$Geometry$Joint$Plus);
-var $author$project$Forth$Interpreter$initialStatus = {
-	global: {piers: _List_Nil, rails: _List_Nil},
-	stack: _List_fromArray(
-		[$author$project$Forth$RailPiece$initialLocation])
-};
 var $elm$core$String$words = _String_words;
-var $author$project$Forth$Interpreter$tokenize = function (string) {
-	return $elm$core$String$words(string);
-};
 var $author$project$Forth$Interpreter$execute = function (src) {
+	var tokenize = function (string) {
+		return $elm$core$String$words(string);
+	};
+	var initialStatus = {
+		global: {piers: _List_Nil, rails: _List_Nil},
+		stack: _List_fromArray(
+			[$author$project$Forth$RailPiece$initialLocation])
+	};
 	return A2(
 		$author$project$Forth$Interpreter$executeRec,
-		$author$project$Forth$Interpreter$tokenize(src),
-		$author$project$Forth$Interpreter$initialStatus);
+		tokenize(src),
+		initialStatus);
 };
 var $author$project$Forth$execute = $author$project$Forth$Interpreter$execute;
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
