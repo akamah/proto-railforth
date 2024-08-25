@@ -11,12 +11,6 @@ import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailPlacement exposing (RailPlacement)
 
 
-{-| Forthの辞書。意味的には次の継続と現在の状態を与えられたら結果が得られる、というもの。
--}
-type alias ForthDict result status =
-    Dict String ((status -> result) -> (status -> result))
-
-
 {-| Forthの状態。スタックがあり、そのほか余計な情報がある。
 -}
 type alias ForthStatus stack global =
@@ -54,24 +48,25 @@ type alias ExecResult =
 
 execute : String -> ExecResult
 execute src =
+    let
+        tokenize : String -> List String
+        tokenize string =
+            String.words string
+
+        initialStatus : ExecStatus
+        initialStatus =
+            { stack = [ RailPiece.initialLocation ]
+            , global =
+                { rails = []
+                , piers = []
+                }
+            }
+    in
     executeRec (tokenize src) initialStatus
 
 
-tokenize : String -> List String
-tokenize string =
-    String.words string
-
-
-initialStatus : ExecStatus
-initialStatus =
-    { stack = [ RailPiece.initialLocation ]
-    , global =
-        { rails = []
-        , piers = []
-        }
-    }
-
-
+{-| Forthの普遍的なワードで、Railforthとしてのワードではないもの。スタック操作など
+-}
 type alias CoreWord result stack global =
     (ForthStatus stack global -> result)
     -> (ForthStatus stack global -> ForthError -> result)
@@ -92,6 +87,7 @@ coreGlossary =
         ]
 
 
+{-| -}
 controlWords : Dict String (List String -> ExecStatus -> ExecResult)
 controlWords =
     Dict.fromList

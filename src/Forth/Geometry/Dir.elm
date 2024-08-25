@@ -89,20 +89,19 @@ inv (Dir d) =
         Dir (8 - d)
 
 
-aux : Int -> Int -> Int -> Int
-aux a b x =
-    if x == a then
-        1
-
-    else if x == b then
-        -1
-
-    else
-        0
-
-
 toRot45 : Dir -> Rot45
 toRot45 (Dir d) =
+    let
+        aux a b x =
+            if x == a then
+                1
+
+            else if x == b then
+                -1
+
+            else
+                0
+    in
     Rot45.make
         (aux 0 4 d)
         (aux 1 5 d)

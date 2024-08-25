@@ -11,7 +11,7 @@ import Types.RailPlacement exposing (RailPlacement)
 
 
 
--- -- 具体的なレールの配置についてのモジュール
+-- 具体的なレールの配置についてのモジュール
 
 
 type alias RailPiece =
