@@ -9029,18 +9029,18 @@ var $author$project$Forth$Geometry$Rot45$mul = F2(
 		var yd = _v1.d;
 		return A4($author$project$Forth$Geometry$Rot45$make, (((xa * ya) - (xb * yd)) - (xc * yc)) - (xd * yb), (((xa * yb) + (xb * ya)) - (xc * yd)) - (xd * yc), (((xa * yc) + (xb * yb)) + (xc * ya)) - (xd * yd), (((xa * yd) + (xb * yc)) + (xc * yb)) + (xd * ya));
 	});
-var $author$project$Forth$Geometry$Dir$aux = F3(
-	function (a, b, x) {
-		return _Utils_eq(x, a) ? 1 : (_Utils_eq(x, b) ? (-1) : 0);
-	});
 var $author$project$Forth$Geometry$Dir$toRot45 = function (_v0) {
 	var d = _v0.a;
+	var aux = F3(
+		function (a, b, x) {
+			return _Utils_eq(x, a) ? 1 : (_Utils_eq(x, b) ? (-1) : 0);
+		});
 	return A4(
 		$author$project$Forth$Geometry$Rot45$make,
-		A3($author$project$Forth$Geometry$Dir$aux, 0, 4, d),
-		A3($author$project$Forth$Geometry$Dir$aux, 1, 5, d),
-		A3($author$project$Forth$Geometry$Dir$aux, 2, 6, d),
-		A3($author$project$Forth$Geometry$Dir$aux, 3, 7, d));
+		A3(aux, 0, 4, d),
+		A3(aux, 1, 5, d),
+		A3(aux, 2, 6, d),
+		A3(aux, 3, 7, d));
 };
 var $author$project$Forth$Geometry$Location$mul = F2(
 	function (global, local) {
