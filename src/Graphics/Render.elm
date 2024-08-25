@@ -39,92 +39,102 @@ showRail projectionTransform viewTransform mesh origin angle =
             makeMeshMatrix origin angle
     in
     [ -- 輪郭をくりぬいた中身のマスクをステンシルバッファにのみ書き込む。
+      --   WebGL.entityWith
+      --     [ WebGL.Settings.DepthTest.default
+      --     , WebGL.Settings.cullFace WebGL.Settings.back
+      --     --        , WebGL.Settings.colorMask False False False False
+      --     , WebGL.Settings.StencilTest.test
+      --         { ref = 1
+      --         , mask = 0xFF
+      --         , writeMask = 0xFF
+      --         , test = WebGL.Settings.StencilTest.always
+      --         , fail = WebGL.Settings.StencilTest.keep
+      --         , zfail = WebGL.Settings.StencilTest.keep
+      --         , zpass = WebGL.Settings.StencilTest.replace
+      --         }
+      --     ]
+      --     outlineVertexShader
+      --     outlineFragmentShader
+      --     mesh
+      --     { projectionTransform = projectionTransform
+      --     , viewTransform = viewTransform
+      --     , modelTransform = modelTransform
+      --     , color = vec4 0.0 1.0 0.5 1.0
+      --     , light = lightFromAbove
+      --     , scalingFactor = -1.7
+      --     }
+      -- , -- 輪郭線の部分を書き込む。cullFace frontでやるので裏を描く感じ。ステンシルバッファは変更しない
+      --   WebGL.entityWith
+      --     [ WebGL.Settings.DepthTest.default
+      --     , WebGL.Settings.cullFace WebGL.Settings.front
+      --     ]
+      --     outlineVertexShader
+      --     outlineFragmentShader
+      --     mesh
+      --     { projectionTransform = projectionTransform
+      --     , viewTransform = viewTransform
+      --     , modelTransform = modelTransform
+      --     , color = vec4 0.2 0.2 0.2 1.0
+      --     , light = lightFromAbove
+      --     , scalingFactor = 0.0
+      --     }
+      -- , -- テスト。ステンシルバッファが1のときにベタ塗りする
+      --   WebGL.entityWith
+      --     [ WebGL.Settings.DepthTest.always { write = True, near = 0, far = 1 }
+      --     , WebGL.Settings.cullFace WebGL.Settings.back
+      --     , WebGL.Settings.StencilTest.test
+      --         { ref = 1
+      --         , mask = 0xFF
+      --         , writeMask = 0xFF
+      --         , test = WebGL.Settings.StencilTest.equal
+      --         , fail = WebGL.Settings.StencilTest.keep
+      --         , zfail = WebGL.Settings.StencilTest.keep
+      --         , zpass = WebGL.Settings.StencilTest.decrementWrap
+      --         }
+      --     ]
+      --     outlineVertexShader
+      --     outlineFragmentShader
+      --     mesh
+      --     { projectionTransform = projectionTransform
+      --     , viewTransform = viewTransform
+      --     , modelTransform = modelTransform
+      --     , color = vec4 0.5 0.5 0.2 1.0
+      --     , scalingFactor = 0
+      --     }
+      -- レール本体を描画する。この際に最初のマスクの部分のみに対して描画を行う
+      -- , WebGL.entityWith
+      --     [ WebGL.Settings.DepthTest.always { write = True, near = 0.0, far = 1.0 }
+      --     , WebGL.Settings.cullFace WebGL.Settings.back
+      --     , WebGL.Settings.StencilTest.test
+      --         { ref = 1
+      --         , mask = 0xFF
+      --         , writeMask = 0xFF
+      --         , test = WebGL.Settings.StencilTest.equal
+      --         , fail = WebGL.Settings.StencilTest.keep
+      --         , zfail = WebGL.Settings.StencilTest.keep
+      --         , zpass = WebGL.Settings.StencilTest.decrementWrap
+      --         }
+      --     ]
+      --     railVertexShader
+      --     railFragmentShader
+      --     mesh
+      --     { projectionTransform = projectionTransform
+      --     , viewTransform = viewTransform
+      --     , modelTransform = modelTransform
+      --     , light = lightFromAbove
+      --     }
       WebGL.entityWith
         [ WebGL.Settings.DepthTest.default
         , WebGL.Settings.cullFace WebGL.Settings.back
-
-        --        , WebGL.Settings.colorMask False False False False
-        , WebGL.Settings.StencilTest.test
-            { ref = 1
-            , mask = 0xFF
-            , writeMask = 0xFF
-            , test = WebGL.Settings.StencilTest.always
-            , fail = WebGL.Settings.StencilTest.keep
-            , zfail = WebGL.Settings.StencilTest.keep
-            , zpass = WebGL.Settings.StencilTest.replace
-            }
         ]
-        outlineVertexShader
-        outlineFragmentShader
+        railVertexShader
+        railFragmentShader
         mesh
         { projectionTransform = projectionTransform
         , viewTransform = viewTransform
         , modelTransform = modelTransform
-        , color = vec4 0.0 1.0 0.5 1.0
         , light = lightFromAbove
-        , scalingFactor = -1.7
         }
-    , -- 輪郭線の部分を書き込む。cullFace frontでやるので裏を描く感じ。ステンシルバッファは変更しない
-      WebGL.entityWith
-        [ WebGL.Settings.DepthTest.default
-        , WebGL.Settings.cullFace WebGL.Settings.front
-        ]
-        outlineVertexShader
-        outlineFragmentShader
-        mesh
-        { projectionTransform = projectionTransform
-        , viewTransform = viewTransform
-        , modelTransform = modelTransform
-        , color = vec4 0.2 0.2 0.2 1.0
-        , light = lightFromAbove
-        , scalingFactor = 0.0
-        }
-
-    -- , -- テスト。ステンシルバッファが1のときにベタ塗りする
-    --   WebGL.entityWith
-    --     [ WebGL.Settings.DepthTest.always { write = True, near = 0, far = 1 }
-    --     , WebGL.Settings.cullFace WebGL.Settings.back
-    --     , WebGL.Settings.StencilTest.test
-    --         { ref = 1
-    --         , mask = 0xFF
-    --         , writeMask = 0xFF
-    --         , test = WebGL.Settings.StencilTest.equal
-    --         , fail = WebGL.Settings.StencilTest.keep
-    --         , zfail = WebGL.Settings.StencilTest.keep
-    --         , zpass = WebGL.Settings.StencilTest.decrementWrap
-    --         }
-    --     ]
-    --     outlineVertexShader
-    --     outlineFragmentShader
-    --     mesh
-    --     { projectionTransform = projectionTransform
-    --     , viewTransform = viewTransform
-    --     , modelTransform = modelTransform
-    --     , color = vec4 0.5 0.5 0.2 1.0
-    --     , scalingFactor = 0
-    --     }
-    -- レール本体を描画する。この際に最初のマスクの部分のみに対して描画を行う
-    -- , WebGL.entityWith
-    --     [ WebGL.Settings.DepthTest.always { write = True, near = 0.0, far = 1.0 }
-    --     , WebGL.Settings.cullFace WebGL.Settings.back
-    --     , WebGL.Settings.StencilTest.test
-    --         { ref = 1
-    --         , mask = 0xFF
-    --         , writeMask = 0xFF
-    --         , test = WebGL.Settings.StencilTest.equal
-    --         , fail = WebGL.Settings.StencilTest.keep
-    --         , zfail = WebGL.Settings.StencilTest.keep
-    --         , zpass = WebGL.Settings.StencilTest.decrementWrap
-    --         }
-    --     ]
-    --     railVertexShader
-    --     railFragmentShader
-    --     mesh
-    --     { projectionTransform = projectionTransform
-    --     , viewTransform = viewTransform
-    --     , modelTransform = modelTransform
-    --     , light = lightFromAbove
-    --     }
     ]
 
 
@@ -210,7 +220,7 @@ railVertexShader =
         varying highp vec3 color;
 
         void main() {
-            highp vec4 worldPosition = modelTransform * vec4(position - 1.0 * scalingVector, 1.0);
+            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
             highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
             // blue to green ratio. 0 <--- blue   green ---> 1.0
@@ -303,7 +313,7 @@ pierVertexShader =
 
             const highp vec3 yellow = vec3(1.0, 1.0, 0.3);
             highp float lambertFactor = dot(worldNormal, vec4(light, 0));
-            highp float intensity = 0.5 + 0.5 * lambertFactor;
+            highp float intensity = 0.7 + 0.3 * lambertFactor;
             color = intensity * yellow;
 
             gl_Position = projectionTransform * viewTransform * worldPosition;
