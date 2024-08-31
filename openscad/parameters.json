@@ -1,0 +1,18 @@
+{
+  "parameterSets": {
+    "straight-invert": {
+      "name": "straight",
+      "inverted": true
+    },
+    "straight-noninvert": {
+      "name": "straight",
+      "inverted": false
+    },
+    "turnout-flip-invert": {
+      "name": "turnout",
+      "flipped": true,
+      "inverted": true
+    }
+  },
+  "fileFormatVersion": "1"
+}

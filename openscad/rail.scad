@@ -210,7 +210,7 @@ module render_grooves(raildef) {
 // @param jacks ジャックを配置する回転行列のリスト
 // @param plugs プラグを配置する回転行列のリスト
 // @param inverted ジャックとプラグを逆にするかどうかのオプション。あったら便利よね
-module render_rail(raildefs, jacks, plugs, inverted=false) {
+module render_rail(raildefs, jacks, plugs, inverted) {
     union() {
         difference() {
             union() {
@@ -264,7 +264,7 @@ module rasp() {
 }
 
 // 補助関数。直線や曲線などの簡単なレールを楽に定義するためのもの
-module render_simple_rail(raildef, inverted=false) {
+module render_simple_rail(raildef, inverted) {
     render_rail([raildef], [start_mat(raildef)], [end_mat(raildef)], inverted);
 }
 
@@ -280,7 +280,7 @@ DOUBLE_TRACK = 60;
 PIER_UNIT = 16.5;
 
 module straight(length, inverted) {
-    render_simple_rail(straight_raildef(length * UNIT));
+    render_simple_rail(straight_raildef(length * UNIT), inverted);
 }
 
 module curve(radius, degree, flipped, inverted, divs) {
@@ -301,7 +301,7 @@ module double_point(flipped, inverted, divs) {
 
 module uturn() {
     uturn = uturn_raildef(UNIT * 5, UNIT * 5/2, DOUBLE_TRACK, 64);
-    render_rail([uturn], [start_mat(uturn), end_mat(uturn)], []);
+    render_rail([uturn], [start_mat(uturn), end_mat(uturn)], [], false);
 }
 
 module joint(inverted) {
@@ -333,14 +333,14 @@ module slope(flipped, inverted, divs) {
 module auto_turnout(divs) {
     straight = straight_raildef(6 * UNIT);
     curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, divs));
-    render_rail([straight, curve], [start_mat(straight)], [end_mat(straight), end_mat(curve)]);
+    render_rail([straight, curve], [start_mat(straight)], [end_mat(straight), end_mat(curve)], false);
 }
 
 module auto_point(divs) {
     straight = straight_raildef(6 * UNIT);
     curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, divs));
     shift = translate_raildef([2 * UNIT, 0, 0], shift_raildef(4 * UNIT, -DOUBLE_TRACK, divs));
-    render_rail([straight, curve, shift], [start_mat(straight)], [end_mat(straight), end_mat(curve), end_mat(shift)]);
+    render_rail([straight, curve, shift], [start_mat(straight)], [end_mat(straight), end_mat(curve), end_mat(shift)], false);
 }
 
 

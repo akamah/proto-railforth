@@ -7,4 +7,10 @@ name = "";
 flipped = false;
 inverted = false;
 
-turnout(flipped, inverted, 4);
+if (name == "turnout") {
+  turnout(flipped, inverted, 4);
+}
+
+if (name == "straight") {
+  straight(4, inverted);
+}
