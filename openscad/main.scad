@@ -2,4 +2,9 @@ use <rail.scad>
 
 
 // slope(false, false, 16);
-auto_point(8);
+
+name = "";
+flipped = false;
+inverted = false;
+
+turnout(flipped, inverted, 4);
