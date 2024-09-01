@@ -283,8 +283,12 @@ module straight(length, inverted) {
     render_simple_rail(straight_raildef(length * UNIT), inverted);
 }
 
-module curve(radius, degree, flipped, inverted, divs) {
-    render_simple_rail(flip_if(flipped, curve_raildef(radius * UNIT, degree, divs)), inverted);    
+module curve(degree, flipped, inverted, divs) {
+    render_simple_rail(flip_if(flipped, curve_raildef(4 * UNIT, degree, divs)), inverted);    
+}
+
+module outer_curve(degree, flipped, inverted, divs) {
+    render_simple_rail(flip_if(flipped, curve_raildef(4 * UNIT + DOUBLE_TRACK, degree, divs)), inverted);    
 }
 
 module turnout(flipped, inverted, divs) {
@@ -293,7 +297,7 @@ module turnout(flipped, inverted, divs) {
     render_rail([straight, curve], [start_mat(straight)], [end_mat(straight), end_mat(curve)], inverted);
 }
 
-module double_point(flipped, inverted, divs) {
+module single_double(flipped, inverted, divs) {
     straight = straight_raildef(4 * UNIT);
     shift = flip_if(flipped, shift_raildef(4 * UNIT, DOUBLE_TRACK, divs));
     render_rail([straight, shift], [start_mat(straight)], [end_mat(straight), end_mat(shift)], inverted);
@@ -309,7 +313,7 @@ module joint(inverted) {
     render_rail([straight], [start_mat(straight), end_mat(straight)], [], inverted);
 }
 
-module eight(inverted, flipped, divs) {
+module eight(flipped, inverted, divs) {
     right = flip_if(flipped, curve_raildef(4 * UNIT, 45, divs));
     left = flip_if(!flipped, curve_raildef(4 * UNIT, 45, divs));
     render_rail([right, left], [start_mat(right), end_mat(left)], [end_mat(right)], inverted);
