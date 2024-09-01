@@ -85,4 +85,8 @@ if (name == "auto_point") {
   assert_cannot_invert(name, inverted);
   auto_point(4 * resolution);
 }
-
+if (name == "uturn") {
+  assert_cannot_flip(name, flipped);
+  assert_cannot_invert(name, inverted);
+  uturn();
+}
