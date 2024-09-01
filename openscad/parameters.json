@@ -1,16 +1,16 @@
 {
   "parameterSets": {
-    "straight-invert": {
-      "name": "straight",
+    "straight1_minus": {      "name": "straight1_minus"    },
+    "straight1_plus": {
+      "name": "straight1",
       "inverted": true
     },
-    "straight-noninvert": {
-      "name": "straight",
+    "straight2_minus": {
+      "name": "straight2",
       "inverted": false
     },
-    "turnout-flip-invert": {
-      "name": "turnout",
-      "flipped": true,
+    "straight2_plus": {
+      "name": "straight2",
       "inverted": true
     }
   },

@@ -1,0 +1,11 @@
+{
+    "parameterSets": {
+        "design default values": {
+            "flipped": "false",
+            "inverted": "false",
+            "name": "auto_turnout",
+            "resolution": "1"
+        }
+    },
+    "fileFormatVersion": "1"
+}
