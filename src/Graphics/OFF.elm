@@ -1,4 +1,4 @@
-module Graphics.OFF exposing (load, parse)
+module Graphics.OFF exposing (Mesh, load, parse)
 
 import Http
 import Math.Vector3 exposing (Vec3, vec3)

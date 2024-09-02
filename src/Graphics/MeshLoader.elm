@@ -3,31 +3,37 @@ module Graphics.MeshLoader exposing
     , Model
     , Msg
     , getErrors
-    , getPierMesh
-    , getRailMesh
     , init
     , loadMeshCmd
+    , renderPiers
+    , renderRails
     , update
     )
 
 import Dict exposing (Dict)
-import Graphics.MeshWithScalingVector as SV
-import Math.Vector3 as Vec3 exposing (Vec3)
+import Graphics.OFF as OFF
+import Graphics.Render as Render
+import Math.Matrix4 exposing (Mat4)
+import Math.Vector3 exposing (Vec3)
 import Types.Pier as Pier exposing (Pier)
+import Types.PierPlacement exposing (PierPlacement)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import WebGL
+import Types.RailPlacement exposing (RailPlacement)
+import WebGL exposing (Entity, Mesh)
 
 
-type alias Mesh =
-    WebGL.Mesh SV.VertexWithScalingVector
+type alias Attributes =
+    { position : Vec3
+    , normal : Vec3
+    }
 
 
 type Msg
-    = LoadMesh String (Result String SV.MeshAndFace)
+    = LoadMesh String (Result String OFF.Mesh)
 
 
 type alias Model =
-    { meshes : Dict String Mesh
+    { meshes : Dict String (Mesh Render.Attributes)
     , errors : List String
     }
 
@@ -50,19 +56,12 @@ update msg model =
                 Ok meshWith ->
                     let
                         glMesh =
-                            WebGL.indexedTriangles meshWith.vertices meshWith.faces
-
-                        flippedMeshWith =
-                            flipMesh meshWith
-
-                        flippedMesh =
-                            WebGL.indexedTriangles flippedMeshWith.vertices flippedMeshWith.faces
+                            WebGL.indexedTriangles meshWith.vertices meshWith.indices
 
                         updatedMeshes =
                             Dict.union model.meshes <|
                                 Dict.fromList
                                     [ ( name, glMesh )
-                                    , ( String.append name "_flip", flippedMesh )
                                     ]
                     in
                     { model | meshes = updatedMeshes }
@@ -72,7 +71,7 @@ update msg model =
 -}
 buildMeshUri : String -> String
 buildMeshUri name =
-    "./assets/" ++ name ++ ".json"
+    "./assets/" ++ name ++ ".off"
 
 
 {-| The list of mesh names. Used when loading .obj files
@@ -123,26 +122,52 @@ loadMeshCmd f =
         Cmd.batch <|
             List.map
                 (\name ->
-                    SV.load (buildMeshUri name) (LoadMesh name)
+                    OFF.load (buildMeshUri name) (LoadMesh name)
                 )
                 allMeshNames
 
 
-dummyMesh : Mesh
+dummyMesh : Mesh Render.Attributes
 dummyMesh =
     WebGL.triangles []
 
 
-getRailMesh : Model -> Rail IsInverted IsFlipped -> Mesh
+getRailMesh : Model -> Rail IsInverted IsFlipped -> Mesh Render.Attributes
 getRailMesh model rail =
     Dict.get (Types.Rail.toString rail) model.meshes
         |> Maybe.withDefault dummyMesh
 
 
-getPierMesh : Model -> Pier -> Mesh
+getPierMesh : Model -> Pier -> Mesh Render.Attributes
 getPierMesh model pier =
     Dict.get (Pier.toString pier) model.meshes
         |> Maybe.withDefault dummyMesh
+
+
+renderRails : Model -> List RailPlacement -> Mat4 -> List Entity
+renderRails model rails transform =
+    List.concatMap
+        (\railPosition ->
+            Render.renderRail
+                transform
+                (getRailMesh model railPosition.rail)
+                railPosition.position
+                railPosition.angle
+        )
+        rails
+
+
+renderPiers : Model -> List PierPlacement -> Mat4 -> List Entity
+renderPiers model piers transform =
+    List.map
+        (\pierPlacement ->
+            Render.renderPier
+                transform
+                (getPierMesh model pierPlacement.pier)
+                pierPlacement.position
+                pierPlacement.angle
+        )
+        piers
 
 
 getErrors : Model -> List String
@@ -150,21 +175,10 @@ getErrors model =
     model.errors
 
 
-flipMesh : SV.MeshAndFace -> SV.MeshAndFace
-flipMesh mesh =
-    { faces = mesh.faces
-    , vertices = List.map flipVertex mesh.vertices
-    }
-
-
-flipVertex : SV.VertexWithScalingVector -> SV.VertexWithScalingVector
-flipVertex vertex =
-    { position = flipVec3 vertex.position
-    , normal = flipVec3 vertex.normal
-    , scalingVector = flipVec3 vertex.scalingVector
-    }
-
-
-flipVec3 : Vec3 -> Vec3
-flipVec3 v =
-    Vec3.vec3 (Vec3.getX v) (negate <| Vec3.getY v) (negate <| Vec3.getZ v)
+convertVertex : OFF.Mesh -> List Attributes
+convertVertex { vertices, indices } =
+    let
+        calcNormal v =
+            3
+    in
+    List.map (\v -> { position = v, normal = calcNormal v }) vertices
