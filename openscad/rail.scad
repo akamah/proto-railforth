@@ -303,8 +303,8 @@ module single_double(flipped, inverted, divs) {
     render_rail([straight, shift], [start_mat(straight)], [end_mat(straight), end_mat(shift)], inverted);
 }
 
-module uturn() {
-    uturn = uturn_raildef(UNIT * 5, UNIT * 5/2, DOUBLE_TRACK, 64);
+module uturn(div) {
+    uturn = uturn_raildef(UNIT * 5, UNIT * 5/2, DOUBLE_TRACK, div);
     render_rail([uturn], [start_mat(uturn), end_mat(uturn)], [], false);
 }
 
@@ -348,10 +348,10 @@ module auto_point(divs) {
 }
 
 
-module double_cross(inverted) {
+module double_cross(inverted, divs) {
     straight = straight_raildef(4 * UNIT);
     next_track = translate_raildef([0, DOUBLE_TRACK, 0], straight);
-    shift = shift_raildef(4 * UNIT, DOUBLE_TRACK, 8);
+    shift = shift_raildef(4 * UNIT, DOUBLE_TRACK, divs);
     
     render_rail(
         [

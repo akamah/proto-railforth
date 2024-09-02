@@ -21,10 +21,10 @@ OpenSCADにも $fn みたいな変数はあるけれど、やや煩雑なので�
 */
 use <rail.scad>
 
-name = ""; // [straight1, straight2, straight4, straight8, curve45, curve90, outer_curve45, turnout, single_double, eight, joint, slope, auto_turnout, auto_point]
+name = ""; // [straight1, straight2, straight4, straight8, curve45, curve90, outer_curve45, turnout, single_double, double_wide, eight, joint, slope, auto_turnout, auto_point, uturn, double_cross]
 flipped = false;
 inverted = false;
-resolution = 1;
+resolution = 4;
 
 module assert_cannot_flip(name, flipped) {
   assert(flipped == false, str(name, " cannot be flipped"));
@@ -37,56 +37,49 @@ module assert_cannot_invert(name, inverted) {
 if (name == "straight1") {
   assert_cannot_flip(name, flipped);
   straight(1, inverted);
-}
-if (name == "straight2") {
+} else if (name == "straight2") {
   assert_cannot_flip(name, flipped);
   straight(2, inverted);
-}
-if (name == "straight4") {
+} else if (name == "straight4") {
   assert_cannot_flip(name, flipped);
   straight(4, inverted);
-}
-if (name == "straight8") {
+} else if (name == "straight8") {
   assert_cannot_flip(name, flipped);
   straight(8, inverted);
-}
-if (name == "curve45") {
-  curve(45, flipped, inverted, 4 * resolution);
-}
-if (name == "curve90") {
-  curve(90, flipped, inverted, 8 * resolution);
-}
-if (name == "outer_curve45") {
-  outer_curve(45, flipped, inverted, 4 * resolution);
-}
-if (name == "turnout") {
-  turnout(flipped, inverted, 4 * resolution);
-}
-if (name == "single_double") {
-  single_double(flipped, inverted, 4 * resolution);
-}
-if (name == "eight") {
-  eight(flipped, inverted, 4 * resolution);
-}
-if (name == "joint") {
+} else if (name == "curve45") {
+  curve(45, flipped, inverted, 1 * resolution);
+} else if (name == "curve90") {
+  curve(90, flipped, inverted, 2 * resolution);
+} else if (name == "outer_curve45") {
+  outer_curve(45, flipped, inverted, 1 * resolution);
+} else if (name == "turnout") {
+  turnout(flipped, inverted, 1 * resolution);
+} else if (name == "single_double") {
+  single_double(flipped, inverted, 1 * resolution);
+} else if (name == "double_wide") {
+  double_wide(flipped, inverted, 1 * resolution);
+} else if (name == "eight") {
+  eight(flipped, inverted, 1 * resolution);
+} else if (name == "joint") {
   assert_cannot_flip(name, flipped);
   joint(inverted);
-}
-if (name == "slope") {
-  slope(flipped, inverted, 4 * resolution);
-}
-if (name == "auto_turnout") {
+} else if (name == "slope") {
+  slope(flipped, inverted, 1 * resolution);
+} else if (name == "auto_turnout") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
-  auto_turnout(4 * resolution);
-}
-if (name == "auto_point") {
+  auto_turnout(1 * resolution);
+} else if (name == "auto_point") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
-  auto_point(4 * resolution);
-}
-if (name == "uturn") {
+  auto_point(1 * resolution);
+} else if (name == "uturn") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
-  uturn();
+  uturn(8 * resolution);
+} else if (name == "double_cross") {
+  assert_cannot_flip(name, flipped);
+  double_cross(inverted, 1 * resolution);
+} else {
+  assert(false, str(name, " is not a valid rail name"));
 }
