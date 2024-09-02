@@ -24,7 +24,7 @@ suite =
                     (Ok
                         { vertices =
                             [ vec3 0 0 0
-                            , vec3 1 0 0
+                            , vec3 -1 0 0
                             , vec3 0 1 0
                             , vec3 0 0 1
                             ]
@@ -40,7 +40,7 @@ suite =
                         String.join "\n"
                             [ "OFF 4 4 6"
                             , "0 0 0"
-                            , "1 0 0"
+                            , "-1 0 0"
                             , "0 1 0"
                             , "0 0 1"
                             , "3 0 1 2"

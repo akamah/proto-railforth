@@ -1,6 +1,5 @@
 module Graphics.MeshLoader exposing
-    ( Mesh
-    , Model
+    ( Model
     , Msg
     , getErrors
     , init
@@ -51,12 +50,12 @@ update msg model =
         LoadMesh name meshOrErr ->
             case meshOrErr of
                 Err e ->
-                    { model | errors = Debug.log "load mesh error" e :: model.errors }
+                    { model | errors = Debug.log ("load mesh error: " ++ name) e :: model.errors }
 
-                Ok meshWith ->
+                Ok mesh ->
                     let
                         glMesh =
-                            WebGL.indexedTriangles meshWith.vertices meshWith.indices
+                            WebGL.indexedTriangles (convertVertex mesh) mesh.indices
 
                         updatedMeshes =
                             Dict.union model.meshes <|
@@ -178,7 +177,8 @@ getErrors model =
 convertVertex : OFF.Mesh -> List Attributes
 convertVertex { vertices, indices } =
     let
+        -- dummy!
         calcNormal v =
-            3
+            v
     in
     List.map (\v -> { position = v, normal = calcNormal v }) vertices

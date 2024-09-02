@@ -27,7 +27,10 @@ load url msg =
 parse : String -> Result String Mesh
 parse input =
     Parser.run parser input
-        |> Result.mapError Parser.deadEndsToString
+        |> Result.mapError
+            (\deadends ->
+                String.join "\n" <| List.map (\deadend -> String.fromInt deadend.row ++ ", " ++ String.fromInt deadend.col) deadends
+            )
 
 
 parser : Parser Mesh
@@ -62,11 +65,11 @@ vertices n =
 vertexLine : Parser Vec3
 vertexLine =
     Parser.succeed vec3
-        |= Parser.float
+        |= float
         |. whitespaces
-        |= Parser.float
+        |= float
         |. whitespaces
-        |= Parser.float
+        |= float
         |. Parser.spaces
 
 
@@ -99,6 +102,16 @@ intOf n =
                 else
                     Parser.problem <| "required " ++ String.fromInt n ++ " but got " ++ String.fromInt x
             )
+
+
+float : Parser Float
+float =
+    Parser.oneOf
+        [ Parser.succeed negate
+            |. Parser.symbol "-"
+            |= Parser.float
+        , Parser.float
+        ]
 
 
 replicate : Int -> Parser a -> Parser (List a)
