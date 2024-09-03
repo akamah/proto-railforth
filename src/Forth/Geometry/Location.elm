@@ -125,5 +125,5 @@ toVec3 tie =
     in
     Vec3.vec3
         (singleUnit * sx + doubleUnit * dx)
+        (singleUnit * sy + doubleUnit * dy)
         (heightUnit * h)
-        -(singleUnit * sy + doubleUnit * dy)

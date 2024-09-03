@@ -22,7 +22,7 @@ type alias Uniforms =
 
 lightFromAbove : Vec3
 lightFromAbove =
-    vec3 (2.0 / 27.0) (26.0 / 27.0) (7.0 / 27.0)
+    vec3 (2.0 / 27.0) (7.0 / 27.0) (26.0 / 27.0)
 
 
 renderRail : Mat4 -> Mesh Attributes -> Vec3 -> Float -> List Entity
@@ -71,7 +71,7 @@ makeMeshMatrix origin angle =
             Mat4.makeTranslate origin
 
         rotate =
-            Mat4.makeRotate angle (vec3 0 1 0)
+            Mat4.makeRotate angle (vec3 0 0 1)
     in
     Mat4.mul position rotate
 
@@ -95,7 +95,7 @@ railVertexShader =
             highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
             // blue to green ratio. 0 <--- blue   green ---> 1.0
-            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);
+            highp float ratio = clamp(worldPosition.z / 660.0, 0.0, 1.0);
 
             const highp vec3 blue = vec3(0.12, 0.56, 1.0);
             const highp vec3 green = vec3(0.12, 1.0, 0.56);
