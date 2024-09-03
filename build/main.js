@@ -6537,6 +6537,43 @@ var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString
 
 	return _Utils_Tuple3(newOffset, row, col);
 });
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
@@ -11812,21 +11849,195 @@ var $elm$core$Basics$clamp = F3(
 	});
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
-var $author$project$Graphics$MeshLoader$convertVertex = function (_v0) {
+var $elm_explorations$linear_algebra$Math$Vector3$cross = _MJS_v3cross;
+var $elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
+			var jsArray = _v0.a;
+			var remainingItems = _v0.b;
+			if (_Utils_cmp(
+				$elm$core$Elm$JsArray$length(jsArray),
+				$elm$core$Array$branchFactor) < 0) {
+				return A2(
+					$elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					$elm$core$List$cons,
+					$elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var $elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return $elm$core$Array$empty;
+	} else {
+		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
+var $elm$core$Result$fromMaybe = F2(
+	function (err, maybe) {
+		if (maybe.$ === 'Just') {
+			var v = maybe.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			return $elm$core$Result$Err(err);
+		}
+	});
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (index >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var subTree = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _v0.a;
+				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var $elm$core$Array$get = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
+			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
+			A3($elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var $elm$core$Maybe$map3 = F4(
+	function (func, ma, mb, mc) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				if (mc.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var c = mc.a;
+					return $elm$core$Maybe$Just(
+						A3(func, a, b, c));
+				}
+			}
+		}
+	});
+var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Graphics$MeshLoader$sequence = function (list) {
+	var rec = F2(
+		function (ls, accum) {
+			if (!ls.b) {
+				return $elm$core$Result$Ok(
+					$elm$core$List$reverse(accum));
+			} else {
+				var x = ls.a;
+				var xs = ls.b;
+				return A2(
+					$elm$core$Result$andThen,
+					function (x1) {
+						return A2(
+							rec,
+							xs,
+							A2($elm$core$List$cons, x1, accum));
+					},
+					x);
+			}
+		});
+	return A2(rec, list, _List_Nil);
+};
+var $elm_explorations$linear_algebra$Math$Vector3$sub = _MJS_v3sub;
+var $author$project$Graphics$MeshLoader$convertMesh = function (_v0) {
 	var vertices = _v0.vertices;
 	var indices = _v0.indices;
-	var calcNormal = function (v) {
-		return v;
-	};
+	var verticesArray = $elm$core$Array$fromList(vertices);
+	var calcNormal = F3(
+		function (v0, v1, v2) {
+			return $elm_explorations$linear_algebra$Math$Vector3$normalize(
+				A2(
+					$elm_explorations$linear_algebra$Math$Vector3$cross,
+					A2($elm_explorations$linear_algebra$Math$Vector3$sub, v1, v0),
+					A2($elm_explorations$linear_algebra$Math$Vector3$sub, v2, v0)));
+		});
+	var calcTriangle = F2(
+		function (i, _v1) {
+			var a = _v1.a;
+			var b = _v1.b;
+			var c = _v1.c;
+			var errMsg = 'invalid face: (' + (A2(
+				$elm$core$String$join,
+				', ',
+				A2(
+					$elm$core$List$map,
+					$elm$core$String$fromInt,
+					_List_fromArray(
+						[a, b, c]))) + ')');
+			return A2(
+				$elm$core$Result$fromMaybe,
+				errMsg,
+				A4(
+					$elm$core$Maybe$map3,
+					F3(
+						function (x, y, z) {
+							var normal = A3(calcNormal, x, y, z);
+							return _Utils_Tuple2(
+								_List_fromArray(
+									[
+										{normal: normal, position: x},
+										{normal: normal, position: y},
+										{normal: normal, position: z}
+									]),
+								_Utils_Tuple3(3 * i, (3 * i) + 1, (3 * i) + 2));
+						}),
+					A2($elm$core$Array$get, a, verticesArray),
+					A2($elm$core$Array$get, b, verticesArray),
+					A2($elm$core$Array$get, c, verticesArray)));
+		});
 	return A2(
-		$elm$core$List$map,
-		function (v) {
-			return {
-				normal: calcNormal(v),
-				position: v
-			};
+		$elm$core$Result$map,
+		function (vs) {
+			return _Utils_Tuple2(
+				A2($elm$core$List$concatMap, $elm$core$Tuple$first, vs),
+				A2($elm$core$List$map, $elm$core$Tuple$second, vs));
 		},
-		vertices);
+		$author$project$Graphics$MeshLoader$sequence(
+			A2($elm$core$List$indexedMap, calcTriangle, indices)));
 };
 var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 	function (a, b, c) {
@@ -11851,22 +12062,35 @@ var $author$project$Graphics$MeshLoader$update = F2(
 				});
 		} else {
 			var mesh = meshOrErr.a;
-			var glMesh = A2(
-				$elm_explorations$webgl$WebGL$indexedTriangles,
-				$author$project$Graphics$MeshLoader$convertVertex(mesh),
-				mesh.indices);
-			var updatedMeshes = A2(
-				$elm$core$Dict$union,
-				model.meshes,
-				$elm$core$Dict$fromList(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(name, glMesh)
-						])));
-			var _v2 = A2($elm$core$Debug$log, 'MeshLoader.update', name);
-			return _Utils_update(
-				model,
-				{meshes: updatedMeshes});
+			var _v2 = $author$project$Graphics$MeshLoader$convertMesh(mesh);
+			if (_v2.$ === 'Err') {
+				var e = _v2.a;
+				return _Utils_update(
+					model,
+					{
+						errors: A2(
+							$elm$core$List$cons,
+							A2($elm$core$Debug$log, 'parse mesh error: ' + name, e),
+							model.errors)
+					});
+			} else {
+				var _v3 = _v2.a;
+				var vertices = _v3.a;
+				var indices = _v3.b;
+				var updatedMeshes = A2(
+					$elm$core$Dict$union,
+					model.meshes,
+					$elm$core$Dict$fromList(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								name,
+								A2($elm_explorations$webgl$WebGL$indexedTriangles, vertices, indices))
+							])));
+				return _Utils_update(
+					model,
+					{meshes: updatedMeshes});
+			}
 		}
 	});
 var $author$project$Graphics$OrbitControl$Rotating = function (a) {

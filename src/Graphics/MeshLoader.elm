@@ -9,11 +9,12 @@ module Graphics.MeshLoader exposing
     , update
     )
 
+import Array
 import Dict exposing (Dict)
 import Graphics.OFF as OFF
 import Graphics.Render as Render
 import Math.Matrix4 exposing (Mat4)
-import Math.Vector3 exposing (Vec3)
+import Math.Vector3 as Vec3 exposing (Vec3)
 import Types.Pier as Pier exposing (Pier)
 import Types.PierPlacement exposing (PierPlacement)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -53,17 +54,19 @@ update msg model =
                     { model | errors = Debug.log ("load mesh error: " ++ name) e :: model.errors }
 
                 Ok mesh ->
-                    let
-                        glMesh =
-                            WebGL.indexedTriangles (convertVertex mesh) mesh.indices
+                    case convertMesh mesh of
+                        Err e ->
+                            { model | errors = Debug.log ("parse mesh error: " ++ name) e :: model.errors }
 
-                        updatedMeshes =
-                            Dict.union model.meshes <|
-                                Dict.fromList
-                                    [ ( name, glMesh )
-                                    ]
-                    in
-                    { model | meshes = updatedMeshes }
+                        Ok ( vertices, indices ) ->
+                            let
+                                updatedMeshes =
+                                    Dict.union model.meshes <|
+                                        Dict.fromList
+                                            [ ( name, WebGL.indexedTriangles vertices indices )
+                                            ]
+                            in
+                            { model | meshes = updatedMeshes }
 
 
 {-| pass only safe constant strings
@@ -174,11 +177,60 @@ getErrors model =
     model.errors
 
 
-convertVertex : OFF.Mesh -> List Attributes
-convertVertex { vertices, indices } =
+sequence : List (Result a b) -> Result a (List b)
+sequence list =
     let
-        -- dummy!
-        calcNormal v =
-            v
+        rec ls accum =
+            case ls of
+                [] ->
+                    Ok (List.reverse accum)
+
+                x :: xs ->
+                    x |> Result.andThen (\x1 -> rec xs (x1 :: accum))
     in
-    List.map (\v -> { position = v, normal = calcNormal v }) vertices
+    rec list []
+
+
+{-| OFFパーサの結果には法線ベクトルが含まれていないので付与する
+-}
+convertMesh : OFF.Mesh -> Result String ( List Attributes, List ( Int, Int, Int ) )
+convertMesh { vertices, indices } =
+    let
+        -- O(1) for getting i-th element of vertices
+        verticesArray =
+            Array.fromList vertices
+
+        calcNormal v0 v1 v2 =
+            Vec3.normalize (Vec3.cross (Vec3.sub v1 v0) (Vec3.sub v2 v0))
+
+        calcTriangle i ( a, b, c ) =
+            let
+                errMsg =
+                    "invalid face: (" ++ String.join ", " (List.map String.fromInt [ a, b, c ]) ++ ")"
+            in
+            Maybe.map3
+                (\x y z ->
+                    let
+                        normal =
+                            calcNormal x y z
+                    in
+                    ( [ { position = x, normal = normal }
+                      , { position = y, normal = normal }
+                      , { position = z, normal = normal }
+                      ]
+                    , ( 3 * i, 3 * i + 1, 3 * i + 2 )
+                    )
+                )
+                (Array.get a verticesArray)
+                (Array.get b verticesArray)
+                (Array.get c verticesArray)
+                |> Result.fromMaybe errMsg
+    in
+    List.indexedMap calcTriangle indices
+        |> sequence
+        |> Result.map
+            (\vs ->
+                ( List.concatMap Tuple.first vs
+                , List.map Tuple.second vs
+                )
+            )
