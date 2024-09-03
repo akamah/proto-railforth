@@ -112,17 +112,20 @@ makeTransform (Model model) =
         h =
             model.scale * model.viewportHeight / 2
 
+        eyeDistance =
+            10000
+
         cameraClipDistance =
             100000
 
         x =
-            cos model.altitude * cos model.azimuth
+            eyeDistance * cos model.altitude * cos model.azimuth
 
         y =
-            cos model.altitude * sin model.azimuth
+            eyeDistance * cos model.altitude * sin model.azimuth
 
         z =
-            sin model.altitude
+            eyeDistance * sin model.altitude
     in
     Mat4.mul
         (Mat4.makeOrtho -w w -h h -cameraClipDistance cameraClipDistance)
