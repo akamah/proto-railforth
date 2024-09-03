@@ -7395,11 +7395,12 @@ var $elm$core$Basics$sin = _Basics_sin;
 var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
 var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
 	var model = _v0.a;
-	var z = $elm$core$Basics$sin(model.altitude);
-	var y = $elm$core$Basics$cos(model.altitude) * $elm$core$Basics$sin(model.azimuth);
-	var x = $elm$core$Basics$cos(model.altitude) * $elm$core$Basics$cos(model.azimuth);
 	var w = (model.scale * model.viewportWidth) / 2;
 	var h = (model.scale * model.viewportHeight) / 2;
+	var eyeDistance = 10000;
+	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
+	var y = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$sin(model.azimuth);
+	var z = eyeDistance * $elm$core$Basics$sin(model.altitude);
 	var cameraClipDistance = 100000;
 	return A2(
 		$elm_explorations$linear_algebra$Math$Matrix4$mul,
@@ -7833,7 +7834,7 @@ var $author$project$Types$Rail$toStringWith = F3(
 				return 'eight' + (inverted(inv) + flipped(flip));
 			case 'JointChange':
 				var inv = rail.a;
-				return 'pole' + inverted(inv);
+				return 'joint' + inverted(inv);
 			case 'Slope':
 				var flip = rail.a;
 				var inv = rail.b;
@@ -10557,8 +10558,51 @@ var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 	function (a, b) {
 		return {$: 'LoadMesh', a: a, b: b};
 	});
-var $author$project$Graphics$MeshLoader$allMeshNames = _List_fromArray(
-	['straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'straight8_minus', 'straight8_plus', 'curve45_minus', 'curve45_plus', 'curve45_minus_flip', 'curve45_plus_flip', 'curve90_minus', 'curve90_plus', 'curve90_minus_flip', 'curve90_plus_flip', 'outer_curve45_minus', 'outer_curve45_plus', 'turnout_minus', 'turnout_plus', 'single_double_minus', 'single_double_plus', 'eight_minus', 'eight_plus', 'joint_minus', 'joint_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'auto_turnout_minus', 'auto_point_minus', 'pier', 'pier_wide', 'pier_4']);
+var $author$project$Types$Rail$allRails = _Utils_ap(
+	_List_fromArray(
+		[$author$project$Types$Rail$SlopeCurveA, $author$project$Types$Rail$SlopeCurveB, $author$project$Types$Rail$AutoTurnout, $author$project$Types$Rail$AutoPoint]),
+	_Utils_ap(
+		A2(
+			$elm$core$List$concatMap,
+			function (invert) {
+				return _List_fromArray(
+					[
+						$author$project$Types$Rail$Straight1(invert),
+						$author$project$Types$Rail$Straight2(invert),
+						$author$project$Types$Rail$Straight4(invert),
+						$author$project$Types$Rail$Straight8(invert),
+						$author$project$Types$Rail$JointChange(invert),
+						$author$project$Types$Rail$Stop(invert)
+					]);
+			},
+			_List_fromArray(
+				[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted])),
+		A2(
+			$elm$core$List$concatMap,
+			function (invert) {
+				return A2(
+					$elm$core$List$concatMap,
+					function (flip) {
+						return _List_fromArray(
+							[
+								A2($author$project$Types$Rail$Curve45, flip, invert),
+								A2($author$project$Types$Rail$Curve90, flip, invert),
+								A2($author$project$Types$Rail$OuterCurve45, flip, invert),
+								A2($author$project$Types$Rail$Turnout, flip, invert),
+								A2($author$project$Types$Rail$SingleDouble, flip, invert),
+								A2($author$project$Types$Rail$EightPoint, flip, invert),
+								A2($author$project$Types$Rail$Slope, flip, invert)
+							]);
+					},
+					_List_fromArray(
+						[$author$project$Types$Rail$Flipped, $author$project$Types$Rail$NotFlipped]));
+			},
+			_List_fromArray(
+				[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted]))));
+var $author$project$Graphics$MeshLoader$allMeshNames = _Utils_ap(
+	A2($elm$core$List$map, $author$project$Types$Rail$toString, $author$project$Types$Rail$allRails),
+	_List_fromArray(
+		['pier', 'pier_wide', 'pier_4']));
 var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.off');
 };

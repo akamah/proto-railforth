@@ -2,6 +2,7 @@ module Types.Rail exposing
     ( IsFlipped(..)
     , IsInverted(..)
     , Rail(..)
+    , allRails
     , canInvert
     , isFlippedToString
     , isInvertedToString
@@ -152,7 +153,7 @@ toStringWith flipped inverted rail =
             "eight" ++ inverted inv ++ flipped flip
 
         JointChange inv ->
-            "pole" ++ inverted inv
+            "joint" ++ inverted inv
 
         Slope flip inv ->
             "slope" ++ inverted inv ++ flipped flip
@@ -191,3 +192,41 @@ isFlippedToString isFlipped =
 
         Flipped ->
             "_flip"
+
+
+allRails : List (Rail IsInverted IsFlipped)
+allRails =
+    [ SlopeCurveA
+    , SlopeCurveB
+    , AutoTurnout
+    , AutoPoint
+    ]
+        ++ ([ Inverted, NotInverted ]
+                |> List.concatMap
+                    (\invert ->
+                        [ Straight1 invert
+                        , Straight2 invert
+                        , Straight4 invert
+                        , Straight8 invert
+                        , JointChange invert
+                        , Stop invert
+                        ]
+                    )
+           )
+        ++ ([ Inverted, NotInverted ]
+                |> List.concatMap
+                    (\invert ->
+                        [ Flipped, NotFlipped ]
+                            |> List.concatMap
+                                (\flip ->
+                                    [ Curve45 flip invert
+                                    , Curve90 flip invert
+                                    , OuterCurve45 flip invert
+                                    , Turnout flip invert
+                                    , SingleDouble flip invert
+                                    , EightPoint flip invert
+                                    , Slope flip invert
+                                    ]
+                                )
+                    )
+           )

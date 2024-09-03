@@ -17,7 +17,7 @@ import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3)
 import Types.Pier as Pier exposing (Pier)
 import Types.PierPlacement exposing (PierPlacement)
-import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
+import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailPlacement exposing (RailPlacement)
 import WebGL exposing (Entity, Mesh)
 
@@ -82,44 +82,11 @@ since the definition of (Rail -> String) is moved to Rail module
 -}
 allMeshNames : List String
 allMeshNames =
-    [ "straight1_minus"
-    , "straight1_plus"
-    , "straight2_minus"
-    , "straight2_plus"
-    , "straight4_minus"
-    , "straight4_plus"
-    , "straight8_minus"
-    , "straight8_plus"
-    , "curve45_minus"
-    , "curve45_plus"
-    , "curve45_minus_flip"
-    , "curve45_plus_flip"
-    , "curve90_minus"
-    , "curve90_plus"
-    , "curve90_minus_flip"
-    , "curve90_plus_flip"
-    , "outer_curve45_minus"
-    , "outer_curve45_plus"
-    , "turnout_minus"
-    , "turnout_plus"
-    , "single_double_minus"
-    , "single_double_plus"
-    , "eight_minus"
-    , "eight_plus"
-    , "joint_minus"
-    , "joint_plus"
-    , "stop_minus"
-    , "stop_plus"
-    , "slope_minus"
-    , "slope_plus"
-    , "slopecurveA_plus"
-    , "slopecurveB_minus"
-    , "auto_turnout_minus"
-    , "auto_point_minus"
-    , "pier"
-    , "pier_wide"
-    , "pier_4"
-    ]
+    List.map Rail.toString Rail.allRails
+        ++ [ "pier"
+           , "pier_wide"
+           , "pier_4"
+           ]
 
 
 loadMeshCmd : (Msg -> msg) -> Cmd msg
@@ -140,7 +107,7 @@ dummyMesh =
 
 getRailMesh : Model -> Rail IsInverted IsFlipped -> Mesh Render.Attributes
 getRailMesh model rail =
-    Dict.get (Types.Rail.toString rail) model.meshes
+    Dict.get (Rail.toString rail) model.meshes
         |> Maybe.withDefault dummyMesh
 
 
