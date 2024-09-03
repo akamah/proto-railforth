@@ -26,6 +26,8 @@ flipped = false;
 inverted = false;
 resolution = 4;
 
+echo([name, flipped, inverted, resolution]);
+
 module assert_cannot_flip(name, flipped) {
   assert(flipped == false, str(name, " cannot be flipped"));
 }

@@ -22,7 +22,6 @@ local rails = {
     'turnout',
     'single_double',
     'eight',
-    'joint',
     'slope',
   ],
 };
@@ -32,9 +31,9 @@ local gen_name(rail, flip, invert) =
 
 local gen_value(rail, flip, invert) = {
   name: rail,
-  flip: flip,
-  invert: invert,
-  resolution: 2,
+  flipped: flip,
+  inverted: invert,
+  resolution: 4,
 };
 
 local main() =
