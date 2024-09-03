@@ -7395,12 +7395,11 @@ var $elm$core$Basics$sin = _Basics_sin;
 var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
 var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
 	var model = _v0.a;
+	var z = $elm$core$Basics$sin(model.altitude);
+	var y = $elm$core$Basics$cos(model.altitude) * $elm$core$Basics$sin(model.azimuth);
+	var x = $elm$core$Basics$cos(model.altitude) * $elm$core$Basics$cos(model.azimuth);
 	var w = (model.scale * model.viewportWidth) / 2;
 	var h = (model.scale * model.viewportHeight) / 2;
-	var eyeDistance = 10000;
-	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
-	var y = eyeDistance * $elm$core$Basics$sin(model.altitude);
-	var z = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * (-$elm$core$Basics$sin(model.azimuth));
 	var cameraClipDistance = 100000;
 	return A2(
 		$elm_explorations$linear_algebra$Math$Matrix4$mul,
@@ -7412,7 +7411,7 @@ var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
 				model.target,
 				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
 			model.target,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0)));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1)));
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -7723,7 +7722,7 @@ var $elm_explorations$webgl$WebGL$Settings$FaceMode = function (a) {
 	return {$: 'FaceMode', a: a};
 };
 var $elm_explorations$webgl$WebGL$Settings$front = $elm_explorations$webgl$WebGL$Settings$FaceMode(1028);
-var $author$project$Graphics$Render$lightFromAbove = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2.0 / 27.0, 26.0 / 27.0, 7.0 / 27.0);
+var $author$project$Graphics$Render$lightFromAbove = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2.0 / 27.0, 7.0 / 27.0, 26.0 / 27.0);
 var $elm_explorations$linear_algebra$Math$Matrix4$makeRotate = _MJS_m4x4makeRotate;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate = _MJS_m4x4makeTranslate;
 var $author$project$Graphics$Render$makeMeshMatrix = F2(
@@ -7731,7 +7730,7 @@ var $author$project$Graphics$Render$makeMeshMatrix = F2(
 		var rotate = A2(
 			$elm_explorations$linear_algebra$Math$Matrix4$makeRotate,
 			angle,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1));
 		var position = $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate(origin);
 		return A2($elm_explorations$linear_algebra$Math$Matrix4$mul, position, rotate);
 	});
@@ -7870,7 +7869,7 @@ var $author$project$Graphics$Render$railFragmentShader = {
 	uniforms: {}
 };
 var $author$project$Graphics$Render$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition.z / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position'},
 	uniforms: {cameraTransform: 'cameraTransform', light: 'light', modelTransform: 'modelTransform'}
 };
@@ -8931,7 +8930,7 @@ var $author$project$Forth$Geometry$Location$toVec3 = function (tie) {
 	var _v1 = $author$project$Forth$Geometry$Rot45$toFloat(tie._double);
 	var dx = _v1.a;
 	var dy = _v1.b;
-	return A3($elm_explorations$linear_algebra$Math$Vector3$vec3, (singleUnit * sx) + (doubleUnit * dx), heightUnit * h, -((singleUnit * sy) + (doubleUnit * dy)));
+	return A3($elm_explorations$linear_algebra$Math$Vector3$vec3, (singleUnit * sx) + (doubleUnit * dx), (singleUnit * sy) + (doubleUnit * dy), heightUnit * h);
 };
 var $author$project$Forth$Geometry$PierLocation$toVec3 = function (loc) {
 	return $author$project$Forth$Geometry$Location$toVec3(loc.location);
@@ -10559,7 +10558,7 @@ var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 		return {$: 'LoadMesh', a: a, b: b};
 	});
 var $author$project$Graphics$MeshLoader$allMeshNames = _List_fromArray(
-	['straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'straight8_minus', 'straight8_plus', 'curve45_minus', 'curve45_plus', 'curve90_minus', 'curve90_plus', 'outer_curve45_minus', 'outer_curve45_plus', 'turnout_minus', 'turnout_plus', 'single_double_minus', 'single_double_plus', 'eight_minus', 'eight_plus', 'joint_minus', 'joint_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'auto_turnout_minus', 'auto_point_minus', 'pier', 'pier_wide', 'pier_4']);
+	['straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'straight8_minus', 'straight8_plus', 'curve45_minus', 'curve45_plus', 'curve45_minus_flip', 'curve45_plus_flip', 'curve90_minus', 'curve90_plus', 'curve90_minus_flip', 'curve90_plus_flip', 'outer_curve45_minus', 'outer_curve45_plus', 'turnout_minus', 'turnout_plus', 'single_double_minus', 'single_double_plus', 'eight_minus', 'eight_plus', 'joint_minus', 'joint_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'auto_turnout_minus', 'auto_point_minus', 'pier', 'pier_wide', 'pier_4']);
 var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.off');
 };
@@ -12138,11 +12137,11 @@ var $author$project$Graphics$OrbitControl$doPanning = F4(
 		var tanx = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$scale,
 			os * dx,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, sa, 0, ca));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, sa, -ca, 0));
 		var tany = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$scale,
 			os * dy,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ca * sb, -cb, -(sa * sb)));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ca * sb, sa * sb, -cb));
 		var trans = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$add,
 			model.target,

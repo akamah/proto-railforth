@@ -112,24 +112,21 @@ makeTransform (Model model) =
         h =
             model.scale * model.viewportHeight / 2
 
-        eyeDistance =
-            10000
-
         cameraClipDistance =
             100000
 
         x =
-            eyeDistance * cos model.altitude * cos model.azimuth
+            cos model.altitude * cos model.azimuth
 
         y =
-            eyeDistance * sin model.altitude
+            cos model.altitude * sin model.azimuth
 
         z =
-            eyeDistance * cos model.altitude * -(sin model.azimuth)
+            sin model.altitude
     in
     Mat4.mul
         (Mat4.makeOrtho -w w -h h -cameraClipDistance cameraClipDistance)
-        (Mat4.makeLookAt (Vec3.add model.target (vec3 x y z)) model.target (vec3 0 1 0))
+        (Mat4.makeLookAt (Vec3.add model.target (vec3 x y z)) model.target (vec3 0 0 1))
 
 
 isDragging : Model -> Bool
@@ -196,10 +193,10 @@ doPanning model newState ( x0, y0 ) ( x, y ) =
             sin model.altitude
 
         tanx =
-            Vec3.scale (os * dx) (vec3 sa 0 ca)
+            Vec3.scale (os * dx) (vec3 sa -ca 0)
 
         tany =
-            Vec3.scale (os * dy) (vec3 (ca * sb) -cb -(sa * sb))
+            Vec3.scale (os * dy) (vec3 (ca * sb) (sa * sb) -cb)
 
         trans =
             Vec3.add model.target (Vec3.add tanx tany)
