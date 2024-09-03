@@ -1,9 +1,9 @@
-#!/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
-ASSETS_DIR=$ROOT_DIR/assets2
+ASSETS_DIR=$ROOT_DIR/assets
 OPENSCAD_DIR=$ROOT_DIR/openscad
 
 parameters_file=$(mktemp)

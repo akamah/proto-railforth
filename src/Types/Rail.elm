@@ -122,31 +122,31 @@ toStringWith : (flipped -> String) -> (inverted -> String) -> Rail inverted flip
 toStringWith flipped inverted rail =
     case rail of
         Straight1 inv ->
-            "straight4" ++ inverted inv
+            "straight1" ++ inverted inv
 
         Straight2 inv ->
             "straight2" ++ inverted inv
 
         Straight4 inv ->
-            "straight1" ++ inverted inv
+            "straight4" ++ inverted inv
 
         Straight8 inv ->
-            "straight0" ++ inverted inv
+            "straight8" ++ inverted inv
 
         Curve45 flip inv ->
-            "curve8" ++ inverted inv ++ flipped flip
+            "curve45" ++ inverted inv ++ flipped flip
 
         Curve90 flip inv ->
-            "curve4" ++ inverted inv ++ flipped flip
+            "curve90" ++ inverted inv ++ flipped flip
 
         OuterCurve45 flip inv ->
-            "outercurve" ++ inverted inv ++ flipped flip
+            "outer_curve45" ++ inverted inv ++ flipped flip
 
         Turnout flip inv ->
             "turnout" ++ inverted inv ++ flipped flip
 
         SingleDouble flip inv ->
-            "singledouble" ++ inverted inv ++ flipped flip
+            "single_double" ++ inverted inv ++ flipped flip
 
         EightPoint flip inv ->
             "eight" ++ inverted inv ++ flipped flip
@@ -167,10 +167,10 @@ toStringWith flipped inverted rail =
             "stop" ++ inverted inv
 
         AutoTurnout ->
-            "autoturnout_minus"
+            "auto_turnout_minus"
 
         AutoPoint ->
-            "autopoint_minus"
+            "auto_point_minus"
 
 
 isInvertedToString : IsInverted -> String

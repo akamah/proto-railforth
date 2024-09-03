@@ -7798,28 +7798,28 @@ var $author$project$Types$Rail$toStringWith = F3(
 		switch (rail.$) {
 			case 'Straight1':
 				var inv = rail.a;
-				return 'straight4' + inverted(inv);
+				return 'straight1' + inverted(inv);
 			case 'Straight2':
 				var inv = rail.a;
 				return 'straight2' + inverted(inv);
 			case 'Straight4':
 				var inv = rail.a;
-				return 'straight1' + inverted(inv);
+				return 'straight4' + inverted(inv);
 			case 'Straight8':
 				var inv = rail.a;
-				return 'straight0' + inverted(inv);
+				return 'straight8' + inverted(inv);
 			case 'Curve45':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'curve8' + (inverted(inv) + flipped(flip));
+				return 'curve45' + (inverted(inv) + flipped(flip));
 			case 'Curve90':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'curve4' + (inverted(inv) + flipped(flip));
+				return 'curve90' + (inverted(inv) + flipped(flip));
 			case 'OuterCurve45':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'outercurve' + (inverted(inv) + flipped(flip));
+				return 'outer_curve45' + (inverted(inv) + flipped(flip));
 			case 'Turnout':
 				var flip = rail.a;
 				var inv = rail.b;
@@ -7827,7 +7827,7 @@ var $author$project$Types$Rail$toStringWith = F3(
 			case 'SingleDouble':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'singledouble' + (inverted(inv) + flipped(flip));
+				return 'single_double' + (inverted(inv) + flipped(flip));
 			case 'EightPoint':
 				var flip = rail.a;
 				var inv = rail.b;
@@ -7847,9 +7847,9 @@ var $author$project$Types$Rail$toStringWith = F3(
 				var inv = rail.a;
 				return 'stop' + inverted(inv);
 			case 'AutoTurnout':
-				return 'autoturnout_minus';
+				return 'auto_turnout_minus';
 			default:
-				return 'autopoint_minus';
+				return 'auto_point_minus';
 		}
 	});
 var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
@@ -10559,7 +10559,7 @@ var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 		return {$: 'LoadMesh', a: a, b: b};
 	});
 var $author$project$Graphics$MeshLoader$allMeshNames = _List_fromArray(
-	['straight0_minus', 'straight0_plus', 'straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'curve8_minus', 'curve8_plus', 'curve4_minus', 'curve4_plus', 'outercurve_minus', 'outercurve_plus', 'turnout_minus', 'turnout_plus', 'singledouble_minus', 'singledouble_plus', 'eight_minus', 'eight_plus', 'pole_minus', 'pole_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'autoturnout_minus', 'autopoint_minus', 'pier', 'pier_wide', 'pier_4']);
+	['straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'straight8_minus', 'straight8_plus', 'curve45_minus', 'curve45_plus', 'curve90_minus', 'curve90_plus', 'outer_curve45_minus', 'outer_curve45_plus', 'turnout_minus', 'turnout_plus', 'single_double_minus', 'single_double_plus', 'eight_minus', 'eight_plus', 'joint_minus', 'joint_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'auto_turnout_minus', 'auto_point_minus', 'pier', 'pier_wide', 'pier_4']);
 var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.off');
 };
