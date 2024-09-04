@@ -53,7 +53,7 @@ renderPier cameraTransform mesh origin angle =
     in
     WebGL.entityWith
         [ WebGL.Settings.DepthTest.default
-        , WebGL.Settings.cullFace WebGL.Settings.front
+        , WebGL.Settings.cullFace WebGL.Settings.back
         ]
         pierVertexShader
         pierFragmentShader
@@ -140,9 +140,9 @@ pierVertexShader =
             highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
             highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
-            const highp vec3 yellow = vec3(1.0, 1.0, 0.3);
+            const highp vec3 yellow = vec3(1.0, 0.85, 0.3);
             highp float lambertFactor = dot(worldNormal, vec4(light, 0));
-            highp float intensity = 0.7 + 0.3 * lambertFactor;
+            highp float intensity = 0.5 + 0.5 * lambertFactor;
             color = intensity * yellow;
 
             gl_Position = cameraTransform * worldPosition;
