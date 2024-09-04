@@ -339,7 +339,17 @@ module slope(flipped, inverted, divs) {
 module auto_turnout(divs) {
     straight = straight_raildef(6 * UNIT);
     curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, 0, divs));
-    render_rail([straight, curve], [start_mat(straight)], [end_mat(straight), end_mat(curve)], false);
+    union() {
+        render_rail([straight, curve], [start_mat(straight)], [end_mat(straight), end_mat(curve)], false);
+
+        // 飾り
+        translate([30, 0, 0]) {
+            cube([200, 60, THICKNESS / 2]);
+        }
+        translate([60, 30, 1]) {
+            cube([60, 20, THICKNESS]);
+        }
+    }
 }
 
 module auto_point(divs) {
@@ -443,6 +453,9 @@ module render_pier(depth, roofWidth, pillarWidth, baseWidth, roofHeight, pillarH
         }
     }
 }
+
+
+
 
 PIER_DEPTH = 30;
 PIER_PILLAR_WIDTH = 12;
