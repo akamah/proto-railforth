@@ -159,19 +159,19 @@ toStringWith flipped inverted rail =
             "slope" ++ inverted inv ++ flipped flip
 
         SlopeCurveA ->
-            "slopecurveA_plus"
+            "slopecurveA"
 
         SlopeCurveB ->
-            "slopecurveB_minus"
+            "slopecurveB"
 
         Stop inv ->
             "stop" ++ inverted inv
 
         AutoTurnout ->
-            "auto_turnout_minus"
+            "auto_turnout"
 
         AutoPoint ->
-            "auto_point_minus"
+            "auto_point"
 
 
 isInvertedToString : IsInverted -> String

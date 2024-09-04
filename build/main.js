@@ -7840,16 +7840,16 @@ var $author$project$Types$Rail$toStringWith = F3(
 				var inv = rail.b;
 				return 'slope' + (inverted(inv) + flipped(flip));
 			case 'SlopeCurveA':
-				return 'slopecurveA_plus';
+				return 'slopecurveA';
 			case 'SlopeCurveB':
-				return 'slopecurveB_minus';
+				return 'slopecurveB';
 			case 'Stop':
 				var inv = rail.a;
 				return 'stop' + inverted(inv);
 			case 'AutoTurnout':
-				return 'auto_turnout_minus';
+				return 'auto_turnout';
 			default:
-				return 'auto_point_minus';
+				return 'auto_point';
 		}
 	});
 var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
