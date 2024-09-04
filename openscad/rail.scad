@@ -479,7 +479,13 @@ module pier_double() {
 }
 
 module pier_mini() {
-    translate([-PIER_DEPTH/2, -PIER_ROOF_WIDTH/2, 0]) {
-        cube([PIER_DEPTH, PIER_ROOF_WIDTH, PIER_UNIT - PIER_MARGIN]);
+    difference() {
+        translate([-PIER_DEPTH/2, -PIER_ROOF_WIDTH/2, 0]) {
+            cube([PIER_DEPTH, PIER_ROOF_WIDTH, PIER_UNIT - PIER_MARGIN]);
+        }
+
+        translate([-PIER_DEPTH, -WIDTH/2, -THICKNESS]) {
+            cube([2 * PIER_DEPTH, WIDTH, 2*THICKNESS]);
+        }
     }
 }
