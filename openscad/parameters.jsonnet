@@ -27,6 +27,7 @@ local rails = {
     'outer_curve45',
     'turnout',
     'single_double',
+    'double_wide',
     'eight',
     'slope',
   ],
