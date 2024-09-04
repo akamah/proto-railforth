@@ -121,6 +121,14 @@ railForthGlossary =
         , ( "dr", executePlaceRail (SingleDouble Flipped ()) 0 )
         , ( "dr1", executePlaceRail (SingleDouble Flipped ()) 1 )
         , ( "dr2", executePlaceRail (SingleDouble Flipped ()) 2 )
+        , ( "dwl", executePlaceRail (DoubleWide NotFlipped ()) 0 )
+        , ( "dwl1", executePlaceRail (DoubleWide NotFlipped ()) 1 )
+        , ( "dwl2", executePlaceRail (DoubleWide NotFlipped ()) 2 )
+        , ( "dwl3", executePlaceRail (DoubleWide NotFlipped ()) 3 )
+        , ( "dwr", executePlaceRail (DoubleWide Flipped ()) 0 )
+        , ( "dwr1", executePlaceRail (DoubleWide Flipped ()) 1 )
+        , ( "dwr2", executePlaceRail (DoubleWide Flipped ()) 2 )
+        , ( "dwr3", executePlaceRail (DoubleWide Flipped ()) 3 )
         , ( "el", executePlaceRail (EightPoint NotFlipped ()) 0 )
         , ( "el1", executePlaceRail (EightPoint NotFlipped ()) 1 )
         , ( "el2", executePlaceRail (EightPoint NotFlipped ()) 2 )
@@ -142,6 +150,8 @@ railForthGlossary =
         , ( "ap1", executePlaceRail AutoPoint 1 )
         , ( "ap2", executePlaceRail AutoPoint 2 )
         , ( "ap3", executePlaceRail AutoPoint 3 )
+        , ( "uturn", executePlaceRail UTurn 0 )
+        , ( "uturn1", executePlaceRail UTurn 1 )
         , ( "ascend", executeAscend 4 )
         ]
 

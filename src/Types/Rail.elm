@@ -44,6 +44,7 @@ type Rail invert flip
     | OuterCurve45 flip invert
     | Turnout flip invert
     | SingleDouble flip invert
+    | DoubleWide flip invert
     | EightPoint flip invert
     | JointChange invert
     | Slope flip invert
@@ -52,6 +53,7 @@ type Rail invert flip
     | Stop invert
     | AutoTurnout
     | AutoPoint
+    | UTurn
 
 
 canInvert : Rail invert flip -> Bool
@@ -86,6 +88,9 @@ map f rail =
         SingleDouble a b ->
             SingleDouble a (f b)
 
+        DoubleWide a b ->
+            DoubleWide a (f b)
+
         EightPoint a b ->
             EightPoint a (f b)
 
@@ -112,6 +117,9 @@ map f rail =
 
         AutoPoint ->
             AutoPoint
+
+        UTurn ->
+            UTurn
 
 
 toString : Rail IsInverted IsFlipped -> String
@@ -149,6 +157,9 @@ toStringWith flipped inverted rail =
         SingleDouble flip inv ->
             "single_double" ++ inverted inv ++ flipped flip
 
+        DoubleWide flip inv ->
+            "double_wide" ++ inverted inv ++ flipped flip
+
         EightPoint flip inv ->
             "eight" ++ inverted inv ++ flipped flip
 
@@ -172,6 +183,9 @@ toStringWith flipped inverted rail =
 
         AutoPoint ->
             "auto_point"
+
+        UTurn ->
+            "uturn"
 
 
 isInvertedToString : IsInverted -> String
@@ -200,6 +214,7 @@ allRails =
     , SlopeCurveB
     , AutoTurnout
     , AutoPoint
+    , UTurn
     ]
         ++ ([ Inverted, NotInverted ]
                 |> List.concatMap
@@ -224,6 +239,7 @@ allRails =
                                     , OuterCurve45 flip invert
                                     , Turnout flip invert
                                     , SingleDouble flip invert
+                                    , DoubleWide flip invert
                                     , EightPoint flip invert
                                     , Slope flip invert
                                     ]
