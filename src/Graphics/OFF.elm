@@ -28,8 +28,15 @@ parse : String -> Result String Mesh
 parse input =
     Parser.run parser input
         |> Result.mapError
-            (\deadends ->
-                String.join "\n" <| List.map (\deadend -> String.fromInt deadend.row ++ ", " ++ String.fromInt deadend.col) deadends
+            (List.map
+                (\deadend ->
+                    "dead end at (line, col) = ("
+                        ++ String.fromInt deadend.row
+                        ++ ", "
+                        ++ String.fromInt deadend.col
+                        ++ ")"
+                )
+                >> String.join "\n"
             )
 
 
@@ -75,32 +82,39 @@ vertexLine =
 
 facets : Int -> Parser (List ( Int, Int, Int ))
 facets n =
-    replicate n facetLine
+    Parser.map List.concat <| replicate n facetLine
 
 
-facetLine : Parser ( Int, Int, Int )
+facetLine : Parser (List ( Int, Int, Int ))
 facetLine =
-    Parser.succeed (\a b c -> ( a, b, c ))
-        |. intOf 3
-        |. whitespaces
-        |= Parser.int
-        |. whitespaces
-        |= Parser.int
-        |. whitespaces
-        |= Parser.int
-        |. Parser.spaces
-
-
-intOf : Int -> Parser Int
-intOf n =
     Parser.int
         |> Parser.andThen
-            (\x ->
-                if x == n then
-                    Parser.succeed n
+            (\count ->
+                case count of
+                    3 ->
+                        Parser.succeed (\a b c -> [ ( a, b, c ) ])
+                            |. whitespaces
+                            |= Parser.int
+                            |. whitespaces
+                            |= Parser.int
+                            |. whitespaces
+                            |= Parser.int
+                            |. Parser.spaces
 
-                else
-                    Parser.problem <| "required " ++ String.fromInt n ++ " but got " ++ String.fromInt x
+                    4 ->
+                        Parser.succeed (\a b c d -> [ ( a, b, c ), ( a, c, d ) ])
+                            |. whitespaces
+                            |= Parser.int
+                            |. whitespaces
+                            |= Parser.int
+                            |. whitespaces
+                            |= Parser.int
+                            |. Parser.spaces
+                            |= Parser.int
+                            |. Parser.spaces
+
+                    _ ->
+                        Parser.problem <| "required 3 or 4 but got " ++ String.fromInt count
             )
 
 

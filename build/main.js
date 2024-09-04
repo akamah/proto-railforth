@@ -10662,6 +10662,11 @@ var $elm$core$Result$mapError = F2(
 				f(e));
 		}
 	});
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
 		return {$: 'Bad', a: a, b: b};
@@ -10920,6 +10925,11 @@ var $elm$parser$Parser$Advanced$int = F2(
 			});
 	});
 var $elm$parser$Parser$int = A2($elm$parser$Parser$Advanced$int, $elm$parser$Parser$ExpectingInt, $elm$parser$Parser$ExpectingInt);
+var $elm$parser$Parser$Advanced$keeper = F2(
+	function (parseFunc, parseArg) {
+		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$apL, parseFunc, parseArg);
+	});
+var $elm$parser$Parser$keeper = $elm$parser$Parser$Advanced$keeper;
 var $elm$parser$Parser$Problem = function (a) {
 	return {$: 'Problem', a: a};
 };
@@ -10936,27 +10946,6 @@ var $elm$parser$Parser$problem = function (msg) {
 	return $elm$parser$Parser$Advanced$problem(
 		$elm$parser$Parser$Problem(msg));
 };
-var $elm$parser$Parser$Advanced$succeed = function (a) {
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			return A3($elm$parser$Parser$Advanced$Good, false, a, s);
-		});
-};
-var $elm$parser$Parser$succeed = $elm$parser$Parser$Advanced$succeed;
-var $author$project$Graphics$OFF$intOf = function (n) {
-	return A2(
-		$elm$parser$Parser$andThen,
-		function (x) {
-			return _Utils_eq(x, n) ? $elm$parser$Parser$succeed(n) : $elm$parser$Parser$problem(
-				'required ' + ($elm$core$String$fromInt(n) + (' but got ' + $elm$core$String$fromInt(x))));
-		},
-		$elm$parser$Parser$int);
-};
-var $elm$parser$Parser$Advanced$keeper = F2(
-	function (parseFunc, parseArg) {
-		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$apL, parseFunc, parseArg);
-	});
-var $elm$parser$Parser$keeper = $elm$parser$Parser$Advanced$keeper;
 var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
 var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
 	function (isGood, offset, row, col, s0) {
@@ -11015,6 +11004,13 @@ var $elm$parser$Parser$Advanced$spaces = $elm$parser$Parser$Advanced$chompWhile(
 			_Utils_chr('\r')));
 	});
 var $elm$parser$Parser$spaces = $elm$parser$Parser$Advanced$spaces;
+var $elm$parser$Parser$Advanced$succeed = function (a) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$Good, false, a, s);
+		});
+};
+var $elm$parser$Parser$succeed = $elm$parser$Parser$Advanced$succeed;
 var $elm$parser$Parser$chompWhile = $elm$parser$Parser$Advanced$chompWhile;
 var $author$project$Graphics$OFF$whitespaces = $elm$parser$Parser$chompWhile(
 	function (c) {
@@ -11025,25 +11021,84 @@ var $author$project$Graphics$OFF$whitespaces = $elm$parser$Parser$chompWhile(
 			_Utils_chr('\t'));
 	});
 var $author$project$Graphics$OFF$facetLine = A2(
-	$elm$parser$Parser$keeper,
-	A2(
-		$elm$parser$Parser$keeper,
-		A2(
-			$elm$parser$Parser$keeper,
-			A2(
-				$elm$parser$Parser$ignorer,
-				A2(
-					$elm$parser$Parser$ignorer,
-					$elm$parser$Parser$succeed(
-						F3(
-							function (a, b, c) {
-								return _Utils_Tuple3(a, b, c);
-							})),
-					$author$project$Graphics$OFF$intOf(3)),
-				$author$project$Graphics$OFF$whitespaces),
-			A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
-		A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
-	A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces));
+	$elm$parser$Parser$andThen,
+	function (count) {
+		switch (count) {
+			case 3:
+				return A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$keeper,
+							A2(
+								$elm$parser$Parser$ignorer,
+								$elm$parser$Parser$succeed(
+									F3(
+										function (a, b, c) {
+											return _List_fromArray(
+												[
+													_Utils_Tuple3(a, b, c)
+												]);
+										})),
+								$author$project$Graphics$OFF$whitespaces),
+							A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+						A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+					A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces));
+			case 4:
+				return A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$keeper,
+							A2(
+								$elm$parser$Parser$keeper,
+								A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed(
+										F4(
+											function (a, b, c, d) {
+												return _List_fromArray(
+													[
+														_Utils_Tuple3(a, b, c),
+														_Utils_Tuple3(a, c, d)
+													]);
+											})),
+									$author$project$Graphics$OFF$whitespaces),
+								A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+							A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+						A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces)),
+					A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces));
+			default:
+				return $elm$parser$Parser$problem(
+					'required 3 or 4 but got ' + $elm$core$String$fromInt(count));
+		}
+	},
+	$elm$parser$Parser$int);
+var $elm$parser$Parser$Advanced$map = F2(
+	function (func, _v0) {
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
+	});
+var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
 var $elm$parser$Parser$Done = function (a) {
 	return {$: 'Done', a: a};
 };
@@ -11090,29 +11145,6 @@ var $elm$parser$Parser$Advanced$loop = F2(
 				return A4($elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
 			});
 	});
-var $elm$parser$Parser$Advanced$map = F2(
-	function (func, _v0) {
-		var parse = _v0.a;
-		return $elm$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _v1 = parse(s0);
-				if (_v1.$ === 'Good') {
-					var p = _v1.a;
-					var a = _v1.b;
-					var s1 = _v1.c;
-					return A3(
-						$elm$parser$Parser$Advanced$Good,
-						p,
-						func(a),
-						s1);
-				} else {
-					var p = _v1.a;
-					var x = _v1.b;
-					return A2($elm$parser$Parser$Advanced$Bad, p, x);
-				}
-			});
-	});
-var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
 var $elm$parser$Parser$Advanced$Done = function (a) {
 	return {$: 'Done', a: a};
 };
@@ -11162,7 +11194,10 @@ var $author$project$Graphics$OFF$replicate = F2(
 			});
 	});
 var $author$project$Graphics$OFF$facets = function (n) {
-	return A2($author$project$Graphics$OFF$replicate, n, $author$project$Graphics$OFF$facetLine);
+	return A2(
+		$elm$parser$Parser$map,
+		$elm$core$List$concat,
+		A2($author$project$Graphics$OFF$replicate, n, $author$project$Graphics$OFF$facetLine));
 };
 var $elm$parser$Parser$ExpectingKeyword = function (a) {
 	return {$: 'ExpectingKeyword', a: a};
@@ -11422,17 +11457,13 @@ var $elm$parser$Parser$run = F2(
 var $author$project$Graphics$OFF$parse = function (input) {
 	return A2(
 		$elm$core$Result$mapError,
-		function (deadends) {
-			return A2(
-				$elm$core$String$join,
-				'\n',
-				A2(
-					$elm$core$List$map,
-					function (deadend) {
-						return $elm$core$String$fromInt(deadend.row) + (', ' + $elm$core$String$fromInt(deadend.col));
-					},
-					deadends));
-		},
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$List$map(
+				function (deadend) {
+					return 'dead end at (line, col) = (' + ($elm$core$String$fromInt(deadend.row) + (', ' + ($elm$core$String$fromInt(deadend.col) + ')')));
+				}),
+			$elm$core$String$join('\n')),
 		A2($elm$parser$Parser$run, $author$project$Graphics$OFF$parser, input));
 };
 var $elm$core$Basics$composeL = F3(
