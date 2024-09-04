@@ -53,6 +53,7 @@ type Rail invert flip
     | Stop invert
     | AutoTurnout
     | AutoPoint
+    | UTurn
 
 
 canInvert : Rail invert flip -> Bool
@@ -117,6 +118,9 @@ map f rail =
         AutoPoint ->
             AutoPoint
 
+        UTurn ->
+            UTurn
+
 
 toString : Rail IsInverted IsFlipped -> String
 toString =
@@ -180,6 +184,9 @@ toStringWith flipped inverted rail =
         AutoPoint ->
             "auto_point"
 
+        UTurn ->
+            "uturn"
+
 
 isInvertedToString : IsInverted -> String
 isInvertedToString isInverted =
@@ -207,6 +214,7 @@ allRails =
     , SlopeCurveB
     , AutoTurnout
     , AutoPoint
+    , UTurn
     ]
         ++ ([ Inverted, NotInverted ]
                 |> List.concatMap

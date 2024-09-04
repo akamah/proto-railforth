@@ -262,6 +262,9 @@ getRailPiece rail =
         AutoPoint ->
             fourEnds minusZero (RailLocation.mul goStraight2.location doubleTrackRight) goStraight6 (RailLocation.mul goStraight2.location turnLeft45deg)
 
+        UTurn ->
+            twoEnds minusZero doubleTrackLeftZeroMinus
+
 
 {-| remove the first element from the list and append it to the end
 -}

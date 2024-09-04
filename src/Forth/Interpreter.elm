@@ -150,6 +150,8 @@ railForthGlossary =
         , ( "ap1", executePlaceRail AutoPoint 1 )
         , ( "ap2", executePlaceRail AutoPoint 2 )
         , ( "ap3", executePlaceRail AutoPoint 3 )
+        , ( "uturn", executePlaceRail UTurn 0 )
+        , ( "uturn1", executePlaceRail UTurn 1 )
         , ( "ascend", executeAscend 4 )
         ]
 
