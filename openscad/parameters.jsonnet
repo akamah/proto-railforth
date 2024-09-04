@@ -5,6 +5,9 @@ local rails = {
     'auto_point',
     'auto_turnout',
     'uturn',
+    'pier_single',
+    'pier_double',
+    'pier_mini',
   ],
   cannot_flip_can_invert: [
     'straight1',

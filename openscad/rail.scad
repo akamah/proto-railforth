@@ -449,7 +449,7 @@ module pier_single() {
     pier_base(0);
 }
 
-module pier_wide() {
+module pier_double() {
     pier_base(DOUBLE_TRACK);
 }
 

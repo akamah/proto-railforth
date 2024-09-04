@@ -82,6 +82,18 @@ if (name == "straight1") {
 } else if (name == "double_cross") {
   assert_cannot_flip(name, flipped);
   double_cross(inverted, 1 * resolution);
+} else if (name == "pier_single") {
+  assert_cannot_flip(name, flipped);
+  assert_cannot_invert(name, inverted);
+  pier_single();
+} else if (name == "pier_double") {
+  assert_cannot_flip(name, flipped);
+  assert_cannot_invert(name, inverted);
+  pier_double();
+} else if (name == "pier_mini") {
+  assert_cannot_flip(name, flipped);
+  assert_cannot_invert(name, inverted);
+  pier_mini();
 } else {
   assert(false, str(name, " is not a valid rail name"));
 }
