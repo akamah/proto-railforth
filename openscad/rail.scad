@@ -356,7 +356,17 @@ module auto_point(divs) {
     straight = straight_raildef(6 * UNIT);
     curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, 0, divs));
     shift = translate_raildef([2 * UNIT, 0, 0], shift_raildef(4 * UNIT, -DOUBLE_TRACK, divs));
-    render_rail([straight, curve, shift], [start_mat(straight)], [end_mat(straight), end_mat(curve), end_mat(shift)], false);
+    union() {
+        render_rail([straight, curve, shift], [start_mat(straight)], [end_mat(straight), end_mat(curve), end_mat(shift)], false);
+        linear_extrude(height = THICKNESS / 2) {
+            polygon([
+                [30, 0],
+                [300, 0],
+                [300, -75],
+                [105, -75],
+            ]);
+        }
+    }
 }
 
 module slope_curve(flipped, inverted, divs) {
