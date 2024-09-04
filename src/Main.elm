@@ -7,7 +7,6 @@ import Dict
 import Forth
 import Graphics.MeshLoader as MeshLoader
 import Graphics.OrbitControl as OC
-import Graphics.Render
 import Html exposing (Html)
 import Html.Attributes as HA exposing (style)
 import Html.Events as HE
@@ -243,8 +242,8 @@ viewCanvas { left, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, 
         ]
     <|
         List.concat
-            [ Graphics.Render.showRails meshes rails transform
-            , Graphics.Render.showPiers meshes piers transform
+            [ MeshLoader.renderRails meshes rails transform
+            , MeshLoader.renderPiers meshes piers transform
             ]
 
 

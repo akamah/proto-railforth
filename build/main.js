@@ -6407,6 +6407,173 @@ function _Http_multipart(parts)
 
 	return $elm$http$Http$Internal$FormDataBody(formData);
 }
+
+
+
+
+// STRINGS
+
+
+var _Parser_isSubString = F5(function(smallString, offset, row, col, bigString)
+{
+	var smallLength = smallString.length;
+	var isGood = offset + smallLength <= bigString.length;
+
+	for (var i = 0; isGood && i < smallLength; )
+	{
+		var code = bigString.charCodeAt(offset);
+		isGood =
+			smallString[i++] === bigString[offset++]
+			&& (
+				code === 0x000A /* \n */
+					? ( row++, col=1 )
+					: ( col++, (code & 0xF800) === 0xD800 ? smallString[i++] === bigString[offset++] : 1 )
+			)
+	}
+
+	return _Utils_Tuple3(isGood ? offset : -1, row, col);
+});
+
+
+
+// CHARS
+
+
+var _Parser_isSubChar = F3(function(predicate, offset, string)
+{
+	return (
+		string.length <= offset
+			? -1
+			:
+		(string.charCodeAt(offset) & 0xF800) === 0xD800
+			? (predicate(_Utils_chr(string.substr(offset, 2))) ? offset + 2 : -1)
+			:
+		(predicate(_Utils_chr(string[offset]))
+			? ((string[offset] === '\n') ? -2 : (offset + 1))
+			: -1
+		)
+	);
+});
+
+
+var _Parser_isAsciiCode = F3(function(code, offset, string)
+{
+	return string.charCodeAt(offset) === code;
+});
+
+
+
+// NUMBERS
+
+
+var _Parser_chompBase10 = F2(function(offset, string)
+{
+	for (; offset < string.length; offset++)
+	{
+		var code = string.charCodeAt(offset);
+		if (code < 0x30 || 0x39 < code)
+		{
+			return offset;
+		}
+	}
+	return offset;
+});
+
+
+var _Parser_consumeBase = F3(function(base, offset, string)
+{
+	for (var total = 0; offset < string.length; offset++)
+	{
+		var digit = string.charCodeAt(offset) - 0x30;
+		if (digit < 0 || base <= digit) break;
+		total = base * total + digit;
+	}
+	return _Utils_Tuple2(offset, total);
+});
+
+
+var _Parser_consumeBase16 = F2(function(offset, string)
+{
+	for (var total = 0; offset < string.length; offset++)
+	{
+		var code = string.charCodeAt(offset);
+		if (0x30 <= code && code <= 0x39)
+		{
+			total = 16 * total + code - 0x30;
+		}
+		else if (0x41 <= code && code <= 0x46)
+		{
+			total = 16 * total + code - 55;
+		}
+		else if (0x61 <= code && code <= 0x66)
+		{
+			total = 16 * total + code - 87;
+		}
+		else
+		{
+			break;
+		}
+	}
+	return _Utils_Tuple2(offset, total);
+});
+
+
+
+// FIND STRING
+
+
+var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString)
+{
+	var newOffset = bigString.indexOf(smallString, offset);
+	var target = newOffset < 0 ? bigString.length : newOffset + smallString.length;
+
+	while (offset < target)
+	{
+		var code = bigString.charCodeAt(offset++);
+		code === 0x000A /* \n */
+			? ( col=1, row++ )
+			: ( col++, (code & 0xF800) === 0xD800 && offset++ )
+	}
+
+	return _Utils_Tuple3(newOffset, row, col);
+});
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
@@ -7232,8 +7399,8 @@ var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
 	var h = (model.scale * model.viewportHeight) / 2;
 	var eyeDistance = 10000;
 	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
-	var y = eyeDistance * $elm$core$Basics$sin(model.altitude);
-	var z = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * (-$elm$core$Basics$sin(model.azimuth));
+	var y = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$sin(model.azimuth);
+	var z = eyeDistance * $elm$core$Basics$sin(model.altitude);
 	var cameraClipDistance = 100000;
 	return A2(
 		$elm_explorations$linear_algebra$Math$Matrix4$mul,
@@ -7245,7 +7412,7 @@ var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
 				model.target,
 				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
 			model.target,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0)));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1)));
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -7424,7 +7591,6 @@ var $elm$html$Html$Attributes$height = function (n) {
 		'height',
 		$elm$core$String$fromInt(n));
 };
-var $elm$core$Basics$round = _Basics_round;
 var $elm_explorations$webgl$WebGL$Mesh3 = F2(
 	function (a, b) {
 		return {$: 'Mesh3', a: a, b: b};
@@ -7467,11 +7633,11 @@ var $elm$core$Dict$get = F2(
 var $author$project$Types$Pier$toString = function (pier) {
 	switch (pier.$) {
 		case 'Single':
-			return 'pier';
+			return 'pier_single';
 		case 'Wide':
-			return 'pier_wide';
+			return 'pier_double';
 		default:
-			return 'pier_4';
+			return 'pier_mini';
 	}
 };
 var $elm$core$Maybe$withDefault = F2(
@@ -7493,7 +7659,10 @@ var $author$project$Graphics$MeshLoader$getPierMesh = F2(
 				$author$project$Types$Pier$toString(pier),
 				model.meshes));
 	});
-var $elm_explorations$linear_algebra$Math$Matrix4$identity = _MJS_m4x4identity;
+var $elm_explorations$webgl$WebGL$Settings$FaceMode = function (a) {
+	return {$: 'FaceMode', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$back = $elm_explorations$webgl$WebGL$Settings$FaceMode(1029);
 var $elm_explorations$webgl$WebGL$Internal$CullFace = function (a) {
 	return {$: 'CullFace', a: a};
 };
@@ -7554,11 +7723,7 @@ var $elm_explorations$webgl$WebGL$Internal$enableSetting = F2(
 		}
 	});
 var $elm_explorations$webgl$WebGL$entityWith = _WebGL_entity;
-var $elm_explorations$webgl$WebGL$Settings$FaceMode = function (a) {
-	return {$: 'FaceMode', a: a};
-};
-var $elm_explorations$webgl$WebGL$Settings$front = $elm_explorations$webgl$WebGL$Settings$FaceMode(1028);
-var $author$project$Graphics$Render$lightFromAbove = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2.0 / 27.0, 26.0 / 27.0, 7.0 / 27.0);
+var $author$project$Graphics$Render$lightFromAbove = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2.0 / 27.0, 7.0 / 27.0, 26.0 / 27.0);
 var $elm_explorations$linear_algebra$Math$Matrix4$makeRotate = _MJS_m4x4makeRotate;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate = _MJS_m4x4makeTranslate;
 var $author$project$Graphics$Render$makeMeshMatrix = F2(
@@ -7566,7 +7731,7 @@ var $author$project$Graphics$Render$makeMeshMatrix = F2(
 		var rotate = A2(
 			$elm_explorations$linear_algebra$Math$Matrix4$makeRotate,
 			angle,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1));
 		var position = $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate(origin);
 		return A2($elm_explorations$linear_algebra$Math$Matrix4$mul, position, rotate);
 	});
@@ -7576,35 +7741,34 @@ var $author$project$Graphics$Render$pierFragmentShader = {
 	uniforms: {}
 };
 var $author$project$Graphics$Render$pierVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            const highp vec3 yellow = vec3(1.0, 1.0, 0.3);\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.7 + 0.3 * lambertFactor;\n            color = intensity * yellow;\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
-	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
-	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            const highp vec3 yellow = vec3(1.0, 0.85, 0.3);\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.5 + 0.5 * lambertFactor;\n            color = intensity * yellow;\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
+	attributes: {normal: 'normal', position: 'position'},
+	uniforms: {cameraTransform: 'cameraTransform', light: 'light', modelTransform: 'modelTransform'}
 };
-var $author$project$Graphics$Render$showPier = F5(
-	function (projectionTransform, viewTransform, mesh, origin, angle) {
+var $author$project$Graphics$Render$renderPier = F4(
+	function (cameraTransform, mesh, origin, angle) {
 		var modelTransform = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
 		return A5(
 			$elm_explorations$webgl$WebGL$entityWith,
 			_List_fromArray(
 				[
 					$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-					$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$front)
+					$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
 				]),
 			$author$project$Graphics$Render$pierVertexShader,
 			$author$project$Graphics$Render$pierFragmentShader,
 			mesh,
-			{light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform, projectionTransform: projectionTransform, viewTransform: viewTransform});
+			{cameraTransform: cameraTransform, light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform});
 	});
-var $author$project$Graphics$Render$showPiers = F3(
-	function (meshes, piers, transform) {
+var $author$project$Graphics$MeshLoader$renderPiers = F3(
+	function (model, piers, transform) {
 		return A2(
 			$elm$core$List$map,
 			function (pierPlacement) {
-				return A5(
-					$author$project$Graphics$Render$showPier,
-					$elm_explorations$linear_algebra$Math$Matrix4$identity,
+				return A4(
+					$author$project$Graphics$Render$renderPier,
 					transform,
-					A2($author$project$Graphics$MeshLoader$getPierMesh, meshes, pierPlacement.pier),
+					A2($author$project$Graphics$MeshLoader$getPierMesh, model, pierPlacement.pier),
 					pierPlacement.position,
 					pierPlacement.angle);
 			},
@@ -7624,7 +7788,7 @@ var $author$project$Types$Rail$isFlippedToString = function (isFlipped) {
 };
 var $author$project$Types$Rail$isInvertedToString = function (isInverted) {
 	if (isInverted.$ === 'NotInverted') {
-		return '_minus';
+		return '';
 	} else {
 		return '_plus';
 	}
@@ -7634,28 +7798,28 @@ var $author$project$Types$Rail$toStringWith = F3(
 		switch (rail.$) {
 			case 'Straight1':
 				var inv = rail.a;
-				return 'straight4' + inverted(inv);
+				return 'straight1' + inverted(inv);
 			case 'Straight2':
 				var inv = rail.a;
 				return 'straight2' + inverted(inv);
 			case 'Straight4':
 				var inv = rail.a;
-				return 'straight1' + inverted(inv);
+				return 'straight4' + inverted(inv);
 			case 'Straight8':
 				var inv = rail.a;
-				return 'straight0' + inverted(inv);
+				return 'straight8' + inverted(inv);
 			case 'Curve45':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'curve8' + (inverted(inv) + flipped(flip));
+				return 'curve45' + (inverted(inv) + flipped(flip));
 			case 'Curve90':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'curve4' + (inverted(inv) + flipped(flip));
+				return 'curve90' + (inverted(inv) + flipped(flip));
 			case 'OuterCurve45':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'outercurve' + (inverted(inv) + flipped(flip));
+				return 'outer_curve45' + (inverted(inv) + flipped(flip));
 			case 'Turnout':
 				var flip = rail.a;
 				var inv = rail.b;
@@ -7663,29 +7827,29 @@ var $author$project$Types$Rail$toStringWith = F3(
 			case 'SingleDouble':
 				var flip = rail.a;
 				var inv = rail.b;
-				return 'singledouble' + (inverted(inv) + flipped(flip));
+				return 'single_double' + (inverted(inv) + flipped(flip));
 			case 'EightPoint':
 				var flip = rail.a;
 				var inv = rail.b;
 				return 'eight' + (inverted(inv) + flipped(flip));
 			case 'JointChange':
 				var inv = rail.a;
-				return 'pole' + inverted(inv);
+				return 'joint' + inverted(inv);
 			case 'Slope':
 				var flip = rail.a;
 				var inv = rail.b;
 				return 'slope' + (inverted(inv) + flipped(flip));
 			case 'SlopeCurveA':
-				return 'slopecurveA_plus';
+				return 'slope_curve_A';
 			case 'SlopeCurveB':
-				return 'slopecurveB_minus';
+				return 'slope_curve_B';
 			case 'Stop':
 				var inv = rail.a;
 				return 'stop' + inverted(inv);
 			case 'AutoTurnout':
-				return 'autoturnout_minus';
+				return 'auto_turnout';
 			default:
-				return 'autopoint_minus';
+				return 'auto_point';
 		}
 	});
 var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
@@ -7699,19 +7863,18 @@ var $author$project$Graphics$MeshLoader$getRailMesh = F2(
 				$author$project$Types$Rail$toString(rail),
 				model.meshes));
 	});
-var $elm_explorations$webgl$WebGL$Settings$back = $elm_explorations$webgl$WebGL$Settings$FaceMode(1029);
 var $author$project$Graphics$Render$railFragmentShader = {
 	src: '\n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);\n            gl_FragColor = vec4(color, dist_density);\n        }\n    ',
 	attributes: {},
 	uniforms: {}
 };
 var $author$project$Graphics$Render$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        attribute vec3 scalingVector;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 viewTransform;\n        uniform mat4 projectionTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition[1] / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = projectionTransform * viewTransform * worldPosition;\n        }\n    ',
-	attributes: {normal: 'normal', position: 'position', scalingVector: 'scalingVector'},
-	uniforms: {light: 'light', modelTransform: 'modelTransform', projectionTransform: 'projectionTransform', viewTransform: 'viewTransform'}
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition.z / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
+	attributes: {normal: 'normal', position: 'position'},
+	uniforms: {cameraTransform: 'cameraTransform', light: 'light', modelTransform: 'modelTransform'}
 };
-var $author$project$Graphics$Render$showRail = F5(
-	function (projectionTransform, viewTransform, mesh, origin, angle) {
+var $author$project$Graphics$Render$renderRail = F4(
+	function (cameraTransform, mesh, origin, angle) {
 		var modelTransform = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
 		return _List_fromArray(
 			[
@@ -7725,24 +7888,24 @@ var $author$project$Graphics$Render$showRail = F5(
 				$author$project$Graphics$Render$railVertexShader,
 				$author$project$Graphics$Render$railFragmentShader,
 				mesh,
-				{light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform, projectionTransform: projectionTransform, viewTransform: viewTransform})
+				{cameraTransform: cameraTransform, light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform})
 			]);
 	});
-var $author$project$Graphics$Render$showRails = F3(
-	function (meshes, rails, transform) {
+var $author$project$Graphics$MeshLoader$renderRails = F3(
+	function (model, rails, transform) {
 		return A2(
 			$elm$core$List$concatMap,
 			function (railPosition) {
-				return A5(
-					$author$project$Graphics$Render$showRail,
-					$elm_explorations$linear_algebra$Math$Matrix4$identity,
+				return A4(
+					$author$project$Graphics$Render$renderRail,
 					transform,
-					A2($author$project$Graphics$MeshLoader$getRailMesh, meshes, railPosition.rail),
+					A2($author$project$Graphics$MeshLoader$getRailMesh, model, railPosition.rail),
 					railPosition.position,
 					railPosition.angle);
 			},
 			rails);
 	});
+var $elm$core$Basics$round = _Basics_round;
 var $elm_explorations$webgl$WebGL$Internal$Stencil = function (a) {
 	return {$: 'Stencil', a: a};
 };
@@ -7810,8 +7973,8 @@ var $author$project$Main$viewCanvas = function (_v0) {
 		$elm$core$List$concat(
 			_List_fromArray(
 				[
-					A3($author$project$Graphics$Render$showRails, meshes, rails, transform),
-					A3($author$project$Graphics$Render$showPiers, meshes, piers, transform)
+					A3($author$project$Graphics$MeshLoader$renderRails, meshes, rails, transform),
+					A3($author$project$Graphics$MeshLoader$renderPiers, meshes, piers, transform)
 				])));
 };
 var $author$project$Main$view = function (model) {
@@ -8767,7 +8930,7 @@ var $author$project$Forth$Geometry$Location$toVec3 = function (tie) {
 	var _v1 = $author$project$Forth$Geometry$Rot45$toFloat(tie._double);
 	var dx = _v1.a;
 	var dy = _v1.b;
-	return A3($elm_explorations$linear_algebra$Math$Vector3$vec3, (singleUnit * sx) + (doubleUnit * dx), heightUnit * h, -((singleUnit * sy) + (doubleUnit * dy)));
+	return A3($elm_explorations$linear_algebra$Math$Vector3$vec3, (singleUnit * sx) + (doubleUnit * dx), (singleUnit * sy) + (doubleUnit * dy), heightUnit * h);
 };
 var $author$project$Forth$Geometry$PierLocation$toVec3 = function (loc) {
 	return $author$project$Forth$Geometry$Location$toVec3(loc.location);
@@ -10394,10 +10557,54 @@ var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 	function (a, b) {
 		return {$: 'LoadMesh', a: a, b: b};
 	});
-var $author$project$Graphics$MeshLoader$allMeshNames = _List_fromArray(
-	['straight0_minus', 'straight0_plus', 'straight1_minus', 'straight1_plus', 'straight2_minus', 'straight2_plus', 'straight4_minus', 'straight4_plus', 'curve8_minus', 'curve8_plus', 'curve4_minus', 'curve4_plus', 'outercurve_minus', 'outercurve_plus', 'turnout_minus', 'turnout_plus', 'singledouble_minus', 'singledouble_plus', 'eight_minus', 'eight_plus', 'pole_minus', 'pole_plus', 'stop_minus', 'stop_plus', 'slope_minus', 'slope_plus', 'slopecurveA_plus', 'slopecurveB_minus', 'autoturnout_minus', 'autopoint_minus', 'pier', 'pier_wide', 'pier_4']);
+var $author$project$Types$Pier$allPiers = _List_fromArray(
+	[$author$project$Types$Pier$Single, $author$project$Types$Pier$Wide, $author$project$Types$Pier$Mini]);
+var $author$project$Types$Rail$allRails = _Utils_ap(
+	_List_fromArray(
+		[$author$project$Types$Rail$SlopeCurveA, $author$project$Types$Rail$SlopeCurveB, $author$project$Types$Rail$AutoTurnout, $author$project$Types$Rail$AutoPoint]),
+	_Utils_ap(
+		A2(
+			$elm$core$List$concatMap,
+			function (invert) {
+				return _List_fromArray(
+					[
+						$author$project$Types$Rail$Straight1(invert),
+						$author$project$Types$Rail$Straight2(invert),
+						$author$project$Types$Rail$Straight4(invert),
+						$author$project$Types$Rail$Straight8(invert),
+						$author$project$Types$Rail$JointChange(invert),
+						$author$project$Types$Rail$Stop(invert)
+					]);
+			},
+			_List_fromArray(
+				[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted])),
+		A2(
+			$elm$core$List$concatMap,
+			function (invert) {
+				return A2(
+					$elm$core$List$concatMap,
+					function (flip) {
+						return _List_fromArray(
+							[
+								A2($author$project$Types$Rail$Curve45, flip, invert),
+								A2($author$project$Types$Rail$Curve90, flip, invert),
+								A2($author$project$Types$Rail$OuterCurve45, flip, invert),
+								A2($author$project$Types$Rail$Turnout, flip, invert),
+								A2($author$project$Types$Rail$SingleDouble, flip, invert),
+								A2($author$project$Types$Rail$EightPoint, flip, invert),
+								A2($author$project$Types$Rail$Slope, flip, invert)
+							]);
+					},
+					_List_fromArray(
+						[$author$project$Types$Rail$Flipped, $author$project$Types$Rail$NotFlipped]));
+			},
+			_List_fromArray(
+				[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted]))));
+var $author$project$Graphics$MeshLoader$allMeshNames = _Utils_ap(
+	A2($elm$core$List$map, $author$project$Types$Rail$toString, $author$project$Types$Rail$allRails),
+	A2($elm$core$List$map, $author$project$Types$Pier$toString, $author$project$Types$Pier$allPiers));
 var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
-	return './assets/' + (name + '.json');
+	return './assets/' + (name + '.off');
 };
 var $elm$http$Http$Internal$EmptyBody = {$: 'EmptyBody'};
 var $elm$http$Http$emptyBody = $elm$http$Http$Internal$EmptyBody;
@@ -10454,78 +10661,809 @@ var $elm$core$Result$mapError = F2(
 				f(e));
 		}
 	});
-var $author$project$Graphics$MeshWithScalingVector$MeshAndFace = F2(
-	function (vertices, faces) {
-		return {faces: faces, vertices: vertices};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
 	});
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Graphics$MeshWithScalingVector$list3 = F2(
-	function (f, decoder) {
-		return A2(
-			$elm$json$Json$Decode$andThen,
-			function (lis) {
-				if (((lis.b && lis.b.b) && lis.b.b.b) && (!lis.b.b.b.b)) {
-					var x = lis.a;
-					var _v1 = lis.b;
-					var y = _v1.a;
-					var _v2 = _v1.b;
-					var z = _v2.a;
-					return $elm$json$Json$Decode$succeed(
-						A3(f, x, y, z));
+var $elm$parser$Parser$Advanced$Bad = F2(
+	function (a, b) {
+		return {$: 'Bad', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$Good = F3(
+	function (a, b, c) {
+		return {$: 'Good', a: a, b: b, c: c};
+	});
+var $elm$parser$Parser$Advanced$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$parser$Parser$Advanced$andThen = F2(
+	function (callback, _v0) {
+		var parseA = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parseA(s0);
+				if (_v1.$ === 'Bad') {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
 				} else {
-					return $elm$json$Json$Decode$fail(
-						'list3: list count be 3 but got ' + $elm$core$String$fromInt(
-							$elm$core$List$length(lis)));
+					var p1 = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					var _v2 = callback(a);
+					var parseB = _v2.a;
+					var _v3 = parseB(s1);
+					if (_v3.$ === 'Bad') {
+						var p2 = _v3.a;
+						var x = _v3.b;
+						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _v3.a;
+						var b = _v3.b;
+						var s2 = _v3.c;
+						return A3($elm$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					}
 				}
-			},
-			$elm$json$Json$Decode$list(decoder));
+			});
 	});
-var $author$project$Graphics$MeshWithScalingVector$face = A2(
-	$author$project$Graphics$MeshWithScalingVector$list3,
-	F3(
-		function (a, b, c) {
-			return _Utils_Tuple3(a, b, c);
-		}),
-	$elm$json$Json$Decode$int);
-var $author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector = F3(
-	function (position, normal, scalingVector) {
-		return {normal: normal, position: position, scalingVector: scalingVector};
+var $elm$parser$Parser$andThen = $elm$parser$Parser$Advanced$andThen;
+var $elm$parser$Parser$Advanced$map2 = F3(
+	function (func, _v0, _v1) {
+		var parseA = _v0.a;
+		var parseB = _v1.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v2 = parseA(s0);
+				if (_v2.$ === 'Bad') {
+					var p = _v2.a;
+					var x = _v2.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _v2.a;
+					var a = _v2.b;
+					var s1 = _v2.c;
+					var _v3 = parseB(s1);
+					if (_v3.$ === 'Bad') {
+						var p2 = _v3.a;
+						var x = _v3.b;
+						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _v3.a;
+						var b = _v3.b;
+						var s2 = _v3.c;
+						return A3(
+							$elm$parser$Parser$Advanced$Good,
+							p1 || p2,
+							A2(func, a, b),
+							s2);
+					}
+				}
+			});
 	});
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$Graphics$MeshWithScalingVector$vertex = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Graphics$MeshWithScalingVector$VertexWithScalingVector,
+var $elm$parser$Parser$Advanced$ignorer = F2(
+	function (keepParser, ignoreParser) {
+		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$always, keepParser, ignoreParser);
+	});
+var $elm$parser$Parser$ignorer = $elm$parser$Parser$Advanced$ignorer;
+var $elm$parser$Parser$ExpectingInt = {$: 'ExpectingInt'};
+var $elm$parser$Parser$Advanced$consumeBase = _Parser_consumeBase;
+var $elm$parser$Parser$Advanced$consumeBase16 = _Parser_consumeBase16;
+var $elm$parser$Parser$Advanced$bumpOffset = F2(
+	function (newOffset, s) {
+		return {col: s.col + (newOffset - s.offset), context: s.context, indent: s.indent, offset: newOffset, row: s.row, src: s.src};
+	});
+var $elm$parser$Parser$Advanced$chompBase10 = _Parser_chompBase10;
+var $elm$parser$Parser$Advanced$isAsciiCode = _Parser_isAsciiCode;
+var $elm$parser$Parser$Advanced$consumeExp = F2(
+	function (offset, src) {
+		if (A3($elm$parser$Parser$Advanced$isAsciiCode, 101, offset, src) || A3($elm$parser$Parser$Advanced$isAsciiCode, 69, offset, src)) {
+			var eOffset = offset + 1;
+			var expOffset = (A3($elm$parser$Parser$Advanced$isAsciiCode, 43, eOffset, src) || A3($elm$parser$Parser$Advanced$isAsciiCode, 45, eOffset, src)) ? (eOffset + 1) : eOffset;
+			var newOffset = A2($elm$parser$Parser$Advanced$chompBase10, expOffset, src);
+			return _Utils_eq(expOffset, newOffset) ? (-newOffset) : newOffset;
+		} else {
+			return offset;
+		}
+	});
+var $elm$parser$Parser$Advanced$consumeDotAndExp = F2(
+	function (offset, src) {
+		return A3($elm$parser$Parser$Advanced$isAsciiCode, 46, offset, src) ? A2(
+			$elm$parser$Parser$Advanced$consumeExp,
+			A2($elm$parser$Parser$Advanced$chompBase10, offset + 1, src),
+			src) : A2($elm$parser$Parser$Advanced$consumeExp, offset, src);
+	});
+var $elm$parser$Parser$Advanced$AddRight = F2(
+	function (a, b) {
+		return {$: 'AddRight', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$DeadEnd = F4(
+	function (row, col, problem, contextStack) {
+		return {col: col, contextStack: contextStack, problem: problem, row: row};
+	});
+var $elm$parser$Parser$Advanced$Empty = {$: 'Empty'};
+var $elm$parser$Parser$Advanced$fromState = F2(
+	function (s, x) {
+		return A2(
+			$elm$parser$Parser$Advanced$AddRight,
+			$elm$parser$Parser$Advanced$Empty,
+			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
+	});
+var $elm$parser$Parser$Advanced$finalizeInt = F5(
+	function (invalid, handler, startOffset, _v0, s) {
+		var endOffset = _v0.a;
+		var n = _v0.b;
+		if (handler.$ === 'Err') {
+			var x = handler.a;
+			return A2(
+				$elm$parser$Parser$Advanced$Bad,
+				true,
+				A2($elm$parser$Parser$Advanced$fromState, s, x));
+		} else {
+			var toValue = handler.a;
+			return _Utils_eq(startOffset, endOffset) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				_Utils_cmp(s.offset, startOffset) < 0,
+				A2($elm$parser$Parser$Advanced$fromState, s, invalid)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				true,
+				toValue(n),
+				A2($elm$parser$Parser$Advanced$bumpOffset, endOffset, s));
+		}
+	});
+var $elm$parser$Parser$Advanced$fromInfo = F4(
+	function (row, col, x, context) {
+		return A2(
+			$elm$parser$Parser$Advanced$AddRight,
+			$elm$parser$Parser$Advanced$Empty,
+			A4($elm$parser$Parser$Advanced$DeadEnd, row, col, x, context));
+	});
+var $elm$core$String$toFloat = _String_toFloat;
+var $elm$parser$Parser$Advanced$finalizeFloat = F6(
+	function (invalid, expecting, intSettings, floatSettings, intPair, s) {
+		var intOffset = intPair.a;
+		var floatOffset = A2($elm$parser$Parser$Advanced$consumeDotAndExp, intOffset, s.src);
+		if (floatOffset < 0) {
+			return A2(
+				$elm$parser$Parser$Advanced$Bad,
+				true,
+				A4($elm$parser$Parser$Advanced$fromInfo, s.row, s.col - (floatOffset + s.offset), invalid, s.context));
+		} else {
+			if (_Utils_eq(s.offset, floatOffset)) {
+				return A2(
+					$elm$parser$Parser$Advanced$Bad,
+					false,
+					A2($elm$parser$Parser$Advanced$fromState, s, expecting));
+			} else {
+				if (_Utils_eq(intOffset, floatOffset)) {
+					return A5($elm$parser$Parser$Advanced$finalizeInt, invalid, intSettings, s.offset, intPair, s);
+				} else {
+					if (floatSettings.$ === 'Err') {
+						var x = floatSettings.a;
+						return A2(
+							$elm$parser$Parser$Advanced$Bad,
+							true,
+							A2($elm$parser$Parser$Advanced$fromState, s, invalid));
+					} else {
+						var toValue = floatSettings.a;
+						var _v1 = $elm$core$String$toFloat(
+							A3($elm$core$String$slice, s.offset, floatOffset, s.src));
+						if (_v1.$ === 'Nothing') {
+							return A2(
+								$elm$parser$Parser$Advanced$Bad,
+								true,
+								A2($elm$parser$Parser$Advanced$fromState, s, invalid));
+						} else {
+							var n = _v1.a;
+							return A3(
+								$elm$parser$Parser$Advanced$Good,
+								true,
+								toValue(n),
+								A2($elm$parser$Parser$Advanced$bumpOffset, floatOffset, s));
+						}
+					}
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$number = function (c) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			if (A3($elm$parser$Parser$Advanced$isAsciiCode, 48, s.offset, s.src)) {
+				var zeroOffset = s.offset + 1;
+				var baseOffset = zeroOffset + 1;
+				return A3($elm$parser$Parser$Advanced$isAsciiCode, 120, zeroOffset, s.src) ? A5(
+					$elm$parser$Parser$Advanced$finalizeInt,
+					c.invalid,
+					c.hex,
+					baseOffset,
+					A2($elm$parser$Parser$Advanced$consumeBase16, baseOffset, s.src),
+					s) : (A3($elm$parser$Parser$Advanced$isAsciiCode, 111, zeroOffset, s.src) ? A5(
+					$elm$parser$Parser$Advanced$finalizeInt,
+					c.invalid,
+					c.octal,
+					baseOffset,
+					A3($elm$parser$Parser$Advanced$consumeBase, 8, baseOffset, s.src),
+					s) : (A3($elm$parser$Parser$Advanced$isAsciiCode, 98, zeroOffset, s.src) ? A5(
+					$elm$parser$Parser$Advanced$finalizeInt,
+					c.invalid,
+					c.binary,
+					baseOffset,
+					A3($elm$parser$Parser$Advanced$consumeBase, 2, baseOffset, s.src),
+					s) : A6(
+					$elm$parser$Parser$Advanced$finalizeFloat,
+					c.invalid,
+					c.expecting,
+					c._int,
+					c._float,
+					_Utils_Tuple2(zeroOffset, 0),
+					s)));
+			} else {
+				return A6(
+					$elm$parser$Parser$Advanced$finalizeFloat,
+					c.invalid,
+					c.expecting,
+					c._int,
+					c._float,
+					A3($elm$parser$Parser$Advanced$consumeBase, 10, s.offset, s.src),
+					s);
+			}
+		});
+};
+var $elm$parser$Parser$Advanced$int = F2(
+	function (expecting, invalid) {
+		return $elm$parser$Parser$Advanced$number(
+			{
+				binary: $elm$core$Result$Err(invalid),
+				expecting: expecting,
+				_float: $elm$core$Result$Err(invalid),
+				hex: $elm$core$Result$Err(invalid),
+				_int: $elm$core$Result$Ok($elm$core$Basics$identity),
+				invalid: invalid,
+				octal: $elm$core$Result$Err(invalid)
+			});
+	});
+var $elm$parser$Parser$int = A2($elm$parser$Parser$Advanced$int, $elm$parser$Parser$ExpectingInt, $elm$parser$Parser$ExpectingInt);
+var $elm$parser$Parser$Advanced$keeper = F2(
+	function (parseFunc, parseArg) {
+		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$apL, parseFunc, parseArg);
+	});
+var $elm$parser$Parser$keeper = $elm$parser$Parser$Advanced$keeper;
+var $elm$parser$Parser$Problem = function (a) {
+	return {$: 'Problem', a: a};
+};
+var $elm$parser$Parser$Advanced$problem = function (x) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, x));
+		});
+};
+var $elm$parser$Parser$problem = function (msg) {
+	return $elm$parser$Parser$Advanced$problem(
+		$elm$parser$Parser$Problem(msg));
+};
+var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
+var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
+	function (isGood, offset, row, col, s0) {
+		chompWhileHelp:
+		while (true) {
+			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.src);
+			if (_Utils_eq(newOffset, -1)) {
+				return A3(
+					$elm$parser$Parser$Advanced$Good,
+					_Utils_cmp(s0.offset, offset) < 0,
+					_Utils_Tuple0,
+					{col: col, context: s0.context, indent: s0.indent, offset: offset, row: row, src: s0.src});
+			} else {
+				if (_Utils_eq(newOffset, -2)) {
+					var $temp$isGood = isGood,
+						$temp$offset = offset + 1,
+						$temp$row = row + 1,
+						$temp$col = 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				} else {
+					var $temp$isGood = isGood,
+						$temp$offset = newOffset,
+						$temp$row = row,
+						$temp$col = col + 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$chompWhile = function (isGood) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A5($elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.offset, s.row, s.col, s);
+		});
+};
+var $elm$parser$Parser$Advanced$spaces = $elm$parser$Parser$Advanced$chompWhile(
+	function (c) {
+		return _Utils_eq(
+			c,
+			_Utils_chr(' ')) || (_Utils_eq(
+			c,
+			_Utils_chr('\n')) || _Utils_eq(
+			c,
+			_Utils_chr('\r')));
+	});
+var $elm$parser$Parser$spaces = $elm$parser$Parser$Advanced$spaces;
+var $elm$parser$Parser$Advanced$succeed = function (a) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$Good, false, a, s);
+		});
+};
+var $elm$parser$Parser$succeed = $elm$parser$Parser$Advanced$succeed;
+var $elm$parser$Parser$chompWhile = $elm$parser$Parser$Advanced$chompWhile;
+var $author$project$Graphics$OFF$whitespaces = $elm$parser$Parser$chompWhile(
+	function (c) {
+		return _Utils_eq(
+			c,
+			_Utils_chr(' ')) || _Utils_eq(
+			c,
+			_Utils_chr('\t'));
+	});
+var $author$project$Graphics$OFF$facetLine = A2(
+	$elm$parser$Parser$andThen,
+	function (count) {
+		switch (count) {
+			case 3:
+				return A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$keeper,
+							A2(
+								$elm$parser$Parser$ignorer,
+								$elm$parser$Parser$succeed(
+									F3(
+										function (a, b, c) {
+											return _List_fromArray(
+												[
+													_Utils_Tuple3(a, b, c)
+												]);
+										})),
+								$author$project$Graphics$OFF$whitespaces),
+							A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+						A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+					A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces));
+			case 4:
+				return A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$keeper,
+							A2(
+								$elm$parser$Parser$keeper,
+								A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed(
+										F4(
+											function (a, b, c, d) {
+												return _List_fromArray(
+													[
+														_Utils_Tuple3(a, b, c),
+														_Utils_Tuple3(a, c, d)
+													]);
+											})),
+									$author$project$Graphics$OFF$whitespaces),
+								A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+							A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $author$project$Graphics$OFF$whitespaces)),
+						A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces)),
+					A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces));
+			default:
+				return $elm$parser$Parser$problem(
+					'required 3 or 4 but got ' + $elm$core$String$fromInt(count));
+		}
+	},
+	$elm$parser$Parser$int);
+var $elm$parser$Parser$Advanced$map = F2(
+	function (func, _v0) {
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
+	});
+var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
+var $elm$parser$Parser$Done = function (a) {
+	return {$: 'Done', a: a};
+};
+var $elm$parser$Parser$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var $elm$parser$Parser$Advanced$loopHelp = F4(
+	function (p, state, callback, s0) {
+		loopHelp:
+		while (true) {
+			var _v0 = callback(state);
+			var parse = _v0.a;
+			var _v1 = parse(s0);
+			if (_v1.$ === 'Good') {
+				var p1 = _v1.a;
+				var step = _v1.b;
+				var s1 = _v1.c;
+				if (step.$ === 'Loop') {
+					var newState = step.a;
+					var $temp$p = p || p1,
+						$temp$state = newState,
+						$temp$callback = callback,
+						$temp$s0 = s1;
+					p = $temp$p;
+					state = $temp$state;
+					callback = $temp$callback;
+					s0 = $temp$s0;
+					continue loopHelp;
+				} else {
+					var result = step.a;
+					return A3($elm$parser$Parser$Advanced$Good, p || p1, result, s1);
+				}
+			} else {
+				var p1 = _v1.a;
+				var x = _v1.b;
+				return A2($elm$parser$Parser$Advanced$Bad, p || p1, x);
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$loop = F2(
+	function (state, callback) {
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				return A4($elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
+			});
+	});
+var $elm$parser$Parser$Advanced$Done = function (a) {
+	return {$: 'Done', a: a};
+};
+var $elm$parser$Parser$Advanced$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var $elm$parser$Parser$toAdvancedStep = function (step) {
+	if (step.$ === 'Loop') {
+		var s = step.a;
+		return $elm$parser$Parser$Advanced$Loop(s);
+	} else {
+		var a = step.a;
+		return $elm$parser$Parser$Advanced$Done(a);
+	}
+};
+var $elm$parser$Parser$loop = F2(
+	function (state, callback) {
+		return A2(
+			$elm$parser$Parser$Advanced$loop,
+			state,
+			function (s) {
+				return A2(
+					$elm$parser$Parser$map,
+					$elm$parser$Parser$toAdvancedStep,
+					callback(s));
+			});
+	});
+var $author$project$Graphics$OFF$replicate = F2(
+	function (n, p) {
+		return A2(
+			$elm$parser$Parser$loop,
+			_Utils_Tuple2(0, _List_Nil),
+			function (_v0) {
+				var i = _v0.a;
+				var revAccum = _v0.b;
+				return (_Utils_cmp(i, n) < 0) ? A2(
+					$elm$parser$Parser$map,
+					function (a) {
+						return $elm$parser$Parser$Loop(
+							_Utils_Tuple2(
+								i + 1,
+								A2($elm$core$List$cons, a, revAccum)));
+					},
+					p) : $elm$parser$Parser$succeed(
+					$elm$parser$Parser$Done(
+						$elm$core$List$reverse(revAccum)));
+			});
+	});
+var $author$project$Graphics$OFF$facets = function (n) {
+	return A2(
+		$elm$parser$Parser$map,
+		$elm$core$List$concat,
+		A2($author$project$Graphics$OFF$replicate, n, $author$project$Graphics$OFF$facetLine));
+};
+var $elm$parser$Parser$ExpectingKeyword = function (a) {
+	return {$: 'ExpectingKeyword', a: a};
+};
+var $elm$parser$Parser$Advanced$Token = F2(
+	function (a, b) {
+		return {$: 'Token', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
+var $elm$core$Basics$not = _Basics_not;
+var $elm$parser$Parser$Advanced$keyword = function (_v0) {
+	var kwd = _v0.a;
+	var expecting = _v0.b;
+	var progress = !$elm$core$String$isEmpty(kwd);
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, kwd, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return (_Utils_eq(newOffset, -1) || (0 <= A3(
+				$elm$parser$Parser$Advanced$isSubChar,
+				function (c) {
+					return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
+						c,
+						_Utils_chr('_'));
+				},
+				newOffset,
+				s.src))) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var $elm$parser$Parser$keyword = function (kwd) {
+	return $elm$parser$Parser$Advanced$keyword(
+		A2(
+			$elm$parser$Parser$Advanced$Token,
+			kwd,
+			$elm$parser$Parser$ExpectingKeyword(kwd)));
+};
+var $author$project$Graphics$OFF$header = A2(
+	$elm$parser$Parser$keeper,
 	A2(
-		$elm$json$Json$Decode$field,
-		'position',
-		A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float)),
+		$elm$parser$Parser$keeper,
+		A2(
+			$elm$parser$Parser$keeper,
+			A2(
+				$elm$parser$Parser$ignorer,
+				A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$succeed(
+						F3(
+							function (nv, nf, ne) {
+								return _Utils_Tuple3(nv, nf, ne);
+							})),
+					$elm$parser$Parser$keyword('OFF')),
+				$elm$parser$Parser$spaces),
+			A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces)),
+		A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces)),
+	A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces));
+var $elm$parser$Parser$ExpectingFloat = {$: 'ExpectingFloat'};
+var $elm$parser$Parser$Advanced$float = F2(
+	function (expecting, invalid) {
+		return $elm$parser$Parser$Advanced$number(
+			{
+				binary: $elm$core$Result$Err(invalid),
+				expecting: expecting,
+				_float: $elm$core$Result$Ok($elm$core$Basics$identity),
+				hex: $elm$core$Result$Err(invalid),
+				_int: $elm$core$Result$Ok($elm$core$Basics$toFloat),
+				invalid: invalid,
+				octal: $elm$core$Result$Err(invalid)
+			});
+	});
+var $elm$parser$Parser$float = A2($elm$parser$Parser$Advanced$float, $elm$parser$Parser$ExpectingFloat, $elm$parser$Parser$ExpectingFloat);
+var $elm$parser$Parser$Advanced$Append = F2(
+	function (a, b) {
+		return {$: 'Append', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$oneOfHelp = F3(
+	function (s0, bag, parsers) {
+		oneOfHelp:
+		while (true) {
+			if (!parsers.b) {
+				return A2($elm$parser$Parser$Advanced$Bad, false, bag);
+			} else {
+				var parse = parsers.a.a;
+				var remainingParsers = parsers.b;
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var step = _v1;
+					return step;
+				} else {
+					var step = _v1;
+					var p = step.a;
+					var x = step.b;
+					if (p) {
+						return step;
+					} else {
+						var $temp$s0 = s0,
+							$temp$bag = A2($elm$parser$Parser$Advanced$Append, bag, x),
+							$temp$parsers = remainingParsers;
+						s0 = $temp$s0;
+						bag = $temp$bag;
+						parsers = $temp$parsers;
+						continue oneOfHelp;
+					}
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$oneOf = function (parsers) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$oneOfHelp, s, $elm$parser$Parser$Advanced$Empty, parsers);
+		});
+};
+var $elm$parser$Parser$oneOf = $elm$parser$Parser$Advanced$oneOf;
+var $elm$parser$Parser$ExpectingSymbol = function (a) {
+	return {$: 'ExpectingSymbol', a: a};
+};
+var $elm$parser$Parser$Advanced$token = function (_v0) {
+	var str = _v0.a;
+	var expecting = _v0.b;
+	var progress = !$elm$core$String$isEmpty(str);
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var $elm$parser$Parser$Advanced$symbol = $elm$parser$Parser$Advanced$token;
+var $elm$parser$Parser$symbol = function (str) {
+	return $elm$parser$Parser$Advanced$symbol(
+		A2(
+			$elm$parser$Parser$Advanced$Token,
+			str,
+			$elm$parser$Parser$ExpectingSymbol(str)));
+};
+var $author$project$Graphics$OFF$float = $elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$parser$Parser$keeper,
+			A2(
+				$elm$parser$Parser$ignorer,
+				$elm$parser$Parser$succeed($elm$core$Basics$negate),
+				$elm$parser$Parser$symbol('-')),
+			$elm$parser$Parser$float),
+			$elm$parser$Parser$float
+		]));
+var $author$project$Graphics$OFF$vertexLine = A2(
+	$elm$parser$Parser$keeper,
 	A2(
-		$elm$json$Json$Decode$field,
-		'normal',
-		A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'scaling_vector',
-		A2($author$project$Graphics$MeshWithScalingVector$list3, $elm_explorations$linear_algebra$Math$Vector3$vec3, $elm$json$Json$Decode$float)));
-var $author$project$Graphics$MeshWithScalingVector$decodeMeshWithScalingVector = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Graphics$MeshWithScalingVector$MeshAndFace,
-	A2(
-		$elm$json$Json$Decode$field,
-		'vertices',
-		$elm$json$Json$Decode$list($author$project$Graphics$MeshWithScalingVector$vertex)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'faces',
-		$elm$json$Json$Decode$list($author$project$Graphics$MeshWithScalingVector$face)));
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
-var $author$project$Graphics$MeshWithScalingVector$parse = function (s) {
+		$elm$parser$Parser$keeper,
+		A2(
+			$elm$parser$Parser$keeper,
+			$elm$parser$Parser$succeed($elm_explorations$linear_algebra$Math$Vector3$vec3),
+			A2($elm$parser$Parser$ignorer, $author$project$Graphics$OFF$float, $author$project$Graphics$OFF$whitespaces)),
+		A2($elm$parser$Parser$ignorer, $author$project$Graphics$OFF$float, $author$project$Graphics$OFF$whitespaces)),
+	A2($elm$parser$Parser$ignorer, $author$project$Graphics$OFF$float, $elm$parser$Parser$spaces));
+var $author$project$Graphics$OFF$vertices = function (n) {
+	return A2($author$project$Graphics$OFF$replicate, n, $author$project$Graphics$OFF$vertexLine);
+};
+var $author$project$Graphics$OFF$parser = A2(
+	$elm$parser$Parser$andThen,
+	function (_v0) {
+		var nv = _v0.a;
+		var nf = _v0.b;
+		return A2(
+			$elm$parser$Parser$keeper,
+			A2(
+				$elm$parser$Parser$keeper,
+				$elm$parser$Parser$succeed(
+					F2(
+						function (vs, fs) {
+							return {indices: fs, vertices: vs};
+						})),
+				$author$project$Graphics$OFF$vertices(nv)),
+			$author$project$Graphics$OFF$facets(nf));
+	},
+	$author$project$Graphics$OFF$header);
+var $elm$parser$Parser$DeadEnd = F3(
+	function (row, col, problem) {
+		return {col: col, problem: problem, row: row};
+	});
+var $elm$parser$Parser$problemToDeadEnd = function (p) {
+	return A3($elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
+};
+var $elm$parser$Parser$Advanced$bagToList = F2(
+	function (bag, list) {
+		bagToList:
+		while (true) {
+			switch (bag.$) {
+				case 'Empty':
+					return list;
+				case 'AddRight':
+					var bag1 = bag.a;
+					var x = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$core$List$cons, x, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+				default:
+					var bag1 = bag.a;
+					var bag2 = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$parser$Parser$Advanced$bagToList, bag2, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$run = F2(
+	function (_v0, src) {
+		var parse = _v0.a;
+		var _v1 = parse(
+			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
+		if (_v1.$ === 'Good') {
+			var value = _v1.b;
+			return $elm$core$Result$Ok(value);
+		} else {
+			var bag = _v1.b;
+			return $elm$core$Result$Err(
+				A2($elm$parser$Parser$Advanced$bagToList, bag, _List_Nil));
+		}
+	});
+var $elm$parser$Parser$run = F2(
+	function (parser, source) {
+		var _v0 = A2($elm$parser$Parser$Advanced$run, parser, source);
+		if (_v0.$ === 'Ok') {
+			var a = _v0.a;
+			return $elm$core$Result$Ok(a);
+		} else {
+			var problems = _v0.a;
+			return $elm$core$Result$Err(
+				A2($elm$core$List$map, $elm$parser$Parser$problemToDeadEnd, problems));
+		}
+	});
+var $author$project$Graphics$OFF$parse = function (input) {
 	return A2(
 		$elm$core$Result$mapError,
-		$elm$json$Json$Decode$errorToString,
-		A2($elm$json$Json$Decode$decodeString, $author$project$Graphics$MeshWithScalingVector$decodeMeshWithScalingVector, s));
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$List$map(
+				function (deadend) {
+					return 'dead end at (line, col) = (' + ($elm$core$String$fromInt(deadend.row) + (', ' + ($elm$core$String$fromInt(deadend.col) + ')')));
+				}),
+			$elm$core$String$join('\n')),
+		A2($elm$parser$Parser$run, $author$project$Graphics$OFF$parser, input));
 };
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
@@ -10562,7 +11500,7 @@ var $elm$http$Http$send = F2(
 			resultToMessage,
 			$elm$http$Http$toTask(request_));
 	});
-var $author$project$Graphics$MeshWithScalingVector$load = F2(
+var $author$project$Graphics$OFF$load = F2(
 	function (url, msg) {
 		return A2(
 			$elm$http$Http$send,
@@ -10570,7 +11508,7 @@ var $author$project$Graphics$MeshWithScalingVector$load = F2(
 				return msg(
 					A2(
 						$elm$core$Result$andThen,
-						$author$project$Graphics$MeshWithScalingVector$parse,
+						$author$project$Graphics$OFF$parse,
 						A2(
 							$elm$core$Result$mapError,
 							function (_v0) {
@@ -10590,7 +11528,7 @@ var $author$project$Graphics$MeshLoader$loadMeshCmd = function (f) {
 				$elm$core$List$map,
 				function (name) {
 					return A2(
-						$author$project$Graphics$MeshWithScalingVector$load,
+						$author$project$Graphics$OFF$load,
 						$author$project$Graphics$MeshLoader$buildMeshUri(name),
 						$author$project$Graphics$MeshLoader$LoadMesh(name));
 				},
@@ -10628,6 +11566,7 @@ var $author$project$Main$Resize = F2(
 	});
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$browser$Browser$Events$Window = {$: 'Window'};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
 		return {$: 'MySub', a: a, b: b, c: c};
@@ -10984,29 +11923,195 @@ var $elm$core$Basics$clamp = F3(
 	});
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
-var $elm$core$String$append = _String_append;
-var $elm_explorations$linear_algebra$Math$Vector3$getX = _MJS_v3getX;
-var $elm_explorations$linear_algebra$Math$Vector3$getY = _MJS_v3getY;
-var $elm_explorations$linear_algebra$Math$Vector3$getZ = _MJS_v3getZ;
-var $author$project$Graphics$MeshLoader$flipVec3 = function (v) {
-	return A3(
-		$elm_explorations$linear_algebra$Math$Vector3$vec3,
-		$elm_explorations$linear_algebra$Math$Vector3$getX(v),
-		-$elm_explorations$linear_algebra$Math$Vector3$getY(v),
-		-$elm_explorations$linear_algebra$Math$Vector3$getZ(v));
+var $elm_explorations$linear_algebra$Math$Vector3$cross = _MJS_v3cross;
+var $elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
+			var jsArray = _v0.a;
+			var remainingItems = _v0.b;
+			if (_Utils_cmp(
+				$elm$core$Elm$JsArray$length(jsArray),
+				$elm$core$Array$branchFactor) < 0) {
+				return A2(
+					$elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					$elm$core$List$cons,
+					$elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var $elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return $elm$core$Array$empty;
+	} else {
+		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
 };
-var $author$project$Graphics$MeshLoader$flipVertex = function (vertex) {
-	return {
-		normal: $author$project$Graphics$MeshLoader$flipVec3(vertex.normal),
-		position: $author$project$Graphics$MeshLoader$flipVec3(vertex.position),
-		scalingVector: $author$project$Graphics$MeshLoader$flipVec3(vertex.scalingVector)
-	};
+var $elm$core$Result$fromMaybe = F2(
+	function (err, maybe) {
+		if (maybe.$ === 'Just') {
+			var v = maybe.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			return $elm$core$Result$Err(err);
+		}
+	});
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (index >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var subTree = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _v0.a;
+				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
 };
-var $author$project$Graphics$MeshLoader$flipMesh = function (mesh) {
-	return {
-		faces: mesh.faces,
-		vertices: A2($elm$core$List$map, $author$project$Graphics$MeshLoader$flipVertex, mesh.vertices)
-	};
+var $elm$core$Array$get = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
+			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
+			A3($elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var $elm$core$Maybe$map3 = F4(
+	function (func, ma, mb, mc) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				if (mc.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var c = mc.a;
+					return $elm$core$Maybe$Just(
+						A3(func, a, b, c));
+				}
+			}
+		}
+	});
+var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Graphics$MeshLoader$sequence = function (list) {
+	var rec = F2(
+		function (ls, accum) {
+			if (!ls.b) {
+				return $elm$core$Result$Ok(
+					$elm$core$List$reverse(accum));
+			} else {
+				var x = ls.a;
+				var xs = ls.b;
+				return A2(
+					$elm$core$Result$andThen,
+					function (x1) {
+						return A2(
+							rec,
+							xs,
+							A2($elm$core$List$cons, x1, accum));
+					},
+					x);
+			}
+		});
+	return A2(rec, list, _List_Nil);
+};
+var $elm_explorations$linear_algebra$Math$Vector3$sub = _MJS_v3sub;
+var $author$project$Graphics$MeshLoader$convertMesh = function (_v0) {
+	var vertices = _v0.vertices;
+	var indices = _v0.indices;
+	var verticesArray = $elm$core$Array$fromList(vertices);
+	var calcNormal = F3(
+		function (v0, v1, v2) {
+			return $elm_explorations$linear_algebra$Math$Vector3$normalize(
+				A2(
+					$elm_explorations$linear_algebra$Math$Vector3$cross,
+					A2($elm_explorations$linear_algebra$Math$Vector3$sub, v1, v0),
+					A2($elm_explorations$linear_algebra$Math$Vector3$sub, v2, v0)));
+		});
+	var calcTriangle = F2(
+		function (i, _v1) {
+			var a = _v1.a;
+			var b = _v1.b;
+			var c = _v1.c;
+			var errMsg = 'invalid face: (' + (A2(
+				$elm$core$String$join,
+				', ',
+				A2(
+					$elm$core$List$map,
+					$elm$core$String$fromInt,
+					_List_fromArray(
+						[a, b, c]))) + ')');
+			return A2(
+				$elm$core$Result$fromMaybe,
+				errMsg,
+				A4(
+					$elm$core$Maybe$map3,
+					F3(
+						function (x, y, z) {
+							var normal = A3(calcNormal, x, y, z);
+							return _Utils_Tuple2(
+								_List_fromArray(
+									[
+										{normal: normal, position: x},
+										{normal: normal, position: y},
+										{normal: normal, position: z}
+									]),
+								_Utils_Tuple3(3 * i, (3 * i) + 1, (3 * i) + 2));
+						}),
+					A2($elm$core$Array$get, a, verticesArray),
+					A2($elm$core$Array$get, b, verticesArray),
+					A2($elm$core$Array$get, c, verticesArray)));
+		});
+	return A2(
+		$elm$core$Result$map,
+		function (vs) {
+			return _Utils_Tuple2(
+				A2($elm$core$List$concatMap, $elm$core$Tuple$first, vs),
+				A2($elm$core$List$map, $elm$core$Tuple$second, vs));
+		},
+		$author$project$Graphics$MeshLoader$sequence(
+			A2($elm$core$List$indexedMap, calcTriangle, indices)));
 };
 var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 	function (a, b, c) {
@@ -11026,28 +12131,40 @@ var $author$project$Graphics$MeshLoader$update = F2(
 				{
 					errors: A2(
 						$elm$core$List$cons,
-						A2($elm$core$Debug$log, 'load mesh error', e),
+						A2($elm$core$Debug$log, 'load mesh error: ' + name, e),
 						model.errors)
 				});
 		} else {
-			var meshWith = meshOrErr.a;
-			var glMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, meshWith.vertices, meshWith.faces);
-			var flippedMeshWith = $author$project$Graphics$MeshLoader$flipMesh(meshWith);
-			var flippedMesh = A2($elm_explorations$webgl$WebGL$indexedTriangles, flippedMeshWith.vertices, flippedMeshWith.faces);
-			var updatedMeshes = A2(
-				$elm$core$Dict$union,
-				model.meshes,
-				$elm$core$Dict$fromList(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(name, glMesh),
-							_Utils_Tuple2(
-							A2($elm$core$String$append, name, '_flip'),
-							flippedMesh)
-						])));
-			return _Utils_update(
-				model,
-				{meshes: updatedMeshes});
+			var mesh = meshOrErr.a;
+			var _v2 = $author$project$Graphics$MeshLoader$convertMesh(mesh);
+			if (_v2.$ === 'Err') {
+				var e = _v2.a;
+				return _Utils_update(
+					model,
+					{
+						errors: A2(
+							$elm$core$List$cons,
+							A2($elm$core$Debug$log, 'parse mesh error: ' + name, e),
+							model.errors)
+					});
+			} else {
+				var _v3 = _v2.a;
+				var vertices = _v3.a;
+				var indices = _v3.b;
+				var updatedMeshes = A2(
+					$elm$core$Dict$union,
+					model.meshes,
+					$elm$core$Dict$fromList(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								name,
+								A2($elm_explorations$webgl$WebGL$indexedTriangles, vertices, indices))
+							])));
+				return _Utils_update(
+					model,
+					{meshes: updatedMeshes});
+			}
 		}
 	});
 var $author$project$Graphics$OrbitControl$Rotating = function (a) {
@@ -11095,11 +12212,11 @@ var $author$project$Graphics$OrbitControl$doPanning = F4(
 		var tanx = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$scale,
 			os * dx,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, sa, 0, ca));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, sa, -ca, 0));
 		var tany = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$scale,
 			os * dy,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ca * sb, -cb, -(sa * sb)));
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ca * sb, sa * sb, -cb));
 		var trans = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$add,
 			model.target,
