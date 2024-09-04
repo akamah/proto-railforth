@@ -7788,7 +7788,7 @@ var $author$project$Types$Rail$isFlippedToString = function (isFlipped) {
 };
 var $author$project$Types$Rail$isInvertedToString = function (isInverted) {
 	if (isInverted.$ === 'NotInverted') {
-		return '_minus';
+		return '';
 	} else {
 		return '_plus';
 	}

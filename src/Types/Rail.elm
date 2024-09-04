@@ -178,7 +178,7 @@ isInvertedToString : IsInverted -> String
 isInvertedToString isInverted =
     case isInverted of
         NotInverted ->
-            "_minus"
+            ""
 
         Inverted ->
             "_plus"

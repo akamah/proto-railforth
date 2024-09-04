@@ -30,7 +30,7 @@ local rails = {
 };
 
 local gen_name(rail, flip, invert) =
-  rail + (if invert then '_plus' else '_minus') + (if flip then '_flip' else '');
+  rail + (if invert then '_plus' else '') + (if flip then '_flip' else '');
 
 local gen_value(rail, flip, invert) = {
   name: rail,
