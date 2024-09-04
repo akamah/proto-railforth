@@ -18,13 +18,13 @@ toString : Pier -> String
 toString pier =
     case pier of
         Single ->
-            "pier"
+            "pier_single"
 
         Wide ->
-            "pier_wide"
+            "pier_double"
 
         Mini ->
-            "pier_4"
+            "pier_mini"
 
 
 getHeight : Pier -> Int

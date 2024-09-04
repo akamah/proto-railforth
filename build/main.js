@@ -7633,11 +7633,11 @@ var $elm$core$Dict$get = F2(
 var $author$project$Types$Pier$toString = function (pier) {
 	switch (pier.$) {
 		case 'Single':
-			return 'pier';
+			return 'pier_single';
 		case 'Wide':
-			return 'pier_wide';
+			return 'pier_double';
 		default:
-			return 'pier_4';
+			return 'pier_mini';
 	}
 };
 var $elm$core$Maybe$withDefault = F2(
