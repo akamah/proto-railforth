@@ -393,6 +393,28 @@ module slope_curve_A(divs) {
     slope_curve(true, true, divs);
 }
 
+module stop(inverted) {
+    size = 40;
+    
+    union() {
+        straight(4, inverted);
+        translate([UNIT * 2, (inverted ? -1 : 1) * WIDTH / 2, 0]) {
+            rotate([0, 0, inverted ? 180 : 0]) {
+                linear_extrude(height = THICKNESS) {
+                    polygon([
+                        [-size / 2, - 0.5],
+                        [-size / 2 + size / 3, size / 3],
+                        [size / 2 - size / 3, size / 3],
+                        [size / 2, - 0.5]
+                    ]);
+                }
+                translate([0, size / 8, size / 4]) {
+                    cube([size / 3, size / 8, size / 4], center = true);
+                }
+            }
+        }
+    }
+}
 
 module double_cross(inverted, divs) {
     straight = straight_raildef(4 * UNIT);

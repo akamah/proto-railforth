@@ -17,6 +17,7 @@ local rails = {
     'straight4',
     'straight8',
     'joint',
+    'stop',
   ],
   can_flip_cannot_invert: [
   ],
