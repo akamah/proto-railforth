@@ -65,7 +65,7 @@ module rail_extrude(path, tang, poly) {
     
 //    echo(points);
 //    echo(faces);
-    polyhedron(points=points, faces=faces);
+    polyhedron(points=points, faces=faces, convexity=10);
 }
 
 /*
