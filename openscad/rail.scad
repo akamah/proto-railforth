@@ -366,3 +366,95 @@ module double_cross(inverted, divs) {
         inverted
     );
 }
+
+// 橋脚。一旦は(0, 0, 0)と隅を合わせて、 x, yの正の方向に描画する
+module render_pier(depth, roofWidth, pillarWidth, baseWidth, roofHeight, pillarHeight, baseHeight) {
+    module pillarAndBase() {
+        // 柱本体
+        translate([0, 0, baseHeight]) {
+            linear_extrude(height = pillarHeight) {
+                polygon([
+                    [0, pillarWidth / 2],
+                    [depth / 2, pillarWidth],
+                    [depth, pillarWidth / 2],
+                    [depth / 2, 0],
+                ]);
+            }
+        }
+        // 上の角取り
+        translate([0, 0, baseHeight + pillarHeight]) {
+            difference() {
+                rotate([-45, 0, 0]) {
+                    cube([depth, pillarWidth * sqrt(1/2), pillarWidth * sqrt(1/2)]);
+                }
+                translate([-1, -1, 0]) {
+                    cube([depth + 2, 2 * pillarWidth + 2, pillarWidth]);
+                }
+            }
+        }
+        // 下の角取り
+        translate([0, 0, baseHeight]) {
+            difference() {
+                rotate([-45, 0, 0]) {
+                    cube([depth, pillarWidth * sqrt(1/2), pillarWidth * sqrt(1/2)]);
+                }
+                translate([-1, -1, -pillarWidth]) {
+                    cube([depth + 2, 2 * pillarWidth + 2, pillarWidth]);
+                }
+            }
+        }
+
+        cube([depth, baseWidth, baseHeight]);
+    }
+
+    // 天井
+    translate([0, 0, baseHeight + pillarHeight]) {
+        cube([depth, roofWidth, roofHeight]);
+    }
+    pillarAndBase();
+    translate([depth, roofWidth, 0]) {
+        rotate([0, 0, 180]) {
+            pillarAndBase();
+        }
+    }
+}
+
+PIER_DEPTH = 30;
+PIER_PILLAR_WIDTH = 12;
+PIER_BASE_WIDTH = 23;
+PIER_ROOF_HEIGHT = 6;
+PIER_MARGIN = 0.5;
+PIER_SPACING = 4;
+PIER_BASE_HEIGHT = THICKNESS;
+PIER_ROOF_WIDTH = WIDTH + 2 * PIER_SPACING + 2 * PIER_BASE_WIDTH;
+PIER_PILLAR_HEIGHT = 4 * PIER_UNIT - PIER_ROOF_HEIGHT - PIER_BASE_HEIGHT - PIER_MARGIN;
+
+// extendは単線と複線の橋脚のどちらにも対応できるようにするためのパラメータ。
+// extend = 0なら単線、DOUBLE_TRACKなら複線になるようになる
+module pier_base(extend) {
+    translate([-PIER_DEPTH / 2, -PIER_ROOF_WIDTH / 2, 0]) {
+        render_pier(
+            depth = PIER_DEPTH,
+            roofWidth = PIER_ROOF_WIDTH + extend,
+            pillarWidth = PIER_PILLAR_WIDTH,
+            baseWidth = PIER_BASE_WIDTH,
+            roofHeight = PIER_ROOF_HEIGHT,
+            pillarHeight = PIER_PILLAR_HEIGHT,
+            baseHeight = PIER_BASE_HEIGHT
+        );
+    }
+}
+
+module pier_single() {
+    pier_base(0);
+}
+
+module pier_wide() {
+    pier_base(DOUBLE_TRACK);
+}
+
+module pier_mini() {
+    translate([-PIER_DEPTH/2, -PIER_ROOF_WIDTH/2, 0]) {
+        cube([PIER_DEPTH, PIER_ROOF_WIDTH, PIER_UNIT - PIER_MARGIN]);
+    }
+}
