@@ -67,6 +67,14 @@ if (name == "straight1") {
   joint(inverted);
 } else if (name == "slope") {
   slope(flipped, inverted, 1 * resolution);
+} else if (name == "slope_curve_A") {
+  assert_cannot_flip(name, flipped);
+  assert_cannot_invert(name, inverted);
+  slope_curve_A(1 * resolution);
+} else if (name == "slope_curve_B") {
+  assert_cannot_flip(name, flipped);
+  assert_cannot_invert(name, inverted);
+  slope_curve_B(1 * resolution);
 } else if (name == "auto_turnout") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);

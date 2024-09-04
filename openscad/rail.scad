@@ -112,9 +112,9 @@ function straight_raildef(length) =
     ,[ for (i = [0:1]) [1, 0, 0] ]
     ];
 
-function curve_raildef(radius, degrees, div) =
-    [[ for (i = [0:div]) radius * [sin(degrees * i / div), 1 - cos(degrees * i / div), 0] ]
-    ,[ for (i = [0:div]) [cos(degrees * i / div), sin(degrees * i / div), 0] ]
+function curve_raildef(radius, degrees, height, div) =
+    [[ for (i = [0:div]) [radius * sin(degrees * i / div), radius * (1 - cos(degrees * i / div)), height * (1 - cos(180 * i/div)) / 2] ]
+    ,[ for (i = [0:div]) [radius * degrees * cos(degrees * i / div), radius * degrees * sin(degrees * i / div), height * 180 * sin(180 * i/div) / 2] ]
     ];
 
 function slope_raildef(length, height, div) =
@@ -286,16 +286,16 @@ module straight(length, inverted) {
 }
 
 module curve(degree, flipped, inverted, divs) {
-    render_simple_rail(flip_if(flipped, curve_raildef(4 * UNIT, degree, divs)), inverted);    
+    render_simple_rail(flip_if(flipped, curve_raildef(4 * UNIT, degree, 0, divs)), inverted);    
 }
 
 module outer_curve(degree, flipped, inverted, divs) {
-    render_simple_rail(flip_if(flipped, curve_raildef(4 * UNIT + DOUBLE_TRACK, degree, divs)), inverted);    
+    render_simple_rail(flip_if(flipped, curve_raildef(4 * UNIT + DOUBLE_TRACK, degree, 0, divs)), inverted);    
 }
 
 module turnout(flipped, inverted, divs) {
     straight = straight_raildef(4 * UNIT);
-    curve = flip_if(flipped, curve_raildef(4 * UNIT, 45, divs));
+    curve = flip_if(flipped, curve_raildef(4 * UNIT, 45, 0, divs));
     render_rail([straight, curve], [start_mat(straight)], [end_mat(straight), end_mat(curve)], inverted);
 }
 
@@ -316,8 +316,8 @@ module joint(inverted) {
 }
 
 module eight(flipped, inverted, divs) {
-    right = flip_if(flipped, curve_raildef(4 * UNIT, 45, divs));
-    left = flip_if(!flipped, curve_raildef(4 * UNIT, 45, divs));
+    right = flip_if(flipped, curve_raildef(4 * UNIT, 45, 0, divs));
+    left = flip_if(!flipped, curve_raildef(4 * UNIT, 45, 0, divs));
     render_rail([right, left], [start_mat(right), end_mat(left)], [end_mat(right)], inverted);
 }
 
@@ -338,16 +338,41 @@ module slope(flipped, inverted, divs) {
 
 module auto_turnout(divs) {
     straight = straight_raildef(6 * UNIT);
-    curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, divs));
+    curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, 0, divs));
     render_rail([straight, curve], [start_mat(straight)], [end_mat(straight), end_mat(curve)], false);
 }
 
 module auto_point(divs) {
     straight = straight_raildef(6 * UNIT);
-    curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, divs));
+    curve = translate_raildef([2 * UNIT, 0, 0], curve_raildef(4 * UNIT, 45, 0, divs));
     shift = translate_raildef([2 * UNIT, 0, 0], shift_raildef(4 * UNIT, -DOUBLE_TRACK, divs));
     render_rail([straight, curve, shift], [start_mat(straight)], [end_mat(straight), end_mat(curve), end_mat(shift)], false);
 }
+
+module slope_curve(flipped, inverted, divs) {
+    // 反転させると下の方に行ってしまうので、あらかじめ高さを逆にしておく
+    curve = flip_if(flipped, curve_raildef(4 * UNIT, 45, flipped ? -PIER_UNIT : PIER_UNIT, divs));
+    union() {
+        render_simple_rail(curve, inverted);
+
+        // 一つ分うえにできちゃったので一個下げる
+        translate([0, 0, -PIER_UNIT]) {
+            multmatrix(end_mat(curve)) {
+                pier_mini();
+            }
+        }
+    }
+}
+
+// この種類のレールだけは逆方向がなかったりするので、それぞれ単品として扱う
+module slope_curve_B(divs) {
+    slope_curve(false, false, divs);
+}
+
+module slope_curve_A(divs) {
+    slope_curve(true, true, divs);
+}
+
 
 module double_cross(inverted, divs) {
     straight = straight_raildef(4 * UNIT);
