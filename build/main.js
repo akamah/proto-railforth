@@ -7840,9 +7840,9 @@ var $author$project$Types$Rail$toStringWith = F3(
 				var inv = rail.b;
 				return 'slope' + (inverted(inv) + flipped(flip));
 			case 'SlopeCurveA':
-				return 'slopecurveA';
+				return 'slope_curve_A';
 			case 'SlopeCurveB':
-				return 'slopecurveB';
+				return 'slope_curve_B';
 			case 'Stop':
 				var inv = rail.a;
 				return 'stop' + inverted(inv);

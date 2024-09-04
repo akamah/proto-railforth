@@ -159,10 +159,10 @@ toStringWith flipped inverted rail =
             "slope" ++ inverted inv ++ flipped flip
 
         SlopeCurveA ->
-            "slopecurveA"
+            "slope_curve_A"
 
         SlopeCurveB ->
-            "slopecurveB"
+            "slope_curve_B"
 
         Stop inv ->
             "stop" ++ inverted inv
