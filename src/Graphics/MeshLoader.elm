@@ -82,11 +82,7 @@ since the definition of (Rail -> String) is moved to Rail module
 -}
 allMeshNames : List String
 allMeshNames =
-    List.map Rail.toString Rail.allRails
-        ++ [ "pier"
-           , "pier_wide"
-           , "pier_4"
-           ]
+    List.map Rail.toString Rail.allRails ++ List.map Pier.toString Pier.allPiers
 
 
 loadMeshCmd : (Msg -> msg) -> Cmd msg

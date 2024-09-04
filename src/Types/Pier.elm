@@ -1,5 +1,6 @@
 module Types.Pier exposing
     ( Pier(..)
+    , allPiers
     , getHeight
     , toString
     )
@@ -37,3 +38,8 @@ getHeight pier =
 
         Mini ->
             1
+
+
+allPiers : List Pier
+allPiers =
+    [ Single, Wide, Mini ]

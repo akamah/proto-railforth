@@ -10558,6 +10558,8 @@ var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 	function (a, b) {
 		return {$: 'LoadMesh', a: a, b: b};
 	});
+var $author$project$Types$Pier$allPiers = _List_fromArray(
+	[$author$project$Types$Pier$Single, $author$project$Types$Pier$Wide, $author$project$Types$Pier$Mini]);
 var $author$project$Types$Rail$allRails = _Utils_ap(
 	_List_fromArray(
 		[$author$project$Types$Rail$SlopeCurveA, $author$project$Types$Rail$SlopeCurveB, $author$project$Types$Rail$AutoTurnout, $author$project$Types$Rail$AutoPoint]),
@@ -10601,8 +10603,7 @@ var $author$project$Types$Rail$allRails = _Utils_ap(
 				[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted]))));
 var $author$project$Graphics$MeshLoader$allMeshNames = _Utils_ap(
 	A2($elm$core$List$map, $author$project$Types$Rail$toString, $author$project$Types$Rail$allRails),
-	_List_fromArray(
-		['pier', 'pier_wide', 'pier_4']));
+	A2($elm$core$List$map, $author$project$Types$Pier$toString, $author$project$Types$Pier$allPiers));
 var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.off');
 };
