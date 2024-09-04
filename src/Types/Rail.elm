@@ -44,6 +44,7 @@ type Rail invert flip
     | OuterCurve45 flip invert
     | Turnout flip invert
     | SingleDouble flip invert
+    | DoubleWide flip invert
     | EightPoint flip invert
     | JointChange invert
     | Slope flip invert
@@ -85,6 +86,9 @@ map f rail =
 
         SingleDouble a b ->
             SingleDouble a (f b)
+
+        DoubleWide a b ->
+            DoubleWide a (f b)
 
         EightPoint a b ->
             EightPoint a (f b)
@@ -148,6 +152,9 @@ toStringWith flipped inverted rail =
 
         SingleDouble flip inv ->
             "single_double" ++ inverted inv ++ flipped flip
+
+        DoubleWide flip inv ->
+            "double_wide" ++ inverted inv ++ flipped flip
 
         EightPoint flip inv ->
             "eight" ++ inverted inv ++ flipped flip
@@ -224,6 +231,7 @@ allRails =
                                     , OuterCurve45 flip invert
                                     , Turnout flip invert
                                     , SingleDouble flip invert
+                                    , DoubleWide flip invert
                                     , EightPoint flip invert
                                     , Slope flip invert
                                     ]

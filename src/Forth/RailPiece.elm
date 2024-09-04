@@ -69,6 +69,11 @@ plusZero =
     RailLocation.make Rot45.zero Rot45.zero 0 Dir.w Joint.Plus
 
 
+doubleTrackLeftZeroMinus : RailLocation
+doubleTrackLeftZeroMinus =
+    RailLocation.make Rot45.zero (Rot45.make 0 0 1 0) 0 Dir.w Joint.Minus
+
+
 goStraight1 : RailLocation
 goStraight1 =
     RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
@@ -87,6 +92,11 @@ goStraight2 =
 goStraight4 : RailLocation
 goStraight4 =
     RailLocation.mul goStraight2.location goStraight2
+
+
+goStraight5Minus : RailLocation
+goStraight5Minus =
+    RailLocation.make (Rot45.make 5 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
 
 
 goStraight6 : RailLocation
@@ -127,6 +137,11 @@ doubleTrackLeft =
 doubleTrackRight : RailLocation
 doubleTrackRight =
     RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 -1 0) 0 Dir.e Joint.Plus
+
+
+doubleTrackWideLeft : RailLocation
+doubleTrackWideLeft =
+    RailLocation.make (Rot45.make 5 0 2 0) Rot45.zero 0 Dir.e Joint.Plus
 
 
 slopeCurveA : RailLocation
@@ -205,6 +220,9 @@ getRailPiece rail =
 
         SingleDouble f _ ->
             flip f <| threeEnds minusZero goStraight4 doubleTrackLeft
+
+        DoubleWide f _ ->
+            flip f <| fourEnds minusZero goStraight5Minus doubleTrackWideLeft doubleTrackLeftZeroMinus
 
         EightPoint f _ ->
             flip f <| threeEnds minusZero turnRight45deg turnLeft45deg
