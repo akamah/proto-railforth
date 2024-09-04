@@ -190,7 +190,7 @@ WIDTH  = 38;
 THICKNESS = 8;
 
 module render_rail_body(raildef) {
-    body_polygon = generate_square_polygon(WIDTH, THICKNESS, [0, 0, 0]);
+    body_polygon = generate_square_polygon(WIDTH, THICKNESS, [0, 0, THICKNESS/2]);
     rail_extrude(raildef[0], raildef[1], body_polygon);
 }
 
@@ -198,7 +198,7 @@ module render_grooves(raildef) {
     groove_width = 8.0;
     groove_depth = 6.0;
     groove_width_center = 13.5;
-    groove_depth_center = THICKNESS/2;
+    groove_depth_center = THICKNESS;
     
     for (scaleY = [-1, 1]) {
         poly = generate_square_polygon(groove_width, groove_depth, [0, scaleY * groove_width_center, groove_depth_center]);
@@ -245,13 +245,13 @@ module render_rail(raildefs, jacks, plugs, inverted) {
 }
 
 module render_joint_jack() {
-    translate([-4.5, 0, 0]) {
+    translate([-4.5, 0, THICKNESS/2]) {
         cube([10.0, 12.0, THICKNESS + 2.0], center = true);
     }
 }
 
 module render_joint_plug() {
-    translate([4.0, 0, 0]) {
+    translate([4.0, 0, THICKNESS/2]) {
         cube([9.0, 11.0, THICKNESS], center = true);
     }
 }
@@ -260,7 +260,9 @@ module render_joint_plug() {
 // 溝を掘ると終端にバリが出ることがあるのでそれの処理のためと、
 // 線路をつなげた際にぴっちりしないようにするために使う。
 module rasp() {
-    cube([1.0, WIDTH + 1.0, THICKNESS + 1.0], center = true);
+    translate([0, 0, THICKNESS/2]) {
+        cube([1.0, WIDTH + 1.0, THICKNESS + 1.0], center = true);
+    }
 }
 
 // 補助関数。直線や曲線などの簡単なレールを楽に定義するためのもの
@@ -346,7 +348,6 @@ module auto_point(divs) {
     shift = translate_raildef([2 * UNIT, 0, 0], shift_raildef(4 * UNIT, -DOUBLE_TRACK, divs));
     render_rail([straight, curve, shift], [start_mat(straight)], [end_mat(straight), end_mat(curve), end_mat(shift)], false);
 }
-
 
 module double_cross(inverted, divs) {
     straight = straight_raildef(4 * UNIT);
