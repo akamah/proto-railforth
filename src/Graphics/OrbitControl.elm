@@ -118,18 +118,22 @@ makeTransform (Model model) =
         cameraClipDistance =
             100000
 
-        x =
-            eyeDistance * cos model.altitude * cos model.azimuth
+        eyePosition =
+            vec3
+                (eyeDistance * cos model.altitude * cos model.azimuth)
+                (eyeDistance * cos model.altitude * sin model.azimuth)
+                (eyeDistance * sin model.altitude)
 
-        y =
-            eyeDistance * cos model.altitude * sin model.azimuth
-
-        z =
-            eyeDistance * sin model.altitude
+        -- differentiate by altitude
+        upVector =
+            vec3
+                -(sin model.altitude * cos model.azimuth)
+                -(sin model.altitude * sin model.azimuth)
+                (cos model.altitude)
     in
     Mat4.mul
         (Mat4.makeOrtho -w w -h h -cameraClipDistance cameraClipDistance)
-        (Mat4.makeLookAt (Vec3.add model.target (vec3 x y z)) model.target (vec3 0 0 1))
+        (Mat4.makeLookAt (Vec3.add model.target eyePosition) model.target upVector)
 
 
 isDragging : Model -> Bool

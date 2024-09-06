@@ -7396,23 +7396,27 @@ var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
 var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
 	var model = _v0.a;
 	var w = (model.scale * model.viewportWidth) / 2;
+	var upVector = A3(
+		$elm_explorations$linear_algebra$Math$Vector3$vec3,
+		-($elm$core$Basics$sin(model.altitude) * $elm$core$Basics$cos(model.azimuth)),
+		-($elm$core$Basics$sin(model.altitude) * $elm$core$Basics$sin(model.azimuth)),
+		$elm$core$Basics$cos(model.altitude));
 	var h = (model.scale * model.viewportHeight) / 2;
 	var eyeDistance = 10000;
-	var x = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth);
-	var y = (eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$sin(model.azimuth);
-	var z = eyeDistance * $elm$core$Basics$sin(model.altitude);
+	var eyePosition = A3(
+		$elm_explorations$linear_algebra$Math$Vector3$vec3,
+		(eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth),
+		(eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$sin(model.azimuth),
+		eyeDistance * $elm$core$Basics$sin(model.altitude));
 	var cameraClipDistance = 100000;
 	return A2(
 		$elm_explorations$linear_algebra$Math$Matrix4$mul,
 		A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -cameraClipDistance, cameraClipDistance),
 		A3(
 			$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
-			A2(
-				$elm_explorations$linear_algebra$Math$Vector3$add,
-				model.target,
-				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, x, y, z)),
+			A2($elm_explorations$linear_algebra$Math$Vector3$add, model.target, eyePosition),
 			model.target,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1)));
+			upVector));
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
