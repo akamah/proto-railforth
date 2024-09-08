@@ -8970,10 +8970,10 @@ var $author$project$Forth$Geometry$Rot45$toFloat = function (_v0) {
 		c + ($elm$core$Basics$sqrt(1.0 / 2.0) * (b + d)));
 };
 var $author$project$Forth$Geometry$Location$toVec3 = function (tie) {
-	var singleUnit = 54;
+	var singleUnit = 27;
 	var heightUnit = 16.5;
 	var h = tie.height;
-	var doubleUnit = 60;
+	var doubleUnit = 30;
 	var _v0 = $author$project$Forth$Geometry$Rot45$toFloat(tie.single);
 	var sx = _v0.a;
 	var sy = _v0.b;
@@ -9092,11 +9092,6 @@ var $elm$core$Dict$member = F2(
 			return false;
 		}
 	});
-var $author$project$Forth$Geometry$Dir$e = $author$project$Forth$Geometry$Dir$Dir(0);
-var $author$project$Forth$Geometry$Location$make = F4(
-	function (single, _double, height, dir) {
-		return {dir: dir, _double: _double, height: height, single: single};
-	});
 var $author$project$Forth$Geometry$Rot45$Rot45 = F4(
 	function (a, b, c, d) {
 		return {$: 'Rot45', a: a, b: b, c: c, d: d};
@@ -9116,6 +9111,11 @@ var $author$project$Forth$Geometry$Rot45$add = F2(
 		var yc = _v1.c;
 		var yd = _v1.d;
 		return A4($author$project$Forth$Geometry$Rot45$make, xa + ya, xb + yb, xc + yc, xd + yd);
+	});
+var $author$project$Forth$Geometry$Dir$e = $author$project$Forth$Geometry$Dir$Dir(0);
+var $author$project$Forth$Geometry$Location$make = F4(
+	function (single, _double, height, dir) {
+		return {dir: dir, _double: _double, height: height, single: single};
 	});
 var $author$project$Forth$Geometry$Dir$mul = F2(
 	function (_v0, _v1) {
@@ -9176,7 +9176,10 @@ var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = functi
 		A4(
 			$author$project$Forth$Geometry$Location$make,
 			$author$project$Forth$Geometry$Rot45$zero,
-			$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
+			A2(
+				$author$project$Forth$Geometry$Rot45$add,
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
 			0,
 			$author$project$Forth$Geometry$Dir$e));
 };
@@ -9456,13 +9459,8 @@ var $author$project$Forth$PierConstruction$toPierPlacement = function (list) {
 		A2(
 			$elm$core$Result$andThen,
 			$author$project$Forth$PierConstruction$doubleTrackPiers,
-			A2(
-				$elm$core$Result$andThen,
-				$author$project$Forth$PierConstruction$divideIntoDict,
-				A2(
-					$elm$core$Result$map,
-					$author$project$Forth$PierConstruction$cleansePierPlacements,
-					$elm$core$Result$Ok(list)))));
+			$author$project$Forth$PierConstruction$divideIntoDict(
+				$author$project$Forth$PierConstruction$cleansePierPlacements(list))));
 };
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 	var _v0 = $author$project$Forth$PierConstruction$toPierPlacement(status.global.piers);
@@ -9740,8 +9738,8 @@ var $author$project$Forth$Geometry$RailLocation$make = F5(
 	});
 var $author$project$Forth$RailPiece$doubleTrackLeft = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 4, 0, 0, 0),
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 8, 0, 0, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 2, 0),
 	0,
 	$author$project$Forth$Geometry$Dir$e,
 	$author$project$Forth$Geometry$Joint$Plus);
@@ -9749,27 +9747,27 @@ var $author$project$Forth$Geometry$Dir$w = $author$project$Forth$Geometry$Dir$Di
 var $author$project$Forth$RailPiece$doubleTrackLeftZeroMinus = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
 	$author$project$Forth$Geometry$Rot45$zero,
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 2, 0),
 	0,
 	$author$project$Forth$Geometry$Dir$w,
 	$author$project$Forth$Geometry$Joint$Minus);
 var $author$project$Forth$RailPiece$doubleTrackRight = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 4, 0, 0, 0),
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -1, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 8, 0, 0, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -2, 0),
 	0,
 	$author$project$Forth$Geometry$Dir$e,
 	$author$project$Forth$Geometry$Joint$Plus);
 var $author$project$Forth$RailPiece$doubleTrackRightZeroMinus = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
 	$author$project$Forth$Geometry$Rot45$zero,
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -1, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -2, 0),
 	0,
 	$author$project$Forth$Geometry$Dir$w,
 	$author$project$Forth$Geometry$Joint$Minus);
 var $author$project$Forth$RailPiece$doubleTrackWideLeft = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 5, 0, 2, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 10, 0, 4, 0),
 	$author$project$Forth$Geometry$Rot45$zero,
 	0,
 	$author$project$Forth$Geometry$Dir$e,
@@ -9868,38 +9866,24 @@ var $author$project$Forth$RailPiece$fourEnds = F4(
 				_List_fromArray(
 					[b, c, d])));
 	});
-var $author$project$Forth$RailPiece$goStraight1 = A5(
-	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 1, 0, 0, 0),
-	$author$project$Forth$Geometry$Rot45$zero,
-	0,
-	$author$project$Forth$Geometry$Dir$e,
-	$author$project$Forth$Geometry$Joint$Plus);
-var $author$project$Forth$RailPiece$goStraight1Minus = A5(
-	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 1, 0, 0, 0),
-	$author$project$Forth$Geometry$Rot45$zero,
-	0,
-	$author$project$Forth$Geometry$Dir$e,
-	$author$project$Forth$Geometry$Joint$Minus);
-var $author$project$Forth$Geometry$RailLocation$mul = F2(
-	function (global, local) {
-		return {
-			joint: local.joint,
-			location: A2($author$project$Forth$Geometry$Location$mul, global, local.location)
-		};
-	});
-var $author$project$Forth$RailPiece$goStraight2 = A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight1.location, $author$project$Forth$RailPiece$goStraight1);
-var $author$project$Forth$RailPiece$goStraight4 = A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$goStraight2);
-var $author$project$Forth$RailPiece$goStraight5Minus = A5(
-	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 5, 0, 0, 0),
-	$author$project$Forth$Geometry$Rot45$zero,
-	0,
-	$author$project$Forth$Geometry$Dir$e,
-	$author$project$Forth$Geometry$Joint$Minus);
-var $author$project$Forth$RailPiece$goStraight6 = A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$goStraight4);
-var $author$project$Forth$RailPiece$goStraight8 = A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight4.location, $author$project$Forth$RailPiece$goStraight4);
+var $author$project$Forth$RailPiece$goStraightMinus = function (x) {
+	return A5(
+		$author$project$Forth$Geometry$RailLocation$make,
+		A4($author$project$Forth$Geometry$Rot45$make, x, 0, 0, 0),
+		$author$project$Forth$Geometry$Rot45$zero,
+		0,
+		$author$project$Forth$Geometry$Dir$e,
+		$author$project$Forth$Geometry$Joint$Minus);
+};
+var $author$project$Forth$RailPiece$goStraightPlus = function (x) {
+	return A5(
+		$author$project$Forth$Geometry$RailLocation$make,
+		A4($author$project$Forth$Geometry$Rot45$make, x, 0, 0, 0),
+		$author$project$Forth$Geometry$Rot45$zero,
+		0,
+		$author$project$Forth$Geometry$Dir$e,
+		$author$project$Forth$Geometry$Joint$Plus);
+};
 var $author$project$Forth$Geometry$Joint$invert = function (p) {
 	if (p.$ === 'Plus') {
 		return $author$project$Forth$Geometry$Joint$Minus;
@@ -9927,7 +9911,17 @@ var $author$project$Forth$RailPiece$invert = F2(
 		}
 	});
 var $author$project$Forth$RailPiece$minusZero = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$w, $author$project$Forth$Geometry$Joint$Minus);
+var $author$project$Forth$Geometry$RailLocation$mul = F2(
+	function (global, local) {
+		return {
+			joint: local.joint,
+			location: A2($author$project$Forth$Geometry$Location$mul, global, local.location)
+		};
+	});
+var $author$project$Forth$Geometry$Dir$ne = $author$project$Forth$Geometry$Dir$Dir(1);
+var $author$project$Forth$Geometry$Dir$nw = $author$project$Forth$Geometry$Dir$Dir(3);
 var $author$project$Forth$RailPiece$plusZero = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$w, $author$project$Forth$Geometry$Joint$Plus);
+var $author$project$Forth$Geometry$Dir$se = $author$project$Forth$Geometry$Dir$Dir(7);
 var $author$project$Forth$Geometry$RailLocation$setHeight = F2(
 	function (newHeight, railLocation) {
 		return _Utils_update(
@@ -9936,23 +9930,22 @@ var $author$project$Forth$Geometry$RailLocation$setHeight = F2(
 				location: A2($author$project$Forth$Geometry$Location$setHeight, newHeight, railLocation.location)
 			});
 	});
-var $author$project$Forth$Geometry$Dir$se = $author$project$Forth$Geometry$Dir$Dir(7);
 var $author$project$Forth$RailPiece$slopeCurveA = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 4, -4, 0),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 8, -8, 0),
 	$author$project$Forth$Geometry$Rot45$zero,
 	1,
 	$author$project$Forth$Geometry$Dir$se,
 	$author$project$Forth$Geometry$Joint$Minus);
-var $author$project$Forth$Geometry$Dir$ne = $author$project$Forth$Geometry$Dir$Dir(1);
 var $author$project$Forth$RailPiece$slopeCurveB = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 4, -4),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 8, -8),
 	$author$project$Forth$Geometry$Rot45$zero,
 	1,
 	$author$project$Forth$Geometry$Dir$ne,
 	$author$project$Forth$Geometry$Joint$Plus);
 var $author$project$Forth$Geometry$PierLocation$slopeCurveMargin = {bottom: 1, top: 4};
+var $author$project$Forth$Geometry$Dir$sw = $author$project$Forth$Geometry$Dir$Dir(5);
 var $author$project$Forth$RailPiece$threeEnds = F3(
 	function (a, b, c) {
 		return $author$project$Forth$RailPiece$makeFlatRailPiece(
@@ -9964,7 +9957,7 @@ var $author$project$Forth$RailPiece$threeEnds = F3(
 	});
 var $author$project$Forth$RailPiece$turnLeft45deg = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 4, -4),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 8, -8),
 	$author$project$Forth$Geometry$Rot45$zero,
 	0,
 	$author$project$Forth$Geometry$Dir$ne,
@@ -9972,12 +9965,18 @@ var $author$project$Forth$RailPiece$turnLeft45deg = A5(
 var $author$project$Forth$RailPiece$turnLeft90deg = A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$turnLeft45deg.location, $author$project$Forth$RailPiece$turnLeft45deg);
 var $author$project$Forth$RailPiece$turnLeftOuter45deg = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 4, -4),
-	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, -1),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 8, -8),
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 2, -2),
 	0,
 	$author$project$Forth$Geometry$Dir$ne,
 	$author$project$Forth$Geometry$Joint$Plus);
-var $author$project$Forth$RailPiece$turnRight45deg = $author$project$Forth$Geometry$RailLocation$flip($author$project$Forth$RailPiece$turnLeft45deg);
+var $author$project$Forth$RailPiece$turnRight45degMinus = A5(
+	$author$project$Forth$Geometry$RailLocation$make,
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 8, -8, 0),
+	$author$project$Forth$Geometry$Rot45$zero,
+	0,
+	$author$project$Forth$Geometry$Dir$se,
+	$author$project$Forth$Geometry$Joint$Minus);
 var $author$project$Forth$RailPiece$twoEnds = F2(
 	function (a, b) {
 		return $author$project$Forth$RailPiece$makeFlatRailPiece(
@@ -9990,13 +9989,25 @@ var $author$project$Forth$RailPiece$twoEnds = F2(
 var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 	switch (rail.$) {
 		case 'Straight1':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight1);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightPlus(2));
 		case 'Straight2':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight2);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightPlus(4));
 		case 'Straight4':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight4);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightPlus(8));
 		case 'Straight8':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight8);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightPlus(16));
 		case 'Curve45':
 			var f = rail.a;
 			return A2(
@@ -10032,27 +10043,43 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 			return A2(
 				$author$project$Forth$RailPiece$flip,
 				f,
-				A3($author$project$Forth$RailPiece$threeEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight4, $author$project$Forth$RailPiece$turnLeft45deg));
+				A3(
+					$author$project$Forth$RailPiece$threeEnds,
+					$author$project$Forth$RailPiece$minusZero,
+					$author$project$Forth$RailPiece$goStraightPlus(8),
+					$author$project$Forth$RailPiece$turnLeft45deg));
 		case 'SingleDouble':
 			var f = rail.a;
 			return A2(
 				$author$project$Forth$RailPiece$flip,
 				f,
-				A3($author$project$Forth$RailPiece$threeEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight4, $author$project$Forth$RailPiece$doubleTrackLeft));
+				A3(
+					$author$project$Forth$RailPiece$threeEnds,
+					$author$project$Forth$RailPiece$minusZero,
+					$author$project$Forth$RailPiece$goStraightPlus(8),
+					$author$project$Forth$RailPiece$doubleTrackLeft));
 		case 'DoubleWide':
 			var f = rail.a;
 			return A2(
 				$author$project$Forth$RailPiece$flip,
 				f,
-				A4($author$project$Forth$RailPiece$fourEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight5Minus, $author$project$Forth$RailPiece$doubleTrackWideLeft, $author$project$Forth$RailPiece$doubleTrackLeftZeroMinus));
+				A4(
+					$author$project$Forth$RailPiece$fourEnds,
+					$author$project$Forth$RailPiece$minusZero,
+					$author$project$Forth$RailPiece$goStraightMinus(10),
+					$author$project$Forth$RailPiece$doubleTrackWideLeft,
+					$author$project$Forth$RailPiece$doubleTrackLeftZeroMinus));
 		case 'EightPoint':
 			var f = rail.a;
 			return A2(
 				$author$project$Forth$RailPiece$flip,
 				f,
-				A3($author$project$Forth$RailPiece$threeEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$turnRight45deg, $author$project$Forth$RailPiece$turnLeft45deg));
+				A3($author$project$Forth$RailPiece$threeEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$turnRight45degMinus, $author$project$Forth$RailPiece$turnLeft45deg));
 		case 'JointChange':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight1Minus);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightMinus(2));
 		case 'Slope':
 			var f = rail.a;
 			return A2(
@@ -10061,7 +10088,10 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 				A2(
 					$author$project$Forth$RailPiece$twoEnds,
 					$author$project$Forth$RailPiece$minusZero,
-					A2($author$project$Forth$Geometry$RailLocation$setHeight, 4, $author$project$Forth$RailPiece$goStraight8)));
+					A2(
+						$author$project$Forth$Geometry$RailLocation$setHeight,
+						4,
+						$author$project$Forth$RailPiece$goStraightPlus(16))));
 		case 'SlopeCurveA':
 			return {
 				origin: $author$project$Forth$Geometry$RailLocation$zero,
@@ -10091,24 +10121,100 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 						[$author$project$Forth$RailPiece$slopeCurveB]))
 			};
 		case 'Stop':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight4);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightPlus(8));
 		case 'AutoTurnout':
 			return A3(
 				$author$project$Forth$RailPiece$threeEnds,
 				$author$project$Forth$RailPiece$minusZero,
-				$author$project$Forth$RailPiece$goStraight6,
-				A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$turnLeft45deg));
+				$author$project$Forth$RailPiece$goStraightPlus(12),
+				A2(
+					$author$project$Forth$Geometry$RailLocation$mul,
+					$author$project$Forth$RailPiece$goStraightPlus(4).location,
+					$author$project$Forth$RailPiece$turnLeft45deg));
 		case 'AutoPoint':
 			return A4(
 				$author$project$Forth$RailPiece$fourEnds,
 				$author$project$Forth$RailPiece$minusZero,
-				A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$doubleTrackRight),
-				$author$project$Forth$RailPiece$goStraight6,
-				A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$turnLeft45deg));
+				A2(
+					$author$project$Forth$Geometry$RailLocation$mul,
+					$author$project$Forth$RailPiece$goStraightPlus(4).location,
+					$author$project$Forth$RailPiece$doubleTrackRight),
+				$author$project$Forth$RailPiece$goStraightPlus(12),
+				A2(
+					$author$project$Forth$Geometry$RailLocation$mul,
+					$author$project$Forth$RailPiece$goStraightPlus(4).location,
+					$author$project$Forth$RailPiece$turnLeft45deg));
 		case 'AutoCross':
-			return A4($author$project$Forth$RailPiece$fourEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$doubleTrackRightZeroMinus, $author$project$Forth$RailPiece$doubleTrackRight, $author$project$Forth$RailPiece$goStraight4);
+			return A4(
+				$author$project$Forth$RailPiece$fourEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$doubleTrackRightZeroMinus,
+				$author$project$Forth$RailPiece$doubleTrackRight,
+				$author$project$Forth$RailPiece$goStraightPlus(8));
 		case 'UTurn':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$doubleTrackLeftZeroMinus);
+			return {
+				origin: $author$project$Forth$Geometry$RailLocation$zero,
+				pierLocations: A2(
+					$elm$core$List$map,
+					function (loc) {
+						return {location: loc, margin: $author$project$Forth$Geometry$PierLocation$flatRailMargin};
+					},
+					_List_fromArray(
+						[
+							$author$project$Forth$RailPiece$minusZero.location,
+							A4(
+							$author$project$Forth$Geometry$Location$make,
+							A4($author$project$Forth$Geometry$Rot45$make, 10, -5, 0, 0),
+							A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+							0,
+							$author$project$Forth$Geometry$Dir$se),
+							A4(
+							$author$project$Forth$Geometry$Location$make,
+							A4($author$project$Forth$Geometry$Rot45$make, 10, 0, -5, 0),
+							A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+							0,
+							$author$project$Forth$Geometry$Dir$e),
+							A4(
+							$author$project$Forth$Geometry$Location$make,
+							A4($author$project$Forth$Geometry$Rot45$make, 10, 0, 0, -5),
+							A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+							0,
+							$author$project$Forth$Geometry$Dir$ne),
+							A4(
+							$author$project$Forth$Geometry$Location$make,
+							A4($author$project$Forth$Geometry$Rot45$make, 15, 0, 0, 0),
+							A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+							0,
+							$author$project$Forth$Geometry$Dir$n),
+							A4(
+							$author$project$Forth$Geometry$Location$make,
+							A4($author$project$Forth$Geometry$Rot45$make, 10, 5, 0, 0),
+							A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+							0,
+							$author$project$Forth$Geometry$Dir$nw),
+							A4(
+							$author$project$Forth$Geometry$Location$make,
+							A4($author$project$Forth$Geometry$Rot45$make, 10, 0, 5, 0),
+							A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+							0,
+							$author$project$Forth$Geometry$Dir$w),
+							A4(
+							$author$project$Forth$Geometry$Location$make,
+							A4($author$project$Forth$Geometry$Rot45$make, 10, 0, 0, 5),
+							A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 1, 0),
+							0,
+							$author$project$Forth$Geometry$Dir$sw),
+							$author$project$Forth$RailPiece$doubleTrackLeftZeroMinus.location
+						])),
+				railLocations: A2(
+					$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+					$author$project$Forth$RailPiece$minusZero,
+					_List_fromArray(
+						[$author$project$Forth$RailPiece$doubleTrackLeftZeroMinus]))
+			};
 		case 'Oneway':
 			var f = rail.a;
 			return A2(
@@ -10117,30 +10223,40 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 				A2(
 					$author$project$Forth$RailPiece$flip,
 					f,
-					A3($author$project$Forth$RailPiece$threeEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight4, $author$project$Forth$RailPiece$turnLeft45deg)));
+					A3(
+						$author$project$Forth$RailPiece$threeEnds,
+						$author$project$Forth$RailPiece$minusZero,
+						$author$project$Forth$RailPiece$goStraightPlus(8),
+						$author$project$Forth$RailPiece$turnLeft45deg)));
 		case 'WideCross':
 			return A4(
 				$author$project$Forth$RailPiece$fourEnds,
 				$author$project$Forth$RailPiece$minusZero,
 				A5(
 					$author$project$Forth$Geometry$RailLocation$make,
-					A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -2, 0),
+					A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -4, 0),
 					$author$project$Forth$Geometry$Rot45$zero,
 					0,
 					$author$project$Forth$Geometry$Dir$w,
 					$author$project$Forth$Geometry$Joint$Plus),
 				A5(
 					$author$project$Forth$Geometry$RailLocation$make,
-					A4($author$project$Forth$Geometry$Rot45$make, 4, 0, -2, 0),
+					A4($author$project$Forth$Geometry$Rot45$make, 8, 0, -4, 0),
 					$author$project$Forth$Geometry$Rot45$zero,
 					0,
 					$author$project$Forth$Geometry$Dir$e,
 					$author$project$Forth$Geometry$Joint$Minus),
-				$author$project$Forth$RailPiece$goStraight4);
+				$author$project$Forth$RailPiece$goStraightPlus(8));
 		case 'Forward':
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight2);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightPlus(4));
 		default:
-			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight2);
+			return A2(
+				$author$project$Forth$RailPiece$twoEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$goStraightPlus(4));
 	}
 };
 var $mgold$elm_nonempty_list$List$Nonempty$head = function (_v0) {
