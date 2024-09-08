@@ -11,6 +11,8 @@ module Types.Rail exposing
     , toStringWith
     )
 
+import Types.Pier exposing (Pier(..))
+
 
 type IsInverted
     = NotInverted
@@ -53,7 +55,12 @@ type Rail invert flip
     | Stop invert
     | AutoTurnout
     | AutoPoint
+    | AutoCross
     | UTurn
+    | Oneway flip
+    | WideCross
+    | Forward invert
+    | Backward invert
 
 
 canInvert : Rail invert flip -> Bool
@@ -118,8 +125,23 @@ map f rail =
         AutoPoint ->
             AutoPoint
 
+        AutoCross ->
+            AutoCross
+
         UTurn ->
             UTurn
+
+        Oneway a ->
+            Oneway a
+
+        WideCross ->
+            WideCross
+
+        Forward a ->
+            Forward (f a)
+
+        Backward a ->
+            Backward (f a)
 
 
 toString : Rail IsInverted IsFlipped -> String
@@ -184,8 +206,23 @@ toStringWith flipped inverted rail =
         AutoPoint ->
             "auto_point"
 
+        AutoCross ->
+            "auto_cross"
+
         UTurn ->
             "uturn"
+
+        Oneway flip ->
+            "oneway" ++ flipped flip
+
+        WideCross ->
+            "wide_cross"
+
+        Forward inv ->
+            "forward" ++ inverted inv
+
+        Backward inv ->
+            "backward" ++ inverted inv
 
 
 isInvertedToString : IsInverted -> String
@@ -214,8 +251,17 @@ allRails =
     , SlopeCurveB
     , AutoTurnout
     , AutoPoint
+    , AutoCross
     , UTurn
+    , WideCross
     ]
+        ++ ([ Flipped, NotFlipped ]
+                |> List.concatMap
+                    (\flipped ->
+                        [ Oneway flipped
+                        ]
+                    )
+           )
         ++ ([ Inverted, NotInverted ]
                 |> List.concatMap
                     (\invert ->
@@ -225,6 +271,8 @@ allRails =
                         , Straight8 invert
                         , JointChange invert
                         , Stop invert
+                        , Forward invert
+                        , Backward invert
                         ]
                     )
            )

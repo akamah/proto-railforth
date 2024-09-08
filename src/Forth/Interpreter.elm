@@ -6,6 +6,7 @@ import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
+import Types.Pier exposing (Pier(..))
 import Types.PierPlacement exposing (PierPlacement)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailPlacement exposing (RailPlacement)
@@ -150,8 +151,22 @@ railForthGlossary =
         , ( "ap1", executePlaceRail AutoPoint 1 )
         , ( "ap2", executePlaceRail AutoPoint 2 )
         , ( "ap3", executePlaceRail AutoPoint 3 )
+        , ( "ac", executePlaceRail AutoCross 0 )
+        , ( "ac1", executePlaceRail AutoCross 1 )
+        , ( "ac2", executePlaceRail AutoCross 2 )
+        , ( "ac3", executePlaceRail AutoCross 3 )
         , ( "uturn", executePlaceRail UTurn 0 )
         , ( "uturn1", executePlaceRail UTurn 1 )
+        , ( "owl", executePlaceRail (Oneway NotFlipped) 0 )
+        , ( "owl1", executePlaceRail (Oneway NotFlipped) 1 )
+        , ( "owl2", executePlaceRail (Oneway NotFlipped) 2 )
+        , ( "owr", executePlaceRail (Oneway Flipped) 0 )
+        , ( "owr1", executePlaceRail (Oneway Flipped) 1 )
+        , ( "owr2", executePlaceRail (Oneway Flipped) 2 )
+        , ( "dc", executePlaceRail WideCross 0 )
+        , ( "dc1", executePlaceRail WideCross 1 )
+        , ( "fw", executePlaceRail (Forward ()) 0 )
+        , ( "bk", executePlaceRail (Backward ()) 0 )
         , ( "ascend", executeAscend 4 )
         ]
 

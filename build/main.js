@@ -7858,8 +7858,21 @@ var $author$project$Types$Rail$toStringWith = F3(
 				return 'auto_turnout';
 			case 'AutoPoint':
 				return 'auto_point';
-			default:
+			case 'AutoCross':
+				return 'auto_cross';
+			case 'UTurn':
 				return 'uturn';
+			case 'Oneway':
+				var flip = rail.a;
+				return 'oneway' + flipped(flip);
+			case 'WideCross':
+				return 'wide_cross';
+			case 'Forward':
+				var inv = rail.a;
+				return 'forward' + inverted(inv);
+			default:
+				var inv = rail.a;
+				return 'backward' + inverted(inv);
 		}
 	});
 var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
@@ -9456,8 +9469,12 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 		};
 	}
 };
+var $author$project$Types$Rail$AutoCross = {$: 'AutoCross'};
 var $author$project$Types$Rail$AutoPoint = {$: 'AutoPoint'};
 var $author$project$Types$Rail$AutoTurnout = {$: 'AutoTurnout'};
+var $author$project$Types$Rail$Backward = function (a) {
+	return {$: 'Backward', a: a};
+};
 var $author$project$Types$Rail$Curve45 = F2(
 	function (a, b) {
 		return {$: 'Curve45', a: a, b: b};
@@ -9475,10 +9492,16 @@ var $author$project$Types$Rail$EightPoint = F2(
 		return {$: 'EightPoint', a: a, b: b};
 	});
 var $author$project$Types$Rail$Flipped = {$: 'Flipped'};
+var $author$project$Types$Rail$Forward = function (a) {
+	return {$: 'Forward', a: a};
+};
 var $author$project$Types$Rail$JointChange = function (a) {
 	return {$: 'JointChange', a: a};
 };
 var $author$project$Types$Rail$NotFlipped = {$: 'NotFlipped'};
+var $author$project$Types$Rail$Oneway = function (a) {
+	return {$: 'Oneway', a: a};
+};
 var $author$project$Types$Rail$OuterCurve45 = F2(
 	function (a, b) {
 		return {$: 'OuterCurve45', a: a, b: b};
@@ -9513,6 +9536,7 @@ var $author$project$Types$Rail$Turnout = F2(
 		return {$: 'Turnout', a: a, b: b};
 	});
 var $author$project$Types$Rail$UTurn = {$: 'UTurn'};
+var $author$project$Types$Rail$WideCross = {$: 'WideCross'};
 var $author$project$Forth$Geometry$Location$addHeight = F2(
 	function (diffHeight, location) {
 		return _Utils_update(
@@ -9643,8 +9667,23 @@ var $author$project$Types$Rail$map = F2(
 				return $author$project$Types$Rail$AutoTurnout;
 			case 'AutoPoint':
 				return $author$project$Types$Rail$AutoPoint;
-			default:
+			case 'AutoCross':
+				return $author$project$Types$Rail$AutoCross;
+			case 'UTurn':
 				return $author$project$Types$Rail$UTurn;
+			case 'Oneway':
+				var a = rail.a;
+				return $author$project$Types$Rail$Oneway(a);
+			case 'WideCross':
+				return $author$project$Types$Rail$WideCross;
+			case 'Forward':
+				var a = rail.a;
+				return $author$project$Types$Rail$Forward(
+					f(a));
+			default:
+				var a = rail.a;
+				return $author$project$Types$Rail$Backward(
+					f(a));
 		}
 	});
 var $elm$core$Basics$neq = _Utils_notEqual;
@@ -9659,6 +9698,7 @@ var $author$project$Types$Rail$canInvert = function (rail) {
 			$elm$core$Basics$always(false),
 			rail));
 };
+var $author$project$Forth$Geometry$Joint$Minus = {$: 'Minus'};
 var $mgold$elm_nonempty_list$List$Nonempty$Nonempty = F2(
 	function (a, b) {
 		return {$: 'Nonempty', a: a, b: b};
@@ -9678,7 +9718,6 @@ var $author$project$Forth$RailPiece$doubleTrackLeft = A5(
 	0,
 	$author$project$Forth$Geometry$Dir$e,
 	$author$project$Forth$Geometry$Joint$Plus);
-var $author$project$Forth$Geometry$Joint$Minus = {$: 'Minus'};
 var $author$project$Forth$Geometry$Dir$w = $author$project$Forth$Geometry$Dir$Dir(4);
 var $author$project$Forth$RailPiece$doubleTrackLeftZeroMinus = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
@@ -9694,6 +9733,13 @@ var $author$project$Forth$RailPiece$doubleTrackRight = A5(
 	0,
 	$author$project$Forth$Geometry$Dir$e,
 	$author$project$Forth$Geometry$Joint$Plus);
+var $author$project$Forth$RailPiece$doubleTrackRightZeroMinus = A5(
+	$author$project$Forth$Geometry$RailLocation$make,
+	$author$project$Forth$Geometry$Rot45$zero,
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -1, 0),
+	0,
+	$author$project$Forth$Geometry$Dir$w,
+	$author$project$Forth$Geometry$Joint$Minus);
 var $author$project$Forth$RailPiece$doubleTrackWideLeft = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
 	A4($author$project$Forth$Geometry$Rot45$make, 5, 0, 2, 0),
@@ -9827,6 +9873,32 @@ var $author$project$Forth$RailPiece$goStraight5Minus = A5(
 	$author$project$Forth$Geometry$Joint$Minus);
 var $author$project$Forth$RailPiece$goStraight6 = A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$goStraight4);
 var $author$project$Forth$RailPiece$goStraight8 = A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight4.location, $author$project$Forth$RailPiece$goStraight4);
+var $author$project$Forth$Geometry$Joint$invert = function (p) {
+	if (p.$ === 'Plus') {
+		return $author$project$Forth$Geometry$Joint$Minus;
+	} else {
+		return $author$project$Forth$Geometry$Joint$Plus;
+	}
+};
+var $author$project$Forth$Geometry$RailLocation$invertJoint = function (loc) {
+	return _Utils_update(
+		loc,
+		{
+			joint: $author$project$Forth$Geometry$Joint$invert(loc.joint)
+		});
+};
+var $author$project$Forth$RailPiece$invert = F2(
+	function (inverted, piece) {
+		if (inverted.$ === 'NotInverted') {
+			return piece;
+		} else {
+			return {
+				origin: $author$project$Forth$Geometry$RailLocation$invertJoint(piece.origin),
+				pierLocations: piece.pierLocations,
+				railLocations: A2($mgold$elm_nonempty_list$List$Nonempty$map, $author$project$Forth$Geometry$RailLocation$invertJoint, piece.railLocations)
+			};
+		}
+	});
 var $author$project$Forth$RailPiece$minusZero = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$w, $author$project$Forth$Geometry$Joint$Minus);
 var $author$project$Forth$RailPiece$plusZero = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$w, $author$project$Forth$Geometry$Joint$Plus);
 var $author$project$Forth$Geometry$RailLocation$setHeight = F2(
@@ -10006,8 +10078,42 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 				A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$doubleTrackRight),
 				$author$project$Forth$RailPiece$goStraight6,
 				A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$turnLeft45deg));
-		default:
+		case 'AutoCross':
+			return A4($author$project$Forth$RailPiece$fourEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$doubleTrackRightZeroMinus, $author$project$Forth$RailPiece$doubleTrackRight, $author$project$Forth$RailPiece$goStraight4);
+		case 'UTurn':
 			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$doubleTrackLeftZeroMinus);
+		case 'Oneway':
+			var f = rail.a;
+			return A2(
+				$author$project$Forth$RailPiece$invert,
+				$author$project$Types$Rail$Inverted,
+				A2(
+					$author$project$Forth$RailPiece$flip,
+					f,
+					A3($author$project$Forth$RailPiece$threeEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight4, $author$project$Forth$RailPiece$turnLeft45deg)));
+		case 'WideCross':
+			return A4(
+				$author$project$Forth$RailPiece$fourEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				A5(
+					$author$project$Forth$Geometry$RailLocation$make,
+					A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -2, 0),
+					$author$project$Forth$Geometry$Rot45$zero,
+					0,
+					$author$project$Forth$Geometry$Dir$w,
+					$author$project$Forth$Geometry$Joint$Plus),
+				A5(
+					$author$project$Forth$Geometry$RailLocation$make,
+					A4($author$project$Forth$Geometry$Rot45$make, 4, 0, -2, 0),
+					$author$project$Forth$Geometry$Rot45$zero,
+					0,
+					$author$project$Forth$Geometry$Dir$e,
+					$author$project$Forth$Geometry$Joint$Minus),
+				$author$project$Forth$RailPiece$goStraight4);
+		case 'Forward':
+			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight2);
+		default:
+			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight2);
 	}
 };
 var $mgold$elm_nonempty_list$List$Nonempty$head = function (_v0) {
@@ -10015,32 +10121,6 @@ var $mgold$elm_nonempty_list$List$Nonempty$head = function (_v0) {
 	var xs = _v0.b;
 	return x;
 };
-var $author$project$Forth$Geometry$Joint$invert = function (p) {
-	if (p.$ === 'Plus') {
-		return $author$project$Forth$Geometry$Joint$Minus;
-	} else {
-		return $author$project$Forth$Geometry$Joint$Plus;
-	}
-};
-var $author$project$Forth$Geometry$RailLocation$invertJoint = function (loc) {
-	return _Utils_update(
-		loc,
-		{
-			joint: $author$project$Forth$Geometry$Joint$invert(loc.joint)
-		});
-};
-var $author$project$Forth$RailPiece$invert = F2(
-	function (inverted, piece) {
-		if (inverted.$ === 'NotInverted') {
-			return piece;
-		} else {
-			return {
-				origin: $author$project$Forth$Geometry$RailLocation$invertJoint(piece.origin),
-				pierLocations: piece.pierLocations,
-				railLocations: A2($mgold$elm_nonempty_list$List$Nonempty$map, $author$project$Forth$Geometry$RailLocation$invertJoint, piece.railLocations)
-			};
-		}
-	});
 var $author$project$Forth$RailPiece$loop = F3(
 	function (n, f, a) {
 		loop:
@@ -10522,11 +10602,77 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			'ap3',
 			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 3)),
 			_Utils_Tuple2(
+			'ac',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 0)),
+			_Utils_Tuple2(
+			'ac1',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 1)),
+			_Utils_Tuple2(
+			'ac2',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 2)),
+			_Utils_Tuple2(
+			'ac3',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 3)),
+			_Utils_Tuple2(
 			'uturn',
 			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$UTurn, 0)),
 			_Utils_Tuple2(
 			'uturn1',
 			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$UTurn, 1)),
+			_Utils_Tuple2(
+			'owl',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Oneway($author$project$Types$Rail$NotFlipped),
+				0)),
+			_Utils_Tuple2(
+			'owl1',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Oneway($author$project$Types$Rail$NotFlipped),
+				1)),
+			_Utils_Tuple2(
+			'owl2',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Oneway($author$project$Types$Rail$NotFlipped),
+				2)),
+			_Utils_Tuple2(
+			'owr',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Oneway($author$project$Types$Rail$Flipped),
+				0)),
+			_Utils_Tuple2(
+			'owr1',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Oneway($author$project$Types$Rail$Flipped),
+				1)),
+			_Utils_Tuple2(
+			'owr2',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Oneway($author$project$Types$Rail$Flipped),
+				2)),
+			_Utils_Tuple2(
+			'dc',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$WideCross, 0)),
+			_Utils_Tuple2(
+			'dc1',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$WideCross, 1)),
+			_Utils_Tuple2(
+			'fw',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Forward(_Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
+			'bk',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Backward(_Utils_Tuple0),
+				0)),
 			_Utils_Tuple2(
 			'ascend',
 			$author$project$Forth$Interpreter$executeAscend(4))
@@ -10668,46 +10814,59 @@ var $author$project$Types$Pier$allPiers = _List_fromArray(
 	[$author$project$Types$Pier$Single, $author$project$Types$Pier$Wide, $author$project$Types$Pier$Mini]);
 var $author$project$Types$Rail$allRails = _Utils_ap(
 	_List_fromArray(
-		[$author$project$Types$Rail$SlopeCurveA, $author$project$Types$Rail$SlopeCurveB, $author$project$Types$Rail$AutoTurnout, $author$project$Types$Rail$AutoPoint, $author$project$Types$Rail$UTurn]),
+		[$author$project$Types$Rail$SlopeCurveA, $author$project$Types$Rail$SlopeCurveB, $author$project$Types$Rail$AutoTurnout, $author$project$Types$Rail$AutoPoint, $author$project$Types$Rail$AutoCross, $author$project$Types$Rail$UTurn, $author$project$Types$Rail$WideCross]),
 	_Utils_ap(
 		A2(
 			$elm$core$List$concatMap,
-			function (invert) {
+			function (flipped) {
 				return _List_fromArray(
 					[
-						$author$project$Types$Rail$Straight1(invert),
-						$author$project$Types$Rail$Straight2(invert),
-						$author$project$Types$Rail$Straight4(invert),
-						$author$project$Types$Rail$Straight8(invert),
-						$author$project$Types$Rail$JointChange(invert),
-						$author$project$Types$Rail$Stop(invert)
+						$author$project$Types$Rail$Oneway(flipped)
 					]);
 			},
 			_List_fromArray(
-				[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted])),
-		A2(
-			$elm$core$List$concatMap,
-			function (invert) {
-				return A2(
-					$elm$core$List$concatMap,
-					function (flip) {
-						return _List_fromArray(
-							[
-								A2($author$project$Types$Rail$Curve45, flip, invert),
-								A2($author$project$Types$Rail$Curve90, flip, invert),
-								A2($author$project$Types$Rail$OuterCurve45, flip, invert),
-								A2($author$project$Types$Rail$Turnout, flip, invert),
-								A2($author$project$Types$Rail$SingleDouble, flip, invert),
-								A2($author$project$Types$Rail$DoubleWide, flip, invert),
-								A2($author$project$Types$Rail$EightPoint, flip, invert),
-								A2($author$project$Types$Rail$Slope, flip, invert)
-							]);
-					},
-					_List_fromArray(
-						[$author$project$Types$Rail$Flipped, $author$project$Types$Rail$NotFlipped]));
-			},
-			_List_fromArray(
-				[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted]))));
+				[$author$project$Types$Rail$Flipped, $author$project$Types$Rail$NotFlipped])),
+		_Utils_ap(
+			A2(
+				$elm$core$List$concatMap,
+				function (invert) {
+					return _List_fromArray(
+						[
+							$author$project$Types$Rail$Straight1(invert),
+							$author$project$Types$Rail$Straight2(invert),
+							$author$project$Types$Rail$Straight4(invert),
+							$author$project$Types$Rail$Straight8(invert),
+							$author$project$Types$Rail$JointChange(invert),
+							$author$project$Types$Rail$Stop(invert),
+							$author$project$Types$Rail$Forward(invert),
+							$author$project$Types$Rail$Backward(invert)
+						]);
+				},
+				_List_fromArray(
+					[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted])),
+			A2(
+				$elm$core$List$concatMap,
+				function (invert) {
+					return A2(
+						$elm$core$List$concatMap,
+						function (flip) {
+							return _List_fromArray(
+								[
+									A2($author$project$Types$Rail$Curve45, flip, invert),
+									A2($author$project$Types$Rail$Curve90, flip, invert),
+									A2($author$project$Types$Rail$OuterCurve45, flip, invert),
+									A2($author$project$Types$Rail$Turnout, flip, invert),
+									A2($author$project$Types$Rail$SingleDouble, flip, invert),
+									A2($author$project$Types$Rail$DoubleWide, flip, invert),
+									A2($author$project$Types$Rail$EightPoint, flip, invert),
+									A2($author$project$Types$Rail$Slope, flip, invert)
+								]);
+						},
+						_List_fromArray(
+							[$author$project$Types$Rail$Flipped, $author$project$Types$Rail$NotFlipped]));
+				},
+				_List_fromArray(
+					[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted])))));
 var $author$project$Graphics$MeshLoader$allMeshNames = _Utils_ap(
 	A2($elm$core$List$map, $author$project$Types$Rail$toString, $author$project$Types$Rail$allRails),
 	A2($elm$core$List$map, $author$project$Types$Pier$toString, $author$project$Types$Pier$allPiers));

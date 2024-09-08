@@ -4,9 +4,11 @@ local rails = {
   cannot_flip_cannot_invert: [
     'auto_point',
     'auto_turnout',
+    'auto_cross',
     'slope_curve_A',
     'slope_curve_B',
     'uturn',
+    'wide_cross',
     'pier_single',
     'pier_double',
     'pier_mini',
@@ -18,8 +20,11 @@ local rails = {
     'straight8',
     'joint',
     'stop',
+    'forward',
+    'backward',
   ],
   can_flip_cannot_invert: [
+    'oneway',
   ],
   can_flip_can_invert: [
     'curve45',
