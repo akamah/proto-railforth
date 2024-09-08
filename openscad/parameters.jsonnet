@@ -35,6 +35,7 @@ local rails = {
     'double_wide',
     'eight',
     'slope',
+    'shift',
   ],
 };
 
@@ -45,7 +46,7 @@ local gen_value(rail, flip, invert) = {
   name: rail,
   flipped: flip,
   inverted: invert,
-  resolution: 4,
+  resolution: 8,
 };
 
 local main() =

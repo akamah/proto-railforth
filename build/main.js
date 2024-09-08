@@ -7873,6 +7873,10 @@ var $author$project$Types$Rail$toStringWith = F3(
 				var flip = rail.a;
 				var inv = rail.b;
 				return 'slope' + (inverted(inv) + flipped(flip));
+			case 'Shift':
+				var flip = rail.a;
+				var inv = rail.b;
+				return 'shift' + (inverted(inv) + flipped(flip));
 			case 'SlopeCurveA':
 				return 'slope_curve_A';
 			case 'SlopeCurveB':
@@ -9531,6 +9535,10 @@ var $author$project$Types$Rail$OuterCurve45 = F2(
 	function (a, b) {
 		return {$: 'OuterCurve45', a: a, b: b};
 	});
+var $author$project$Types$Rail$Shift = F2(
+	function (a, b) {
+		return {$: 'Shift', a: a, b: b};
+	});
 var $author$project$Types$Rail$SingleDouble = F2(
 	function (a, b) {
 		return {$: 'SingleDouble', a: a, b: b};
@@ -9678,6 +9686,13 @@ var $author$project$Types$Rail$map = F2(
 				var b = rail.b;
 				return A2(
 					$author$project$Types$Rail$Slope,
+					a,
+					f(b));
+			case 'Shift':
+				var a = rail.a;
+				var b = rail.b;
+				return A2(
+					$author$project$Types$Rail$Shift,
 					a,
 					f(b));
 			case 'SlopeCurveA':
@@ -10092,6 +10107,12 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 						$author$project$Forth$Geometry$RailLocation$setHeight,
 						4,
 						$author$project$Forth$RailPiece$goStraightPlus(16))));
+		case 'Shift':
+			var f = rail.a;
+			return A2(
+				$author$project$Forth$RailPiece$flip,
+				f,
+				A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$doubleTrackLeft));
 		case 'SlopeCurveA':
 			return {
 				origin: $author$project$Forth$Geometry$RailLocation$zero,
@@ -10718,6 +10739,18 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			'sb1',
 			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$SlopeCurveB, 1)),
 			_Utils_Tuple2(
+			'shl',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				A2($author$project$Types$Rail$Shift, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
+			'shr',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				A2($author$project$Types$Rail$Shift, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
 			'stop',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
@@ -11002,7 +11035,8 @@ var $author$project$Types$Rail$allRails = _Utils_ap(
 									A2($author$project$Types$Rail$SingleDouble, flip, invert),
 									A2($author$project$Types$Rail$DoubleWide, flip, invert),
 									A2($author$project$Types$Rail$EightPoint, flip, invert),
-									A2($author$project$Types$Rail$Slope, flip, invert)
+									A2($author$project$Types$Rail$Slope, flip, invert),
+									A2($author$project$Types$Rail$Shift, flip, invert)
 								]);
 						},
 						_List_fromArray(

@@ -214,6 +214,9 @@ getRailPiece rail =
         Slope f _ ->
             flip f <| twoEnds minusZero (RailLocation.setHeight 4 (goStraightPlus 16))
 
+        Shift f _ ->
+            flip f <| twoEnds minusZero doubleTrackLeft
+
         SlopeCurveA ->
             { railLocations =
                 Nonempty plusZero [ slopeCurveA ]
