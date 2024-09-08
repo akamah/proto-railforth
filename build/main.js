@@ -7858,6 +7858,8 @@ var $author$project$Types$Rail$toStringWith = F3(
 				return 'auto_turnout';
 			case 'AutoPoint':
 				return 'auto_point';
+			case 'AutoCross':
+				return 'auto_cross';
 			default:
 				return 'uturn';
 		}
@@ -9456,6 +9458,7 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 		};
 	}
 };
+var $author$project$Types$Rail$AutoCross = {$: 'AutoCross'};
 var $author$project$Types$Rail$AutoPoint = {$: 'AutoPoint'};
 var $author$project$Types$Rail$AutoTurnout = {$: 'AutoTurnout'};
 var $author$project$Types$Rail$Curve45 = F2(
@@ -9643,6 +9646,8 @@ var $author$project$Types$Rail$map = F2(
 				return $author$project$Types$Rail$AutoTurnout;
 			case 'AutoPoint':
 				return $author$project$Types$Rail$AutoPoint;
+			case 'AutoCross':
+				return $author$project$Types$Rail$AutoCross;
 			default:
 				return $author$project$Types$Rail$UTurn;
 		}
@@ -9694,6 +9699,13 @@ var $author$project$Forth$RailPiece$doubleTrackRight = A5(
 	0,
 	$author$project$Forth$Geometry$Dir$e,
 	$author$project$Forth$Geometry$Joint$Plus);
+var $author$project$Forth$RailPiece$doubleTrackRightZeroMinus = A5(
+	$author$project$Forth$Geometry$RailLocation$make,
+	$author$project$Forth$Geometry$Rot45$zero,
+	A4($author$project$Forth$Geometry$Rot45$make, 0, 0, -1, 0),
+	0,
+	$author$project$Forth$Geometry$Dir$w,
+	$author$project$Forth$Geometry$Joint$Minus);
 var $author$project$Forth$RailPiece$doubleTrackWideLeft = A5(
 	$author$project$Forth$Geometry$RailLocation$make,
 	A4($author$project$Forth$Geometry$Rot45$make, 5, 0, 2, 0),
@@ -10006,6 +10018,8 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 				A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$doubleTrackRight),
 				$author$project$Forth$RailPiece$goStraight6,
 				A2($author$project$Forth$Geometry$RailLocation$mul, $author$project$Forth$RailPiece$goStraight2.location, $author$project$Forth$RailPiece$turnLeft45deg));
+		case 'AutoCross':
+			return A4($author$project$Forth$RailPiece$fourEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$doubleTrackRightZeroMinus, $author$project$Forth$RailPiece$doubleTrackRight, $author$project$Forth$RailPiece$goStraight4);
 		default:
 			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$doubleTrackLeftZeroMinus);
 	}
@@ -10522,6 +10536,18 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			'ap3',
 			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoPoint, 3)),
 			_Utils_Tuple2(
+			'ac',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 0)),
+			_Utils_Tuple2(
+			'ac1',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 1)),
+			_Utils_Tuple2(
+			'ac2',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 2)),
+			_Utils_Tuple2(
+			'ac3',
+			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$AutoCross, 3)),
+			_Utils_Tuple2(
 			'uturn',
 			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$UTurn, 0)),
 			_Utils_Tuple2(
@@ -10668,7 +10694,7 @@ var $author$project$Types$Pier$allPiers = _List_fromArray(
 	[$author$project$Types$Pier$Single, $author$project$Types$Pier$Wide, $author$project$Types$Pier$Mini]);
 var $author$project$Types$Rail$allRails = _Utils_ap(
 	_List_fromArray(
-		[$author$project$Types$Rail$SlopeCurveA, $author$project$Types$Rail$SlopeCurveB, $author$project$Types$Rail$AutoTurnout, $author$project$Types$Rail$AutoPoint, $author$project$Types$Rail$UTurn]),
+		[$author$project$Types$Rail$SlopeCurveA, $author$project$Types$Rail$SlopeCurveB, $author$project$Types$Rail$AutoTurnout, $author$project$Types$Rail$AutoPoint, $author$project$Types$Rail$AutoCross, $author$project$Types$Rail$UTurn]),
 	_Utils_ap(
 		A2(
 			$elm$core$List$concatMap,

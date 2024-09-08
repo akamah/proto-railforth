@@ -4,6 +4,7 @@ local rails = {
   cannot_flip_cannot_invert: [
     'auto_point',
     'auto_turnout',
+    'auto_cross',
     'slope_curve_A',
     'slope_curve_B',
     'uturn',

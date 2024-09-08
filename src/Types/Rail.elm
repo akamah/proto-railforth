@@ -53,6 +53,7 @@ type Rail invert flip
     | Stop invert
     | AutoTurnout
     | AutoPoint
+    | AutoCross
     | UTurn
 
 
@@ -117,6 +118,9 @@ map f rail =
 
         AutoPoint ->
             AutoPoint
+
+        AutoCross ->
+            AutoCross
 
         UTurn ->
             UTurn
@@ -184,6 +188,9 @@ toStringWith flipped inverted rail =
         AutoPoint ->
             "auto_point"
 
+        AutoCross ->
+            "auto_cross"
+
         UTurn ->
             "uturn"
 
@@ -214,6 +221,7 @@ allRails =
     , SlopeCurveB
     , AutoTurnout
     , AutoPoint
+    , AutoCross
     , UTurn
     ]
         ++ ([ Inverted, NotInverted ]

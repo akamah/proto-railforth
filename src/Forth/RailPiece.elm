@@ -74,6 +74,11 @@ doubleTrackLeftZeroMinus =
     RailLocation.make Rot45.zero (Rot45.make 0 0 1 0) 0 Dir.w Joint.Minus
 
 
+doubleTrackRightZeroMinus : RailLocation
+doubleTrackRightZeroMinus =
+    RailLocation.make Rot45.zero (Rot45.make 0 0 -1 0) 0 Dir.w Joint.Minus
+
+
 goStraight1 : RailLocation
 goStraight1 =
     RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
@@ -261,6 +266,9 @@ getRailPiece rail =
 
         AutoPoint ->
             fourEnds minusZero (RailLocation.mul goStraight2.location doubleTrackRight) goStraight6 (RailLocation.mul goStraight2.location turnLeft45deg)
+
+        AutoCross ->
+            fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight goStraight4
 
         UTurn ->
             twoEnds minusZero doubleTrackLeftZeroMinus

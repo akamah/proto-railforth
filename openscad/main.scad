@@ -21,7 +21,7 @@ OpenSCADにも $fn みたいな変数はあるけれど、やや煩雑なので�
 */
 use <rail.scad>
 
-name = ""; // [straight1, straight2, straight4, straight8, curve45, curve90, outer_curve45, turnout, single_double, double_wide, eight, joint, slope, auto_turnout, auto_point, uturn, double_cross]
+name = "";
 flipped = false;
 inverted = false;
 resolution = 4;
@@ -90,9 +90,9 @@ if (name == "straight1") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
   uturn(8 * resolution);
-} else if (name == "double_cross") {
-  assert_cannot_flip(name, flipped);
-  double_cross(inverted, 1 * resolution);
+} else if (name == "auto_cross") {
+  assert_cannot_invert(name, inverted);
+  auto_cross(1 * resolution);
 } else if (name == "pier_single") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);

@@ -416,21 +416,21 @@ module stop(inverted) {
     }
 }
 
-module double_cross(inverted, divs) {
+module auto_cross(divs) {
     straight = straight_raildef(4 * UNIT);
-    next_track = translate_raildef([0, DOUBLE_TRACK, 0], straight);
-    shift = shift_raildef(4 * UNIT, DOUBLE_TRACK, divs);
+    next_track = translate_raildef([0, -DOUBLE_TRACK, 0], straight);
+    shift = shift_raildef(4 * UNIT, -DOUBLE_TRACK, divs);
     
     render_rail(
         [
             straight,
             next_track,
             shift,
-            translate_raildef([0, DOUBLE_TRACK, 0], flip_raildef(shift)),
+            translate_raildef([0, -DOUBLE_TRACK, 0], flip_raildef(shift)),
         ],
         [start_mat(straight), start_mat(next_track)],
         [end_mat(straight), end_mat(next_track)],
-        inverted
+        inverted=false
     );
 }
 
