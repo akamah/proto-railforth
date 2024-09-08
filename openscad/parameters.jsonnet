@@ -35,6 +35,7 @@ local rails = {
     'double_wide',
     'eight',
     'slope',
+    'shift',
   ],
 };
 
