@@ -143,6 +143,8 @@ railForthGlossary =
         , ( "sa1", executePlaceRail SlopeCurveA 1 )
         , ( "sb", executePlaceRail SlopeCurveB 0 )
         , ( "sb1", executePlaceRail SlopeCurveB 1 )
+        , ( "shl", executePlaceRail (Shift NotFlipped ()) 0 )
+        , ( "shr", executePlaceRail (Shift Flipped ()) 0 )
         , ( "stop", executePlaceRail (Stop ()) 0 )
         , ( "at", executePlaceRail AutoTurnout 0 )
         , ( "at1", executePlaceRail AutoTurnout 1 )

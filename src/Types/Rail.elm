@@ -50,6 +50,7 @@ type Rail invert flip
     | EightPoint flip invert
     | JointChange invert
     | Slope flip invert
+    | Shift flip invert
     | SlopeCurveA
     | SlopeCurveB
     | Stop invert
@@ -109,6 +110,9 @@ map f rail =
 
         Slope a b ->
             Slope a (f b)
+
+        Shift a b ->
+            Shift a (f b)
 
         SlopeCurveA ->
             SlopeCurveA
@@ -190,6 +194,9 @@ toStringWith flipped inverted rail =
 
         Slope flip inv ->
             "slope" ++ inverted inv ++ flipped flip
+
+        Shift flip inv ->
+            "shift" ++ inverted inv ++ flipped flip
 
         SlopeCurveA ->
             "slope_curve_A"
@@ -290,6 +297,7 @@ allRails =
                                     , DoubleWide flip invert
                                     , EightPoint flip invert
                                     , Slope flip invert
+                                    , Shift flip invert
                                     ]
                                 )
                     )
