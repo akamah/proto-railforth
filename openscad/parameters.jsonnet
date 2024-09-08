@@ -20,9 +20,11 @@ local rails = {
     'straight8',
     'joint',
     'stop',
+    'forward',
+    'backward',
   ],
   can_flip_cannot_invert: [
-    'oneway'
+    'oneway',
   ],
   can_flip_can_invert: [
     'curve45',

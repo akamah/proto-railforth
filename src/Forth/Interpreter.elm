@@ -165,6 +165,8 @@ railForthGlossary =
         , ( "owr2", executePlaceRail (Oneway Flipped) 2 )
         , ( "dc", executePlaceRail WideCross 0 )
         , ( "dc1", executePlaceRail WideCross 1 )
+        , ( "fw", executePlaceRail (Forward ()) 0 )
+        , ( "bk", executePlaceRail (Backward ()) 0 )
         , ( "ascend", executeAscend 4 )
         ]
 

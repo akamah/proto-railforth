@@ -283,6 +283,12 @@ getRailPiece rail =
                 (RailLocation.make (Rot45.make 4 0 -2 0) Rot45.zero 0 Dir.e Joint.Minus)
                 goStraight4
 
+        Forward _ ->
+            twoEnds minusZero goStraight2
+
+        Backward _ ->
+            twoEnds minusZero goStraight2
+
 
 {-| remove the first element from the list and append it to the end
 -}

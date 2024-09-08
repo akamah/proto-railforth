@@ -7865,8 +7865,14 @@ var $author$project$Types$Rail$toStringWith = F3(
 			case 'Oneway':
 				var flip = rail.a;
 				return 'oneway' + flipped(flip);
-			default:
+			case 'WideCross':
 				return 'wide_cross';
+			case 'Forward':
+				var inv = rail.a;
+				return 'forward' + inverted(inv);
+			default:
+				var inv = rail.a;
+				return 'backward' + inverted(inv);
 		}
 	});
 var $author$project$Types$Rail$toString = A2($author$project$Types$Rail$toStringWith, $author$project$Types$Rail$isFlippedToString, $author$project$Types$Rail$isInvertedToString);
@@ -9466,6 +9472,9 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 var $author$project$Types$Rail$AutoCross = {$: 'AutoCross'};
 var $author$project$Types$Rail$AutoPoint = {$: 'AutoPoint'};
 var $author$project$Types$Rail$AutoTurnout = {$: 'AutoTurnout'};
+var $author$project$Types$Rail$Backward = function (a) {
+	return {$: 'Backward', a: a};
+};
 var $author$project$Types$Rail$Curve45 = F2(
 	function (a, b) {
 		return {$: 'Curve45', a: a, b: b};
@@ -9483,6 +9492,9 @@ var $author$project$Types$Rail$EightPoint = F2(
 		return {$: 'EightPoint', a: a, b: b};
 	});
 var $author$project$Types$Rail$Flipped = {$: 'Flipped'};
+var $author$project$Types$Rail$Forward = function (a) {
+	return {$: 'Forward', a: a};
+};
 var $author$project$Types$Rail$JointChange = function (a) {
 	return {$: 'JointChange', a: a};
 };
@@ -9662,8 +9674,16 @@ var $author$project$Types$Rail$map = F2(
 			case 'Oneway':
 				var a = rail.a;
 				return $author$project$Types$Rail$Oneway(a);
-			default:
+			case 'WideCross':
 				return $author$project$Types$Rail$WideCross;
+			case 'Forward':
+				var a = rail.a;
+				return $author$project$Types$Rail$Forward(
+					f(a));
+			default:
+				var a = rail.a;
+				return $author$project$Types$Rail$Backward(
+					f(a));
 		}
 	});
 var $elm$core$Basics$neq = _Utils_notEqual;
@@ -10071,7 +10091,7 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 					$author$project$Forth$RailPiece$flip,
 					f,
 					A3($author$project$Forth$RailPiece$threeEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight4, $author$project$Forth$RailPiece$turnLeft45deg)));
-		default:
+		case 'WideCross':
 			return A4(
 				$author$project$Forth$RailPiece$fourEnds,
 				$author$project$Forth$RailPiece$minusZero,
@@ -10090,6 +10110,10 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 					$author$project$Forth$Geometry$Dir$e,
 					$author$project$Forth$Geometry$Joint$Minus),
 				$author$project$Forth$RailPiece$goStraight4);
+		case 'Forward':
+			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight2);
+		default:
+			return A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$goStraight2);
 	}
 };
 var $mgold$elm_nonempty_list$List$Nonempty$head = function (_v0) {
@@ -10638,6 +10662,18 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			'dc1',
 			A2($author$project$Forth$Interpreter$executePlaceRail, $author$project$Types$Rail$WideCross, 1)),
 			_Utils_Tuple2(
+			'fw',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Forward(_Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
+			'bk',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$Backward(_Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
 			'ascend',
 			$author$project$Forth$Interpreter$executeAscend(4))
 		]));
@@ -10801,7 +10837,9 @@ var $author$project$Types$Rail$allRails = _Utils_ap(
 							$author$project$Types$Rail$Straight4(invert),
 							$author$project$Types$Rail$Straight8(invert),
 							$author$project$Types$Rail$JointChange(invert),
-							$author$project$Types$Rail$Stop(invert)
+							$author$project$Types$Rail$Stop(invert),
+							$author$project$Types$Rail$Forward(invert),
+							$author$project$Types$Rail$Backward(invert)
 						]);
 				},
 				_List_fromArray(

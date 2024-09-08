@@ -101,6 +101,12 @@ if (name == "straight1") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
   wide_cross(1 * resolution);
+} else if (name == "forward") {
+  assert_cannot_flip(name, flipped);
+  straight(2, inverted);
+} else if (name == "backward") {
+  assert_cannot_flip(name, flipped);
+  straight(2, inverted);
 } else if (name == "pier_single") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);

@@ -59,6 +59,8 @@ type Rail invert flip
     | UTurn
     | Oneway flip
     | WideCross
+    | Forward invert
+    | Backward invert
 
 
 canInvert : Rail invert flip -> Bool
@@ -135,6 +137,12 @@ map f rail =
         WideCross ->
             WideCross
 
+        Forward a ->
+            Forward (f a)
+
+        Backward a ->
+            Backward (f a)
+
 
 toString : Rail IsInverted IsFlipped -> String
 toString =
@@ -210,6 +218,12 @@ toStringWith flipped inverted rail =
         WideCross ->
             "wide_cross"
 
+        Forward inv ->
+            "forward" ++ inverted inv
+
+        Backward inv ->
+            "backward" ++ inverted inv
+
 
 isInvertedToString : IsInverted -> String
 isInvertedToString isInverted =
@@ -257,6 +271,8 @@ allRails =
                         , Straight8 invert
                         , JointChange invert
                         , Stop invert
+                        , Forward invert
+                        , Backward invert
                         ]
                     )
            )
