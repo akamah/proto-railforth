@@ -2,6 +2,7 @@ module Graphics.Render exposing (Attributes, renderPier, renderRail)
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 exposing (Vec3, vec3)
+import Types.Rail exposing (Rail(..))
 import WebGL exposing (Entity, Mesh, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest
@@ -26,8 +27,8 @@ lightFromAbove =
     vec3 (2.0 / 27.0) (7.0 / 27.0) (26.0 / 27.0)
 
 
-renderRail : Mat4 -> Mesh Attributes -> Vec3 -> Float -> List Entity
-renderRail cameraTransform mesh origin angle =
+renderRail : Mat4 -> Mesh Attributes -> Vec3 -> Float -> Vec3 -> List Entity
+renderRail cameraTransform mesh origin angle color =
     let
         modelTransform =
             makeMeshMatrix origin angle
@@ -42,7 +43,7 @@ renderRail cameraTransform mesh origin angle =
         { cameraTransform = cameraTransform
         , modelTransform = modelTransform
         , light = lightFromAbove
-        , color = vec3 0.12 0.56 1.0
+        , color = color
         }
     ]
 

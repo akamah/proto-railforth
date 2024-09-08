@@ -14,7 +14,7 @@ import Dict exposing (Dict)
 import Graphics.OFF as OFF
 import Graphics.Render as Render
 import Math.Matrix4 exposing (Mat4)
-import Math.Vector3 as Vec3 exposing (Vec3)
+import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Types.Pier as Pier exposing (Pier)
 import Types.PierPlacement exposing (PierPlacement)
 import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -122,8 +122,47 @@ renderRails model rails transform =
                 (getRailMesh model railPosition.rail)
                 railPosition.position
                 railPosition.angle
+                (getRailColor railPosition.rail)
         )
         rails
+
+
+getRailColor : Rail a b -> Vec3
+getRailColor rail =
+    let
+        blue =
+            vec3 0.12 0.56 1.0
+
+        red =
+            vec3 1.0 0.2 0.4
+
+        gray =
+            vec3 0.8 0.8 0.8
+
+        green =
+            vec3 0.12 1.0 0.56
+
+        skyblue =
+            vec3 0.47 0.8 1.0
+    in
+    case rail of
+        UTurn ->
+            red
+
+        Oneway _ ->
+            gray
+
+        WideCross ->
+            gray
+
+        Forward _ ->
+            green
+
+        Backward _ ->
+            skyblue
+
+        _ ->
+            blue
 
 
 renderPiers : Model -> List PierPlacement -> Mat4 -> List Entity

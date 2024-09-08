@@ -7788,6 +7788,27 @@ var $elm$core$List$concatMap = F2(
 		return $elm$core$List$concat(
 			A2($elm$core$List$map, f, list));
 	});
+var $author$project$Graphics$MeshLoader$getRailColor = function (rail) {
+	var skyblue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.47, 0.8, 1.0);
+	var red = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 0.2, 0.4);
+	var green = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 1.0, 0.56);
+	var gray = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.8, 0.8, 0.8);
+	var blue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 0.56, 1.0);
+	switch (rail.$) {
+		case 'UTurn':
+			return red;
+		case 'Oneway':
+			return gray;
+		case 'WideCross':
+			return gray;
+		case 'Forward':
+			return green;
+		case 'Backward':
+			return skyblue;
+		default:
+			return blue;
+	}
+};
 var $author$project$Types$Rail$isFlippedToString = function (isFlipped) {
 	if (isFlipped.$ === 'NotFlipped') {
 		return '';
@@ -7901,8 +7922,8 @@ var $author$project$Graphics$Render$railVertexShader = {
 	attributes: {normal: 'normal', position: 'position'},
 	uniforms: {cameraTransform: 'cameraTransform', color: 'color', light: 'light', modelTransform: 'modelTransform'}
 };
-var $author$project$Graphics$Render$renderRail = F4(
-	function (cameraTransform, mesh, origin, angle) {
+var $author$project$Graphics$Render$renderRail = F5(
+	function (cameraTransform, mesh, origin, angle, color) {
 		var modelTransform = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
 		return _List_fromArray(
 			[
@@ -7916,12 +7937,7 @@ var $author$project$Graphics$Render$renderRail = F4(
 				$author$project$Graphics$Render$railVertexShader,
 				$author$project$Graphics$Render$railFragmentShader,
 				mesh,
-				{
-					cameraTransform: cameraTransform,
-					color: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 0.56, 1.0),
-					light: $author$project$Graphics$Render$lightFromAbove,
-					modelTransform: modelTransform
-				})
+				{cameraTransform: cameraTransform, color: color, light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform})
 			]);
 	});
 var $author$project$Graphics$MeshLoader$renderRails = F3(
@@ -7929,12 +7945,13 @@ var $author$project$Graphics$MeshLoader$renderRails = F3(
 		return A2(
 			$elm$core$List$concatMap,
 			function (railPosition) {
-				return A4(
+				return A5(
 					$author$project$Graphics$Render$renderRail,
 					transform,
 					A2($author$project$Graphics$MeshLoader$getRailMesh, model, railPosition.rail),
 					railPosition.position,
-					railPosition.angle);
+					railPosition.angle,
+					$author$project$Graphics$MeshLoader$getRailColor(railPosition.rail));
 			},
 			rails);
 	});
