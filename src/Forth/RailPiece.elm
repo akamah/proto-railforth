@@ -2,6 +2,7 @@ module Forth.RailPiece exposing (getRailPiece, initialLocation, placeRail, rotat
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
+import Forth.Geometry.Location as Location
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
@@ -246,7 +247,22 @@ getRailPiece rail =
             fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight (goStraightPlus 8)
 
         UTurn ->
-            twoEnds minusZero doubleTrackLeftZeroMinus
+            { railLocations =
+                Nonempty minusZero [ doubleTrackLeftZeroMinus ]
+            , pierLocations =
+                List.map (\loc -> { location = loc, margin = PierLocation.flatRailMargin })
+                    [ minusZero.location
+                    , Location.make (Rot45.make 10 -5 0 0) (Rot45.make 0 0 1 0) 0 Dir.se
+                    , Location.make (Rot45.make 10 0 -5 0) (Rot45.make 0 0 1 0) 0 Dir.e
+                    , Location.make (Rot45.make 10 0 0 -5) (Rot45.make 0 0 1 0) 0 Dir.ne
+                    , Location.make (Rot45.make 15 0 0 0) (Rot45.make 0 0 1 0) 0 Dir.n
+                    , Location.make (Rot45.make 10 5 0 0) (Rot45.make 0 0 1 0) 0 Dir.nw
+                    , Location.make (Rot45.make 10 0 5 0) (Rot45.make 0 0 1 0) 0 Dir.w
+                    , Location.make (Rot45.make 10 0 0 5) (Rot45.make 0 0 1 0) 0 Dir.sw
+                    , doubleTrackLeftZeroMinus.location
+                    ]
+            , origin = RailLocation.zero
+            }
 
         Oneway f ->
             invert Inverted <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
