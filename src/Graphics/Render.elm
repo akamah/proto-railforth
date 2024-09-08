@@ -2,6 +2,7 @@ module Graphics.Render exposing (Attributes, renderPier, renderRail)
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 exposing (Vec3, vec3)
+import Types.Rail exposing (Rail(..))
 import WebGL exposing (Entity, Mesh, Shader)
 import WebGL.Settings
 import WebGL.Settings.DepthTest
@@ -17,6 +18,7 @@ type alias Uniforms =
     { cameraTransform : Mat4
     , modelTransform : Mat4
     , light : Vec3
+    , color : Vec3
     }
 
 
@@ -25,8 +27,8 @@ lightFromAbove =
     vec3 (2.0 / 27.0) (7.0 / 27.0) (26.0 / 27.0)
 
 
-renderRail : Mat4 -> Mesh Attributes -> Vec3 -> Float -> List Entity
-renderRail cameraTransform mesh origin angle =
+renderRail : Mat4 -> Mesh Attributes -> Vec3 -> Float -> Vec3 -> List Entity
+renderRail cameraTransform mesh origin angle color =
     let
         modelTransform =
             makeMeshMatrix origin angle
@@ -41,6 +43,7 @@ renderRail cameraTransform mesh origin angle =
         { cameraTransform = cameraTransform
         , modelTransform = modelTransform
         , light = lightFromAbove
+        , color = color
         }
     ]
 
@@ -61,6 +64,7 @@ renderPier cameraTransform mesh origin angle =
         { cameraTransform = cameraTransform
         , modelTransform = modelTransform
         , light = lightFromAbove
+        , color = vec3 1.0 0.85 0.3
         }
 
 
@@ -76,7 +80,7 @@ makeMeshMatrix origin angle =
     Mat4.mul position rotate
 
 
-railVertexShader : Shader Attributes Uniforms { edge : Float, color : Vec3 }
+railVertexShader : Shader Attributes Uniforms { edge : Float, fragmentColor : Vec3 }
 railVertexShader =
     -- シェーダ周り、というか描画周りはモジュールに分けてしまいたい
     [glsl|
@@ -86,23 +90,18 @@ railVertexShader =
         uniform mat4 modelTransform;
         uniform mat4 cameraTransform;
         uniform vec3 light;
+        uniform vec3 color;
         
         varying highp float edge;
-        varying highp vec3 color;
+        varying highp vec3 fragmentColor;
 
         void main() {
             highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
             highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
-            // blue to green ratio. 0 <--- blue   green ---> 1.0
-            highp float ratio = clamp(worldPosition.z / 660.0, 0.0, 1.0);
-
-            const highp vec3 blue = vec3(0.12, 0.56, 1.0);
-            const highp vec3 green = vec3(0.12, 1.0, 0.56);
-
             highp float lambertFactor = dot(worldNormal, vec4(light, 0));
             highp float intensity = 0.3 + 0.7 * lambertFactor;
-            color = intensity * (ratio * green + (1.0 - ratio) * blue);
+            fragmentColor = intensity * color;
 
             edge = distance(vec3(0.0, 0.0, 0.0), position);
 
@@ -111,20 +110,20 @@ railVertexShader =
     |]
 
 
-railFragmentShader : Shader {} Uniforms { edge : Float, color : Vec3 }
+railFragmentShader : Shader {} Uniforms { edge : Float, fragmentColor : Vec3 }
 railFragmentShader =
     [glsl|
         varying highp float edge;
-        varying highp vec3 color;
+        varying highp vec3 fragmentColor;
 
         void main() {
             highp float dist_density = min(edge / 30.0 + 0.2, 1.0);
-            gl_FragColor = vec4(color, dist_density);
+            gl_FragColor = vec4(fragmentColor, dist_density);
         }
     |]
 
 
-pierVertexShader : Shader Attributes Uniforms { color : Vec3 }
+pierVertexShader : Shader Attributes Uniforms { fragmentColor : Vec3 }
 pierVertexShader =
     [glsl|
         attribute vec3 position;
@@ -133,29 +132,29 @@ pierVertexShader =
         uniform mat4 modelTransform;
         uniform mat4 cameraTransform;
         uniform vec3 light;
+        uniform vec3 color;
 
-        varying highp vec3 color;
+        varying highp vec3 fragmentColor;
 
         void main() {
             highp vec4 worldPosition = modelTransform * vec4(position, 1.0);
             highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));
 
-            const highp vec3 yellow = vec3(1.0, 0.85, 0.3);
             highp float lambertFactor = dot(worldNormal, vec4(light, 0));
             highp float intensity = 0.5 + 0.5 * lambertFactor;
-            color = intensity * yellow;
+            fragmentColor = intensity * color;
 
             gl_Position = cameraTransform * worldPosition;
         }
     |]
 
 
-pierFragmentShader : Shader {} Uniforms { color : Vec3 }
+pierFragmentShader : Shader {} Uniforms { fragmentColor : Vec3 }
 pierFragmentShader =
     [glsl|
-        varying highp vec3 color;
+        varying highp vec3 fragmentColor;
 
         void main() {
-            gl_FragColor = vec4(color, 1.0);
+            gl_FragColor = vec4(fragmentColor, 1.0);
         }
     |]
