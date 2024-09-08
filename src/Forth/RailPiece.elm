@@ -71,62 +71,37 @@ plusZero =
 
 doubleTrackLeftZeroMinus : RailLocation
 doubleTrackLeftZeroMinus =
-    RailLocation.make Rot45.zero (Rot45.make 0 0 1 0) 0 Dir.w Joint.Minus
+    RailLocation.make Rot45.zero (Rot45.make 0 0 2 0) 0 Dir.w Joint.Minus
 
 
 doubleTrackRightZeroMinus : RailLocation
 doubleTrackRightZeroMinus =
-    RailLocation.make Rot45.zero (Rot45.make 0 0 -1 0) 0 Dir.w Joint.Minus
+    RailLocation.make Rot45.zero (Rot45.make 0 0 -2 0) 0 Dir.w Joint.Minus
 
 
-goStraight1 : RailLocation
-goStraight1 =
-    RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
+goStraightPlus : Int -> RailLocation
+goStraightPlus x =
+    RailLocation.make (Rot45.make x 0 0 0) Rot45.zero 0 Dir.e Joint.Plus
 
 
-goStraight1Minus : RailLocation
-goStraight1Minus =
-    RailLocation.make (Rot45.make 1 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
-
-
-goStraight2 : RailLocation
-goStraight2 =
-    RailLocation.mul goStraight1.location goStraight1
-
-
-goStraight4 : RailLocation
-goStraight4 =
-    RailLocation.mul goStraight2.location goStraight2
-
-
-goStraight5Minus : RailLocation
-goStraight5Minus =
-    RailLocation.make (Rot45.make 5 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
-
-
-goStraight6 : RailLocation
-goStraight6 =
-    RailLocation.mul goStraight2.location goStraight4
-
-
-goStraight8 : RailLocation
-goStraight8 =
-    RailLocation.mul goStraight4.location goStraight4
+goStraightMinus : Int -> RailLocation
+goStraightMinus x =
+    RailLocation.make (Rot45.make x 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
 
 
 turnLeft45deg : RailLocation
 turnLeft45deg =
-    RailLocation.make (Rot45.make 0 0 4 -4) Rot45.zero 0 Dir.ne Joint.Plus
+    RailLocation.make (Rot45.make 0 0 8 -8) Rot45.zero 0 Dir.ne Joint.Plus
 
 
-turnRight45deg : RailLocation
-turnRight45deg =
-    RailLocation.flip turnLeft45deg
+turnRight45degMinus : RailLocation
+turnRight45degMinus =
+    RailLocation.make (Rot45.make 0 8 -8 0) Rot45.zero 0 Dir.se Joint.Minus
 
 
 turnLeftOuter45deg : RailLocation
 turnLeftOuter45deg =
-    RailLocation.make (Rot45.make 0 0 4 -4) (Rot45.make 0 0 1 -1) 0 Dir.ne Joint.Plus
+    RailLocation.make (Rot45.make 0 0 8 -8) (Rot45.make 0 0 2 -2) 0 Dir.ne Joint.Plus
 
 
 turnLeft90deg : RailLocation
@@ -136,27 +111,27 @@ turnLeft90deg =
 
 doubleTrackLeft : RailLocation
 doubleTrackLeft =
-    RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 1 0) 0 Dir.e Joint.Plus
+    RailLocation.make (Rot45.make 8 0 0 0) (Rot45.make 0 0 2 0) 0 Dir.e Joint.Plus
 
 
 doubleTrackRight : RailLocation
 doubleTrackRight =
-    RailLocation.make (Rot45.make 4 0 0 0) (Rot45.make 0 0 -1 0) 0 Dir.e Joint.Plus
+    RailLocation.make (Rot45.make 8 0 0 0) (Rot45.make 0 0 -2 0) 0 Dir.e Joint.Plus
 
 
 doubleTrackWideLeft : RailLocation
 doubleTrackWideLeft =
-    RailLocation.make (Rot45.make 5 0 2 0) Rot45.zero 0 Dir.e Joint.Plus
+    RailLocation.make (Rot45.make 10 0 4 0) Rot45.zero 0 Dir.e Joint.Plus
 
 
 slopeCurveA : RailLocation
 slopeCurveA =
-    RailLocation.make (Rot45.make 0 4 -4 0) Rot45.zero 1 Dir.se Joint.Minus
+    RailLocation.make (Rot45.make 0 8 -8 0) Rot45.zero 1 Dir.se Joint.Minus
 
 
 slopeCurveB : RailLocation
 slopeCurveB =
-    RailLocation.make (Rot45.make 0 0 4 -4) Rot45.zero 1 Dir.ne Joint.Plus
+    RailLocation.make (Rot45.make 0 0 8 -8) Rot45.zero 1 Dir.ne Joint.Plus
 
 
 invert : IsInverted -> RailPiece -> RailPiece
@@ -196,16 +171,16 @@ getRailPiece : Rail () IsFlipped -> RailPiece
 getRailPiece rail =
     case rail of
         Straight1 _ ->
-            twoEnds minusZero goStraight1
+            twoEnds minusZero <| goStraightPlus 2
 
         Straight2 _ ->
-            twoEnds minusZero goStraight2
+            twoEnds minusZero <| goStraightPlus 4
 
         Straight4 _ ->
-            twoEnds minusZero goStraight4
+            twoEnds minusZero <| goStraightPlus 8
 
         Straight8 _ ->
-            twoEnds minusZero goStraight8
+            twoEnds minusZero <| goStraightPlus 16
 
         Curve45 f _ ->
             flip f <| twoEnds minusZero turnLeft45deg
@@ -221,22 +196,22 @@ getRailPiece rail =
             flip f <| twoEnds minusZero turnLeftOuter45deg
 
         Turnout f _ ->
-            flip f <| threeEnds minusZero goStraight4 turnLeft45deg
+            flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
 
         SingleDouble f _ ->
-            flip f <| threeEnds minusZero goStraight4 doubleTrackLeft
+            flip f <| threeEnds minusZero (goStraightPlus 8) doubleTrackLeft
 
         DoubleWide f _ ->
-            flip f <| fourEnds minusZero goStraight5Minus doubleTrackWideLeft doubleTrackLeftZeroMinus
+            flip f <| fourEnds minusZero (goStraightMinus 10) doubleTrackWideLeft doubleTrackLeftZeroMinus
 
         EightPoint f _ ->
-            flip f <| threeEnds minusZero turnRight45deg turnLeft45deg
+            flip f <| threeEnds minusZero turnRight45degMinus turnLeft45deg
 
         JointChange _ ->
-            twoEnds minusZero goStraight1Minus
+            twoEnds minusZero (goStraightMinus 2)
 
         Slope f _ ->
-            flip f <| twoEnds minusZero (RailLocation.setHeight 4 goStraight8)
+            flip f <| twoEnds minusZero (RailLocation.setHeight 4 (goStraightPlus 16))
 
         SlopeCurveA ->
             { railLocations =
@@ -259,35 +234,35 @@ getRailPiece rail =
             }
 
         Stop _ ->
-            twoEnds minusZero goStraight4
+            twoEnds minusZero (goStraightPlus 8)
 
         AutoTurnout ->
-            threeEnds minusZero goStraight6 (RailLocation.mul goStraight2.location turnLeft45deg)
+            threeEnds minusZero (goStraightPlus 12) (RailLocation.mul (goStraightPlus 4).location turnLeft45deg)
 
         AutoPoint ->
-            fourEnds minusZero (RailLocation.mul goStraight2.location doubleTrackRight) goStraight6 (RailLocation.mul goStraight2.location turnLeft45deg)
+            fourEnds minusZero (RailLocation.mul (goStraightPlus 4).location doubleTrackRight) (goStraightPlus 12) (RailLocation.mul (goStraightPlus 4).location turnLeft45deg)
 
         AutoCross ->
-            fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight goStraight4
+            fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight (goStraightPlus 8)
 
         UTurn ->
             twoEnds minusZero doubleTrackLeftZeroMinus
 
         Oneway f ->
-            invert Inverted <| flip f <| threeEnds minusZero goStraight4 turnLeft45deg
+            invert Inverted <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
 
         WideCross ->
             fourEnds
                 minusZero
-                (RailLocation.make (Rot45.make 0 0 -2 0) Rot45.zero 0 Dir.w Joint.Plus)
-                (RailLocation.make (Rot45.make 4 0 -2 0) Rot45.zero 0 Dir.e Joint.Minus)
-                goStraight4
+                (RailLocation.make (Rot45.make 0 0 -4 0) Rot45.zero 0 Dir.w Joint.Plus)
+                (RailLocation.make (Rot45.make 8 0 -4 0) Rot45.zero 0 Dir.e Joint.Minus)
+                (goStraightPlus 8)
 
         Forward _ ->
-            twoEnds minusZero goStraight2
+            twoEnds minusZero (goStraightPlus 4)
 
         Backward _ ->
-            twoEnds minusZero goStraight2
+            twoEnds minusZero (goStraightPlus 4)
 
 
 {-| remove the first element from the list and append it to the end

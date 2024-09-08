@@ -106,10 +106,10 @@ toVec3 : Location -> Vec3
 toVec3 tie =
     let
         singleUnit =
-            54
+            27
 
         doubleUnit =
-            60
+            30
 
         heightUnit =
             16.5
