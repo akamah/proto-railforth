@@ -434,6 +434,19 @@ module auto_cross(divs) {
     );
 }
 
+module wide_cross(divs) {
+    shift_right = shift_raildef(4 * UNIT, -2 * UNIT, divs);
+    shift_left = translate_raildef([0, -2 * UNIT, 0], shift_raildef(4 * UNIT, 2 * UNIT, divs));
+    
+    union() {
+        render_rail([shift_left, shift_right], [start_mat(shift_right), end_mat(shift_right)], [start_mat(shift_left), end_mat(shift_left)], inverted=false);
+
+        translate([2 * UNIT, -UNIT, THICKNESS / 4]) {
+            cube([4 * UNIT - 30, 2 * UNIT + WIDTH - 10, THICKNESS / 2], center = true);
+        }
+    }
+}
+
 // 橋脚。一旦は(0, 0, 0)と隅を合わせて、 x, yの正の方向に描画する
 module render_pier(depth, roofWidth, pillarWidth, baseWidth, roofHeight, pillarHeight, baseHeight) {
     module pillarAndBase() {

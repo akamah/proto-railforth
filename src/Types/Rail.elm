@@ -11,6 +11,8 @@ module Types.Rail exposing
     , toStringWith
     )
 
+import Types.Pier exposing (Pier(..))
+
 
 type IsInverted
     = NotInverted
@@ -56,6 +58,7 @@ type Rail invert flip
     | AutoCross
     | UTurn
     | Oneway flip
+    | WideCross
 
 
 canInvert : Rail invert flip -> Bool
@@ -129,6 +132,9 @@ map f rail =
         Oneway a ->
             Oneway a
 
+        WideCross ->
+            WideCross
+
 
 toString : Rail IsInverted IsFlipped -> String
 toString =
@@ -201,6 +207,9 @@ toStringWith flipped inverted rail =
         Oneway flip ->
             "oneway" ++ flipped flip
 
+        WideCross ->
+            "wide_cross"
+
 
 isInvertedToString : IsInverted -> String
 isInvertedToString isInverted =
@@ -230,6 +239,7 @@ allRails =
     , AutoPoint
     , AutoCross
     , UTurn
+    , WideCross
     ]
         ++ ([ Flipped, NotFlipped ]
                 |> List.concatMap

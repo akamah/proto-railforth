@@ -6,6 +6,7 @@ import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
+import Types.Pier exposing (Pier(..))
 import Types.PierPlacement exposing (PierPlacement)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailPlacement exposing (RailPlacement)
@@ -162,6 +163,8 @@ railForthGlossary =
         , ( "owr", executePlaceRail (Oneway Flipped) 0 )
         , ( "owr1", executePlaceRail (Oneway Flipped) 1 )
         , ( "owr2", executePlaceRail (Oneway Flipped) 2 )
+        , ( "dc", executePlaceRail WideCross 0 )
+        , ( "dc1", executePlaceRail WideCross 1 )
         , ( "ascend", executeAscend 4 )
         ]
 

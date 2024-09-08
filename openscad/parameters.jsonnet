@@ -8,6 +8,7 @@ local rails = {
     'slope_curve_A',
     'slope_curve_B',
     'uturn',
+    'wide_cross',
     'pier_single',
     'pier_double',
     'pier_mini',

@@ -276,6 +276,13 @@ getRailPiece rail =
         Oneway f ->
             invert Inverted <| flip f <| threeEnds minusZero goStraight4 turnLeft45deg
 
+        WideCross ->
+            fourEnds
+                minusZero
+                (RailLocation.make (Rot45.make 0 0 -2 0) Rot45.zero 0 Dir.w Joint.Plus)
+                (RailLocation.make (Rot45.make 4 0 -2 0) Rot45.zero 0 Dir.e Joint.Minus)
+                goStraight4
+
 
 {-| remove the first element from the list and append it to the end
 -}

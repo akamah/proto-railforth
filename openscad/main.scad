@@ -97,6 +97,10 @@ if (name == "straight1") {
 } else if (name == "oneway") {
   assert_cannot_invert(name, inverted);
   turnout(flipped, true, 1 * resolution);
+} else if (name == "wide_cross") {
+  assert_cannot_flip(name, flipped);
+  assert_cannot_invert(name, inverted);
+  wide_cross(1 * resolution);
 } else if (name == "pier_single") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
