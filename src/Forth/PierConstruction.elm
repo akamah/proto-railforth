@@ -284,9 +284,9 @@ maximumHeight ls =
 -}
 toPierPlacement : List PierLocation -> Result String (List PierPlacement)
 toPierPlacement list =
-    Result.Ok list
-        |> Result.map cleansePierPlacements
-        |> Result.andThen divideIntoDict
+    list
+        |> cleansePierPlacements
+        |> divideIntoDict
         |> Result.andThen doubleTrackPiers
         |> Result.andThen
             (\( single, double ) ->

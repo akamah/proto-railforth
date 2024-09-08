@@ -99,7 +99,7 @@ addHeight diffHeight location =
 moveLeftByDoubleTrackLength : Location -> Location
 moveLeftByDoubleTrackLength loc =
     mul loc <|
-        make Rot45.zero (Dir.toRot45 Dir.n) 0 Dir.e
+        make Rot45.zero (Rot45.add (Dir.toRot45 Dir.n) (Dir.toRot45 Dir.n)) 0 Dir.e
 
 
 toVec3 : Location -> Vec3

@@ -9092,11 +9092,6 @@ var $elm$core$Dict$member = F2(
 			return false;
 		}
 	});
-var $author$project$Forth$Geometry$Dir$e = $author$project$Forth$Geometry$Dir$Dir(0);
-var $author$project$Forth$Geometry$Location$make = F4(
-	function (single, _double, height, dir) {
-		return {dir: dir, _double: _double, height: height, single: single};
-	});
 var $author$project$Forth$Geometry$Rot45$Rot45 = F4(
 	function (a, b, c, d) {
 		return {$: 'Rot45', a: a, b: b, c: c, d: d};
@@ -9116,6 +9111,11 @@ var $author$project$Forth$Geometry$Rot45$add = F2(
 		var yc = _v1.c;
 		var yd = _v1.d;
 		return A4($author$project$Forth$Geometry$Rot45$make, xa + ya, xb + yb, xc + yc, xd + yd);
+	});
+var $author$project$Forth$Geometry$Dir$e = $author$project$Forth$Geometry$Dir$Dir(0);
+var $author$project$Forth$Geometry$Location$make = F4(
+	function (single, _double, height, dir) {
+		return {dir: dir, _double: _double, height: height, single: single};
 	});
 var $author$project$Forth$Geometry$Dir$mul = F2(
 	function (_v0, _v1) {
@@ -9176,7 +9176,10 @@ var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = functi
 		A4(
 			$author$project$Forth$Geometry$Location$make,
 			$author$project$Forth$Geometry$Rot45$zero,
-			$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
+			A2(
+				$author$project$Forth$Geometry$Rot45$add,
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
 			0,
 			$author$project$Forth$Geometry$Dir$e));
 };
@@ -9456,13 +9459,8 @@ var $author$project$Forth$PierConstruction$toPierPlacement = function (list) {
 		A2(
 			$elm$core$Result$andThen,
 			$author$project$Forth$PierConstruction$doubleTrackPiers,
-			A2(
-				$elm$core$Result$andThen,
-				$author$project$Forth$PierConstruction$divideIntoDict,
-				A2(
-					$elm$core$Result$map,
-					$author$project$Forth$PierConstruction$cleansePierPlacements,
-					$elm$core$Result$Ok(list)))));
+			$author$project$Forth$PierConstruction$divideIntoDict(
+				$author$project$Forth$PierConstruction$cleansePierPlacements(list))));
 };
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 	var _v0 = $author$project$Forth$PierConstruction$toPierPlacement(status.global.piers);
