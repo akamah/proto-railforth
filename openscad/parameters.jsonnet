@@ -21,6 +21,7 @@ local rails = {
     'stop',
   ],
   can_flip_cannot_invert: [
+    'oneway'
   ],
   can_flip_can_invert: [
     'curve45',

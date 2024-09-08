@@ -55,6 +55,7 @@ type Rail invert flip
     | AutoPoint
     | AutoCross
     | UTurn
+    | Oneway flip
 
 
 canInvert : Rail invert flip -> Bool
@@ -125,6 +126,9 @@ map f rail =
         UTurn ->
             UTurn
 
+        Oneway a ->
+            Oneway a
+
 
 toString : Rail IsInverted IsFlipped -> String
 toString =
@@ -194,6 +198,9 @@ toStringWith flipped inverted rail =
         UTurn ->
             "uturn"
 
+        Oneway flip ->
+            "oneway" ++ flipped flip
+
 
 isInvertedToString : IsInverted -> String
 isInvertedToString isInverted =
@@ -224,6 +231,13 @@ allRails =
     , AutoCross
     , UTurn
     ]
+        ++ ([ Flipped, NotFlipped ]
+                |> List.concatMap
+                    (\flipped ->
+                        [ Oneway flipped
+                        ]
+                    )
+           )
         ++ ([ Inverted, NotInverted ]
                 |> List.concatMap
                     (\invert ->

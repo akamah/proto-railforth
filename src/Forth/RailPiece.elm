@@ -273,6 +273,9 @@ getRailPiece rail =
         UTurn ->
             twoEnds minusZero doubleTrackLeftZeroMinus
 
+        Oneway f ->
+            invert Inverted <| flip f <| threeEnds minusZero goStraight4 turnLeft45deg
+
 
 {-| remove the first element from the list and append it to the end
 -}

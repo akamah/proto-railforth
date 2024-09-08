@@ -156,6 +156,12 @@ railForthGlossary =
         , ( "ac3", executePlaceRail AutoCross 3 )
         , ( "uturn", executePlaceRail UTurn 0 )
         , ( "uturn1", executePlaceRail UTurn 1 )
+        , ( "owl", executePlaceRail (Oneway NotFlipped) 0 )
+        , ( "owl1", executePlaceRail (Oneway NotFlipped) 1 )
+        , ( "owl2", executePlaceRail (Oneway NotFlipped) 2 )
+        , ( "owr", executePlaceRail (Oneway Flipped) 0 )
+        , ( "owr1", executePlaceRail (Oneway Flipped) 1 )
+        , ( "owr2", executePlaceRail (Oneway Flipped) 2 )
         , ( "ascend", executeAscend 4 )
         ]
 
