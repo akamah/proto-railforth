@@ -7740,14 +7740,14 @@ var $author$project$Graphics$Render$makeMeshMatrix = F2(
 		return A2($elm_explorations$linear_algebra$Math$Matrix4$mul, position, rotate);
 	});
 var $author$project$Graphics$Render$pierFragmentShader = {
-	src: '\n        varying highp vec3 color;\n\n        void main() {\n            gl_FragColor = vec4(color, 1.0);\n        }\n    ',
+	src: '\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            gl_FragColor = vec4(fragmentColor, 1.0);\n        }\n    ',
 	attributes: {},
 	uniforms: {}
 };
 var $author$project$Graphics$Render$pierVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            const highp vec3 yellow = vec3(1.0, 0.85, 0.3);\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.5 + 0.5 * lambertFactor;\n            color = intensity * yellow;\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        uniform vec3 color;\n\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.5 + 0.5 * lambertFactor;\n            fragmentColor = intensity * color;\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position'},
-	uniforms: {cameraTransform: 'cameraTransform', light: 'light', modelTransform: 'modelTransform'}
+	uniforms: {cameraTransform: 'cameraTransform', color: 'color', light: 'light', modelTransform: 'modelTransform'}
 };
 var $author$project$Graphics$Render$renderPier = F4(
 	function (cameraTransform, mesh, origin, angle) {
@@ -7762,7 +7762,12 @@ var $author$project$Graphics$Render$renderPier = F4(
 			$author$project$Graphics$Render$pierVertexShader,
 			$author$project$Graphics$Render$pierFragmentShader,
 			mesh,
-			{cameraTransform: cameraTransform, light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform});
+			{
+				cameraTransform: cameraTransform,
+				color: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 0.85, 0.3),
+				light: $author$project$Graphics$Render$lightFromAbove,
+				modelTransform: modelTransform
+			});
 	});
 var $author$project$Graphics$MeshLoader$renderPiers = F3(
 	function (model, piers, transform) {
@@ -7887,14 +7892,14 @@ var $author$project$Graphics$MeshLoader$getRailMesh = F2(
 				model.meshes));
 	});
 var $author$project$Graphics$Render$railFragmentShader = {
-	src: '\n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);\n            gl_FragColor = vec4(color, dist_density);\n        }\n    ',
+	src: '\n        varying highp float edge;\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);\n            gl_FragColor = vec4(fragmentColor, dist_density);\n        }\n    ',
 	attributes: {},
 	uniforms: {}
 };
 var $author$project$Graphics$Render$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        \n        varying highp float edge;\n        varying highp vec3 color;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            // blue to green ratio. 0 <--- blue   green ---> 1.0\n            highp float ratio = clamp(worldPosition.z / 660.0, 0.0, 1.0);\n\n            const highp vec3 blue = vec3(0.12, 0.56, 1.0);\n            const highp vec3 green = vec3(0.12, 1.0, 0.56);\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            color = intensity * (ratio * green + (1.0 - ratio) * blue);\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        uniform vec3 color;\n        \n        varying highp float edge;\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            fragmentColor = intensity * color;\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position'},
-	uniforms: {cameraTransform: 'cameraTransform', light: 'light', modelTransform: 'modelTransform'}
+	uniforms: {cameraTransform: 'cameraTransform', color: 'color', light: 'light', modelTransform: 'modelTransform'}
 };
 var $author$project$Graphics$Render$renderRail = F4(
 	function (cameraTransform, mesh, origin, angle) {
@@ -7911,7 +7916,12 @@ var $author$project$Graphics$Render$renderRail = F4(
 				$author$project$Graphics$Render$railVertexShader,
 				$author$project$Graphics$Render$railFragmentShader,
 				mesh,
-				{cameraTransform: cameraTransform, light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform})
+				{
+					cameraTransform: cameraTransform,
+					color: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 0.56, 1.0),
+					light: $author$project$Graphics$Render$lightFromAbove,
+					modelTransform: modelTransform
+				})
 			]);
 	});
 var $author$project$Graphics$MeshLoader$renderRails = F3(
