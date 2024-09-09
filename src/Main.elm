@@ -88,7 +88,7 @@ init flags =
       , piers = execResult.piers
       , errMsg = execResult.errMsg -- Just <| formatRailCount execResult.railCount
       , splitBarDragState = Nothing
-      , splitBarPosition = 1100.0
+      , splitBarPosition = 300.0
       }
     , Cmd.batch
         [ Task.perform SetViewport Browser.Dom.getViewport
@@ -115,30 +115,51 @@ view : Model -> Html Msg
 view model =
     -- TODO: もう少し分離する
     let
+        barThickness =
+            8
+
         railViewTop =
             0
 
+        railViewRight =
+            0
+
         railViewHeight =
-            model.splitBarPosition
+            model.viewport.height
+
+        railViewWidth =
+            model.viewport.width - model.splitBarPosition - barThickness / 2
 
         barTop =
-            model.splitBarPosition
+            0
+
+        barLeft =
+            model.splitBarPosition - barThickness / 2
+
+        barWidth =
+            barThickness
 
         barHeight =
-            8
+            model.viewport.height
 
         editorTop =
-            barTop + barHeight
+            0
+
+        editorLeft =
+            0
+
+        editorWidth =
+            model.splitBarPosition - barThickness / 2
 
         editorHeight =
-            model.viewport.height - editorTop - barHeight
+            model.viewport.height
     in
     Html.div []
         [ viewCanvas
-            { width = model.viewport.width
-            , height = model.splitBarPosition
-            , top = 0
-            , left = 0
+            { width = railViewWidth
+            , height = railViewHeight
+            , top = railViewTop
+            , right = railViewRight
             , onMouseDown = onMouseDownHandler model
             , onMouseUp = onMouseUpHandler model
             , onWheel = onWheelHandler model
@@ -155,9 +176,9 @@ view model =
                 else
                     "block"
             , style "position" "absolute"
-            , style "left" (px 0)
             , style "top" (px railViewTop)
-            , style "width" (px model.viewport.width)
+            , style "right" (px railViewRight)
+            , style "width" (px railViewWidth)
             , style "height" (px railViewHeight)
             , style "font-size" "1rem"
             , style "pointer-events" "none"
@@ -165,14 +186,16 @@ view model =
             , style "z-index" "100"
             ]
             [ Html.text <| Maybe.withDefault "" <| model.errMsg ]
+
+        -- bar
         , Html.div
             [ style "display" "block"
             , style "position" "absolute"
-            , style "left" (px 0)
             , style "top" (px barTop)
-            , style "cursor" "row-resize"
-            , style "width" (px model.viewport.width)
+            , style "left" (px barLeft)
+            , style "width" (px barWidth)
             , style "height" (px barHeight)
+            , style "cursor" "col-resize"
             , style "box-sizing" "border-box"
             , style "background-color" "lightgrey"
             , style "border-style" "outset"
@@ -181,17 +204,19 @@ view model =
             , onSplitBarDragBegin model
             ]
             []
+
+        -- editor
         , Html.textarea
             [ style "display" "block"
             , style "position" "absolute"
             , style "resize" "none"
             , style "top" (px editorTop)
-            , style "left" (px 0)
-            , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
+            , style "left" (px editorLeft)
+            , style "width" (px editorWidth)
             , style "height" (px editorHeight)
-            , style "margin" "3px"
-            , style "padding" "0"
-            , style "border" "solid 1px"
+            , style "margin" "0"
+            , style "padding" "0.5em"
+            , style "border" "none"
             , style "outline" "none"
             , style "font-family" "monospace"
             , style "font-size" "large"
@@ -207,7 +232,7 @@ view model =
 
 
 viewCanvas :
-    { left : Float
+    { right : Float
     , top : Float
     , width : Float
     , height : Float
@@ -220,7 +245,7 @@ viewCanvas :
     , transform : Mat4
     }
     -> Html msg
-viewCanvas { left, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, rails, piers, transform } =
+viewCanvas { right, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, rails, piers, transform } =
     WebGL.toHtmlWith
         [ WebGL.alpha True
         , WebGL.antialias
@@ -232,7 +257,7 @@ viewCanvas { left, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, 
         , HA.height (round (2.0 * height))
         , HA.style "display" "block"
         , HA.style "position" "absolute"
-        , HA.style "left" (left |> px)
+        , HA.style "right" (right |> px)
         , HA.style "top" (top |> px)
         , HA.style "width" (width |> px)
         , HA.style "height" (height |> px)
@@ -303,14 +328,14 @@ update msg model =
         SplitBarBeginDrag pos ->
             ( { model | splitBarDragState = Just pos }, Cmd.none )
 
-        SplitBarUpdateDrag ( _, y ) ->
+        SplitBarUpdateDrag ( x, _ ) ->
             let
                 splitBarPosition =
-                    clamp 100 1200 y
+                    clamp 100 (model.viewport.width - 100) x
             in
             ( { model
                 | splitBarPosition = splitBarPosition
-                , orbitControl = OC.updateViewport model.viewport.width splitBarPosition model.orbitControl
+                , orbitControl = OC.updateViewport (model.viewport.width - splitBarPosition - 4) model.viewport.height model.orbitControl
               }
             , Cmd.none
             )
@@ -323,11 +348,11 @@ updateViewport : Float -> Float -> Model -> Model
 updateViewport w h model =
     let
         splitBarPosition =
-            clamp 10 (h - 10) (h * 0.8)
+            clamp 10 (w - 10) (w * 0.3)
     in
     { model
         | viewport = { width = w, height = h }
-        , orbitControl = OC.updateViewport w splitBarPosition model.orbitControl
+        , orbitControl = OC.updateViewport (w - splitBarPosition - 4) h model.orbitControl
         , splitBarPosition = splitBarPosition
     }
 

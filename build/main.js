@@ -7382,7 +7382,6 @@ var $elm$html$Html$Attributes$autocomplete = function (bool) {
 		bool ? 'on' : 'off');
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
 var $elm$core$Basics$cos = _Basics_cos;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
@@ -7546,6 +7545,7 @@ var $author$project$Main$onWheelHandler = function (_v0) {
 			A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
 };
 var $elm$html$Html$pre = _VirtualDom_node('pre');
+var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Main$px = function (x) {
 	return $elm$core$String$fromFloat(x) + 'px';
 };
@@ -7975,7 +7975,7 @@ var $elm$html$Html$Attributes$width = function (n) {
 		$elm$core$String$fromInt(n));
 };
 var $author$project$Main$viewCanvas = function (_v0) {
-	var left = _v0.left;
+	var right = _v0.right;
 	var top = _v0.top;
 	var width = _v0.width;
 	var height = _v0.height;
@@ -8006,8 +8006,8 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 				A2(
 				$elm$html$Html$Attributes$style,
-				'left',
-				$author$project$Main$px(left)),
+				'right',
+				$author$project$Main$px(right)),
 				A2(
 				$elm$html$Html$Attributes$style,
 				'top',
@@ -8033,11 +8033,18 @@ var $author$project$Main$viewCanvas = function (_v0) {
 };
 var $author$project$Main$view = function (model) {
 	var railViewTop = 0;
-	var railViewHeight = model.splitBarPosition;
-	var barTop = model.splitBarPosition;
-	var barHeight = 8;
-	var editorTop = barTop + barHeight;
-	var editorHeight = (model.viewport.height - editorTop) - barHeight;
+	var railViewRight = 0;
+	var railViewHeight = model.viewport.height;
+	var editorTop = 0;
+	var editorLeft = 0;
+	var editorHeight = model.viewport.height;
+	var barTop = 0;
+	var barThickness = 8;
+	var barWidth = barThickness;
+	var editorWidth = model.splitBarPosition - (barThickness / 2);
+	var railViewWidth = (model.viewport.width - model.splitBarPosition) - (barThickness / 2);
+	var barLeft = model.splitBarPosition - (barThickness / 2);
+	var barHeight = model.viewport.height;
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
@@ -8045,17 +8052,17 @@ var $author$project$Main$view = function (model) {
 			[
 				$author$project$Main$viewCanvas(
 				{
-					height: model.splitBarPosition,
-					left: 0,
+					height: railViewHeight,
 					meshes: model.meshes,
 					onMouseDown: $author$project$Main$onMouseDownHandler(model),
 					onMouseUp: $author$project$Main$onMouseUpHandler(model),
 					onWheel: $author$project$Main$onWheelHandler(model),
 					piers: model.piers,
 					rails: model.rails,
-					top: 0,
+					right: railViewRight,
+					top: railViewTop,
 					transform: $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
-					width: model.viewport.width
+					width: railViewWidth
 				}),
 				A2(
 				$elm$html$Html$pre,
@@ -8068,16 +8075,16 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 						A2(
 						$elm$html$Html$Attributes$style,
-						'left',
-						$author$project$Main$px(0)),
-						A2(
-						$elm$html$Html$Attributes$style,
 						'top',
 						$author$project$Main$px(railViewTop)),
 						A2(
 						$elm$html$Html$Attributes$style,
+						'right',
+						$author$project$Main$px(railViewRight)),
+						A2(
+						$elm$html$Html$Attributes$style,
 						'width',
-						$author$project$Main$px(model.viewport.width)),
+						$author$project$Main$px(railViewWidth)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
@@ -8100,21 +8107,21 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 						A2(
 						$elm$html$Html$Attributes$style,
-						'left',
-						$author$project$Main$px(0)),
-						A2(
-						$elm$html$Html$Attributes$style,
 						'top',
 						$author$project$Main$px(barTop)),
-						A2($elm$html$Html$Attributes$style, 'cursor', 'row-resize'),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'left',
+						$author$project$Main$px(barLeft)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'width',
-						$author$project$Main$px(model.viewport.width)),
+						$author$project$Main$px(barWidth)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
 						$author$project$Main$px(barHeight)),
+						A2($elm$html$Html$Attributes$style, 'cursor', 'col-resize'),
 						A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
 						A2($elm$html$Html$Attributes$style, 'background-color', 'lightgrey'),
 						A2($elm$html$Html$Attributes$style, 'border-style', 'outset'),
@@ -8137,18 +8144,18 @@ var $author$project$Main$view = function (model) {
 						A2(
 						$elm$html$Html$Attributes$style,
 						'left',
-						$author$project$Main$px(0)),
+						$author$project$Main$px(editorLeft)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'width',
-						$elm$core$String$fromFloat(model.viewport.width - 8) + 'px'),
+						$author$project$Main$px(editorWidth)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
 						$author$project$Main$px(editorHeight)),
-						A2($elm$html$Html$Attributes$style, 'margin', '3px'),
-						A2($elm$html$Html$Attributes$style, 'padding', '0'),
-						A2($elm$html$Html$Attributes$style, 'border', 'solid 1px'),
+						A2($elm$html$Html$Attributes$style, 'margin', '0'),
+						A2($elm$html$Html$Attributes$style, 'padding', '0.5em'),
+						A2($elm$html$Html$Attributes$style, 'border', 'none'),
 						A2($elm$html$Html$Attributes$style, 'outline', 'none'),
 						A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
 						A2($elm$html$Html$Attributes$style, 'font-size', 'large'),
@@ -12045,7 +12052,7 @@ var $author$project$Main$init = function (flags) {
 			program: flags.program,
 			rails: execResult.rails,
 			splitBarDragState: $elm$core$Maybe$Nothing,
-			splitBarPosition: 1100.0,
+			splitBarPosition: 300.0,
 			viewport: {height: 0, width: 0}
 		},
 		$elm$core$Platform$Cmd$batch(
@@ -12786,11 +12793,11 @@ var $author$project$Graphics$OrbitControl$updateViewport = F3(
 	});
 var $author$project$Main$updateViewport = F3(
 	function (w, h, model) {
-		var splitBarPosition = A3($elm$core$Basics$clamp, 10, h - 10, h * 0.8);
+		var splitBarPosition = A3($elm$core$Basics$clamp, 10, w - 10, w * 0.3);
 		return _Utils_update(
 			model,
 			{
-				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, w, splitBarPosition, model.orbitControl),
+				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (w - splitBarPosition) - 4, h, model.orbitControl),
 				splitBarPosition: splitBarPosition,
 				viewport: {height: h, width: w}
 			});
@@ -12911,13 +12918,13 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'SplitBarUpdateDrag':
 				var _v2 = msg.a;
-				var y = _v2.b;
-				var splitBarPosition = A3($elm$core$Basics$clamp, 100, 1200, y);
+				var x = _v2.a;
+				var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, x);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, model.viewport.width, splitBarPosition, model.orbitControl),
+							orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (model.viewport.width - splitBarPosition) - 4, model.viewport.height, model.orbitControl),
 							splitBarPosition: splitBarPosition
 						}),
 					$elm$core$Platform$Cmd$none);
