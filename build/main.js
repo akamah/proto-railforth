@@ -8184,6 +8184,8 @@ var $elm$core$Basics$pi = _Basics_pi;
 var $elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * $elm$core$Basics$pi) / 180;
 };
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $author$project$Forth$Interpreter$executeDrop = F3(
 	function (cont, err, status) {
 		var _v0 = status.stack;
@@ -8287,8 +8289,6 @@ var $author$project$Forth$Interpreter$executeSwap = F3(
 			return A2(err, status, 'スタックに最低2つの要素がある必要があります');
 		}
 	});
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -10895,6 +10895,28 @@ var $author$project$Forth$Interpreter$executeComment = F3(
 			}
 		}
 	});
+var $author$project$Forth$Interpreter$executeLoad = F2(
+	function (toks, status) {
+		if (toks.b) {
+			var name = toks.a;
+			var restToks = toks.b;
+			var _v9 = A2($elm$core$Dict$get, name, status.savepoints);
+			if (_v9.$ === 'Just') {
+				var val = _v9.a;
+				var nextStatus = _Utils_update(
+					status,
+					{
+						savepoints: A2($elm$core$Dict$remove, name, status.savepoints),
+						stack: A2($elm$core$List$cons, val, status.stack)
+					});
+				return A2($author$project$Forth$Interpreter$executeRec, restToks, nextStatus);
+			} else {
+				return A2($author$project$Forth$Interpreter$haltWithError, status, 'セーブポイント (' + (name + ') が見つかりません'));
+			}
+		} else {
+			return A2($author$project$Forth$Interpreter$haltWithError, status, 'ロードする定数の名前を与えてください');
+		}
+	});
 var $author$project$Forth$Interpreter$executeRec = F2(
 	function (toks, status) {
 		if (!toks.b) {
@@ -10902,26 +10924,26 @@ var $author$project$Forth$Interpreter$executeRec = F2(
 		} else {
 			var t = toks.a;
 			var ts = toks.b;
-			var _v1 = A2(
+			var _v5 = A2(
 				$elm$core$Dict$get,
 				t,
 				$author$project$Forth$Interpreter$cyclic$controlWords());
-			if (_v1.$ === 'Just') {
-				var thread = _v1.a;
+			if (_v5.$ === 'Just') {
+				var thread = _v5.a;
 				return A2(thread, ts, status);
 			} else {
-				var _v2 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$coreGlossary);
-				if (_v2.$ === 'Just') {
-					var thread = _v2.a;
+				var _v6 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$coreGlossary);
+				if (_v6.$ === 'Just') {
+					var thread = _v6.a;
 					return A3(
 						thread,
 						$author$project$Forth$Interpreter$executeRec(ts),
 						$author$project$Forth$Interpreter$haltWithError,
 						status);
 				} else {
-					var _v3 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$railForthGlossary);
-					if (_v3.$ === 'Just') {
-						var thread = _v3.a;
+					var _v7 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$railForthGlossary);
+					if (_v7.$ === 'Just') {
+						var thread = _v7.a;
 						return A2(
 							thread,
 							$author$project$Forth$Interpreter$executeRec(ts),
@@ -10931,6 +10953,32 @@ var $author$project$Forth$Interpreter$executeRec = F2(
 					}
 				}
 			}
+		}
+	});
+var $author$project$Forth$Interpreter$executeSave = F2(
+	function (toks, status) {
+		var _v0 = _Utils_Tuple2(toks, status.stack);
+		if (_v0.a.b) {
+			if (_v0.b.b) {
+				var _v1 = _v0.a;
+				var name = _v1.a;
+				var restToks = _v1.b;
+				var _v2 = _v0.b;
+				var top = _v2.a;
+				var restOfStack = _v2.b;
+				var nextStatus = _Utils_update(
+					status,
+					{
+						savepoints: A3($elm$core$Dict$insert, name, top, status.savepoints),
+						stack: restOfStack
+					});
+				return A2($author$project$Forth$Interpreter$executeRec, restToks, nextStatus);
+			} else {
+				var _v3 = _v0.a;
+				return A2($author$project$Forth$Interpreter$haltWithError, status, '定義時のスタックが空です');
+			}
+		} else {
+			return A2($author$project$Forth$Interpreter$haltWithError, status, 'セーブする定数の名前を与えてください');
 		}
 	});
 function $author$project$Forth$Interpreter$cyclic$controlWords() {
@@ -10943,9 +10991,11 @@ function $author$project$Forth$Interpreter$cyclic$controlWords() {
 				_Utils_Tuple2(
 				')',
 				F2(
-					function (_v6, status) {
+					function (_v12, status) {
 						return A2($author$project$Forth$Interpreter$haltWithError, status, '余分なコメント終了文字 ) があります');
-					}))
+					})),
+				_Utils_Tuple2('save', $author$project$Forth$Interpreter$executeSave),
+				_Utils_Tuple2('load', $author$project$Forth$Interpreter$executeLoad)
 			]));
 }
 try {
@@ -10954,7 +11004,7 @@ try {
 		return $author$project$Forth$Interpreter$controlWords;
 	};
 } catch ($) {
-	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    controlWords\n  │     ↓\n  │    executeComment\n  │     ↓\n  │    executeRec\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    controlWords\n  │     ↓\n  │    executeComment\n  │     ↓\n  │    executeLoad\n  │     ↓\n  │    executeRec\n  │     ↓\n  │    executeSave\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $author$project$Forth$RailPiece$initialLocation = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$e, $author$project$Forth$Geometry$Joint$Plus);
 var $elm$core$String$words = _String_words;
 var $author$project$Forth$Interpreter$execute = function (src) {
@@ -10963,6 +11013,7 @@ var $author$project$Forth$Interpreter$execute = function (src) {
 	};
 	var initialStatus = {
 		global: {piers: _List_Nil, rails: _List_Nil},
+		savepoints: $elm$core$Dict$empty,
 		stack: _List_fromArray(
 			[$author$project$Forth$RailPiece$initialLocation])
 	};

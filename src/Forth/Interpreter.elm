@@ -21,6 +21,7 @@ type alias Word =
 type alias ForthStatus stack global =
     { stack : List stack
     , global : global
+    , savepoints : Dict Word stack
     }
 
 
@@ -62,6 +63,7 @@ execute src =
                 { rails = []
                 , piers = []
                 }
+            , savepoints = Dict.empty
             }
     in
     executeRec (tokenize src) initialStatus
@@ -95,6 +97,8 @@ controlWords =
     Dict.fromList
         [ ( "(", executeComment 1 )
         , ( ")", \_ status -> haltWithError status "余分なコメント終了文字 ) があります" )
+        , ( "save", executeSave )
+        , ( "load", executeLoad )
         ]
 
 
@@ -298,6 +302,52 @@ executeComment depth tok status =
 
                     _ ->
                         executeComment depth ts status
+
+
+{-| 現在の位置に名前をつけて保存する。
+-}
+executeSave : List Word -> ExecStatus -> ExecResult
+executeSave toks status =
+    case ( toks, status.stack ) of
+        ( name :: restToks, top :: restOfStack ) ->
+            let
+                nextStatus =
+                    { status
+                        | savepoints = Dict.insert name top status.savepoints
+                        , stack = restOfStack
+                    }
+            in
+            executeRec restToks nextStatus
+
+        ( _ :: _, _ ) ->
+            haltWithError status "定義時のスタックが空です"
+
+        _ ->
+            haltWithError status "セーブする定数の名前を与えてください"
+
+
+{-| 名前をつけて保存した位置をロードする。一度ロードすると消えてしまう
+-}
+executeLoad : List Word -> ExecStatus -> ExecResult
+executeLoad toks status =
+    case toks of
+        name :: restToks ->
+            case Dict.get name status.savepoints of
+                Just val ->
+                    let
+                        nextStatus =
+                            { status
+                                | savepoints = Dict.remove name status.savepoints
+                                , stack = val :: status.stack
+                            }
+                    in
+                    executeRec restToks nextStatus
+
+                Nothing ->
+                    haltWithError status ("セーブポイント (" ++ name ++ ") が見つかりません")
+
+        _ ->
+            haltWithError status "ロードする定数の名前を与えてください"
 
 
 executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
