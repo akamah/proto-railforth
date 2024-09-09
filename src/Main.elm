@@ -88,7 +88,7 @@ init flags =
       , piers = execResult.piers
       , errMsg = execResult.errMsg -- Just <| formatRailCount execResult.railCount
       , splitBarDragState = Nothing
-      , splitBarPosition = 1100.0
+      , splitBarPosition = 300.0
       }
     , Cmd.batch
         [ Task.perform SetViewport Browser.Dom.getViewport
@@ -115,30 +115,51 @@ view : Model -> Html Msg
 view model =
     -- TODO: もう少し分離する
     let
+        railViewHeight =
+            model.splitBarPosition
+
+        railViewWidth =
+            model.viewport.width
+
         railViewTop =
             0
 
-        railViewHeight =
-            model.splitBarPosition
+        railViewLeft =
+            0
+
+        barThickness =
+            8
+
+        barWidth =
+            model.viewport.width
+
+        barHeight =
+            barThickness
 
         barTop =
             model.splitBarPosition
 
-        barHeight =
-            8
+        barLeft =
+            0
 
         editorTop =
-            barTop + barHeight
+            barTop + barThickness
+
+        editorLeft =
+            0
+
+        editorWidth =
+            model.viewport.width - 8
 
         editorHeight =
-            model.viewport.height - editorTop - barHeight
+            model.viewport.height - editorTop - barThickness
     in
     Html.div []
         [ viewCanvas
-            { width = model.viewport.width
-            , height = model.splitBarPosition
-            , top = 0
-            , left = 0
+            { width = railViewWidth
+            , height = railViewHeight
+            , top = railViewTop
+            , left = railViewLeft
             , onMouseDown = onMouseDownHandler model
             , onMouseUp = onMouseUpHandler model
             , onWheel = onWheelHandler model
@@ -155,9 +176,9 @@ view model =
                 else
                     "block"
             , style "position" "absolute"
-            , style "left" (px 0)
             , style "top" (px railViewTop)
-            , style "width" (px model.viewport.width)
+            , style "left" (px railViewLeft)
+            , style "width" (px railViewWidth)
             , style "height" (px railViewHeight)
             , style "font-size" "1rem"
             , style "pointer-events" "none"
@@ -165,14 +186,16 @@ view model =
             , style "z-index" "100"
             ]
             [ Html.text <| Maybe.withDefault "" <| model.errMsg ]
+
+        -- bar
         , Html.div
             [ style "display" "block"
             , style "position" "absolute"
-            , style "left" (px 0)
             , style "top" (px barTop)
-            , style "cursor" "row-resize"
-            , style "width" (px model.viewport.width)
+            , style "left" (px barLeft)
+            , style "width" (px barWidth)
             , style "height" (px barHeight)
+            , style "cursor" "row-resize"
             , style "box-sizing" "border-box"
             , style "background-color" "lightgrey"
             , style "border-style" "outset"
@@ -181,13 +204,15 @@ view model =
             , onSplitBarDragBegin model
             ]
             []
+
+        -- editor
         , Html.textarea
             [ style "display" "block"
             , style "position" "absolute"
             , style "resize" "none"
             , style "top" (px editorTop)
-            , style "left" (px 0)
-            , style "width" (String.fromFloat (model.viewport.width - 8) ++ "px")
+            , style "left" (px editorLeft)
+            , style "width" (px editorWidth)
             , style "height" (px editorHeight)
             , style "margin" "3px"
             , style "padding" "0"

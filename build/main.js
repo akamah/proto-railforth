@@ -7382,7 +7382,6 @@ var $elm$html$Html$Attributes$autocomplete = function (bool) {
 		bool ? 'on' : 'off');
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
 var $elm$core$Basics$cos = _Basics_cos;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
@@ -7546,6 +7545,7 @@ var $author$project$Main$onWheelHandler = function (_v0) {
 			A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
 };
 var $elm$html$Html$pre = _VirtualDom_node('pre');
+var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Main$px = function (x) {
 	return $elm$core$String$fromFloat(x) + 'px';
 };
@@ -8032,12 +8032,19 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				])));
 };
 var $author$project$Main$view = function (model) {
+	var railViewWidth = model.viewport.width;
 	var railViewTop = 0;
+	var railViewLeft = 0;
 	var railViewHeight = model.splitBarPosition;
+	var editorWidth = model.viewport.width - 8;
+	var editorLeft = 0;
+	var barWidth = model.viewport.width;
 	var barTop = model.splitBarPosition;
-	var barHeight = 8;
-	var editorTop = barTop + barHeight;
-	var editorHeight = (model.viewport.height - editorTop) - barHeight;
+	var barThickness = 8;
+	var editorTop = barTop + barThickness;
+	var editorHeight = (model.viewport.height - editorTop) - barThickness;
+	var barLeft = 0;
+	var barHeight = barThickness;
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
@@ -8045,17 +8052,17 @@ var $author$project$Main$view = function (model) {
 			[
 				$author$project$Main$viewCanvas(
 				{
-					height: model.splitBarPosition,
-					left: 0,
+					height: railViewHeight,
+					left: railViewLeft,
 					meshes: model.meshes,
 					onMouseDown: $author$project$Main$onMouseDownHandler(model),
 					onMouseUp: $author$project$Main$onMouseUpHandler(model),
 					onWheel: $author$project$Main$onWheelHandler(model),
 					piers: model.piers,
 					rails: model.rails,
-					top: 0,
+					top: railViewTop,
 					transform: $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
-					width: model.viewport.width
+					width: railViewWidth
 				}),
 				A2(
 				$elm$html$Html$pre,
@@ -8068,16 +8075,16 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 						A2(
 						$elm$html$Html$Attributes$style,
-						'left',
-						$author$project$Main$px(0)),
-						A2(
-						$elm$html$Html$Attributes$style,
 						'top',
 						$author$project$Main$px(railViewTop)),
 						A2(
 						$elm$html$Html$Attributes$style,
+						'left',
+						$author$project$Main$px(railViewLeft)),
+						A2(
+						$elm$html$Html$Attributes$style,
 						'width',
-						$author$project$Main$px(model.viewport.width)),
+						$author$project$Main$px(railViewWidth)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
@@ -8100,21 +8107,21 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 						A2(
 						$elm$html$Html$Attributes$style,
-						'left',
-						$author$project$Main$px(0)),
-						A2(
-						$elm$html$Html$Attributes$style,
 						'top',
 						$author$project$Main$px(barTop)),
-						A2($elm$html$Html$Attributes$style, 'cursor', 'row-resize'),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'left',
+						$author$project$Main$px(barLeft)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'width',
-						$author$project$Main$px(model.viewport.width)),
+						$author$project$Main$px(barWidth)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
 						$author$project$Main$px(barHeight)),
+						A2($elm$html$Html$Attributes$style, 'cursor', 'row-resize'),
 						A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
 						A2($elm$html$Html$Attributes$style, 'background-color', 'lightgrey'),
 						A2($elm$html$Html$Attributes$style, 'border-style', 'outset'),
@@ -8137,11 +8144,11 @@ var $author$project$Main$view = function (model) {
 						A2(
 						$elm$html$Html$Attributes$style,
 						'left',
-						$author$project$Main$px(0)),
+						$author$project$Main$px(editorLeft)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'width',
-						$elm$core$String$fromFloat(model.viewport.width - 8) + 'px'),
+						$author$project$Main$px(editorWidth)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'height',
@@ -12045,7 +12052,7 @@ var $author$project$Main$init = function (flags) {
 			program: flags.program,
 			rails: execResult.rails,
 			splitBarDragState: $elm$core$Maybe$Nothing,
-			splitBarPosition: 1100.0,
+			splitBarPosition: 300.0,
 			viewport: {height: 0, width: 0}
 		},
 		$elm$core$Platform$Cmd$batch(
