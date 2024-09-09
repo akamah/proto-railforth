@@ -12,6 +12,10 @@ import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailPlacement exposing (RailPlacement)
 
 
+type alias Word =
+    String
+
+
 {-| Forthの状態。スタックがあり、そのほか余計な情報がある。
 -}
 type alias ForthStatus stack global =
@@ -41,16 +45,13 @@ type alias ExecResult =
     , piers : List PierPlacement
     , errMsg : Maybe String
     , railCount : Dict String Int
-
-    -- hukusen piers
-    -- statistics :: count of rails...
     }
 
 
 execute : String -> ExecResult
 execute src =
     let
-        tokenize : String -> List String
+        tokenize : String -> List Word
         tokenize string =
             String.words string
 
@@ -75,7 +76,7 @@ type alias CoreWord result stack global =
     -> result
 
 
-coreGlossary : Dict String (CoreWord result stack global)
+coreGlossary : Dict Word (CoreWord result stack global)
 coreGlossary =
     Dict.fromList
         [ ( "", \cont _ status -> cont status {- do nothing -} )
@@ -89,7 +90,7 @@ coreGlossary =
 
 
 {-| -}
-controlWords : Dict String (List String -> ExecStatus -> ExecResult)
+controlWords : Dict Word (List Word -> ExecStatus -> ExecResult)
 controlWords =
     Dict.fromList
         [ ( "(", executeComment 1 )
@@ -97,7 +98,7 @@ controlWords =
         ]
 
 
-railForthGlossary : Dict String ((ExecStatus -> ExecResult) -> ExecStatus -> ExecResult)
+railForthGlossary : Dict Word ((ExecStatus -> ExecResult) -> ExecStatus -> ExecResult)
 railForthGlossary =
     Dict.fromList
         [ ( "q", executePlaceRail (Straight1 ()) 0 )
@@ -173,7 +174,7 @@ railForthGlossary =
         ]
 
 
-executeRec : List String -> ExecStatus -> ExecResult
+executeRec : List Word -> ExecStatus -> ExecResult
 executeRec toks status =
     case toks of
         [] ->
@@ -277,7 +278,7 @@ executeNip cont err status =
             err status "スタックに最低2つの要素がある必要があります"
 
 
-executeComment : Int -> List String -> ExecStatus -> ExecResult
+executeComment : Int -> List Word -> ExecStatus -> ExecResult
 executeComment depth tok status =
     if depth <= 0 then
         executeRec tok status
