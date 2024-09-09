@@ -7975,7 +7975,7 @@ var $elm$html$Html$Attributes$width = function (n) {
 		$elm$core$String$fromInt(n));
 };
 var $author$project$Main$viewCanvas = function (_v0) {
-	var left = _v0.left;
+	var right = _v0.right;
 	var top = _v0.top;
 	var width = _v0.width;
 	var height = _v0.height;
@@ -8006,8 +8006,8 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 				A2(
 				$elm$html$Html$Attributes$style,
-				'left',
-				$author$project$Main$px(left)),
+				'right',
+				$author$project$Main$px(right)),
 				A2(
 				$elm$html$Html$Attributes$style,
 				'top',
@@ -8032,19 +8032,19 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				])));
 };
 var $author$project$Main$view = function (model) {
-	var railViewWidth = model.viewport.width;
 	var railViewTop = 0;
-	var railViewLeft = 0;
-	var railViewHeight = model.splitBarPosition;
-	var editorWidth = model.viewport.width - 8;
+	var railViewRight = 0;
+	var railViewHeight = model.viewport.height;
+	var editorTop = 0;
 	var editorLeft = 0;
-	var barWidth = model.viewport.width;
-	var barTop = model.splitBarPosition;
+	var editorHeight = model.viewport.height;
+	var barTop = 0;
 	var barThickness = 8;
-	var editorTop = barTop + barThickness;
-	var editorHeight = (model.viewport.height - editorTop) - barThickness;
-	var barLeft = 0;
-	var barHeight = barThickness;
+	var barWidth = barThickness;
+	var editorWidth = model.splitBarPosition - (barThickness / 2);
+	var railViewWidth = (model.viewport.width - model.splitBarPosition) - (barThickness / 2);
+	var barLeft = model.splitBarPosition - (barThickness / 2);
+	var barHeight = model.viewport.height;
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
@@ -8053,13 +8053,13 @@ var $author$project$Main$view = function (model) {
 				$author$project$Main$viewCanvas(
 				{
 					height: railViewHeight,
-					left: railViewLeft,
 					meshes: model.meshes,
 					onMouseDown: $author$project$Main$onMouseDownHandler(model),
 					onMouseUp: $author$project$Main$onMouseUpHandler(model),
 					onWheel: $author$project$Main$onWheelHandler(model),
 					piers: model.piers,
 					rails: model.rails,
+					right: railViewRight,
 					top: railViewTop,
 					transform: $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
 					width: railViewWidth
@@ -8079,8 +8079,8 @@ var $author$project$Main$view = function (model) {
 						$author$project$Main$px(railViewTop)),
 						A2(
 						$elm$html$Html$Attributes$style,
-						'left',
-						$author$project$Main$px(railViewLeft)),
+						'right',
+						$author$project$Main$px(railViewRight)),
 						A2(
 						$elm$html$Html$Attributes$style,
 						'width',
@@ -8121,7 +8121,7 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$Attributes$style,
 						'height',
 						$author$project$Main$px(barHeight)),
-						A2($elm$html$Html$Attributes$style, 'cursor', 'row-resize'),
+						A2($elm$html$Html$Attributes$style, 'cursor', 'col-resize'),
 						A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
 						A2($elm$html$Html$Attributes$style, 'background-color', 'lightgrey'),
 						A2($elm$html$Html$Attributes$style, 'border-style', 'outset'),
@@ -8153,9 +8153,9 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$Attributes$style,
 						'height',
 						$author$project$Main$px(editorHeight)),
-						A2($elm$html$Html$Attributes$style, 'margin', '3px'),
-						A2($elm$html$Html$Attributes$style, 'padding', '0'),
-						A2($elm$html$Html$Attributes$style, 'border', 'solid 1px'),
+						A2($elm$html$Html$Attributes$style, 'margin', '0'),
+						A2($elm$html$Html$Attributes$style, 'padding', '0.5em'),
+						A2($elm$html$Html$Attributes$style, 'border', 'none'),
 						A2($elm$html$Html$Attributes$style, 'outline', 'none'),
 						A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
 						A2($elm$html$Html$Attributes$style, 'font-size', 'large'),
@@ -12793,11 +12793,11 @@ var $author$project$Graphics$OrbitControl$updateViewport = F3(
 	});
 var $author$project$Main$updateViewport = F3(
 	function (w, h, model) {
-		var splitBarPosition = A3($elm$core$Basics$clamp, 10, h - 10, h * 0.8);
+		var splitBarPosition = A3($elm$core$Basics$clamp, 10, w - 10, w * 0.3);
 		return _Utils_update(
 			model,
 			{
-				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, w, splitBarPosition, model.orbitControl),
+				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (w - splitBarPosition) - 4, h, model.orbitControl),
 				splitBarPosition: splitBarPosition,
 				viewport: {height: h, width: w}
 			});
@@ -12918,13 +12918,13 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'SplitBarUpdateDrag':
 				var _v2 = msg.a;
-				var y = _v2.b;
-				var splitBarPosition = A3($elm$core$Basics$clamp, 100, 1200, y);
+				var x = _v2.a;
+				var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, x);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, model.viewport.width, splitBarPosition, model.orbitControl),
+							orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (model.viewport.width - splitBarPosition) - 4, model.viewport.height, model.orbitControl),
 							splitBarPosition: splitBarPosition
 						}),
 					$elm$core$Platform$Cmd$none);

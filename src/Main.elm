@@ -115,51 +115,51 @@ view : Model -> Html Msg
 view model =
     -- TODO: もう少し分離する
     let
-        railViewHeight =
-            model.splitBarPosition
-
-        railViewWidth =
-            model.viewport.width
+        barThickness =
+            8
 
         railViewTop =
             0
 
-        railViewLeft =
+        railViewRight =
             0
 
-        barThickness =
-            8
+        railViewHeight =
+            model.viewport.height
 
-        barWidth =
-            model.viewport.width
-
-        barHeight =
-            barThickness
+        railViewWidth =
+            model.viewport.width - model.splitBarPosition - barThickness / 2
 
         barTop =
-            model.splitBarPosition
-
-        barLeft =
             0
 
+        barLeft =
+            model.splitBarPosition - barThickness / 2
+
+        barWidth =
+            barThickness
+
+        barHeight =
+            model.viewport.height
+
         editorTop =
-            barTop + barThickness
+            0
 
         editorLeft =
             0
 
         editorWidth =
-            model.viewport.width - 8
+            model.splitBarPosition - barThickness / 2
 
         editorHeight =
-            model.viewport.height - editorTop - barThickness
+            model.viewport.height
     in
     Html.div []
         [ viewCanvas
             { width = railViewWidth
             , height = railViewHeight
             , top = railViewTop
-            , left = railViewLeft
+            , right = railViewRight
             , onMouseDown = onMouseDownHandler model
             , onMouseUp = onMouseUpHandler model
             , onWheel = onWheelHandler model
@@ -177,7 +177,7 @@ view model =
                     "block"
             , style "position" "absolute"
             , style "top" (px railViewTop)
-            , style "left" (px railViewLeft)
+            , style "right" (px railViewRight)
             , style "width" (px railViewWidth)
             , style "height" (px railViewHeight)
             , style "font-size" "1rem"
@@ -195,7 +195,7 @@ view model =
             , style "left" (px barLeft)
             , style "width" (px barWidth)
             , style "height" (px barHeight)
-            , style "cursor" "row-resize"
+            , style "cursor" "col-resize"
             , style "box-sizing" "border-box"
             , style "background-color" "lightgrey"
             , style "border-style" "outset"
@@ -214,9 +214,9 @@ view model =
             , style "left" (px editorLeft)
             , style "width" (px editorWidth)
             , style "height" (px editorHeight)
-            , style "margin" "3px"
-            , style "padding" "0"
-            , style "border" "solid 1px"
+            , style "margin" "0"
+            , style "padding" "0.5em"
+            , style "border" "none"
             , style "outline" "none"
             , style "font-family" "monospace"
             , style "font-size" "large"
@@ -232,7 +232,7 @@ view model =
 
 
 viewCanvas :
-    { left : Float
+    { right : Float
     , top : Float
     , width : Float
     , height : Float
@@ -245,7 +245,7 @@ viewCanvas :
     , transform : Mat4
     }
     -> Html msg
-viewCanvas { left, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, rails, piers, transform } =
+viewCanvas { right, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, rails, piers, transform } =
     WebGL.toHtmlWith
         [ WebGL.alpha True
         , WebGL.antialias
@@ -257,7 +257,7 @@ viewCanvas { left, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, 
         , HA.height (round (2.0 * height))
         , HA.style "display" "block"
         , HA.style "position" "absolute"
-        , HA.style "left" (left |> px)
+        , HA.style "right" (right |> px)
         , HA.style "top" (top |> px)
         , HA.style "width" (width |> px)
         , HA.style "height" (height |> px)
@@ -328,14 +328,14 @@ update msg model =
         SplitBarBeginDrag pos ->
             ( { model | splitBarDragState = Just pos }, Cmd.none )
 
-        SplitBarUpdateDrag ( _, y ) ->
+        SplitBarUpdateDrag ( x, _ ) ->
             let
                 splitBarPosition =
-                    clamp 100 1200 y
+                    clamp 100 (model.viewport.width - 100) x
             in
             ( { model
                 | splitBarPosition = splitBarPosition
-                , orbitControl = OC.updateViewport model.viewport.width splitBarPosition model.orbitControl
+                , orbitControl = OC.updateViewport (model.viewport.width - splitBarPosition - 4) model.viewport.height model.orbitControl
               }
             , Cmd.none
             )
@@ -348,11 +348,11 @@ updateViewport : Float -> Float -> Model -> Model
 updateViewport w h model =
     let
         splitBarPosition =
-            clamp 10 (h - 10) (h * 0.8)
+            clamp 10 (w - 10) (w * 0.3)
     in
     { model
         | viewport = { width = w, height = h }
-        , orbitControl = OC.updateViewport w splitBarPosition model.orbitControl
+        , orbitControl = OC.updateViewport (w - splitBarPosition - 4) h model.orbitControl
         , splitBarPosition = splitBarPosition
     }
 
