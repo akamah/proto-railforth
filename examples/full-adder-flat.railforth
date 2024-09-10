@@ -1,29 +1,6 @@
-<!DOCTYPE HTML>
-<html lang="ja">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>Railforth Prototype</title>
-  <script src="./build/main.js"></script>
-</head>
-
-<body>
-  <script>
-    const storage = window.localStorage;
-    let program = "";
-    if (storage) {
-      program = storage.getItem("program") || `(
-操作：
-ドラッグ / スワイプ → 回転
-Shift+ドラッグ / 二本指スワイプ → 移動
-マウスホイール / ピンチ操作 → 拡大縮小
-
-プラレール全加算器 flat ver.
-これはプラレールで全加算器を実現するレイアウトの定義ファイルです。
-2024/10/26 に OSC 2024 Tokyo/Fall にて展示します。
-
-なお、ライセンスは MIT ライセンスで提供されます。
+(
+* 2024/09/10 プラレール全加算器 flat ver. 
+* 本プログラムはMITライセンスで提供されます。末尾のライセンス表示をご覧下さい。
 )
 
 ( 最初は凹側から始めるため逆転させる )
@@ -213,22 +190,3 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 )  
-`      ;
-    }
-
-    var app = Elm.Main.init({
-      flags: {
-        program: program
-      }
-    });
-
-    app.ports.save.subscribe(function (program) {
-      const storage = window.localStorage;
-      if (storage) {
-        storage.setItem("program", program);
-      }
-    });
-  </script>
-</body>
-
-</html>
