@@ -9610,6 +9610,41 @@ var $author$project$Forth$Interpreter$executeAscend = F3(
 					}));
 		}
 	});
+var $author$project$Forth$Geometry$Joint$Minus = {$: 'Minus'};
+var $author$project$Forth$Geometry$Joint$Plus = {$: 'Plus'};
+var $author$project$Forth$Geometry$Joint$invert = function (p) {
+	if (p.$ === 'Plus') {
+		return $author$project$Forth$Geometry$Joint$Minus;
+	} else {
+		return $author$project$Forth$Geometry$Joint$Plus;
+	}
+};
+var $author$project$Forth$Geometry$RailLocation$invertJoint = function (loc) {
+	return _Utils_update(
+		loc,
+		{
+			joint: $author$project$Forth$Geometry$Joint$invert(loc.joint)
+		});
+};
+var $author$project$Forth$Interpreter$executeInvert = F2(
+	function (cont, status) {
+		var _v0 = status.stack;
+		if (!_v0.b) {
+			return A2($author$project$Forth$Interpreter$haltWithError, status, 'スタックが空です');
+		} else {
+			var top = _v0.a;
+			var restOfStack = _v0.b;
+			return cont(
+				_Utils_update(
+					status,
+					{
+						stack: A2(
+							$elm$core$List$cons,
+							$author$project$Forth$Geometry$RailLocation$invertJoint(top),
+							restOfStack)
+					}));
+		}
+	});
 var $author$project$Types$Rail$Inverted = {$: 'Inverted'};
 var $author$project$Types$Rail$NotInverted = {$: 'NotInverted'};
 var $elm$core$Basics$always = F2(
@@ -9745,12 +9780,10 @@ var $author$project$Types$Rail$canInvert = function (rail) {
 			$elm$core$Basics$always(false),
 			rail));
 };
-var $author$project$Forth$Geometry$Joint$Minus = {$: 'Minus'};
 var $mgold$elm_nonempty_list$List$Nonempty$Nonempty = F2(
 	function (a, b) {
 		return {$: 'Nonempty', a: a, b: b};
 	});
-var $author$project$Forth$Geometry$Joint$Plus = {$: 'Plus'};
 var $author$project$Forth$Geometry$RailLocation$make = F5(
 	function (single, _double, height, dir, joint) {
 		return {
@@ -9905,20 +9938,6 @@ var $author$project$Forth$RailPiece$goStraightPlus = function (x) {
 		0,
 		$author$project$Forth$Geometry$Dir$e,
 		$author$project$Forth$Geometry$Joint$Plus);
-};
-var $author$project$Forth$Geometry$Joint$invert = function (p) {
-	if (p.$ === 'Plus') {
-		return $author$project$Forth$Geometry$Joint$Minus;
-	} else {
-		return $author$project$Forth$Geometry$Joint$Plus;
-	}
-};
-var $author$project$Forth$Geometry$RailLocation$invertJoint = function (loc) {
-	return _Utils_update(
-		loc,
-		{
-			joint: $author$project$Forth$Geometry$Joint$invert(loc.joint)
-		});
 };
 var $author$project$Forth$RailPiece$invert = F2(
 	function (inverted, piece) {
@@ -10858,7 +10877,8 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 				0)),
 			_Utils_Tuple2(
 			'ascend',
-			$author$project$Forth$Interpreter$executeAscend(4))
+			$author$project$Forth$Interpreter$executeAscend(4)),
+			_Utils_Tuple2('invert', $author$project$Forth$Interpreter$executeInvert)
 		]));
 var $author$project$Forth$Interpreter$executeComment = F3(
 	function (depth, tok, status) {
