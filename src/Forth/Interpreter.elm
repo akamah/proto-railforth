@@ -175,6 +175,7 @@ railForthGlossary =
         , ( "fw", executePlaceRail (Forward ()) 0 )
         , ( "bk", executePlaceRail (Backward ()) 0 )
         , ( "ascend", executeAscend 4 )
+        , ( "invert", executeInvert )
         ]
 
 
@@ -380,3 +381,13 @@ executeAscend amount cont status =
 
         top :: restOfStack ->
             cont { status | stack = RailLocation.addHeight amount top :: restOfStack }
+
+
+executeInvert : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executeInvert cont status =
+    case status.stack of
+        [] ->
+            haltWithError status "スタックが空です"
+
+        top :: restOfStack ->
+            cont { status | stack = RailLocation.invertJoint top :: restOfStack }
