@@ -7392,7 +7392,7 @@ var $elm$core$Basics$negate = function (n) {
 };
 var $elm$core$Basics$sin = _Basics_sin;
 var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
-var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
+var $author$project$Graphics$OrbitControlImpl$makeTransform = function (_v0) {
 	var model = _v0.a;
 	var w = (model.scale * model.viewportWidth) / 2;
 	var upVector = A3(
@@ -7416,6 +7416,10 @@ var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
 			A2($elm_explorations$linear_algebra$Math$Vector3$add, model.target, eyePosition),
 			model.target,
 			upVector));
+};
+var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
+	var model = _v0.a;
+	return $author$project$Graphics$OrbitControlImpl$makeTransform(model.ocImpl);
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -11055,10 +11059,21 @@ var $author$project$Graphics$MeshLoader$init = {errors: _List_Nil, meshes: $elm$
 var $author$project$Graphics$OrbitControl$Model = function (a) {
 	return {$: 'Model', a: a};
 };
+var $author$project$Graphics$OrbitControlImpl$Model = function (a) {
+	return {$: 'Model', a: a};
+};
+var $author$project$Graphics$OrbitControlImpl$init = F4(
+	function (azimuth, altitude, scale, eyeTarget) {
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			{altitude: altitude, azimuth: azimuth, scale: scale, target: eyeTarget, viewportHeight: 0, viewportWidth: 0});
+	});
 var $author$project$Graphics$OrbitControl$init = F4(
 	function (azimuth, altitude, scale, eyeTarget) {
 		return $author$project$Graphics$OrbitControl$Model(
-			{altitude: altitude, azimuth: azimuth, draggingState: $elm$core$Maybe$Nothing, scale: scale, target: eyeTarget, viewportHeight: 0, viewportWidth: 0});
+			{
+				draggingState: $elm$core$Maybe$Nothing,
+				ocImpl: A4($author$project$Graphics$OrbitControlImpl$init, azimuth, altitude, scale, eyeTarget)
+			});
 	});
 var $author$project$Graphics$MeshLoader$LoadMesh = F2(
 	function (a, b) {
@@ -12718,12 +12733,13 @@ var $author$project$Graphics$OrbitControl$updateMouseDownWithShift = F2(
 				}));
 	});
 var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
-var $author$project$Graphics$OrbitControl$doPanning = F4(
-	function (model, newState, _v0, _v1) {
-		var x0 = _v0.a;
-		var y0 = _v0.b;
-		var x = _v1.a;
-		var y = _v1.b;
+var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
+	function (_v0, _v1, _v2) {
+		var model = _v0.a;
+		var x0 = _v1.a;
+		var y0 = _v1.b;
+		var x = _v2.a;
+		var y = _v2.b;
 		var sb = $elm$core$Basics$sin(model.altitude);
 		var sa = $elm$core$Basics$sin(model.azimuth);
 		var os = model.scale;
@@ -12743,16 +12759,18 @@ var $author$project$Graphics$OrbitControl$doPanning = F4(
 			$elm_explorations$linear_algebra$Math$Vector3$add,
 			model.target,
 			A2($elm_explorations$linear_algebra$Math$Vector3$add, tanx, tany));
-		return _Utils_update(
-			model,
-			{draggingState: newState, target: trans});
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{target: trans}));
 	});
-var $author$project$Graphics$OrbitControl$doRotation = F4(
-	function (model, newState, _v0, _v1) {
-		var x0 = _v0.a;
-		var y0 = _v0.b;
-		var x = _v1.a;
-		var y = _v1.b;
+var $author$project$Graphics$OrbitControlImpl$doRotation = F3(
+	function (_v0, _v1, _v2) {
+		var model = _v0.a;
+		var x0 = _v1.a;
+		var y0 = _v1.b;
+		var x = _v2.a;
+		var y = _v2.b;
 		var dy = y - y0;
 		var dx = x - x0;
 		var azimuth = model.azimuth - (dx * $elm$core$Basics$degrees(0.3));
@@ -12761,9 +12779,10 @@ var $author$project$Graphics$OrbitControl$doRotation = F4(
 			$elm$core$Basics$degrees(0),
 			$elm$core$Basics$degrees(90),
 			model.altitude - (dy * $elm$core$Basics$degrees(0.3)));
-		return _Utils_update(
-			model,
-			{altitude: altitude, azimuth: azimuth, draggingState: newState});
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{altitude: altitude, azimuth: azimuth}));
 	});
 var $author$project$Graphics$OrbitControl$updateMouseMove = F2(
 	function (_v0, newPoint) {
@@ -12775,23 +12794,19 @@ var $author$project$Graphics$OrbitControl$updateMouseMove = F2(
 			if (_v1.a.$ === 'Rotating') {
 				var oldPoint = _v1.a.a;
 				return $author$project$Graphics$OrbitControl$Model(
-					A4(
-						$author$project$Graphics$OrbitControl$doRotation,
-						model,
-						$elm$core$Maybe$Just(
+					{
+						draggingState: $elm$core$Maybe$Just(
 							$author$project$Graphics$OrbitControl$Rotating(newPoint)),
-						oldPoint,
-						newPoint));
+						ocImpl: A3($author$project$Graphics$OrbitControlImpl$doRotation, model.ocImpl, oldPoint, newPoint)
+					});
 			} else {
 				var oldPoint = _v1.a.a;
 				return $author$project$Graphics$OrbitControl$Model(
-					A4(
-						$author$project$Graphics$OrbitControl$doPanning,
-						model,
-						$elm$core$Maybe$Just(
+					{
+						draggingState: $elm$core$Maybe$Just(
 							$author$project$Graphics$OrbitControl$Panning(newPoint)),
-						oldPoint,
-						newPoint));
+						ocImpl: A3($author$project$Graphics$OrbitControlImpl$doPanning, model.ocImpl, oldPoint, newPoint)
+					});
 			}
 		}
 	});
@@ -12803,13 +12818,23 @@ var $author$project$Graphics$OrbitControl$updateMouseUp = F2(
 				model,
 				{draggingState: $elm$core$Maybe$Nothing}));
 	});
+var $author$project$Graphics$OrbitControlImpl$updateViewport = F3(
+	function (_v0, w, h) {
+		var model = _v0.a;
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{viewportHeight: h, viewportWidth: w}));
+	});
 var $author$project$Graphics$OrbitControl$updateViewport = F3(
 	function (w, h, _v0) {
 		var model = _v0.a;
 		return $author$project$Graphics$OrbitControl$Model(
 			_Utils_update(
 				model,
-				{viewportHeight: h, viewportWidth: w}));
+				{
+					ocImpl: A3($author$project$Graphics$OrbitControlImpl$updateViewport, model.ocImpl, w, h)
+				}));
 	});
 var $author$project$Main$updateViewport = F3(
 	function (w, h, model) {
@@ -12822,21 +12847,27 @@ var $author$project$Main$updateViewport = F3(
 				viewport: {height: h, width: w}
 			});
 	});
-var $author$project$Graphics$OrbitControl$doDolly = F2(
-	function (model, dy) {
+var $author$project$Graphics$OrbitControlImpl$doDolly = F2(
+	function (_v0, dy) {
+		var model = _v0.a;
 		var multiplier = 1.02;
 		var delta = (dy < 0) ? (1 / multiplier) : ((dy > 0) ? (1 * multiplier) : 1);
 		var next = model.scale * delta;
-		return _Utils_update(
-			model,
-			{scale: next});
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{scale: next}));
 	});
 var $author$project$Graphics$OrbitControl$updateWheel = F2(
 	function (_v0, _v1) {
 		var model = _v0.a;
 		var dy = _v1.b;
 		return $author$project$Graphics$OrbitControl$Model(
-			A2($author$project$Graphics$OrbitControl$doDolly, model, dy));
+			_Utils_update(
+				model,
+				{
+					ocImpl: A2($author$project$Graphics$OrbitControlImpl$doDolly, model.ocImpl, dy)
+				}));
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
