@@ -7534,6 +7534,26 @@ var $elm$html$Html$Attributes$height = function (n) {
 		'height',
 		$elm$core$String$fromInt(n));
 };
+var $author$project$Main$ContextMenu = {$: 'ContextMenu'};
+var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
+	function (a) {
+		return _Utils_Tuple2(a, true);
+	});
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $author$project$Main$onContextMenuHandler = A2(
+	$elm$html$Html$Events$preventDefaultOn,
+	'contextmenu',
+	$author$project$Main$preventDefaultDecoder(
+		$elm$json$Json$Decode$succeed($author$project$Main$ContextMenu)));
 var $author$project$Main$PointerDown = function (a) {
 	return {$: 'PointerDown', a: a};
 };
@@ -7574,20 +7594,6 @@ var $author$project$Main$onPointerUpHandler = A2(
 var $author$project$Main$Wheel = function (a) {
 	return {$: 'Wheel', a: a};
 };
-var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
-	function (a) {
-		return _Utils_Tuple2(a, true);
-	});
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
 var $author$project$Main$wheelEventDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	F2(
@@ -8027,7 +8033,8 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				$author$project$Main$onWheelHandler,
 				$author$project$Main$onPointerDownHandler,
 				$author$project$Main$onPointerMoveHandler,
-				$author$project$Main$onPointerUpHandler
+				$author$project$Main$onPointerUpHandler,
+				$author$project$Main$onContextMenuHandler
 			]),
 		$elm$core$List$concat(
 			_List_fromArray(
@@ -12432,6 +12439,7 @@ var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
 var $author$project$PointerEvent$setPointerCaptureImpl = _Platform_outgoingPort('setPointerCaptureImpl', $elm$core$Basics$identity);
@@ -12635,7 +12643,6 @@ var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 	});
 var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
 	{elemSize: 1, indexSize: 3, mode: 4});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Graphics$MeshLoader$update = F2(
 	function (msg, model) {
 		var name = msg.a;
@@ -12884,6 +12891,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'Wheel':
 				var pos = msg.a;
+				var _v1 = A2($elm$core$Debug$log, 'wheel', pos);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -12891,6 +12899,8 @@ var $author$project$Main$update = F2(
 							orbitControl: A2($author$project$Graphics$OrbitControl$updateWheel, model.orbitControl, pos)
 						}),
 					$elm$core$Platform$Cmd$none);
+			case 'ContextMenu':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'SetViewport':
 				var viewport = msg.a;
 				return _Utils_Tuple2(
@@ -12907,13 +12917,13 @@ var $author$project$Main$update = F2(
 				var execResult = $author$project$Forth$execute(program);
 				return _Utils_Tuple2(
 					function () {
-						var _v1 = execResult.errMsg;
-						if (_v1.$ === 'Nothing') {
+						var _v2 = execResult.errMsg;
+						if (_v2.$ === 'Nothing') {
 							return _Utils_update(
 								model,
 								{errMsg: $elm$core$Maybe$Nothing, piers: execResult.piers, program: program, rails: execResult.rails});
 						} else {
-							var errMsg = _v1.a;
+							var errMsg = _v2.a;
 							return _Utils_update(
 								model,
 								{
@@ -12933,8 +12943,8 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SplitBarUpdateDrag':
-				var _v2 = msg.a;
-				var x = _v2.a;
+				var _v3 = msg.a;
+				var x = _v3.a;
 				var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, x);
 				return _Utils_Tuple2(
 					_Utils_update(

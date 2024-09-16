@@ -27,6 +27,7 @@ type Msg
     | PointerMove PE.PointerEvent
     | PointerUp PE.PointerEvent
     | Wheel ( Float, Float )
+    | ContextMenu
     | SetViewport Browser.Dom.Viewport
     | Resize Float Float
     | UpdateScript String
@@ -259,6 +260,7 @@ viewCanvas { right, top, width, height, meshes, rails, piers, transform } =
         , onPointerDownHandler
         , onPointerMoveHandler
         , onPointerUpHandler
+        , onContextMenuHandler
         ]
     <|
         List.concat
@@ -286,7 +288,14 @@ update msg model =
             ( { model | orbitControl = OC.updateMouseUp model.orbitControl }, Cmd.none )
 
         Wheel pos ->
+            let
+                _ =
+                    Debug.log "wheel" pos
+            in
             ( { model | orbitControl = OC.updateWheel model.orbitControl pos }, Cmd.none )
+
+        ContextMenu ->
+            ( model, Cmd.none )
 
         SetViewport viewport ->
             ( updateViewport viewport.viewport.width
@@ -399,6 +408,12 @@ onWheelHandler : Html.Attribute Msg
 onWheelHandler =
     HE.preventDefaultOn "wheel"
         (Decode.map Wheel wheelEventDecoder |> preventDefaultDecoder)
+
+
+onContextMenuHandler : Html.Attribute Msg
+onContextMenuHandler =
+    HE.preventDefaultOn "contextmenu"
+        (Decode.succeed ContextMenu |> preventDefaultDecoder)
 
 
 subscriptions : Model -> Sub Msg
