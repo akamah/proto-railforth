@@ -7455,13 +7455,9 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $author$project$Main$MouseDown = function (a) {
-	return {$: 'MouseDown', a: a};
+var $author$project$Main$SplitBarBeginDrag = function (a) {
+	return {$: 'SplitBarBeginDrag', a: a};
 };
-var $author$project$Main$MouseDownWithShift = function (a) {
-	return {$: 'MouseDownWithShift', a: a};
-};
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Main$mouseEventDecoder = A3(
 	$elm$json$Json$Decode$map2,
@@ -7471,40 +7467,6 @@ var $author$project$Main$mouseEventDecoder = A3(
 		}),
 	A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float),
 	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float));
-var $author$project$Main$mouseEventDecoderWithModifier = F2(
-	function (normal, shift) {
-		return A3(
-			$elm$json$Json$Decode$map2,
-			function (shiftPressed) {
-				return shiftPressed ? shift : normal;
-			},
-			A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool),
-			$author$project$Main$mouseEventDecoder);
-	});
-var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
-	function (a) {
-		return _Utils_Tuple2(a, true);
-	});
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
-var $author$project$Main$onMouseDownHandler = function (_v0) {
-	return A2(
-		$elm$html$Html$Events$preventDefaultOn,
-		'mousedown',
-		$author$project$Main$preventDefaultDecoder(
-			A2($author$project$Main$mouseEventDecoderWithModifier, $author$project$Main$MouseDown, $author$project$Main$MouseDownWithShift)));
-};
-var $author$project$Main$MouseUp = function (a) {
-	return {$: 'MouseUp', a: a};
-};
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -7515,38 +7477,11 @@ var $elm$html$Html$Events$on = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
-var $author$project$Main$onMouseUpHandler = function (_v0) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseup',
-		A2($elm$json$Json$Decode$map, $author$project$Main$MouseUp, $author$project$Main$mouseEventDecoder));
-};
-var $author$project$Main$SplitBarBeginDrag = function (a) {
-	return {$: 'SplitBarBeginDrag', a: a};
-};
 var $author$project$Main$onSplitBarDragBegin = function (_v0) {
 	return A2(
 		$elm$html$Html$Events$on,
 		'mousedown',
 		A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarBeginDrag, $author$project$Main$mouseEventDecoder));
-};
-var $author$project$Main$Wheel = function (a) {
-	return {$: 'Wheel', a: a};
-};
-var $author$project$Main$wheelEventDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	F2(
-		function (x, y) {
-			return _Utils_Tuple2(x, -y);
-		}),
-	A2($elm$json$Json$Decode$field, 'deltaX', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float));
-var $author$project$Main$onWheelHandler = function (_v0) {
-	return A2(
-		$elm$html$Html$Events$preventDefaultOn,
-		'wheel',
-		$author$project$Main$preventDefaultDecoder(
-			A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
 };
 var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $elm$core$String$fromFloat = _String_fromNumber;
@@ -7599,6 +7534,88 @@ var $elm$html$Html$Attributes$height = function (n) {
 		'height',
 		$elm$core$String$fromInt(n));
 };
+var $author$project$Main$MouseDown = function (a) {
+	return {$: 'MouseDown', a: a};
+};
+var $author$project$Main$MouseDownWithShift = function (a) {
+	return {$: 'MouseDownWithShift', a: a};
+};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$Main$mouseEventDecoderWithModifier = F2(
+	function (normal, shift) {
+		return A3(
+			$elm$json$Json$Decode$map2,
+			function (shiftPressed) {
+				return shiftPressed ? shift : normal;
+			},
+			A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool),
+			$author$project$Main$mouseEventDecoder);
+	});
+var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
+	function (a) {
+		return _Utils_Tuple2(a, true);
+	});
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $author$project$Main$onMouseDownHandler = A2(
+	$elm$html$Html$Events$preventDefaultOn,
+	'mousedown',
+	$author$project$Main$preventDefaultDecoder(
+		A2($author$project$Main$mouseEventDecoderWithModifier, $author$project$Main$MouseDown, $author$project$Main$MouseDownWithShift)));
+var $author$project$Main$MouseUp = function (a) {
+	return {$: 'MouseUp', a: a};
+};
+var $author$project$Main$onMouseUpHandler = A2(
+	$elm$html$Html$Events$on,
+	'mouseup',
+	A2($elm$json$Json$Decode$map, $author$project$Main$MouseUp, $author$project$Main$mouseEventDecoder));
+var $author$project$Main$PointerDown = F2(
+	function (a, b) {
+		return {$: 'PointerDown', a: a, b: b};
+	});
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Main$onPointerDownHandler = A2(
+	$elm$html$Html$Events$on,
+	'pointerdown',
+	A3($elm$json$Json$Decode$map2, $author$project$Main$PointerDown, $elm$json$Json$Decode$value, $author$project$Main$mouseEventDecoder));
+var $author$project$Main$PointerMove = function (a) {
+	return {$: 'PointerMove', a: a};
+};
+var $author$project$Main$onPointerMoveHandler = A2(
+	$elm$html$Html$Events$on,
+	'pointermove',
+	A2($elm$json$Json$Decode$map, $author$project$Main$PointerMove, $author$project$Main$mouseEventDecoder));
+var $author$project$Main$PointerUp = function (a) {
+	return {$: 'PointerUp', a: a};
+};
+var $author$project$Main$onPointerUpHandler = A2(
+	$elm$html$Html$Events$on,
+	'pointerup',
+	A2($elm$json$Json$Decode$map, $author$project$Main$PointerUp, $author$project$Main$mouseEventDecoder));
+var $author$project$Main$Wheel = function (a) {
+	return {$: 'Wheel', a: a};
+};
+var $author$project$Main$wheelEventDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (x, y) {
+			return _Utils_Tuple2(x, -y);
+		}),
+	A2($elm$json$Json$Decode$field, 'deltaX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float));
+var $author$project$Main$onWheelHandler = A2(
+	$elm$html$Html$Events$preventDefaultOn,
+	'wheel',
+	$author$project$Main$preventDefaultDecoder(
+		A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
 var $elm_explorations$webgl$WebGL$Mesh3 = F2(
 	function (a, b) {
 		return {$: 'Mesh3', a: a, b: b};
@@ -7983,9 +8000,6 @@ var $author$project$Main$viewCanvas = function (_v0) {
 	var top = _v0.top;
 	var width = _v0.width;
 	var height = _v0.height;
-	var onMouseDown = _v0.onMouseDown;
-	var onMouseUp = _v0.onMouseUp;
-	var onWheel = _v0.onWheel;
 	var meshes = _v0.meshes;
 	var rails = _v0.rails;
 	var piers = _v0.piers;
@@ -8024,9 +8038,13 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				$elm$html$Html$Attributes$style,
 				'height',
 				$author$project$Main$px(height)),
-				onMouseDown,
-				onMouseUp,
-				onWheel
+				A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+				$author$project$Main$onMouseDownHandler,
+				$author$project$Main$onMouseUpHandler,
+				$author$project$Main$onWheelHandler,
+				$author$project$Main$onPointerDownHandler,
+				$author$project$Main$onPointerMoveHandler,
+				$author$project$Main$onPointerUpHandler
 			]),
 		$elm$core$List$concat(
 			_List_fromArray(
@@ -8058,9 +8076,6 @@ var $author$project$Main$view = function (model) {
 				{
 					height: railViewHeight,
 					meshes: model.meshes,
-					onMouseDown: $author$project$Main$onMouseDownHandler(model),
-					onMouseUp: $author$project$Main$onMouseUpHandler(model),
-					onWheel: $author$project$Main$onWheelHandler(model),
 					piers: model.piers,
 					rails: model.rails,
 					right: railViewRight,
@@ -12458,8 +12473,10 @@ var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
+var $author$project$Element$setPointerCapture = _Platform_outgoingPort('setPointerCapture', $elm$core$Basics$identity);
 var $elm_explorations$linear_algebra$Math$Vector3$cross = _MJS_v3cross;
 var $elm$core$Array$fromListHelp = F3(
 	function (list, nodeList, nodeListSize) {
@@ -12656,7 +12673,6 @@ var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 	});
 var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
 	{elemSize: 1, indexSize: 3, mode: 4});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Graphics$MeshLoader$update = F2(
 	function (msg, model) {
 		var name = msg.a;
@@ -12917,6 +12933,21 @@ var $author$project$Main$update = F2(
 							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseDownWithShift, model.orbitControl, pos)
 						}),
 					$elm$core$Platform$Cmd$none);
+			case 'PointerDown':
+				var event = msg.a;
+				var pos = msg.b;
+				var _v1 = A2($elm$core$Debug$log, 'pointer down', pos);
+				return _Utils_Tuple2(
+					model,
+					$author$project$Element$setPointerCapture(event));
+			case 'PointerMove':
+				var pos = msg.a;
+				var _v2 = A2($elm$core$Debug$log, 'pointer move', pos);
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'PointerUp':
+				var pos = msg.a;
+				var _v3 = A2($elm$core$Debug$log, 'pointer up', pos);
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'Wheel':
 				var pos = msg.a;
 				return _Utils_Tuple2(
@@ -12942,13 +12973,13 @@ var $author$project$Main$update = F2(
 				var execResult = $author$project$Forth$execute(program);
 				return _Utils_Tuple2(
 					function () {
-						var _v1 = execResult.errMsg;
-						if (_v1.$ === 'Nothing') {
+						var _v4 = execResult.errMsg;
+						if (_v4.$ === 'Nothing') {
 							return _Utils_update(
 								model,
 								{errMsg: $elm$core$Maybe$Nothing, piers: execResult.piers, program: program, rails: execResult.rails});
 						} else {
-							var errMsg = _v1.a;
+							var errMsg = _v4.a;
 							return _Utils_update(
 								model,
 								{
@@ -12968,8 +12999,8 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SplitBarUpdateDrag':
-				var _v2 = msg.a;
-				var x = _v2.a;
+				var _v5 = msg.a;
+				var x = _v5.a;
 				var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, x);
 				return _Utils_Tuple2(
 					_Utils_update(

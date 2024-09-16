@@ -228,6 +228,10 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
         storage.setItem("program", program);
       }
     });
+    app.ports.setPointerCapture.subscribe(function (event) {
+      console.log(event);
+      event.target.setPointerCapture(event.pointerId);
+    });    
   </script>
 </body>
 

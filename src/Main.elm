@@ -4,6 +4,7 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Dict
+import Element
 import Forth
 import Graphics.MeshLoader as MeshLoader
 import Graphics.OrbitControl as OC
@@ -27,6 +28,9 @@ type Msg
     | MouseDownWithShift ( Float, Float )
     | MouseMove ( Float, Float )
     | MouseUp ( Float, Float )
+    | PointerDown Decode.Value ( Float, Float )
+    | PointerMove ( Float, Float )
+    | PointerUp ( Float, Float )
     | Wheel ( Float, Float )
     | SetViewport Browser.Dom.Viewport
     | Resize Float Float
@@ -160,9 +164,6 @@ view model =
             , height = railViewHeight
             , top = railViewTop
             , right = railViewRight
-            , onMouseDown = onMouseDownHandler model
-            , onMouseUp = onMouseUpHandler model
-            , onWheel = onWheelHandler model
             , rails = model.rails
             , piers = model.piers
             , meshes = model.meshes
@@ -236,16 +237,13 @@ viewCanvas :
     , top : Float
     , width : Float
     , height : Float
-    , onMouseDown : Html.Attribute msg
-    , onMouseUp : Html.Attribute msg
-    , onWheel : Html.Attribute msg
     , meshes : MeshLoader.Model
     , rails : List RailPlacement
     , piers : List PierPlacement
     , transform : Mat4
     }
-    -> Html msg
-viewCanvas { right, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, rails, piers, transform } =
+    -> Html Msg
+viewCanvas { right, top, width, height, meshes, rails, piers, transform } =
     WebGL.toHtmlWith
         [ WebGL.alpha True
         , WebGL.antialias
@@ -261,9 +259,13 @@ viewCanvas { right, top, width, height, onMouseDown, onMouseUp, onWheel, meshes,
         , HA.style "top" (top |> px)
         , HA.style "width" (width |> px)
         , HA.style "height" (height |> px)
-        , onMouseDown
-        , onMouseUp
-        , onWheel
+        , HA.style "touch-action" "none"
+        , onMouseDownHandler
+        , onMouseUpHandler
+        , onWheelHandler
+        , onPointerDownHandler
+        , onPointerMoveHandler
+        , onPointerUpHandler
         ]
     <|
         List.concat
@@ -289,6 +291,27 @@ update msg model =
 
         MouseDownWithShift pos ->
             ( { model | orbitControl = OC.updateMouseDownWithShift model.orbitControl pos }, Cmd.none )
+
+        PointerDown event pos ->
+            let
+                _ =
+                    Debug.log "pointer down" pos
+            in
+            ( model, Element.setPointerCapture event )
+
+        PointerMove pos ->
+            let
+                _ =
+                    Debug.log "pointer move" pos
+            in
+            ( model, Cmd.none )
+
+        PointerUp pos ->
+            let
+                _ =
+                    Debug.log "pointer up" pos
+            in
+            ( model, Cmd.none )
 
         Wheel pos ->
             ( { model | orbitControl = OC.updateWheel model.orbitControl pos }, Cmd.none )
@@ -390,10 +413,28 @@ preventDefaultDecoder =
     Decode.map (\a -> ( a, True ))
 
 
-onMouseUpHandler : Model -> Html.Attribute Msg
-onMouseUpHandler _ =
+onMouseUpHandler : Html.Attribute Msg
+onMouseUpHandler =
     HE.on "mouseup" <|
         Decode.map MouseUp mouseEventDecoder
+
+
+onPointerDownHandler : Html.Attribute Msg
+onPointerDownHandler =
+    HE.on "pointerdown" <|
+        Decode.map2 PointerDown Decode.value mouseEventDecoder
+
+
+onPointerMoveHandler : Html.Attribute Msg
+onPointerMoveHandler =
+    HE.on "pointermove" <|
+        Decode.map PointerMove mouseEventDecoder
+
+
+onPointerUpHandler : Html.Attribute Msg
+onPointerUpHandler =
+    HE.on "pointerup" <|
+        Decode.map PointerUp mouseEventDecoder
 
 
 onSplitBarDragBegin : Model -> Html.Attribute Msg
@@ -402,21 +443,21 @@ onSplitBarDragBegin _ =
         Decode.map SplitBarBeginDrag mouseEventDecoder
 
 
-onMouseMoveHandler : Model -> Html.Attribute Msg
-onMouseMoveHandler _ =
+onMouseMoveHandler : Html.Attribute Msg
+onMouseMoveHandler =
     HE.on "mousemove" <|
         Decode.map MouseMove mouseEventDecoder
 
 
-onMouseDownHandler : Model -> Html.Attribute Msg
-onMouseDownHandler _ =
+onMouseDownHandler : Html.Attribute Msg
+onMouseDownHandler =
     HE.preventDefaultOn "mousedown" <|
         preventDefaultDecoder <|
             mouseEventDecoderWithModifier MouseDown MouseDownWithShift
 
 
-onWheelHandler : Model -> Html.Attribute Msg
-onWheelHandler _ =
+onWheelHandler : Html.Attribute Msg
+onWheelHandler =
     HE.preventDefaultOn "wheel"
         (Decode.map Wheel wheelEventDecoder |> preventDefaultDecoder)
 
