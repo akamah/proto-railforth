@@ -7534,29 +7534,43 @@ var $elm$html$Html$Attributes$height = function (n) {
 		'height',
 		$elm$core$String$fromInt(n));
 };
-var $author$project$Main$PointerDown = F2(
-	function (a, b) {
-		return {$: 'PointerDown', a: a, b: b};
+var $author$project$Main$PointerDown = function (a) {
+	return {$: 'PointerDown', a: a};
+};
+var $author$project$PointerEvent$PointerEvent = F5(
+	function (pointerId, clientX, clientY, shiftKey, event) {
+		return {clientX: clientX, clientY: clientY, event: event, pointerId: pointerId, shiftKey: shiftKey};
 	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map5 = _Json_map5;
 var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$PointerEvent$decode = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$PointerEvent$PointerEvent,
+	A2($elm$json$Json$Decode$field, 'pointerId', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool),
+	$elm$json$Json$Decode$value);
 var $author$project$Main$onPointerDownHandler = A2(
 	$elm$html$Html$Events$on,
 	'pointerdown',
-	A3($elm$json$Json$Decode$map2, $author$project$Main$PointerDown, $elm$json$Json$Decode$value, $author$project$Main$mouseEventDecoder));
+	A2($elm$json$Json$Decode$map, $author$project$Main$PointerDown, $author$project$PointerEvent$decode));
 var $author$project$Main$PointerMove = function (a) {
 	return {$: 'PointerMove', a: a};
 };
 var $author$project$Main$onPointerMoveHandler = A2(
 	$elm$html$Html$Events$on,
 	'pointermove',
-	A2($elm$json$Json$Decode$map, $author$project$Main$PointerMove, $author$project$Main$mouseEventDecoder));
+	A2($elm$json$Json$Decode$map, $author$project$Main$PointerMove, $author$project$PointerEvent$decode));
 var $author$project$Main$PointerUp = function (a) {
 	return {$: 'PointerUp', a: a};
 };
 var $author$project$Main$onPointerUpHandler = A2(
 	$elm$html$Html$Events$on,
 	'pointerup',
-	A2($elm$json$Json$Decode$map, $author$project$Main$PointerUp, $author$project$Main$mouseEventDecoder));
+	A2($elm$json$Json$Decode$map, $author$project$Main$PointerUp, $author$project$PointerEvent$decode));
 var $author$project$Main$Wheel = function (a) {
 	return {$: 'Wheel', a: a};
 };
@@ -7578,7 +7592,7 @@ var $author$project$Main$wheelEventDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	F2(
 		function (x, y) {
-			return _Utils_Tuple2(x, -y);
+			return _Utils_Tuple2(x, y);
 		}),
 	A2($elm$json$Json$Decode$field, 'deltaX', $elm$json$Json$Decode$float),
 	A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float));
@@ -12087,7 +12101,6 @@ var $author$project$Main$Resize = F2(
 	});
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$browser$Browser$Events$Window = {$: 'Window'};
-var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
 		return {$: 'MySub', a: a, b: b, c: c};
@@ -12419,10 +12432,13 @@ var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
-var $author$project$Element$setPointerCapture = _Platform_outgoingPort('setPointerCapture', $elm$core$Basics$identity);
+var $author$project$PointerEvent$setPointerCaptureImpl = _Platform_outgoingPort('setPointerCaptureImpl', $elm$core$Basics$identity);
+var $author$project$PointerEvent$setPointerCapture = function (_v0) {
+	var event = _v0.event;
+	return $author$project$PointerEvent$setPointerCaptureImpl(event);
+};
 var $elm_explorations$linear_algebra$Math$Vector3$cross = _MJS_v3cross;
 var $elm$core$Array$fromListHelp = F3(
 	function (list, nodeList, nodeListSize) {
@@ -12619,6 +12635,7 @@ var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
 	});
 var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
 	{elemSize: 1, indexSize: 3, mode: 4});
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Graphics$MeshLoader$update = F2(
 	function (msg, model) {
 		var name = msg.a;
@@ -12666,18 +12683,107 @@ var $author$project$Graphics$MeshLoader$update = F2(
 			}
 		}
 	});
+var $author$project$Graphics$OrbitControl$Panning = function (a) {
+	return {$: 'Panning', a: a};
+};
 var $author$project$Graphics$OrbitControl$Rotating = function (a) {
 	return {$: 'Rotating', a: a};
 };
-var $author$project$Graphics$OrbitControl$updateMouseDown = F2(
-	function (_v0, pos) {
+var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
+var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
+	function (_v0, _v1, _v2) {
 		var model = _v0.a;
+		var x0 = _v1.a;
+		var y0 = _v1.b;
+		var x = _v2.a;
+		var y = _v2.b;
+		var sb = $elm$core$Basics$sin(model.altitude);
+		var sa = $elm$core$Basics$sin(model.azimuth);
+		var os = model.scale;
+		var dy = -(y - y0);
+		var dx = x - x0;
+		var cb = $elm$core$Basics$cos(model.altitude);
+		var ca = $elm$core$Basics$cos(model.azimuth);
+		var tanx = A2(
+			$elm_explorations$linear_algebra$Math$Vector3$scale,
+			os * dx,
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, sa, -ca, 0));
+		var tany = A2(
+			$elm_explorations$linear_algebra$Math$Vector3$scale,
+			os * dy,
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ca * sb, sa * sb, -cb));
+		var trans = A2(
+			$elm_explorations$linear_algebra$Math$Vector3$add,
+			model.target,
+			A2($elm_explorations$linear_algebra$Math$Vector3$add, tanx, tany));
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{target: trans}));
+	});
+var $author$project$Graphics$OrbitControlImpl$doRotation = F3(
+	function (_v0, _v1, _v2) {
+		var model = _v0.a;
+		var x0 = _v1.a;
+		var y0 = _v1.b;
+		var x = _v2.a;
+		var y = _v2.b;
+		var dy = y - y0;
+		var dx = x - x0;
+		var azimuth = model.azimuth - (dx * $elm$core$Basics$degrees(0.3));
+		var altitude = A3(
+			$elm$core$Basics$clamp,
+			$elm$core$Basics$degrees(0),
+			$elm$core$Basics$degrees(90),
+			model.altitude - (dy * $elm$core$Basics$degrees(0.3)));
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{altitude: altitude, azimuth: azimuth}));
+	});
+var $author$project$Graphics$OrbitControl$updateMouseMove = F2(
+	function (_v0, newPoint) {
+		var model = _v0.a;
+		var _v1 = model.draggingState;
+		if (_v1.$ === 'Nothing') {
+			return $author$project$Graphics$OrbitControl$Model(model);
+		} else {
+			if (_v1.a.$ === 'Rotating') {
+				var oldPoint = _v1.a.a;
+				return $author$project$Graphics$OrbitControl$Model(
+					{
+						draggingState: $elm$core$Maybe$Just(
+							$author$project$Graphics$OrbitControl$Rotating(newPoint)),
+						ocImpl: A3($author$project$Graphics$OrbitControlImpl$doRotation, model.ocImpl, oldPoint, newPoint)
+					});
+			} else {
+				var oldPoint = _v1.a.a;
+				return $author$project$Graphics$OrbitControl$Model(
+					{
+						draggingState: $elm$core$Maybe$Just(
+							$author$project$Graphics$OrbitControl$Panning(newPoint)),
+						ocImpl: A3($author$project$Graphics$OrbitControlImpl$doPanning, model.ocImpl, oldPoint, newPoint)
+					});
+			}
+		}
+	});
+var $author$project$Graphics$OrbitControl$updateMouseUp = function (_v0) {
+	var model = _v0.a;
+	return $author$project$Graphics$OrbitControl$Model(
+		_Utils_update(
+			model,
+			{draggingState: $elm$core$Maybe$Nothing}));
+};
+var $author$project$Graphics$OrbitControl$updatePointerDown = F3(
+	function (_v0, pos, shiftKey) {
+		var model = _v0.a;
+		var next = shiftKey ? $author$project$Graphics$OrbitControl$Panning : $author$project$Graphics$OrbitControl$Rotating;
 		return $author$project$Graphics$OrbitControl$Model(
 			_Utils_update(
 				model,
 				{
 					draggingState: $elm$core$Maybe$Just(
-						$author$project$Graphics$OrbitControl$Rotating(pos))
+						next(pos))
 				}));
 	});
 var $author$project$Graphics$OrbitControlImpl$updateViewport = F3(
@@ -12743,30 +12849,39 @@ var $author$project$Main$update = F2(
 							meshes: A2($author$project$Graphics$MeshLoader$update, meshMsg, model.meshes)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'MouseDown':
-				var pos = msg.a;
+			case 'PointerDown':
+				var event = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseDown, model.orbitControl, pos)
+							orbitControl: A3(
+								$author$project$Graphics$OrbitControl$updatePointerDown,
+								model.orbitControl,
+								_Utils_Tuple2(event.clientX, event.clientY),
+								event.shiftKey)
+						}),
+					$author$project$PointerEvent$setPointerCapture(event));
+			case 'PointerMove':
+				var event = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							orbitControl: A2(
+								$author$project$Graphics$OrbitControl$updateMouseMove,
+								model.orbitControl,
+								_Utils_Tuple2(event.clientX, event.clientY))
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'PointerDown':
-				var event = msg.a;
-				var pos = msg.b;
-				var _v1 = A2($elm$core$Debug$log, 'pointer down', pos);
-				return _Utils_Tuple2(
-					model,
-					$author$project$Element$setPointerCapture(event));
-			case 'PointerMove':
-				var pos = msg.a;
-				var _v2 = A2($elm$core$Debug$log, 'pointer move', pos);
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'PointerUp':
-				var pos = msg.a;
-				var _v3 = A2($elm$core$Debug$log, 'pointer up', pos);
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							orbitControl: $author$project$Graphics$OrbitControl$updateMouseUp(model.orbitControl)
+						}),
+					$elm$core$Platform$Cmd$none);
 			case 'Wheel':
 				var pos = msg.a;
 				return _Utils_Tuple2(
@@ -12792,13 +12907,13 @@ var $author$project$Main$update = F2(
 				var execResult = $author$project$Forth$execute(program);
 				return _Utils_Tuple2(
 					function () {
-						var _v4 = execResult.errMsg;
-						if (_v4.$ === 'Nothing') {
+						var _v1 = execResult.errMsg;
+						if (_v1.$ === 'Nothing') {
 							return _Utils_update(
 								model,
 								{errMsg: $elm$core$Maybe$Nothing, piers: execResult.piers, program: program, rails: execResult.rails});
 						} else {
-							var errMsg = _v4.a;
+							var errMsg = _v1.a;
 							return _Utils_update(
 								model,
 								{
@@ -12818,8 +12933,8 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SplitBarUpdateDrag':
-				var _v5 = msg.a;
-				var x = _v5.a;
+				var _v2 = msg.a;
+				var x = _v2.a;
 				var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, x);
 				return _Utils_Tuple2(
 					_Utils_update(

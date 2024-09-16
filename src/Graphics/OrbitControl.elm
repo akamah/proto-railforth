@@ -3,30 +3,12 @@ module Graphics.OrbitControl exposing
     , init
     , isDragging
     , makeTransform
-    , updateMouseDown
-    , updateMouseDownWithShift
     , updateMouseMove
     , updateMouseUp
+    , updatePointerDown
     , updateViewport
     , updateWheel
     )
-
-{-| The simple orbit control
-
-  - Mouse: rotation
-  - Shift+Mouse: panning
-  - Wheel: dolly
-
-
-## Usage
-
-  - use `init` to initialize the state of OrbitControl
-  - `startRotation` and `startPan` begin rotation and panning w/r
-  - call `updateMouseMove`, `updateMouseUp`, and updateWheel when the user do so
-  - explicitly call `updateViewport` when the drawing area is resized.
-  - finally, makeTransform to get the matrix which is the result of viewing transform and perspective trannsform.
-
--}
 
 import Graphics.OrbitControlImpl as Impl
 import Math.Matrix4 exposing (Mat4)
@@ -56,14 +38,17 @@ init azimuth altitude scale eyeTarget =
         }
 
 
-updateMouseDown : Model -> ( Float, Float ) -> Model
-updateMouseDown (Model model) pos =
-    Model { model | draggingState = Just (Rotating pos) }
+updatePointerDown : Model -> ( Float, Float ) -> Bool -> Model
+updatePointerDown (Model model) pos shiftKey =
+    let
+        next =
+            if shiftKey then
+                Panning
 
-
-updateMouseDownWithShift : Model -> ( Float, Float ) -> Model
-updateMouseDownWithShift (Model model) pos =
-    Model { model | draggingState = Just (Panning pos) }
+            else
+                Rotating
+    in
+    Model { model | draggingState = Just (next pos) }
 
 
 updateMouseMove : Model -> ( Float, Float ) -> Model
@@ -85,8 +70,8 @@ updateMouseMove (Model model) newPoint =
                 }
 
 
-updateMouseUp : Model -> ( Float, Float ) -> Model
-updateMouseUp (Model model) _ =
+updateMouseUp : Model -> Model
+updateMouseUp (Model model) =
     Model { model | draggingState = Nothing }
 
 

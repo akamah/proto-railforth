@@ -4,7 +4,6 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Dict
-import Element
 import Forth
 import Graphics.MeshLoader as MeshLoader
 import Graphics.OrbitControl as OC
@@ -14,6 +13,7 @@ import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 exposing (vec3)
+import PointerEvent as PE
 import Storage
 import Task
 import Types.PierPlacement exposing (PierPlacement)
@@ -23,10 +23,9 @@ import WebGL
 
 type Msg
     = LoadMesh MeshLoader.Msg
-    | MouseDown ( Float, Float )
-    | PointerDown Decode.Value ( Float, Float )
-    | PointerMove ( Float, Float )
-    | PointerUp ( Float, Float )
+    | PointerDown PE.PointerEvent
+    | PointerMove PE.PointerEvent
+    | PointerUp PE.PointerEvent
     | Wheel ( Float, Float )
     | SetViewport Browser.Dom.Viewport
     | Resize Float Float
@@ -274,35 +273,17 @@ update msg model =
         LoadMesh meshMsg ->
             ( { model | meshes = MeshLoader.update meshMsg model.meshes }, Cmd.none )
 
-        MouseDown pos ->
-            ( { model | orbitControl = OC.updateMouseDown model.orbitControl pos }, Cmd.none )
+        PointerDown event ->
+            ( { model | orbitControl = OC.updatePointerDown model.orbitControl ( event.clientX, event.clientY ) event.shiftKey }
+            , PE.setPointerCapture event
+              -- necessary for tracking the pointer event outside of the canvas
+            )
 
-        -- MouseMove pos ->
-        --     ( { model | orbitControl = OC.updateMouseMove model.orbitControl pos }, Cmd.none )
-        -- MouseUp pos ->
-        --     ( { model | orbitControl = OC.updateMouseUp model.orbitControl pos }, Cmd.none )
-        -- MouseDownWithShift pos ->
-        --     ( { model | orbitControl = OC.updateMouseDownWithShift model.orbitControl pos }, Cmd.none )
-        PointerDown event pos ->
-            let
-                _ =
-                    Debug.log "pointer down" pos
-            in
-            ( model, Element.setPointerCapture event )
+        PointerMove event ->
+            ( { model | orbitControl = OC.updateMouseMove model.orbitControl ( event.clientX, event.clientY ) }, Cmd.none )
 
-        PointerMove pos ->
-            let
-                _ =
-                    Debug.log "pointer move" pos
-            in
-            ( model, Cmd.none )
-
-        PointerUp pos ->
-            let
-                _ =
-                    Debug.log "pointer up" pos
-            in
-            ( model, Cmd.none )
+        PointerUp _ ->
+            ( { model | orbitControl = OC.updateMouseUp model.orbitControl }, Cmd.none )
 
         Wheel pos ->
             ( { model | orbitControl = OC.updateWheel model.orbitControl pos }, Cmd.none )
@@ -378,23 +359,9 @@ mouseEventDecoder =
         (Decode.field "clientY" Decode.float)
 
 
-
--- mouseEventDecoderWithModifier : (( Float, Float ) -> msg) -> (( Float, Float ) -> msg) -> Decoder msg
--- mouseEventDecoderWithModifier normal shift =
---     Decode.map2
---         (\shiftPressed ->
---             if shiftPressed then
---                 shift
---             else
---                 normal
---         )
---         (Decode.field "shiftKey" Decode.bool)
---         mouseEventDecoder
-
-
 wheelEventDecoder : Decoder ( Float, Float )
 wheelEventDecoder =
-    Decode.map2 (\x y -> ( x, -y ))
+    Decode.map2 (\x y -> ( x, y ))
         (Decode.field "deltaX" Decode.float)
         (Decode.field "deltaY" Decode.float)
 
@@ -407,19 +374,19 @@ preventDefaultDecoder =
 onPointerDownHandler : Html.Attribute Msg
 onPointerDownHandler =
     HE.on "pointerdown" <|
-        Decode.map2 PointerDown Decode.value mouseEventDecoder
+        Decode.map PointerDown PE.decode
 
 
 onPointerMoveHandler : Html.Attribute Msg
 onPointerMoveHandler =
     HE.on "pointermove" <|
-        Decode.map PointerMove mouseEventDecoder
+        Decode.map PointerMove PE.decode
 
 
 onPointerUpHandler : Html.Attribute Msg
 onPointerUpHandler =
     HE.on "pointerup" <|
-        Decode.map PointerUp mouseEventDecoder
+        Decode.map PointerUp PE.decode
 
 
 onSplitBarDragBegin : Model -> Html.Attribute Msg
