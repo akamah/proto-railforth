@@ -31,9 +31,9 @@ type Msg
     | SetViewport Browser.Dom.Viewport
     | Resize Float Float
     | UpdateScript String
-    | SplitBarBeginDrag ( Float, Float )
-    | SplitBarUpdateDrag ( Float, Float )
-    | SplitBarEndDrag ( Float, Float )
+    | SplitBarBeginMove PE.PointerEvent
+    | SplitBarUpdateMove PE.PointerEvent
+    | SplitBarEndMove PE.PointerEvent
 
 
 type alias Model =
@@ -47,7 +47,7 @@ type alias Model =
     , rails : List RailPlacement
     , piers : List PierPlacement
     , errMsg : Maybe String
-    , splitBarDragState : Maybe ( Float, Float )
+    , isSplitBarDragging : Bool
     , splitBarPosition : Float
     }
 
@@ -87,7 +87,7 @@ init flags =
       , rails = execResult.rails
       , piers = execResult.piers
       , errMsg = execResult.errMsg -- Just <| formatRailCount execResult.railCount
-      , splitBarDragState = Nothing
+      , isSplitBarDragging = False
       , splitBarPosition = 300.0
       }
     , Cmd.batch
@@ -199,6 +199,8 @@ view model =
             , style "border-width" "1px"
             , style "touch-action" "none"
             , onSplitBarDragBegin model
+            , onSplitBarDragMove model
+            , onSplitBarDragEnd model
             ]
             []
 
@@ -329,23 +331,27 @@ update msg model =
             , Storage.save program
             )
 
-        SplitBarBeginDrag pos ->
-            ( { model | splitBarDragState = Just pos }, Cmd.none )
+        SplitBarBeginMove event ->
+            ( { model | isSplitBarDragging = True }, PE.setPointerCapture event )
 
-        SplitBarUpdateDrag ( x, _ ) ->
-            let
-                splitBarPosition =
-                    clamp 100 (model.viewport.width - 100) x
-            in
-            ( { model
-                | splitBarPosition = splitBarPosition
-                , orbitControl = OC.updateViewport (model.viewport.width - splitBarPosition - 4) model.viewport.height model.orbitControl
-              }
-            , Cmd.none
-            )
+        SplitBarUpdateMove event ->
+            if model.isSplitBarDragging then
+                let
+                    splitBarPosition =
+                        clamp 100 (model.viewport.width - 100) event.clientX
+                in
+                ( { model
+                    | splitBarPosition = splitBarPosition
+                    , orbitControl = OC.updateViewport (model.viewport.width - splitBarPosition - 4) model.viewport.height model.orbitControl
+                  }
+                , Cmd.none
+                )
 
-        SplitBarEndDrag _ ->
-            ( { model | splitBarDragState = Nothing }, Cmd.none )
+            else
+                ( model, Cmd.none )
+
+        SplitBarEndMove _ ->
+            ( { model | isSplitBarDragging = False }, Cmd.none )
 
 
 updateViewport : Float -> Float -> Model -> Model
@@ -359,13 +365,6 @@ updateViewport w h model =
         , orbitControl = OC.updateViewport (w - splitBarPosition - 4) h model.orbitControl
         , splitBarPosition = splitBarPosition
     }
-
-
-mouseEventDecoder : Decoder ( Float, Float )
-mouseEventDecoder =
-    Decode.map2 (\x y -> ( x, y ))
-        (Decode.field "clientX" Decode.float)
-        (Decode.field "clientY" Decode.float)
 
 
 wheelEventDecoder : Decoder ( Float, Float )
@@ -400,8 +399,23 @@ onPointerUpHandler =
 
 onSplitBarDragBegin : Model -> Html.Attribute Msg
 onSplitBarDragBegin _ =
-    HE.on "mousedown" <|
-        Decode.map SplitBarBeginDrag mouseEventDecoder
+    HE.preventDefaultOn "pointerdown" <|
+        preventDefaultDecoder <|
+            Decode.map SplitBarBeginMove PE.decode
+
+
+onSplitBarDragMove : Model -> Html.Attribute Msg
+onSplitBarDragMove _ =
+    HE.preventDefaultOn "pointermove" <|
+        preventDefaultDecoder <|
+            Decode.map SplitBarUpdateMove PE.decode
+
+
+onSplitBarDragEnd : Model -> Html.Attribute Msg
+onSplitBarDragEnd _ =
+    HE.preventDefaultOn "pointerup" <|
+        preventDefaultDecoder <|
+            Decode.map SplitBarEndMove PE.decode
 
 
 onWheelHandler : Html.Attribute Msg
@@ -417,23 +431,7 @@ onContextMenuHandler =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.batch
         [ Browser.Events.onResize (\w h -> Resize (toFloat w) (toFloat h))
-        , subscriptionSplitBar model
         ]
-
-
-subscriptionSplitBar : Model -> Sub Msg
-subscriptionSplitBar model =
-    -- なぜsubscriptionに埋め込んだかを思い出せないけれど、たしかちゃんとした理由があったはず。
-    -- そういうのはちゃんとコメントに書いた方がいいぞい
-    case model.splitBarDragState of
-        Just _ ->
-            Sub.batch
-                [ Browser.Events.onMouseMove <| Decode.map SplitBarUpdateDrag mouseEventDecoder
-                , Browser.Events.onMouseUp <| Decode.map SplitBarEndDrag mouseEventDecoder
-                ]
-
-        Nothing ->
-            Sub.none
