@@ -13,6 +13,7 @@ import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 exposing (vec3)
+import PointerEvent as PE
 import Storage
 import Task
 import Types.PierPlacement exposing (PierPlacement)
@@ -22,12 +23,11 @@ import WebGL
 
 type Msg
     = LoadMesh MeshLoader.Msg
-    | MouseDown ( Float, Float )
-      -- Shift だけ特別扱いするというのが漏れてるのでどうにかしたい
-    | MouseDownWithShift ( Float, Float )
-    | MouseMove ( Float, Float )
-    | MouseUp ( Float, Float )
+    | PointerDown PE.PointerEvent
+    | PointerMove PE.PointerEvent
+    | PointerUp PE.PointerEvent
     | Wheel ( Float, Float )
+    | ContextMenu
     | SetViewport Browser.Dom.Viewport
     | Resize Float Float
     | UpdateScript String
@@ -160,9 +160,6 @@ view model =
             , height = railViewHeight
             , top = railViewTop
             , right = railViewRight
-            , onMouseDown = onMouseDownHandler model
-            , onMouseUp = onMouseUpHandler model
-            , onWheel = onWheelHandler model
             , rails = model.rails
             , piers = model.piers
             , meshes = model.meshes
@@ -236,16 +233,13 @@ viewCanvas :
     , top : Float
     , width : Float
     , height : Float
-    , onMouseDown : Html.Attribute msg
-    , onMouseUp : Html.Attribute msg
-    , onWheel : Html.Attribute msg
     , meshes : MeshLoader.Model
     , rails : List RailPlacement
     , piers : List PierPlacement
     , transform : Mat4
     }
-    -> Html msg
-viewCanvas { right, top, width, height, onMouseDown, onMouseUp, onWheel, meshes, rails, piers, transform } =
+    -> Html Msg
+viewCanvas { right, top, width, height, meshes, rails, piers, transform } =
     WebGL.toHtmlWith
         [ WebGL.alpha True
         , WebGL.antialias
@@ -261,9 +255,12 @@ viewCanvas { right, top, width, height, onMouseDown, onMouseUp, onWheel, meshes,
         , HA.style "top" (top |> px)
         , HA.style "width" (width |> px)
         , HA.style "height" (height |> px)
-        , onMouseDown
-        , onMouseUp
-        , onWheel
+        , HA.style "touch-action" "none"
+        , onWheelHandler
+        , onPointerDownHandler
+        , onPointerMoveHandler
+        , onPointerUpHandler
+        , onContextMenuHandler
         ]
     <|
         List.concat
@@ -278,20 +275,27 @@ update msg model =
         LoadMesh meshMsg ->
             ( { model | meshes = MeshLoader.update meshMsg model.meshes }, Cmd.none )
 
-        MouseDown pos ->
-            ( { model | orbitControl = OC.updateMouseDown model.orbitControl pos }, Cmd.none )
+        PointerDown event ->
+            ( { model | orbitControl = OC.updatePointerDown model.orbitControl ( event.clientX, event.clientY ) event.shiftKey }
+            , PE.setPointerCapture event
+              -- necessary for tracking the pointer event outside of the canvas
+            )
 
-        MouseMove pos ->
-            ( { model | orbitControl = OC.updateMouseMove model.orbitControl pos }, Cmd.none )
+        PointerMove event ->
+            ( { model | orbitControl = OC.updateMouseMove model.orbitControl ( event.clientX, event.clientY ) }, Cmd.none )
 
-        MouseUp pos ->
-            ( { model | orbitControl = OC.updateMouseUp model.orbitControl pos }, Cmd.none )
-
-        MouseDownWithShift pos ->
-            ( { model | orbitControl = OC.updateMouseDownWithShift model.orbitControl pos }, Cmd.none )
+        PointerUp _ ->
+            ( { model | orbitControl = OC.updateMouseUp model.orbitControl }, Cmd.none )
 
         Wheel pos ->
+            let
+                _ =
+                    Debug.log "wheel" pos
+            in
             ( { model | orbitControl = OC.updateWheel model.orbitControl pos }, Cmd.none )
+
+        ContextMenu ->
+            ( model, Cmd.none )
 
         SetViewport viewport ->
             ( updateViewport viewport.viewport.width
@@ -364,23 +368,9 @@ mouseEventDecoder =
         (Decode.field "clientY" Decode.float)
 
 
-mouseEventDecoderWithModifier : (( Float, Float ) -> msg) -> (( Float, Float ) -> msg) -> Decoder msg
-mouseEventDecoderWithModifier normal shift =
-    Decode.map2
-        (\shiftPressed ->
-            if shiftPressed then
-                shift
-
-            else
-                normal
-        )
-        (Decode.field "shiftKey" Decode.bool)
-        mouseEventDecoder
-
-
 wheelEventDecoder : Decoder ( Float, Float )
 wheelEventDecoder =
-    Decode.map2 (\x y -> ( x, -y ))
+    Decode.map2 (\x y -> ( x, y ))
         (Decode.field "deltaX" Decode.float)
         (Decode.field "deltaY" Decode.float)
 
@@ -390,10 +380,22 @@ preventDefaultDecoder =
     Decode.map (\a -> ( a, True ))
 
 
-onMouseUpHandler : Model -> Html.Attribute Msg
-onMouseUpHandler _ =
-    HE.on "mouseup" <|
-        Decode.map MouseUp mouseEventDecoder
+onPointerDownHandler : Html.Attribute Msg
+onPointerDownHandler =
+    HE.on "pointerdown" <|
+        Decode.map PointerDown PE.decode
+
+
+onPointerMoveHandler : Html.Attribute Msg
+onPointerMoveHandler =
+    HE.on "pointermove" <|
+        Decode.map PointerMove PE.decode
+
+
+onPointerUpHandler : Html.Attribute Msg
+onPointerUpHandler =
+    HE.on "pointerup" <|
+        Decode.map PointerUp PE.decode
 
 
 onSplitBarDragBegin : Model -> Html.Attribute Msg
@@ -402,44 +404,24 @@ onSplitBarDragBegin _ =
         Decode.map SplitBarBeginDrag mouseEventDecoder
 
 
-onMouseMoveHandler : Model -> Html.Attribute Msg
-onMouseMoveHandler _ =
-    HE.on "mousemove" <|
-        Decode.map MouseMove mouseEventDecoder
-
-
-onMouseDownHandler : Model -> Html.Attribute Msg
-onMouseDownHandler _ =
-    HE.preventDefaultOn "mousedown" <|
-        preventDefaultDecoder <|
-            mouseEventDecoderWithModifier MouseDown MouseDownWithShift
-
-
-onWheelHandler : Model -> Html.Attribute Msg
-onWheelHandler _ =
+onWheelHandler : Html.Attribute Msg
+onWheelHandler =
     HE.preventDefaultOn "wheel"
         (Decode.map Wheel wheelEventDecoder |> preventDefaultDecoder)
+
+
+onContextMenuHandler : Html.Attribute Msg
+onContextMenuHandler =
+    HE.preventDefaultOn "contextmenu"
+        (Decode.succeed ContextMenu |> preventDefaultDecoder)
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Browser.Events.onResize (\w h -> Resize (toFloat w) (toFloat h))
-        , subscriptionMouseEvent model
         , subscriptionSplitBar model
         ]
-
-
-subscriptionMouseEvent : Model -> Sub Msg
-subscriptionMouseEvent model =
-    if OC.isDragging model.orbitControl then
-        Sub.batch
-            [ Browser.Events.onMouseMove <| Decode.map MouseMove mouseEventDecoder
-            , Browser.Events.onMouseUp <| Decode.map MouseUp mouseEventDecoder
-            ]
-
-    else
-        Sub.none
 
 
 subscriptionSplitBar : Model -> Sub Msg
