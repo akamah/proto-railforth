@@ -7455,33 +7455,66 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $author$project$Main$SplitBarBeginDrag = function (a) {
-	return {$: 'SplitBarBeginDrag', a: a};
+var $author$project$Main$SplitBarBeginMove = function (a) {
+	return {$: 'SplitBarBeginMove', a: a};
 };
+var $author$project$PointerEvent$PointerEvent = F5(
+	function (pointerId, clientX, clientY, shiftKey, event) {
+		return {clientX: clientX, clientY: clientY, event: event, pointerId: pointerId, shiftKey: shiftKey};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $author$project$Main$mouseEventDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	F2(
-		function (x, y) {
-			return _Utils_Tuple2(x, y);
-		}),
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$PointerEvent$decode = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$PointerEvent$PointerEvent,
+	A2($elm$json$Json$Decode$field, 'pointerId', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float));
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
+	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool),
+	$elm$json$Json$Decode$value);
+var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
+	function (a) {
+		return _Utils_Tuple2(a, true);
+	});
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
 };
-var $elm$html$Html$Events$on = F2(
+var $elm$html$Html$Events$preventDefaultOn = F2(
 	function (event, decoder) {
 		return A2(
 			$elm$virtual_dom$VirtualDom$on,
 			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
 	});
 var $author$project$Main$onSplitBarDragBegin = function (_v0) {
 	return A2(
-		$elm$html$Html$Events$on,
-		'mousedown',
-		A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarBeginDrag, $author$project$Main$mouseEventDecoder));
+		$elm$html$Html$Events$preventDefaultOn,
+		'pointerdown',
+		$author$project$Main$preventDefaultDecoder(
+			A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarBeginMove, $author$project$PointerEvent$decode)));
+};
+var $author$project$Main$SplitBarEndMove = function (a) {
+	return {$: 'SplitBarEndMove', a: a};
+};
+var $author$project$Main$onSplitBarDragEnd = function (_v0) {
+	return A2(
+		$elm$html$Html$Events$preventDefaultOn,
+		'pointerup',
+		$author$project$Main$preventDefaultDecoder(
+			A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarEndMove, $author$project$PointerEvent$decode)));
+};
+var $author$project$Main$SplitBarUpdateMove = function (a) {
+	return {$: 'SplitBarUpdateMove', a: a};
+};
+var $author$project$Main$onSplitBarDragMove = function (_v0) {
+	return A2(
+		$elm$html$Html$Events$preventDefaultOn,
+		'pointermove',
+		$author$project$Main$preventDefaultDecoder(
+			A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarUpdateMove, $author$project$PointerEvent$decode)));
 };
 var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $elm$core$String$fromFloat = _String_fromNumber;
@@ -7535,20 +7568,6 @@ var $elm$html$Html$Attributes$height = function (n) {
 		$elm$core$String$fromInt(n));
 };
 var $author$project$Main$ContextMenu = {$: 'ContextMenu'};
-var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
-	function (a) {
-		return _Utils_Tuple2(a, true);
-	});
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
 var $author$project$Main$onContextMenuHandler = A2(
 	$elm$html$Html$Events$preventDefaultOn,
 	'contextmenu',
@@ -7557,22 +7576,16 @@ var $author$project$Main$onContextMenuHandler = A2(
 var $author$project$Main$PointerDown = function (a) {
 	return {$: 'PointerDown', a: a};
 };
-var $author$project$PointerEvent$PointerEvent = F5(
-	function (pointerId, clientX, clientY, shiftKey, event) {
-		return {clientX: clientX, clientY: clientY, event: event, pointerId: pointerId, shiftKey: shiftKey};
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$map5 = _Json_map5;
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$PointerEvent$decode = A6(
-	$elm$json$Json$Decode$map5,
-	$author$project$PointerEvent$PointerEvent,
-	A2($elm$json$Json$Decode$field, 'pointerId', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool),
-	$elm$json$Json$Decode$value);
 var $author$project$Main$onPointerDownHandler = A2(
 	$elm$html$Html$Events$on,
 	'pointerdown',
@@ -8136,7 +8149,9 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'border-style', 'outset'),
 						A2($elm$html$Html$Attributes$style, 'border-width', '1px'),
 						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
-						$author$project$Main$onSplitBarDragBegin(model)
+						$author$project$Main$onSplitBarDragBegin(model),
+						$author$project$Main$onSplitBarDragMove(model),
+						$author$project$Main$onSplitBarDragEnd(model)
 					]),
 				_List_Nil),
 				A2(
@@ -12081,6 +12096,7 @@ var $author$project$Main$init = function (flags) {
 	return _Utils_Tuple2(
 		{
 			errMsg: execResult.errMsg,
+			isSplitBarDragging: false,
 			meshes: $author$project$Graphics$MeshLoader$init,
 			orbitControl: A4(
 				$author$project$Graphics$OrbitControl$init,
@@ -12091,7 +12107,6 @@ var $author$project$Main$init = function (flags) {
 			piers: execResult.piers,
 			program: flags.program,
 			rails: execResult.rails,
-			splitBarDragState: $elm$core$Maybe$Nothing,
 			splitBarPosition: 300.0,
 			viewport: {height: 0, width: 0}
 		},
@@ -12398,32 +12413,7 @@ var $elm$browser$Browser$Events$onResize = function (func) {
 				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
 				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
 };
-var $author$project$Main$SplitBarEndDrag = function (a) {
-	return {$: 'SplitBarEndDrag', a: a};
-};
-var $author$project$Main$SplitBarUpdateDrag = function (a) {
-	return {$: 'SplitBarUpdateDrag', a: a};
-};
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $elm$browser$Browser$Events$Document = {$: 'Document'};
-var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
-var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
-var $author$project$Main$subscriptionSplitBar = function (model) {
-	var _v0 = model.splitBarDragState;
-	if (_v0.$ === 'Just') {
-		return $elm$core$Platform$Sub$batch(
-			_List_fromArray(
-				[
-					$elm$browser$Browser$Events$onMouseMove(
-					A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarUpdateDrag, $author$project$Main$mouseEventDecoder)),
-					$elm$browser$Browser$Events$onMouseUp(
-					A2($elm$json$Json$Decode$map, $author$project$Main$SplitBarEndDrag, $author$project$Main$mouseEventDecoder))
-				]));
-	} else {
-		return $elm$core$Platform$Sub$none;
-	}
-};
-var $author$project$Main$subscriptions = function (model) {
+var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
@@ -12431,8 +12421,7 @@ var $author$project$Main$subscriptions = function (model) {
 				F2(
 					function (w, h) {
 						return A2($author$project$Main$Resize, w, h);
-					})),
-				$author$project$Main$subscriptionSplitBar(model)
+					}))
 			]));
 };
 var $elm$core$Basics$clamp = F3(
@@ -12933,32 +12922,33 @@ var $author$project$Main$update = F2(
 						}
 					}(),
 					$author$project$Storage$save(program));
-			case 'SplitBarBeginDrag':
-				var pos = msg.a;
+			case 'SplitBarBeginMove':
+				var event = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{
-							splitBarDragState: $elm$core$Maybe$Just(pos)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'SplitBarUpdateDrag':
-				var _v3 = msg.a;
-				var x = _v3.a;
-				var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, x);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (model.viewport.width - splitBarPosition) - 4, model.viewport.height, model.orbitControl),
-							splitBarPosition: splitBarPosition
-						}),
-					$elm$core$Platform$Cmd$none);
+						{isSplitBarDragging: true}),
+					$author$project$PointerEvent$setPointerCapture(event));
+			case 'SplitBarUpdateMove':
+				var event = msg.a;
+				if (model.isSplitBarDragging) {
+					var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, event.clientX);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (model.viewport.width - splitBarPosition) - 4, model.viewport.height, model.orbitControl),
+								splitBarPosition: splitBarPosition
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{splitBarDragState: $elm$core$Maybe$Nothing}),
+						{isSplitBarDragging: false}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
