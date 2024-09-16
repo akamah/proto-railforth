@@ -7534,49 +7534,6 @@ var $elm$html$Html$Attributes$height = function (n) {
 		'height',
 		$elm$core$String$fromInt(n));
 };
-var $author$project$Main$MouseDown = function (a) {
-	return {$: 'MouseDown', a: a};
-};
-var $author$project$Main$MouseDownWithShift = function (a) {
-	return {$: 'MouseDownWithShift', a: a};
-};
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $author$project$Main$mouseEventDecoderWithModifier = F2(
-	function (normal, shift) {
-		return A3(
-			$elm$json$Json$Decode$map2,
-			function (shiftPressed) {
-				return shiftPressed ? shift : normal;
-			},
-			A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool),
-			$author$project$Main$mouseEventDecoder);
-	});
-var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
-	function (a) {
-		return _Utils_Tuple2(a, true);
-	});
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
-var $author$project$Main$onMouseDownHandler = A2(
-	$elm$html$Html$Events$preventDefaultOn,
-	'mousedown',
-	$author$project$Main$preventDefaultDecoder(
-		A2($author$project$Main$mouseEventDecoderWithModifier, $author$project$Main$MouseDown, $author$project$Main$MouseDownWithShift)));
-var $author$project$Main$MouseUp = function (a) {
-	return {$: 'MouseUp', a: a};
-};
-var $author$project$Main$onMouseUpHandler = A2(
-	$elm$html$Html$Events$on,
-	'mouseup',
-	A2($elm$json$Json$Decode$map, $author$project$Main$MouseUp, $author$project$Main$mouseEventDecoder));
 var $author$project$Main$PointerDown = F2(
 	function (a, b) {
 		return {$: 'PointerDown', a: a, b: b};
@@ -7603,6 +7560,20 @@ var $author$project$Main$onPointerUpHandler = A2(
 var $author$project$Main$Wheel = function (a) {
 	return {$: 'Wheel', a: a};
 };
+var $author$project$Main$preventDefaultDecoder = $elm$json$Json$Decode$map(
+	function (a) {
+		return _Utils_Tuple2(a, true);
+	});
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
 var $author$project$Main$wheelEventDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	F2(
@@ -8039,8 +8010,6 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				'height',
 				$author$project$Main$px(height)),
 				A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
-				$author$project$Main$onMouseDownHandler,
-				$author$project$Main$onMouseUpHandler,
 				$author$project$Main$onWheelHandler,
 				$author$project$Main$onPointerDownHandler,
 				$author$project$Main$onPointerMoveHandler,
@@ -12409,38 +12378,16 @@ var $elm$browser$Browser$Events$onResize = function (func) {
 				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
 				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
 };
-var $author$project$Main$MouseMove = function (a) {
-	return {$: 'MouseMove', a: a};
-};
-var $author$project$Graphics$OrbitControl$isDragging = function (_v0) {
-	var model = _v0.a;
-	var _v1 = model.draggingState;
-	if (_v1.$ === 'Just') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $elm$browser$Browser$Events$Document = {$: 'Document'};
-var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
-var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
-var $author$project$Main$subscriptionMouseEvent = function (model) {
-	return $author$project$Graphics$OrbitControl$isDragging(model.orbitControl) ? $elm$core$Platform$Sub$batch(
-		_List_fromArray(
-			[
-				$elm$browser$Browser$Events$onMouseMove(
-				A2($elm$json$Json$Decode$map, $author$project$Main$MouseMove, $author$project$Main$mouseEventDecoder)),
-				$elm$browser$Browser$Events$onMouseUp(
-				A2($elm$json$Json$Decode$map, $author$project$Main$MouseUp, $author$project$Main$mouseEventDecoder))
-			])) : $elm$core$Platform$Sub$none;
-};
 var $author$project$Main$SplitBarEndDrag = function (a) {
 	return {$: 'SplitBarEndDrag', a: a};
 };
 var $author$project$Main$SplitBarUpdateDrag = function (a) {
 	return {$: 'SplitBarUpdateDrag', a: a};
 };
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$browser$Browser$Events$Document = {$: 'Document'};
+var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
+var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
 var $author$project$Main$subscriptionSplitBar = function (model) {
 	var _v0 = model.splitBarDragState;
 	if (_v0.$ === 'Just') {
@@ -12465,7 +12412,6 @@ var $author$project$Main$subscriptions = function (model) {
 					function (w, h) {
 						return A2($author$project$Main$Resize, w, h);
 					})),
-				$author$project$Main$subscriptionMouseEvent(model),
 				$author$project$Main$subscriptionSplitBar(model)
 			]));
 };
@@ -12734,106 +12680,6 @@ var $author$project$Graphics$OrbitControl$updateMouseDown = F2(
 						$author$project$Graphics$OrbitControl$Rotating(pos))
 				}));
 	});
-var $author$project$Graphics$OrbitControl$Panning = function (a) {
-	return {$: 'Panning', a: a};
-};
-var $author$project$Graphics$OrbitControl$updateMouseDownWithShift = F2(
-	function (_v0, pos) {
-		var model = _v0.a;
-		return $author$project$Graphics$OrbitControl$Model(
-			_Utils_update(
-				model,
-				{
-					draggingState: $elm$core$Maybe$Just(
-						$author$project$Graphics$OrbitControl$Panning(pos))
-				}));
-	});
-var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
-var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
-	function (_v0, _v1, _v2) {
-		var model = _v0.a;
-		var x0 = _v1.a;
-		var y0 = _v1.b;
-		var x = _v2.a;
-		var y = _v2.b;
-		var sb = $elm$core$Basics$sin(model.altitude);
-		var sa = $elm$core$Basics$sin(model.azimuth);
-		var os = model.scale;
-		var dy = -(y - y0);
-		var dx = x - x0;
-		var cb = $elm$core$Basics$cos(model.altitude);
-		var ca = $elm$core$Basics$cos(model.azimuth);
-		var tanx = A2(
-			$elm_explorations$linear_algebra$Math$Vector3$scale,
-			os * dx,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, sa, -ca, 0));
-		var tany = A2(
-			$elm_explorations$linear_algebra$Math$Vector3$scale,
-			os * dy,
-			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ca * sb, sa * sb, -cb));
-		var trans = A2(
-			$elm_explorations$linear_algebra$Math$Vector3$add,
-			model.target,
-			A2($elm_explorations$linear_algebra$Math$Vector3$add, tanx, tany));
-		return $author$project$Graphics$OrbitControlImpl$Model(
-			_Utils_update(
-				model,
-				{target: trans}));
-	});
-var $author$project$Graphics$OrbitControlImpl$doRotation = F3(
-	function (_v0, _v1, _v2) {
-		var model = _v0.a;
-		var x0 = _v1.a;
-		var y0 = _v1.b;
-		var x = _v2.a;
-		var y = _v2.b;
-		var dy = y - y0;
-		var dx = x - x0;
-		var azimuth = model.azimuth - (dx * $elm$core$Basics$degrees(0.3));
-		var altitude = A3(
-			$elm$core$Basics$clamp,
-			$elm$core$Basics$degrees(0),
-			$elm$core$Basics$degrees(90),
-			model.altitude - (dy * $elm$core$Basics$degrees(0.3)));
-		return $author$project$Graphics$OrbitControlImpl$Model(
-			_Utils_update(
-				model,
-				{altitude: altitude, azimuth: azimuth}));
-	});
-var $author$project$Graphics$OrbitControl$updateMouseMove = F2(
-	function (_v0, newPoint) {
-		var model = _v0.a;
-		var _v1 = model.draggingState;
-		if (_v1.$ === 'Nothing') {
-			return $author$project$Graphics$OrbitControl$Model(model);
-		} else {
-			if (_v1.a.$ === 'Rotating') {
-				var oldPoint = _v1.a.a;
-				return $author$project$Graphics$OrbitControl$Model(
-					{
-						draggingState: $elm$core$Maybe$Just(
-							$author$project$Graphics$OrbitControl$Rotating(newPoint)),
-						ocImpl: A3($author$project$Graphics$OrbitControlImpl$doRotation, model.ocImpl, oldPoint, newPoint)
-					});
-			} else {
-				var oldPoint = _v1.a.a;
-				return $author$project$Graphics$OrbitControl$Model(
-					{
-						draggingState: $elm$core$Maybe$Just(
-							$author$project$Graphics$OrbitControl$Panning(newPoint)),
-						ocImpl: A3($author$project$Graphics$OrbitControlImpl$doPanning, model.ocImpl, oldPoint, newPoint)
-					});
-			}
-		}
-	});
-var $author$project$Graphics$OrbitControl$updateMouseUp = F2(
-	function (_v0, _v1) {
-		var model = _v0.a;
-		return $author$project$Graphics$OrbitControl$Model(
-			_Utils_update(
-				model,
-				{draggingState: $elm$core$Maybe$Nothing}));
-	});
 var $author$project$Graphics$OrbitControlImpl$updateViewport = F3(
 	function (_v0, w, h) {
 		var model = _v0.a;
@@ -12904,33 +12750,6 @@ var $author$project$Main$update = F2(
 						model,
 						{
 							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseDown, model.orbitControl, pos)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'MouseMove':
-				var pos = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseMove, model.orbitControl, pos)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'MouseUp':
-				var pos = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseUp, model.orbitControl, pos)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'MouseDownWithShift':
-				var pos = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseDownWithShift, model.orbitControl, pos)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'PointerDown':

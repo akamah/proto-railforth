@@ -24,10 +24,6 @@ import WebGL
 type Msg
     = LoadMesh MeshLoader.Msg
     | MouseDown ( Float, Float )
-      -- Shift だけ特別扱いするというのが漏れてるのでどうにかしたい
-    | MouseDownWithShift ( Float, Float )
-    | MouseMove ( Float, Float )
-    | MouseUp ( Float, Float )
     | PointerDown Decode.Value ( Float, Float )
     | PointerMove ( Float, Float )
     | PointerUp ( Float, Float )
@@ -260,8 +256,6 @@ viewCanvas { right, top, width, height, meshes, rails, piers, transform } =
         , HA.style "width" (width |> px)
         , HA.style "height" (height |> px)
         , HA.style "touch-action" "none"
-        , onMouseDownHandler
-        , onMouseUpHandler
         , onWheelHandler
         , onPointerDownHandler
         , onPointerMoveHandler
@@ -283,15 +277,12 @@ update msg model =
         MouseDown pos ->
             ( { model | orbitControl = OC.updateMouseDown model.orbitControl pos }, Cmd.none )
 
-        MouseMove pos ->
-            ( { model | orbitControl = OC.updateMouseMove model.orbitControl pos }, Cmd.none )
-
-        MouseUp pos ->
-            ( { model | orbitControl = OC.updateMouseUp model.orbitControl pos }, Cmd.none )
-
-        MouseDownWithShift pos ->
-            ( { model | orbitControl = OC.updateMouseDownWithShift model.orbitControl pos }, Cmd.none )
-
+        -- MouseMove pos ->
+        --     ( { model | orbitControl = OC.updateMouseMove model.orbitControl pos }, Cmd.none )
+        -- MouseUp pos ->
+        --     ( { model | orbitControl = OC.updateMouseUp model.orbitControl pos }, Cmd.none )
+        -- MouseDownWithShift pos ->
+        --     ( { model | orbitControl = OC.updateMouseDownWithShift model.orbitControl pos }, Cmd.none )
         PointerDown event pos ->
             let
                 _ =
@@ -387,18 +378,18 @@ mouseEventDecoder =
         (Decode.field "clientY" Decode.float)
 
 
-mouseEventDecoderWithModifier : (( Float, Float ) -> msg) -> (( Float, Float ) -> msg) -> Decoder msg
-mouseEventDecoderWithModifier normal shift =
-    Decode.map2
-        (\shiftPressed ->
-            if shiftPressed then
-                shift
 
-            else
-                normal
-        )
-        (Decode.field "shiftKey" Decode.bool)
-        mouseEventDecoder
+-- mouseEventDecoderWithModifier : (( Float, Float ) -> msg) -> (( Float, Float ) -> msg) -> Decoder msg
+-- mouseEventDecoderWithModifier normal shift =
+--     Decode.map2
+--         (\shiftPressed ->
+--             if shiftPressed then
+--                 shift
+--             else
+--                 normal
+--         )
+--         (Decode.field "shiftKey" Decode.bool)
+--         mouseEventDecoder
 
 
 wheelEventDecoder : Decoder ( Float, Float )
@@ -411,12 +402,6 @@ wheelEventDecoder =
 preventDefaultDecoder : Decoder a -> Decoder ( a, Bool )
 preventDefaultDecoder =
     Decode.map (\a -> ( a, True ))
-
-
-onMouseUpHandler : Html.Attribute Msg
-onMouseUpHandler =
-    HE.on "mouseup" <|
-        Decode.map MouseUp mouseEventDecoder
 
 
 onPointerDownHandler : Html.Attribute Msg
@@ -443,19 +428,6 @@ onSplitBarDragBegin _ =
         Decode.map SplitBarBeginDrag mouseEventDecoder
 
 
-onMouseMoveHandler : Html.Attribute Msg
-onMouseMoveHandler =
-    HE.on "mousemove" <|
-        Decode.map MouseMove mouseEventDecoder
-
-
-onMouseDownHandler : Html.Attribute Msg
-onMouseDownHandler =
-    HE.preventDefaultOn "mousedown" <|
-        preventDefaultDecoder <|
-            mouseEventDecoderWithModifier MouseDown MouseDownWithShift
-
-
 onWheelHandler : Html.Attribute Msg
 onWheelHandler =
     HE.preventDefaultOn "wheel"
@@ -466,21 +438,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Browser.Events.onResize (\w h -> Resize (toFloat w) (toFloat h))
-        , subscriptionMouseEvent model
         , subscriptionSplitBar model
         ]
-
-
-subscriptionMouseEvent : Model -> Sub Msg
-subscriptionMouseEvent model =
-    if OC.isDragging model.orbitControl then
-        Sub.batch
-            [ Browser.Events.onMouseMove <| Decode.map MouseMove mouseEventDecoder
-            , Browser.Events.onMouseUp <| Decode.map MouseUp mouseEventDecoder
-            ]
-
-    else
-        Sub.none
 
 
 subscriptionSplitBar : Model -> Sub Msg
