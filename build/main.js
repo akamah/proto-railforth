@@ -12696,17 +12696,11 @@ var $author$project$Graphics$OrbitControl$updatePointerDown = F4(
 	});
 var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
 var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
-	function (_v0, _v1, _v2) {
+	function (_v0, dx, dy) {
 		var model = _v0.a;
-		var x0 = _v1.a;
-		var y0 = _v1.b;
-		var x = _v2.a;
-		var y = _v2.b;
 		var sb = $elm$core$Basics$sin(model.altitude);
 		var sa = $elm$core$Basics$sin(model.azimuth);
 		var os = model.scale;
-		var dy = -(y - y0);
-		var dx = x - x0;
 		var cb = $elm$core$Basics$cos(model.altitude);
 		var ca = $elm$core$Basics$cos(model.azimuth);
 		var tanx = A2(
@@ -12715,7 +12709,7 @@ var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
 			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, sa, -ca, 0));
 		var tany = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$scale,
-			os * dy,
+			os * (-dy),
 			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ca * sb, sa * sb, -cb));
 		var trans = A2(
 			$elm_explorations$linear_algebra$Math$Vector3$add,
@@ -12726,25 +12720,37 @@ var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
 				model,
 				{target: trans}));
 	});
+var $author$project$Graphics$OrbitControl$doPanning = F3(
+	function (ocImpl, _v0, _v1) {
+		var newX = _v0.a;
+		var newY = _v0.b;
+		var oldX = _v1.a;
+		var oldY = _v1.b;
+		return A3($author$project$Graphics$OrbitControlImpl$doPanning, ocImpl, newX - oldX, newY - oldY);
+	});
 var $author$project$Graphics$OrbitControlImpl$doRotation = F3(
-	function (_v0, _v1, _v2) {
+	function (_v0, radX, radY) {
 		var model = _v0.a;
-		var x0 = _v1.a;
-		var y0 = _v1.b;
-		var x = _v2.a;
-		var y = _v2.b;
-		var dy = y - y0;
-		var dx = x - x0;
-		var azimuth = model.azimuth - (dx * $elm$core$Basics$degrees(0.3));
+		var azimuth = model.azimuth + radX;
 		var altitude = A3(
 			$elm$core$Basics$clamp,
 			$elm$core$Basics$degrees(0),
 			$elm$core$Basics$degrees(90),
-			model.altitude - (dy * $elm$core$Basics$degrees(0.3)));
+			model.altitude + radY);
 		return $author$project$Graphics$OrbitControlImpl$Model(
 			_Utils_update(
 				model,
 				{altitude: altitude, azimuth: azimuth}));
+	});
+var $author$project$Graphics$OrbitControl$doRotation = F3(
+	function (ocImpl, _v0, _v1) {
+		var newX = _v0.a;
+		var newY = _v0.b;
+		var oldX = _v1.a;
+		var oldY = _v1.b;
+		var radY = (-(newY - oldY)) * $elm$core$Basics$degrees(0.3);
+		var radX = (-(newX - oldX)) * $elm$core$Basics$degrees(0.3);
+		return A3($author$project$Graphics$OrbitControlImpl$doRotation, ocImpl, radX, radY);
 	});
 var $elm$core$Basics$pow = _Basics_pow;
 var $author$project$Graphics$OrbitControl$distance = F2(
@@ -12857,7 +12863,7 @@ var $author$project$Graphics$OrbitControl$updatePointerMove = F3(
 									_Utils_update(
 										model,
 										{
-											ocImpl: A3($author$project$Graphics$OrbitControlImpl$doRotation, model.ocImpl, oldPoint, newPoint),
+											ocImpl: A3($author$project$Graphics$OrbitControl$doRotation, model.ocImpl, newPoint, oldPoint),
 											points: updatedPoints
 										}));
 							} else {
@@ -12867,7 +12873,7 @@ var $author$project$Graphics$OrbitControl$updatePointerMove = F3(
 									_Utils_update(
 										model,
 										{
-											ocImpl: A3($author$project$Graphics$OrbitControlImpl$doPanning, model.ocImpl, oldPoint, newPoint),
+											ocImpl: A3($author$project$Graphics$OrbitControl$doPanning, model.ocImpl, newPoint, oldPoint),
 											points: updatedPoints
 										}));
 							}
@@ -12947,26 +12953,33 @@ var $author$project$Main$updateViewport = F3(
 				viewport: {height: h, width: w}
 			});
 	});
-var $author$project$Graphics$OrbitControlImpl$doDolly = F2(
-	function (_v0, dy) {
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $author$project$Graphics$OrbitControlImpl$doScaleAdd = F2(
+	function (_v0, diff) {
 		var model = _v0.a;
-		var multiplier = 1.02;
-		var delta = (dy < 0) ? (1 / multiplier) : ((dy > 0) ? (1 * multiplier) : 1);
-		var next = model.scale * delta;
 		return $author$project$Graphics$OrbitControlImpl$Model(
 			_Utils_update(
 				model,
-				{scale: next}));
+				{scale: model.scale + diff}));
+	});
+var $author$project$Graphics$OrbitControl$doDolly = F3(
+	function (ocImpl, dx, dy) {
+		return (_Utils_cmp(
+			$elm$core$Basics$abs(dx),
+			$elm$core$Basics$abs(dy)) > -1) ? ocImpl : A2($author$project$Graphics$OrbitControlImpl$doScaleAdd, ocImpl, dy * 0.01);
 	});
 var $author$project$Graphics$OrbitControl$updateWheel = F2(
 	function (_v0, _v1) {
 		var model = _v0.a;
+		var dx = _v1.a;
 		var dy = _v1.b;
 		return $author$project$Graphics$OrbitControl$Model(
 			_Utils_update(
 				model,
 				{
-					ocImpl: A2($author$project$Graphics$OrbitControlImpl$doDolly, model.ocImpl, dy)
+					ocImpl: A3($author$project$Graphics$OrbitControl$doDolly, model.ocImpl, dx, dy)
 				}));
 	});
 var $author$project$Main$update = F2(

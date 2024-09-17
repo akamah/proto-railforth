@@ -72,14 +72,14 @@ updatePointerMove (Model model) pointerId newPoint =
         ( 1, Just Rotating, Just oldPoint ) ->
             Model
                 { model
-                    | ocImpl = Impl.doRotation model.ocImpl oldPoint newPoint
+                    | ocImpl = doRotation model.ocImpl newPoint oldPoint
                     , points = updatedPoints
                 }
 
         ( 1, Just Panning, Just oldPoint ) ->
             Model
                 { model
-                    | ocImpl = Impl.doPanning model.ocImpl oldPoint newPoint
+                    | ocImpl = doPanning model.ocImpl newPoint oldPoint
                     , points = updatedPoints
                 }
 
@@ -114,9 +114,9 @@ updatePointerUp (Model model) pointerId =
 
 
 updateWheel : Model -> ( Float, Float ) -> Model
-updateWheel (Model model) ( _, dy ) =
+updateWheel (Model model) ( dx, dy ) =
     Model
-        { model | ocImpl = Impl.doDolly model.ocImpl dy }
+        { model | ocImpl = doDolly model.ocImpl dx dy }
 
 
 updateViewport : Float -> Float -> Model -> Model
@@ -132,6 +132,34 @@ makeTransform (Model model) =
 isDragging : Model -> Bool
 isDragging (Model model) =
     Dict.size model.points > 0
+
+
+doRotation : Impl.Model -> ( Float, Float ) -> ( Float, Float ) -> Impl.Model
+doRotation ocImpl ( newX, newY ) ( oldX, oldY ) =
+    let
+        -- 画面を右へドラッグすると左から回り込むように見ることになるので、この座標系だとazimuthは減る方向になる
+        radX =
+            -(newX - oldX) * degrees 0.3
+
+        -- 画面のY軸が増える方向はaltitudeが小さくなる方向なのでマイナスをつける
+        radY =
+            -(newY - oldY) * degrees 0.3
+    in
+    Impl.doRotation ocImpl radX radY
+
+
+doPanning : Impl.Model -> ( Float, Float ) -> ( Float, Float ) -> Impl.Model
+doPanning ocImpl ( newX, newY ) ( oldX, oldY ) =
+    Impl.doPanning ocImpl (newX - oldX) (newY - oldY)
+
+
+doDolly : Impl.Model -> Float -> Float -> Impl.Model
+doDolly ocImpl dx dy =
+    if abs dx >= abs dy then
+        ocImpl
+
+    else
+        Impl.doScaleAdd ocImpl (dy * 0.01)
 
 
 doTwoPointersMove :
