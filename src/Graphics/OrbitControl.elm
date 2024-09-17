@@ -10,6 +10,7 @@ module Graphics.OrbitControl exposing
     , updateWheel
     )
 
+import Dict exposing (Dict)
 import Graphics.OrbitControlImpl as Impl
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 exposing (Vec3)
@@ -19,27 +20,33 @@ type Model
     = Model ModelImpl
 
 
+type alias PointerId =
+    Int
+
+
 type alias ModelImpl =
-    { draggingState : Maybe DraggingState
+    { draggingState : Maybe DraggingState -- for mouse event, remember if shift key is pressed
+    , points : Dict Int ( Float, Float )
     , ocImpl : Impl.Model
     }
 
 
 type DraggingState
-    = Panning ( Float, Float )
-    | Rotating ( Float, Float )
+    = Panning
+    | Rotating
 
 
 init : Float -> Float -> Float -> Vec3 -> Model
 init azimuth altitude scale eyeTarget =
     Model
         { draggingState = Nothing
+        , points = Dict.empty
         , ocImpl = Impl.init azimuth altitude scale eyeTarget
         }
 
 
-updatePointerDown : Model -> ( Float, Float ) -> Bool -> Model
-updatePointerDown (Model model) pos shiftKey =
+updatePointerDown : Model -> PointerId -> ( Float, Float ) -> Bool -> Model
+updatePointerDown (Model model) pointerId pos shiftKey =
     let
         next =
             if shiftKey then
@@ -48,31 +55,70 @@ updatePointerDown (Model model) pos shiftKey =
             else
                 Rotating
     in
-    Model { model | draggingState = Just (next pos) }
+    Model
+        { model
+            | draggingState = Just next
+            , points = Dict.insert pointerId pos model.points
+        }
 
 
-updateMouseMove : Model -> ( Float, Float ) -> Model
-updateMouseMove (Model model) newPoint =
-    case model.draggingState of
-        Nothing ->
-            Model model
-
-        Just (Rotating oldPoint) ->
+updateMouseMove : Model -> PointerId -> ( Float, Float ) -> Model
+updateMouseMove (Model model) pointerId newPoint =
+    let
+        updatedPoints =
+            Dict.insert pointerId newPoint model.points
+    in
+    case ( Dict.size model.points, model.draggingState, Dict.get pointerId model.points ) of
+        ( 1, Just Rotating, Just oldPoint ) ->
             Model
-                { draggingState = Just (Rotating newPoint)
-                , ocImpl = Impl.doRotation model.ocImpl oldPoint newPoint
+                { model
+                    | ocImpl = Impl.doRotation model.ocImpl oldPoint newPoint
+                    , points = updatedPoints
                 }
 
-        Just (Panning oldPoint) ->
+        ( 1, Just Panning, Just oldPoint ) ->
             Model
-                { draggingState = Just (Panning newPoint)
-                , ocImpl = Impl.doPanning model.ocImpl oldPoint newPoint
+                { model
+                    | ocImpl = Impl.doPanning model.ocImpl oldPoint newPoint
+                    , points = updatedPoints
                 }
 
+        ( 2, _, Just oldPoint ) ->
+            case getOtherElement pointerId model.points of
+                Just otherPoint ->
+                    Model
+                        { model
+                            | ocImpl =
+                                doTwoPointersMove model.ocImpl
+                                    { oldPoint = oldPoint
+                                    , newPoint = newPoint
+                                    , otherPoint = otherPoint
+                                    }
+                            , points = updatedPoints
+                        }
 
-updateMouseUp : Model -> Model
-updateMouseUp (Model model) =
-    Model { model | draggingState = Nothing }
+                _ ->
+                    Model { model | points = updatedPoints }
+
+        _ ->
+            Model { model | points = updatedPoints }
+
+
+getOtherElement : comparable -> Dict comparable v -> Maybe v
+getOtherElement key =
+    Dict.partition (\k _ -> k /= key)
+        >> Tuple.first
+        >> Dict.values
+        >> List.head
+
+
+updateMouseUp : Model -> PointerId -> Model
+updateMouseUp (Model model) pointerId =
+    Model
+        { model
+            | draggingState = Nothing
+            , points = Dict.remove pointerId model.points
+        }
 
 
 updateWheel : Model -> ( Float, Float ) -> Model
@@ -93,9 +139,33 @@ makeTransform (Model model) =
 
 isDragging : Model -> Bool
 isDragging (Model model) =
-    case model.draggingState of
-        Just _ ->
-            True
+    Dict.size model.points > 0
 
-        Nothing ->
-            False
+
+doTwoPointersMove :
+    Impl.Model
+    ->
+        { oldPoint : ( Float, Float )
+        , newPoint : ( Float, Float )
+        , otherPoint : ( Float, Float )
+        }
+    -> Impl.Model
+doTwoPointersMove ocImpl { oldPoint, newPoint, otherPoint } =
+    let
+        scale =
+            distance newPoint otherPoint / distance oldPoint otherPoint
+
+        ( dx, dy ) =
+            sub2 newPoint oldPoint
+    in
+    ocImpl
+
+
+distance : ( Float, Float ) -> ( Float, Float ) -> Float
+distance ( px, py ) ( qx, qy ) =
+    sqrt ((px - qx) ^ 2 + (py - qy) ^ 2)
+
+
+sub2 : ( Float, Float ) -> ( Float, Float ) -> ( Float, Float )
+sub2 ( px, py ) ( qx, qy ) =
+    ( (px - qx) / 2, (py - qy) / 2 )

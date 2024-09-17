@@ -278,16 +278,16 @@ update msg model =
             ( { model | meshes = MeshLoader.update meshMsg model.meshes }, Cmd.none )
 
         PointerDown event ->
-            ( { model | orbitControl = OC.updatePointerDown model.orbitControl ( event.clientX, event.clientY ) event.shiftKey }
+            ( { model | orbitControl = OC.updatePointerDown model.orbitControl event.pointerId ( event.clientX, event.clientY ) event.shiftKey }
             , PE.setPointerCapture event
               -- necessary for tracking the pointer event outside of the canvas
             )
 
         PointerMove event ->
-            ( { model | orbitControl = OC.updateMouseMove model.orbitControl ( event.clientX, event.clientY ) }, Cmd.none )
+            ( { model | orbitControl = OC.updateMouseMove model.orbitControl event.pointerId ( event.clientX, event.clientY ) }, Cmd.none )
 
-        PointerUp _ ->
-            ( { model | orbitControl = OC.updateMouseUp model.orbitControl }, Cmd.none )
+        PointerUp event ->
+            ( { model | orbitControl = OC.updateMouseUp model.orbitControl event.pointerId }, Cmd.none )
 
         Wheel pos ->
             let
