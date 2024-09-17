@@ -1,8 +1,9 @@
 module Graphics.OrbitControlImpl exposing
     ( Model
-    , doDolly
     , doPanning
     , doRotation
+    , doScaleAdd
+    , doScaleMult
     , init
     , makeTransform
     , updateViewport
@@ -81,22 +82,16 @@ makeTransform (Model model) =
         (Mat4.makeLookAt (Vec3.add model.target eyePosition) model.target upVector)
 
 
-doRotation : Model -> ( Float, Float ) -> ( Float, Float ) -> Model
-doRotation (Model model) ( x0, y0 ) ( x, y ) =
+doRotation : Model -> Float -> Float -> Model
+doRotation (Model model) radX radY =
+    -- TODO: altitudeMax and altitudeMin
     let
-        dx =
-            x - x0
-
-        dy =
-            y - y0
-
         azimuth =
-            model.azimuth - dx * degrees 0.3
+            model.azimuth + radX
 
         altitude =
             model.altitude
-                - dy
-                * degrees 0.3
+                + radY
                 |> clamp (degrees 0) (degrees 90)
     in
     Model
@@ -106,15 +101,9 @@ doRotation (Model model) ( x0, y0 ) ( x, y ) =
         }
 
 
-doPanning : Model -> ( Float, Float ) -> ( Float, Float ) -> Model
-doPanning (Model model) ( x0, y0 ) ( x, y ) =
+doPanning : Model -> Float -> Float -> Model
+doPanning (Model model) dx dy =
     let
-        dx =
-            x - x0
-
-        dy =
-            -(y - y0)
-
         os =
             model.scale
 
@@ -134,7 +123,7 @@ doPanning (Model model) ( x0, y0 ) ( x, y ) =
             Vec3.scale (os * dx) (vec3 sa -ca 0)
 
         tany =
-            Vec3.scale (os * dy) (vec3 (ca * sb) (sa * sb) -cb)
+            Vec3.scale (os * -dy) (vec3 (ca * sb) (sa * sb) -cb)
 
         trans =
             Vec3.add model.target (Vec3.add tanx tany)
@@ -142,25 +131,11 @@ doPanning (Model model) ( x0, y0 ) ( x, y ) =
     Model { model | target = trans }
 
 
-doDolly : Model -> Float -> Model
-doDolly (Model model) dy =
-    let
-        multiplier =
-            1.02
+doScaleAdd : Model -> Float -> Model
+doScaleAdd (Model model) diff =
+    Model { model | scale = model.scale + diff }
 
-        delta =
-            if dy < 0 then
-                -- zoom out
-                1 / multiplier
 
-            else if dy > 0 then
-                -- zoom in
-                1 * multiplier
-
-            else
-                1
-
-        next =
-            model.scale * delta
-    in
-    Model { model | scale = next }
+doScaleMult : Model -> Float -> Model
+doScaleMult (Model model) mult =
+    Model { model | scale = model.scale * mult }
