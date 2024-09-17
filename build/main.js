@@ -12680,6 +12680,20 @@ var $author$project$Graphics$MeshLoader$update = F2(
 			}
 		}
 	});
+var $author$project$Graphics$OrbitControl$Panning = {$: 'Panning'};
+var $author$project$Graphics$OrbitControl$Rotating = {$: 'Rotating'};
+var $author$project$Graphics$OrbitControl$updatePointerDown = F4(
+	function (_v0, pointerId, pos, shiftKey) {
+		var model = _v0.a;
+		var next = shiftKey ? $author$project$Graphics$OrbitControl$Panning : $author$project$Graphics$OrbitControl$Rotating;
+		return $author$project$Graphics$OrbitControl$Model(
+			_Utils_update(
+				model,
+				{
+					draggingState: $elm$core$Maybe$Just(next),
+					points: A3($elm$core$Dict$insert, pointerId, pos, model.points)
+				}));
+	});
 var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
 var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
 	function (_v0, _v1, _v2) {
@@ -12822,7 +12836,7 @@ var $elm$core$Dict$sizeHelp = F2(
 var $elm$core$Dict$size = function (dict) {
 	return A2($elm$core$Dict$sizeHelp, 0, dict);
 };
-var $author$project$Graphics$OrbitControl$updateMouseMove = F3(
+var $author$project$Graphics$OrbitControl$updatePointerMove = F3(
 	function (_v0, pointerId, newPoint) {
 		var model = _v0.a;
 		var updatedPoints = A3($elm$core$Dict$insert, pointerId, newPoint, model.points);
@@ -12893,7 +12907,7 @@ var $author$project$Graphics$OrbitControl$updateMouseMove = F3(
 				model,
 				{points: updatedPoints}));
 	});
-var $author$project$Graphics$OrbitControl$updateMouseUp = F2(
+var $author$project$Graphics$OrbitControl$updatePointerUp = F2(
 	function (_v0, pointerId) {
 		var model = _v0.a;
 		return $author$project$Graphics$OrbitControl$Model(
@@ -12902,20 +12916,6 @@ var $author$project$Graphics$OrbitControl$updateMouseUp = F2(
 				{
 					draggingState: $elm$core$Maybe$Nothing,
 					points: A2($elm$core$Dict$remove, pointerId, model.points)
-				}));
-	});
-var $author$project$Graphics$OrbitControl$Panning = {$: 'Panning'};
-var $author$project$Graphics$OrbitControl$Rotating = {$: 'Rotating'};
-var $author$project$Graphics$OrbitControl$updatePointerDown = F4(
-	function (_v0, pointerId, pos, shiftKey) {
-		var model = _v0.a;
-		var next = shiftKey ? $author$project$Graphics$OrbitControl$Panning : $author$project$Graphics$OrbitControl$Rotating;
-		return $author$project$Graphics$OrbitControl$Model(
-			_Utils_update(
-				model,
-				{
-					draggingState: $elm$core$Maybe$Just(next),
-					points: A3($elm$core$Dict$insert, pointerId, pos, model.points)
 				}));
 	});
 var $author$project$Graphics$OrbitControlImpl$updateViewport = F3(
@@ -13002,7 +13002,7 @@ var $author$project$Main$update = F2(
 						model,
 						{
 							orbitControl: A3(
-								$author$project$Graphics$OrbitControl$updateMouseMove,
+								$author$project$Graphics$OrbitControl$updatePointerMove,
 								model.orbitControl,
 								event.pointerId,
 								_Utils_Tuple2(event.clientX, event.clientY))
@@ -13014,7 +13014,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							orbitControl: A2($author$project$Graphics$OrbitControl$updateMouseUp, model.orbitControl, event.pointerId)
+							orbitControl: A2($author$project$Graphics$OrbitControl$updatePointerUp, model.orbitControl, event.pointerId)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'Wheel':

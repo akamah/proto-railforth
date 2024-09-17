@@ -3,9 +3,9 @@ module Graphics.OrbitControl exposing
     , init
     , isDragging
     , makeTransform
-    , updateMouseMove
-    , updateMouseUp
     , updatePointerDown
+    , updatePointerMove
+    , updatePointerUp
     , updateViewport
     , updateWheel
     )
@@ -62,8 +62,8 @@ updatePointerDown (Model model) pointerId pos shiftKey =
         }
 
 
-updateMouseMove : Model -> PointerId -> ( Float, Float ) -> Model
-updateMouseMove (Model model) pointerId newPoint =
+updatePointerMove : Model -> PointerId -> ( Float, Float ) -> Model
+updatePointerMove (Model model) pointerId newPoint =
     let
         updatedPoints =
             Dict.insert pointerId newPoint model.points
@@ -104,16 +104,8 @@ updateMouseMove (Model model) pointerId newPoint =
             Model { model | points = updatedPoints }
 
 
-getOtherElement : comparable -> Dict comparable v -> Maybe v
-getOtherElement key =
-    Dict.partition (\k _ -> k /= key)
-        >> Tuple.first
-        >> Dict.values
-        >> List.head
-
-
-updateMouseUp : Model -> PointerId -> Model
-updateMouseUp (Model model) pointerId =
+updatePointerUp : Model -> PointerId -> Model
+updatePointerUp (Model model) pointerId =
     Model
         { model
             | draggingState = Nothing
@@ -159,6 +151,16 @@ doTwoPointersMove ocImpl { oldPoint, newPoint, otherPoint } =
             sub2 newPoint oldPoint
     in
     ocImpl
+
+
+{-| get any value other than a given key
+-}
+getOtherElement : comparable -> Dict comparable v -> Maybe v
+getOtherElement key =
+    Dict.partition (\k _ -> k /= key)
+        >> Tuple.first
+        >> Dict.values
+        >> List.head
 
 
 distance : ( Float, Float ) -> ( Float, Float ) -> Float

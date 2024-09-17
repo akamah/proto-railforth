@@ -284,10 +284,10 @@ update msg model =
             )
 
         PointerMove event ->
-            ( { model | orbitControl = OC.updateMouseMove model.orbitControl event.pointerId ( event.clientX, event.clientY ) }, Cmd.none )
+            ( { model | orbitControl = OC.updatePointerMove model.orbitControl event.pointerId ( event.clientX, event.clientY ) }, Cmd.none )
 
         PointerUp event ->
-            ( { model | orbitControl = OC.updateMouseUp model.orbitControl event.pointerId }, Cmd.none )
+            ( { model | orbitControl = OC.updatePointerUp model.orbitControl event.pointerId }, Cmd.none )
 
         Wheel pos ->
             let
