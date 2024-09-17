@@ -12762,6 +12762,14 @@ var $author$project$Graphics$OrbitControl$distance = F2(
 		return $elm$core$Basics$sqrt(
 			A2($elm$core$Basics$pow, px - qx, 2) + A2($elm$core$Basics$pow, py - qy, 2));
 	});
+var $author$project$Graphics$OrbitControlImpl$doScaleMult = F2(
+	function (_v0, mult) {
+		var model = _v0.a;
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{scale: model.scale * mult}));
+	});
 var $author$project$Graphics$OrbitControl$sub2 = F2(
 	function (_v0, _v1) {
 		var px = _v0.a;
@@ -12775,11 +12783,14 @@ var $author$project$Graphics$OrbitControl$doTwoPointersMove = F2(
 		var oldPoint = _v0.oldPoint;
 		var newPoint = _v0.newPoint;
 		var otherPoint = _v0.otherPoint;
-		var scale = A2($author$project$Graphics$OrbitControl$distance, newPoint, otherPoint) / A2($author$project$Graphics$OrbitControl$distance, oldPoint, otherPoint);
+		var scale = A2($author$project$Graphics$OrbitControl$distance, oldPoint, otherPoint) / A2($author$project$Graphics$OrbitControl$distance, newPoint, otherPoint);
 		var _v1 = A2($author$project$Graphics$OrbitControl$sub2, newPoint, oldPoint);
 		var dx = _v1.a;
 		var dy = _v1.b;
-		return ocImpl;
+		return A2(
+			$author$project$Graphics$OrbitControlImpl$doScaleMult,
+			A3($author$project$Graphics$OrbitControlImpl$doPanning, ocImpl, dx, dy),
+			scale);
 	});
 var $elm$core$Dict$partition = F2(
 	function (isGood, dict) {

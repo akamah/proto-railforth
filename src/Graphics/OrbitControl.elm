@@ -173,12 +173,12 @@ doTwoPointersMove :
 doTwoPointersMove ocImpl { oldPoint, newPoint, otherPoint } =
     let
         scale =
-            distance newPoint otherPoint / distance oldPoint otherPoint
+            distance oldPoint otherPoint / distance newPoint otherPoint
 
         ( dx, dy ) =
             sub2 newPoint oldPoint
     in
-    ocImpl
+    Impl.doScaleMult (Impl.doPanning ocImpl dx dy) scale
 
 
 {-| get any value other than a given key
