@@ -51,12 +51,12 @@ update msg model =
         LoadMesh name meshOrErr ->
             case meshOrErr of
                 Err e ->
-                    { model | errors = Debug.log ("load mesh error: " ++ name) e :: model.errors }
+                    { model | errors = e :: model.errors }
 
                 Ok mesh ->
                     case convertMesh mesh of
                         Err e ->
-                            { model | errors = Debug.log ("parse mesh error: " ++ name) e :: model.errors }
+                            { model | errors = e :: model.errors }
 
                         Ok ( vertices, indices ) ->
                             let

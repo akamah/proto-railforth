@@ -229,7 +229,6 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
       }
     });
     app.ports.setPointerCaptureImpl.subscribe(function (event) {
-      console.log(event);
       event.target.setPointerCapture(event.pointerId);
     });    
   </script>
