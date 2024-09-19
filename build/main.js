@@ -7761,7 +7761,9 @@ var $elm_explorations$webgl$WebGL$Internal$enableSetting = F2(
 		}
 	});
 var $elm_explorations$webgl$WebGL$entityWith = _WebGL_entity;
-var $author$project$Graphics$Render$lightFromAbove = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2.0 / 27.0, 7.0 / 27.0, 26.0 / 27.0);
+var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
+var $author$project$Graphics$Render$lightFromAbove = $elm_explorations$linear_algebra$Math$Vector3$normalize(
+	A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2, 1, 5));
 var $elm_explorations$linear_algebra$Math$Matrix4$makeRotate = _MJS_m4x4makeRotate;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate = _MJS_m4x4makeTranslate;
 var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
@@ -7797,14 +7799,14 @@ var $author$project$Graphics$Render$normalMatrix = function (mat) {
 	}
 };
 var $author$project$Graphics$Render$railFragmentShader = {
-	src: '\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            gl_FragColor = vec4(fragmentColor, 1.0);\n        }\n    ',
+	src: '\n        uniform highp vec3 light;\n        uniform highp vec3 color;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n        void main() {\n            highp vec3 nLight = normalize(light);\n            highp vec3 nViewPosition = normalize(varyingViewPosition);\n            highp vec3 nNormal = normalize(varyingNormal);\n            highp vec3 nHalfway = normalize(nLight + nViewPosition);\n\n            highp vec3 ambient = 0.2 * color;\n            highp vec3 diffuse = 0.6 * clamp(dot(nNormal, nLight), 0.0, 1.0) * color;\n            highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));\n\n            // did gamma correction\n            highp vec3 fragmentColor = pow(ambient + diffuse + specular, vec3(1.0 / 2.2));\n\n            gl_FragColor = vec4(fragmentColor, 1.0);\n        }\n    ',
 	attributes: {},
-	uniforms: {}
+	uniforms: {color: 'color', light: 'light'}
 };
 var $author$project$Graphics$Render$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelViewMatrix;\n        uniform mat4 projectionMatrix;\n        uniform mat4 normalMatrix;\n        uniform vec3 light;\n        uniform vec3 color;\n        \n        varying highp vec3 fragmentColor;\n\n        void main() {\n            highp vec4 cameraPosition = modelViewMatrix * vec4(position, 1.0);\n            highp vec4 cameraNormal = normalize(normalMatrix * vec4(normal, 0.0));\n\n            highp float lambertFactor = clamp(dot(cameraNormal, vec4(light, 0)), 0.0, 1.0);\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            fragmentColor = intensity * color;\n\n            gl_Position = projectionMatrix * cameraPosition;\n        }\n    ',
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelViewMatrix;\n        uniform mat4 projectionMatrix;\n        uniform mat4 normalMatrix;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n\n        void main() {\n            highp vec4 cameraPosition = modelViewMatrix * vec4(position, 1.0);\n            varyingNormal = (normalMatrix * vec4(normal, 0.0)).xyz;\n            varyingViewPosition = -cameraPosition.xyz;\n\n            gl_Position = projectionMatrix * cameraPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position'},
-	uniforms: {color: 'color', light: 'light', modelViewMatrix: 'modelViewMatrix', normalMatrix: 'normalMatrix', projectionMatrix: 'projectionMatrix'}
+	uniforms: {modelViewMatrix: 'modelViewMatrix', normalMatrix: 'normalMatrix', projectionMatrix: 'projectionMatrix'}
 };
 var $elm_explorations$linear_algebra$Math$Matrix4$transform = _MJS_v3mul4x4;
 var $author$project$Graphics$Render$renderRail = F6(
@@ -12566,7 +12568,6 @@ var $elm$core$Maybe$map3 = F4(
 			}
 		}
 	});
-var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;

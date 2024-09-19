@@ -1,7 +1,7 @@
-module Graphics.Render exposing (Attributes, renderPier, renderRail)
+module Graphics.Render exposing (Attributes, normalMatrix, renderPier, renderRail)
 
 import Math.Matrix4 as Mat4 exposing (Mat4)
-import Math.Vector3 exposing (Vec3, vec3)
+import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Types.Rail exposing (Rail(..))
 import WebGL exposing (Entity, Mesh, Shader)
 import WebGL.Settings
@@ -31,7 +31,7 @@ type alias Varyings =
 
 lightFromAbove : Vec3
 lightFromAbove =
-    vec3 (2.0 / 27.0) (7.0 / 27.0) (26.0 / 27.0)
+    Vec3.normalize <| vec3 2 1 5
 
 
 renderRail : Mat4 -> Mat4 -> Mesh Attributes -> Vec3 -> Float -> Vec3 -> List Entity
@@ -79,9 +79,8 @@ makeMeshMatrix origin angle =
     Mat4.mul position rotate
 
 
-railVertexShader : Shader Attributes Uniforms { fragmentColor : Vec3 }
+railVertexShader : Shader Attributes Uniforms Varyings
 railVertexShader =
-    -- シェーダ周り、というか描画周りはモジュールに分けてしまいたい
     [glsl|
         attribute vec3 position;
         attribute vec3 normal;
@@ -89,30 +88,43 @@ railVertexShader =
         uniform mat4 modelViewMatrix;
         uniform mat4 projectionMatrix;
         uniform mat4 normalMatrix;
-        uniform vec3 light;
-        uniform vec3 color;
-        
-        varying highp vec3 fragmentColor;
+
+        varying highp vec3 varyingViewPosition;
+        varying highp vec3 varyingNormal;
+
 
         void main() {
             highp vec4 cameraPosition = modelViewMatrix * vec4(position, 1.0);
-            highp vec4 cameraNormal = normalize(normalMatrix * vec4(normal, 0.0));
-
-            highp float lambertFactor = clamp(dot(cameraNormal, vec4(light, 0)), 0.0, 1.0);
-            highp float intensity = 0.3 + 0.7 * lambertFactor;
-            fragmentColor = intensity * color;
+            varyingNormal = (normalMatrix * vec4(normal, 0.0)).xyz;
+            varyingViewPosition = -cameraPosition.xyz;
 
             gl_Position = projectionMatrix * cameraPosition;
         }
     |]
 
 
-railFragmentShader : Shader {} Uniforms { fragmentColor : Vec3 }
+railFragmentShader : Shader {} Uniforms Varyings
 railFragmentShader =
     [glsl|
-        varying highp vec3 fragmentColor;
+        uniform highp vec3 light;
+        uniform highp vec3 color;
+
+        varying highp vec3 varyingViewPosition;
+        varying highp vec3 varyingNormal;
 
         void main() {
+            highp vec3 nLight = normalize(light);
+            highp vec3 nViewPosition = normalize(varyingViewPosition);
+            highp vec3 nNormal = normalize(varyingNormal);
+            highp vec3 nHalfway = normalize(nLight + nViewPosition);
+
+            highp vec3 ambient = 0.2 * color;
+            highp vec3 diffuse = 0.6 * clamp(dot(nNormal, nLight), 0.0, 1.0) * color;
+            highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));
+
+            // did gamma correction
+            highp vec3 fragmentColor = pow(ambient + diffuse + specular, vec3(1.0 / 2.2));
+
             gl_FragColor = vec4(fragmentColor, 1.0);
         }
     |]
