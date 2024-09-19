@@ -113,12 +113,13 @@ getPierMesh model pier =
         |> Maybe.withDefault dummyMesh
 
 
-renderRails : Model -> List RailPlacement -> Mat4 -> List Entity
-renderRails model rails transform =
+renderRails : Model -> List RailPlacement -> Mat4 -> Mat4 -> List Entity
+renderRails model rails viewMatrix projectionMatrix =
     List.concatMap
         (\railPosition ->
             Render.renderRail
-                transform
+                viewMatrix
+                projectionMatrix
                 (getRailMesh model railPosition.rail)
                 railPosition.position
                 railPosition.angle
@@ -165,12 +166,13 @@ getRailColor rail =
             blue
 
 
-renderPiers : Model -> List PierPlacement -> Mat4 -> List Entity
-renderPiers model piers transform =
-    List.map
+renderPiers : Model -> List PierPlacement -> Mat4 -> Mat4 -> List Entity
+renderPiers model piers viewMatrix projectionMatrix =
+    List.concatMap
         (\pierPlacement ->
             Render.renderPier
-                transform
+                viewMatrix
+                projectionMatrix
                 (getPierMesh model pierPlacement.pier)
                 pierPlacement.position
                 pierPlacement.angle

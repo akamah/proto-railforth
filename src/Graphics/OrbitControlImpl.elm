@@ -5,7 +5,8 @@ module Graphics.OrbitControlImpl exposing
     , doScaleAdd
     , doScaleMult
     , init
-    , makeTransform
+    , makeProjectionMatrix
+    , makeViewMatrix
     , updateViewport
     )
 
@@ -49,8 +50,8 @@ updateViewport (Model model) w h =
     Model { model | viewportWidth = w, viewportHeight = h }
 
 
-makeTransform : Model -> Mat4
-makeTransform (Model model) =
+makeProjectionMatrix : Model -> Mat4
+makeProjectionMatrix (Model model) =
     let
         w =
             model.scale * model.viewportWidth / 2
@@ -58,11 +59,17 @@ makeTransform (Model model) =
         h =
             model.scale * model.viewportHeight / 2
 
-        eyeDistance =
-            10000
-
         cameraClipDistance =
             100000
+    in
+    Mat4.makeOrtho -w w -h h -cameraClipDistance cameraClipDistance
+
+
+makeViewMatrix : Model -> Mat4
+makeViewMatrix (Model model) =
+    let
+        eyeDistance =
+            10000
 
         eyePosition =
             vec3
@@ -77,9 +84,7 @@ makeTransform (Model model) =
                 -(sin model.altitude * sin model.azimuth)
                 (cos model.altitude)
     in
-    Mat4.mul
-        (Mat4.makeOrtho -w w -h h -cameraClipDistance cameraClipDistance)
-        (Mat4.makeLookAt (Vec3.add model.target eyePosition) model.target upVector)
+    Mat4.makeLookAt (Vec3.add model.target eyePosition) model.target upVector
 
 
 doRotation : Model -> Float -> Float -> Model
