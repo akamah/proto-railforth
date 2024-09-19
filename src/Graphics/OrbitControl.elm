@@ -2,7 +2,8 @@ module Graphics.OrbitControl exposing
     ( Model
     , init
     , isDragging
-    , makeTransform
+    , makeProjectionMatrix
+    , makeViewMatrix
     , updatePointerDown
     , updatePointerMove
     , updatePointerUp
@@ -124,9 +125,14 @@ updateViewport w h (Model model) =
     Model { model | ocImpl = Impl.updateViewport model.ocImpl w h }
 
 
-makeTransform : Model -> Mat4
-makeTransform (Model model) =
-    Impl.makeTransform model.ocImpl
+makeProjectionMatrix : Model -> Mat4
+makeProjectionMatrix (Model model) =
+    Impl.makeProjectionMatrix model.ocImpl
+
+
+makeViewMatrix : Model -> Mat4
+makeViewMatrix (Model model) =
+    Impl.makeViewMatrix model.ocImpl
 
 
 isDragging : Model -> Bool

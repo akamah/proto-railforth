@@ -7382,44 +7382,48 @@ var $elm$html$Html$Attributes$autocomplete = function (bool) {
 		bool ? 'on' : 'off');
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
-var $elm$core$Basics$cos = _Basics_cos;
-var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeOrtho = _MJS_m4x4makeOrtho;
-var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
-var $elm$core$Basics$sin = _Basics_sin;
-var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
-var $author$project$Graphics$OrbitControlImpl$makeTransform = function (_v0) {
+var $author$project$Graphics$OrbitControlImpl$makeProjectionMatrix = function (_v0) {
 	var model = _v0.a;
 	var w = (model.scale * model.viewportWidth) / 2;
+	var h = (model.scale * model.viewportHeight) / 2;
+	var cameraClipDistance = 100000;
+	return A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -cameraClipDistance, cameraClipDistance);
+};
+var $author$project$Graphics$OrbitControl$makeProjectionMatrix = function (_v0) {
+	var model = _v0.a;
+	return $author$project$Graphics$OrbitControlImpl$makeProjectionMatrix(model.ocImpl);
+};
+var $elm_explorations$linear_algebra$Math$Vector3$add = _MJS_v3add;
+var $elm$core$Basics$cos = _Basics_cos;
+var $elm_explorations$linear_algebra$Math$Matrix4$makeLookAt = _MJS_m4x4makeLookAt;
+var $elm$core$Basics$sin = _Basics_sin;
+var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
+var $author$project$Graphics$OrbitControlImpl$makeViewMatrix = function (_v0) {
+	var model = _v0.a;
 	var upVector = A3(
 		$elm_explorations$linear_algebra$Math$Vector3$vec3,
 		-($elm$core$Basics$sin(model.altitude) * $elm$core$Basics$cos(model.azimuth)),
 		-($elm$core$Basics$sin(model.altitude) * $elm$core$Basics$sin(model.azimuth)),
 		$elm$core$Basics$cos(model.altitude));
-	var h = (model.scale * model.viewportHeight) / 2;
 	var eyeDistance = 10000;
 	var eyePosition = A3(
 		$elm_explorations$linear_algebra$Math$Vector3$vec3,
 		(eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$cos(model.azimuth),
 		(eyeDistance * $elm$core$Basics$cos(model.altitude)) * $elm$core$Basics$sin(model.azimuth),
 		eyeDistance * $elm$core$Basics$sin(model.altitude));
-	var cameraClipDistance = 100000;
-	return A2(
-		$elm_explorations$linear_algebra$Math$Matrix4$mul,
-		A6($elm_explorations$linear_algebra$Math$Matrix4$makeOrtho, -w, w, -h, h, -cameraClipDistance, cameraClipDistance),
-		A3(
-			$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
-			A2($elm_explorations$linear_algebra$Math$Vector3$add, model.target, eyePosition),
-			model.target,
-			upVector));
+	return A3(
+		$elm_explorations$linear_algebra$Math$Matrix4$makeLookAt,
+		A2($elm_explorations$linear_algebra$Math$Vector3$add, model.target, eyePosition),
+		model.target,
+		upVector);
 };
-var $author$project$Graphics$OrbitControl$makeTransform = function (_v0) {
+var $author$project$Graphics$OrbitControl$makeViewMatrix = function (_v0) {
 	var model = _v0.a;
-	return $author$project$Graphics$OrbitControlImpl$makeTransform(model.ocImpl);
+	return $author$project$Graphics$OrbitControlImpl$makeViewMatrix(model.ocImpl);
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -7620,6 +7624,11 @@ var $author$project$Main$onWheelHandler = A2(
 	'wheel',
 	$author$project$Main$preventDefaultDecoder(
 		A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
+var $elm$core$List$concatMap = F2(
+	function (f, list) {
+		return $elm$core$List$concat(
+			A2($elm$core$List$map, f, list));
+	});
 var $elm_explorations$webgl$WebGL$Mesh3 = F2(
 	function (a, b) {
 		return {$: 'Mesh3', a: a, b: b};
@@ -7752,9 +7761,12 @@ var $elm_explorations$webgl$WebGL$Internal$enableSetting = F2(
 		}
 	});
 var $elm_explorations$webgl$WebGL$entityWith = _WebGL_entity;
-var $author$project$Graphics$Render$lightFromAbove = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2.0 / 27.0, 7.0 / 27.0, 26.0 / 27.0);
+var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
+var $author$project$Graphics$Render$lightFromAbove = $elm_explorations$linear_algebra$Math$Vector3$normalize(
+	A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2, 1, 5));
 var $elm_explorations$linear_algebra$Math$Matrix4$makeRotate = _MJS_m4x4makeRotate;
 var $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate = _MJS_m4x4makeTranslate;
+var $elm_explorations$linear_algebra$Math$Matrix4$mul = _MJS_m4x4mul;
 var $author$project$Graphics$Render$makeMeshMatrix = F2(
 	function (origin, angle) {
 		var rotate = A2(
@@ -7764,54 +7776,93 @@ var $author$project$Graphics$Render$makeMeshMatrix = F2(
 		var position = $elm_explorations$linear_algebra$Math$Matrix4$makeTranslate(origin);
 		return A2($elm_explorations$linear_algebra$Math$Matrix4$mul, position, rotate);
 	});
-var $author$project$Graphics$Render$pierFragmentShader = {
-	src: '\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            gl_FragColor = vec4(fragmentColor, 1.0);\n        }\n    ',
+var $elm_explorations$linear_algebra$Math$Matrix4$identity = _MJS_m4x4identity;
+var $elm_explorations$linear_algebra$Math$Matrix4$inverse = _MJS_m4x4inverse;
+var $elm_explorations$linear_algebra$Math$Matrix4$fromRecord = _MJS_m4x4fromRecord;
+var $elm_explorations$linear_algebra$Math$Matrix4$toRecord = _MJS_m4x4toRecord;
+var $author$project$Graphics$Render$toMat3 = function (mat) {
+	var record = $elm_explorations$linear_algebra$Math$Matrix4$toRecord(mat);
+	return $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+		_Utils_update(
+			record,
+			{m14: 0.0, m24: 0.0, m34: 0.0, m41: 0.0, m42: 0.0, m43: 0.0, m44: 1.0}));
+};
+var $elm_explorations$linear_algebra$Math$Matrix4$transpose = _MJS_m4x4transpose;
+var $author$project$Graphics$Render$normalMatrix = function (mat) {
+	var _v0 = $elm_explorations$linear_algebra$Math$Matrix4$inverse(
+		$author$project$Graphics$Render$toMat3(mat));
+	if (_v0.$ === 'Just') {
+		var inverted = _v0.a;
+		return $elm_explorations$linear_algebra$Math$Matrix4$transpose(inverted);
+	} else {
+		return $elm_explorations$linear_algebra$Math$Matrix4$identity;
+	}
+};
+var $author$project$Graphics$Render$railFragmentShader = {
+	src: '\n        uniform highp vec3 light;\n        uniform highp vec3 color;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n        void main() {\n            highp vec3 nLight = normalize(light);\n            highp vec3 nViewPosition = normalize(varyingViewPosition);\n            highp vec3 nNormal = normalize(varyingNormal);\n            highp vec3 nHalfway = normalize(nLight + nViewPosition);\n\n            highp vec3 ambient = 0.2 * color;\n            highp vec3 diffuse = 0.6 * clamp(dot(nNormal, nLight), 0.0, 1.0) * color;\n            highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));\n\n            // did gamma correction\n            highp vec3 fragmentColor = pow(ambient + diffuse + specular, vec3(1.0 / 2.2));\n\n            gl_FragColor = vec4(fragmentColor, 1.0);\n        }\n    ',
 	attributes: {},
-	uniforms: {}
+	uniforms: {color: 'color', light: 'light'}
 };
-var $author$project$Graphics$Render$pierVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        uniform vec3 color;\n\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.5 + 0.5 * lambertFactor;\n            fragmentColor = intensity * color;\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
+var $author$project$Graphics$Render$railVertexShader = {
+	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelViewMatrix;\n        uniform mat4 projectionMatrix;\n        uniform mat4 normalMatrix;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n\n        void main() {\n            highp vec4 cameraPosition = modelViewMatrix * vec4(position, 1.0);\n            varyingNormal = (normalMatrix * vec4(normal, 0.0)).xyz;\n            varyingViewPosition = -cameraPosition.xyz;\n\n            gl_Position = projectionMatrix * cameraPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position'},
-	uniforms: {cameraTransform: 'cameraTransform', color: 'color', light: 'light', modelTransform: 'modelTransform'}
+	uniforms: {modelViewMatrix: 'modelViewMatrix', normalMatrix: 'normalMatrix', projectionMatrix: 'projectionMatrix'}
 };
-var $author$project$Graphics$Render$renderPier = F4(
-	function (cameraTransform, mesh, origin, angle) {
-		var modelTransform = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
-		return A5(
-			$elm_explorations$webgl$WebGL$entityWith,
-			_List_fromArray(
-				[
-					$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-					$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
-				]),
-			$author$project$Graphics$Render$pierVertexShader,
-			$author$project$Graphics$Render$pierFragmentShader,
-			mesh,
-			{
-				cameraTransform: cameraTransform,
-				color: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 0.85, 0.3),
-				light: $author$project$Graphics$Render$lightFromAbove,
-				modelTransform: modelTransform
-			});
+var $elm_explorations$linear_algebra$Math$Matrix4$transform = _MJS_v3mul4x4;
+var $author$project$Graphics$Render$renderRail = F6(
+	function (viewMatrix, projectionMatrix, mesh, origin, angle, color) {
+		var modelMatrix = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
+		var modelViewMatrix = A2($elm_explorations$linear_algebra$Math$Matrix4$mul, viewMatrix, modelMatrix);
+		var normalMat = $author$project$Graphics$Render$normalMatrix(modelViewMatrix);
+		return _List_fromArray(
+			[
+				A5(
+				$elm_explorations$webgl$WebGL$entityWith,
+				_List_fromArray(
+					[
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
+						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
+					]),
+				$author$project$Graphics$Render$railVertexShader,
+				$author$project$Graphics$Render$railFragmentShader,
+				mesh,
+				{
+					color: color,
+					light: A2(
+						$elm_explorations$linear_algebra$Math$Matrix4$transform,
+						$author$project$Graphics$Render$normalMatrix(viewMatrix),
+						$author$project$Graphics$Render$lightFromAbove),
+					modelViewMatrix: modelViewMatrix,
+					normalMatrix: normalMat,
+					projectionMatrix: projectionMatrix
+				})
+			]);
 	});
-var $author$project$Graphics$MeshLoader$renderPiers = F3(
-	function (model, piers, transform) {
+var $author$project$Graphics$Render$renderPier = F5(
+	function (viewMatrix, projectionMatrix, mesh, origin, angle) {
+		return A6(
+			$author$project$Graphics$Render$renderRail,
+			viewMatrix,
+			projectionMatrix,
+			mesh,
+			origin,
+			angle,
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 0.85, 0.3));
+	});
+var $author$project$Graphics$MeshLoader$renderPiers = F4(
+	function (model, piers, viewMatrix, projectionMatrix) {
 		return A2(
-			$elm$core$List$map,
+			$elm$core$List$concatMap,
 			function (pierPlacement) {
-				return A4(
+				return A5(
 					$author$project$Graphics$Render$renderPier,
-					transform,
+					viewMatrix,
+					projectionMatrix,
 					A2($author$project$Graphics$MeshLoader$getPierMesh, model, pierPlacement.pier),
 					pierPlacement.position,
 					pierPlacement.angle);
 			},
 			piers);
-	});
-var $elm$core$List$concatMap = F2(
-	function (f, list) {
-		return $elm$core$List$concat(
-			A2($elm$core$List$map, f, list));
 	});
 var $author$project$Graphics$MeshLoader$getRailColor = function (rail) {
 	var skyblue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.47, 0.8, 1.0);
@@ -7941,42 +7992,15 @@ var $author$project$Graphics$MeshLoader$getRailMesh = F2(
 				$author$project$Types$Rail$toString(rail),
 				model.meshes));
 	});
-var $author$project$Graphics$Render$railFragmentShader = {
-	src: '\n        varying highp float edge;\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            highp float dist_density = min(edge / 30.0 + 0.2, 1.0);\n            gl_FragColor = vec4(fragmentColor, dist_density);\n        }\n    ',
-	attributes: {},
-	uniforms: {}
-};
-var $author$project$Graphics$Render$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelTransform;\n        uniform mat4 cameraTransform;\n        uniform vec3 light;\n        uniform vec3 color;\n        \n        varying highp float edge;\n        varying highp vec3 fragmentColor;\n\n        void main() {\n            highp vec4 worldPosition = modelTransform * vec4(position, 1.0);\n            highp vec4 worldNormal = normalize(modelTransform * vec4(normal, 0.0));\n\n            highp float lambertFactor = dot(worldNormal, vec4(light, 0));\n            highp float intensity = 0.3 + 0.7 * lambertFactor;\n            fragmentColor = intensity * color;\n\n            edge = distance(vec3(0.0, 0.0, 0.0), position);\n\n            gl_Position = cameraTransform * worldPosition;\n        }\n    ',
-	attributes: {normal: 'normal', position: 'position'},
-	uniforms: {cameraTransform: 'cameraTransform', color: 'color', light: 'light', modelTransform: 'modelTransform'}
-};
-var $author$project$Graphics$Render$renderRail = F5(
-	function (cameraTransform, mesh, origin, angle, color) {
-		var modelTransform = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
-		return _List_fromArray(
-			[
-				A5(
-				$elm_explorations$webgl$WebGL$entityWith,
-				_List_fromArray(
-					[
-						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
-					]),
-				$author$project$Graphics$Render$railVertexShader,
-				$author$project$Graphics$Render$railFragmentShader,
-				mesh,
-				{cameraTransform: cameraTransform, color: color, light: $author$project$Graphics$Render$lightFromAbove, modelTransform: modelTransform})
-			]);
-	});
-var $author$project$Graphics$MeshLoader$renderRails = F3(
-	function (model, rails, transform) {
+var $author$project$Graphics$MeshLoader$renderRails = F4(
+	function (model, rails, viewMatrix, projectionMatrix) {
 		return A2(
 			$elm$core$List$concatMap,
 			function (railPosition) {
-				return A5(
+				return A6(
 					$author$project$Graphics$Render$renderRail,
-					transform,
+					viewMatrix,
+					projectionMatrix,
 					A2($author$project$Graphics$MeshLoader$getRailMesh, model, railPosition.rail),
 					railPosition.position,
 					railPosition.angle,
@@ -8007,7 +8031,8 @@ var $author$project$Main$viewCanvas = function (_v0) {
 	var meshes = _v0.meshes;
 	var rails = _v0.rails;
 	var piers = _v0.piers;
-	var transform = _v0.transform;
+	var viewMatrix = _v0.viewMatrix;
+	var projectionMatrix = _v0.projectionMatrix;
 	return A3(
 		$elm_explorations$webgl$WebGL$toHtmlWith,
 		_List_fromArray(
@@ -8052,8 +8077,8 @@ var $author$project$Main$viewCanvas = function (_v0) {
 		$elm$core$List$concat(
 			_List_fromArray(
 				[
-					A3($author$project$Graphics$MeshLoader$renderRails, meshes, rails, transform),
-					A3($author$project$Graphics$MeshLoader$renderPiers, meshes, piers, transform)
+					A4($author$project$Graphics$MeshLoader$renderRails, meshes, rails, viewMatrix, projectionMatrix),
+					A4($author$project$Graphics$MeshLoader$renderPiers, meshes, piers, viewMatrix, projectionMatrix)
 				])));
 };
 var $author$project$Main$view = function (model) {
@@ -8080,10 +8105,11 @@ var $author$project$Main$view = function (model) {
 					height: railViewHeight,
 					meshes: model.meshes,
 					piers: model.piers,
+					projectionMatrix: $author$project$Graphics$OrbitControl$makeProjectionMatrix(model.orbitControl),
 					rails: model.rails,
 					right: railViewRight,
 					top: railViewTop,
-					transform: $author$project$Graphics$OrbitControl$makeTransform(model.orbitControl),
+					viewMatrix: $author$project$Graphics$OrbitControl$makeViewMatrix(model.orbitControl),
 					width: railViewWidth
 				}),
 				A2(
@@ -12429,7 +12455,6 @@ var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
 var $author$project$PointerEvent$setPointerCaptureImpl = _Platform_outgoingPort('setPointerCaptureImpl', $elm$core$Basics$identity);
@@ -12543,7 +12568,6 @@ var $elm$core$Maybe$map3 = F4(
 			}
 		}
 	});
-var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -12642,10 +12666,7 @@ var $author$project$Graphics$MeshLoader$update = F2(
 			return _Utils_update(
 				model,
 				{
-					errors: A2(
-						$elm$core$List$cons,
-						A2($elm$core$Debug$log, 'load mesh error: ' + name, e),
-						model.errors)
+					errors: A2($elm$core$List$cons, e, model.errors)
 				});
 		} else {
 			var mesh = meshOrErr.a;
@@ -12655,10 +12676,7 @@ var $author$project$Graphics$MeshLoader$update = F2(
 				return _Utils_update(
 					model,
 					{
-						errors: A2(
-							$elm$core$List$cons,
-							A2($elm$core$Debug$log, 'parse mesh error: ' + name, e),
-							model.errors)
+						errors: A2($elm$core$List$cons, e, model.errors)
 					});
 			} else {
 				var _v3 = _v2.a;
@@ -13043,7 +13061,6 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'Wheel':
 				var pos = msg.a;
-				var _v1 = A2($elm$core$Debug$log, 'wheel', pos);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -13069,13 +13086,13 @@ var $author$project$Main$update = F2(
 				var execResult = $author$project$Forth$execute(program);
 				return _Utils_Tuple2(
 					function () {
-						var _v2 = execResult.errMsg;
-						if (_v2.$ === 'Nothing') {
+						var _v1 = execResult.errMsg;
+						if (_v1.$ === 'Nothing') {
 							return _Utils_update(
 								model,
 								{errMsg: $elm$core$Maybe$Nothing, piers: execResult.piers, program: program, rails: execResult.rails});
 						} else {
-							var errMsg = _v2.a;
+							var errMsg = _v1.a;
 							return _Utils_update(
 								model,
 								{

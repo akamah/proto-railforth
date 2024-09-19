@@ -163,7 +163,8 @@ view model =
             , rails = model.rails
             , piers = model.piers
             , meshes = model.meshes
-            , transform = OC.makeTransform model.orbitControl
+            , viewMatrix = OC.makeViewMatrix model.orbitControl
+            , projectionMatrix = OC.makeProjectionMatrix model.orbitControl
             }
         , Html.pre
             [ style "display" <|
@@ -238,10 +239,11 @@ viewCanvas :
     , meshes : MeshLoader.Model
     , rails : List RailPlacement
     , piers : List PierPlacement
-    , transform : Mat4
+    , viewMatrix : Mat4
+    , projectionMatrix : Mat4
     }
     -> Html Msg
-viewCanvas { right, top, width, height, meshes, rails, piers, transform } =
+viewCanvas { right, top, width, height, meshes, rails, piers, viewMatrix, projectionMatrix } =
     WebGL.toHtmlWith
         [ WebGL.alpha True
         , WebGL.antialias
@@ -266,8 +268,8 @@ viewCanvas { right, top, width, height, meshes, rails, piers, transform } =
         ]
     <|
         List.concat
-            [ MeshLoader.renderRails meshes rails transform
-            , MeshLoader.renderPiers meshes piers transform
+            [ MeshLoader.renderRails meshes rails viewMatrix projectionMatrix
+            , MeshLoader.renderPiers meshes piers viewMatrix projectionMatrix
             ]
 
 
@@ -290,10 +292,6 @@ update msg model =
             ( { model | orbitControl = OC.updatePointerUp model.orbitControl event.pointerId }, Cmd.none )
 
         Wheel pos ->
-            let
-                _ =
-                    Debug.log "wheel" pos
-            in
             ( { model | orbitControl = OC.updateWheel model.orbitControl pos }, Cmd.none )
 
         ContextMenu ->
