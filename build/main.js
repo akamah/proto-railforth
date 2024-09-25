@@ -12786,7 +12786,9 @@ var $author$project$Graphics$OrbitControlImpl$doScaleMult = F2(
 		return $author$project$Graphics$OrbitControlImpl$Model(
 			_Utils_update(
 				model,
-				{scale: model.scale * mult}));
+				{
+					scale: A3($elm$core$Basics$clamp, 0.1, 100, model.scale * mult)
+				}));
 	});
 var $author$project$Graphics$OrbitControl$sub2 = F2(
 	function (_v0, _v1) {
@@ -12985,19 +12987,14 @@ var $author$project$Main$updateViewport = F3(
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
-var $author$project$Graphics$OrbitControlImpl$doScaleAdd = F2(
-	function (_v0, diff) {
-		var model = _v0.a;
-		return $author$project$Graphics$OrbitControlImpl$Model(
-			_Utils_update(
-				model,
-				{scale: model.scale + diff}));
-	});
 var $author$project$Graphics$OrbitControl$doDolly = F3(
 	function (ocImpl, dx, dy) {
 		return (_Utils_cmp(
 			$elm$core$Basics$abs(dx),
-			$elm$core$Basics$abs(dy)) > -1) ? ocImpl : A2($author$project$Graphics$OrbitControlImpl$doScaleAdd, ocImpl, dy * 0.01);
+			$elm$core$Basics$abs(dy)) > -1) ? ocImpl : A2(
+			$author$project$Graphics$OrbitControlImpl$doScaleMult,
+			ocImpl,
+			A2($elm$core$Basics$pow, 1.002, dy));
 	});
 var $author$project$Graphics$OrbitControl$updateWheel = F2(
 	function (_v0, _v1) {

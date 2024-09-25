@@ -138,9 +138,9 @@ doPanning (Model model) dx dy =
 
 doScaleAdd : Model -> Float -> Model
 doScaleAdd (Model model) diff =
-    Model { model | scale = model.scale + diff }
+    Model { model | scale = clamp 0.1 100 (model.scale + diff) }
 
 
 doScaleMult : Model -> Float -> Model
 doScaleMult (Model model) mult =
-    Model { model | scale = model.scale * mult }
+    Model { model | scale = clamp 0.1 100 (model.scale * mult) }

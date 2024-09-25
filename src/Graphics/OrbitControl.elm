@@ -165,7 +165,7 @@ doDolly ocImpl dx dy =
         ocImpl
 
     else
-        Impl.doScaleAdd ocImpl (dy * 0.01)
+        Impl.doScaleMult ocImpl (1.002 ^ dy)
 
 
 doTwoPointersMove :
