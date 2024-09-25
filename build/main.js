@@ -7799,9 +7799,9 @@ var $author$project$Graphics$Render$normalMatrix = function (mat) {
 	}
 };
 var $author$project$Graphics$Render$railFragmentShader = {
-	src: '\n        uniform highp vec3 light;\n        uniform highp vec3 color;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n        void main() {\n            highp vec3 nLight = normalize(light);\n            highp vec3 nViewPosition = normalize(varyingViewPosition);\n            highp vec3 nNormal = normalize(varyingNormal);\n            highp vec3 nHalfway = normalize(nLight + nViewPosition);\n\n            highp vec3 ambient = 0.2 * color;\n            highp vec3 diffuse = 0.6 * clamp(dot(nNormal, nLight), 0.0, 1.0) * color;\n            highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));\n\n            // did gamma correction\n            highp vec3 fragmentColor = pow(ambient + diffuse + specular, vec3(1.0 / 2.2));\n\n            gl_FragColor = vec4(fragmentColor, 1.0);\n        }\n    ',
+	src: '\n        uniform highp vec3 light;\n        uniform highp vec3 albedo;\n        uniform highp float roughness;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n        void main() {\n            highp vec3 nLight = normalize(light);\n            highp vec3 nViewPosition = normalize(varyingViewPosition);\n            highp vec3 nNormal = normalize(varyingNormal);\n            highp vec3 nHalfway = normalize(nLight + nViewPosition);\n\n            highp vec3 ambient = 0.3 * albedo;\n\n            // https://mimosa-pudica.net/improved-oren-nayar.html\n            highp float dotLightNormal = dot(nLight, nNormal);\n            highp float dotViewNormal = dot(nViewPosition, nNormal);\n            highp float s = dot(nLight, nViewPosition) - dotLightNormal * dotViewNormal;\n            highp float t = mix(1.0, max(dotLightNormal, dotViewNormal), step(0.0, s));\n            highp float orenNayerA = 1.0 - 0.5 * (roughness / (roughness + 0.33));\n            highp float orenNayerB = 0.45 * (roughness / (roughness + 0.09));\n\n            highp vec3 diffuse = 0.8 * albedo * max(dotLightNormal, 0.0) * (orenNayerA + orenNayerB * s / t);\n            highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));\n\n            highp vec3 fragmentColor = ambient + diffuse + specular;\n\n            gl_FragColor = vec4(vec3(fragmentColor), 1.0);\n        }\n    ',
 	attributes: {},
-	uniforms: {color: 'color', light: 'light'}
+	uniforms: {albedo: 'albedo', light: 'light', roughness: 'roughness'}
 };
 var $author$project$Graphics$Render$railVertexShader = {
 	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelViewMatrix;\n        uniform mat4 projectionMatrix;\n        uniform mat4 normalMatrix;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n\n        void main() {\n            highp vec4 cameraPosition = modelViewMatrix * vec4(position, 1.0);\n            varyingNormal = (normalMatrix * vec4(normal, 0.0)).xyz;\n            varyingViewPosition = -cameraPosition.xyz;\n\n            gl_Position = projectionMatrix * cameraPosition;\n        }\n    ',
@@ -7827,14 +7827,15 @@ var $author$project$Graphics$Render$renderRail = F6(
 				$author$project$Graphics$Render$railFragmentShader,
 				mesh,
 				{
-					color: color,
+					albedo: color,
 					light: A2(
 						$elm_explorations$linear_algebra$Math$Matrix4$transform,
 						$author$project$Graphics$Render$normalMatrix(viewMatrix),
 						$author$project$Graphics$Render$lightFromAbove),
 					modelViewMatrix: modelViewMatrix,
 					normalMatrix: normalMat,
-					projectionMatrix: projectionMatrix
+					projectionMatrix: projectionMatrix,
+					roughness: 1.0
 				})
 			]);
 	});

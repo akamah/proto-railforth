@@ -19,7 +19,8 @@ type alias Uniforms =
     , projectionMatrix : Mat4
     , normalMatrix : Mat4
     , light : Vec3
-    , color : Vec3
+    , albedo : Vec3
+    , roughness : Float
     }
 
 
@@ -57,7 +58,8 @@ renderRail viewMatrix projectionMatrix mesh origin angle color =
         , projectionMatrix = projectionMatrix
         , normalMatrix = normalMat
         , light = Mat4.transform (normalMatrix viewMatrix) lightFromAbove
-        , color = color
+        , albedo = color
+        , roughness = 1.0
         }
     ]
 
@@ -107,7 +109,8 @@ railFragmentShader : Shader {} Uniforms Varyings
 railFragmentShader =
     [glsl|
         uniform highp vec3 light;
-        uniform highp vec3 color;
+        uniform highp vec3 albedo;
+        uniform highp float roughness;
 
         varying highp vec3 varyingViewPosition;
         varying highp vec3 varyingNormal;
@@ -118,14 +121,22 @@ railFragmentShader =
             highp vec3 nNormal = normalize(varyingNormal);
             highp vec3 nHalfway = normalize(nLight + nViewPosition);
 
-            highp vec3 ambient = 0.2 * color;
-            highp vec3 diffuse = 0.6 * clamp(dot(nNormal, nLight), 0.0, 1.0) * color;
+            highp vec3 ambient = 0.3 * albedo;
+
+            // https://mimosa-pudica.net/improved-oren-nayar.html
+            highp float dotLightNormal = dot(nLight, nNormal);
+            highp float dotViewNormal = dot(nViewPosition, nNormal);
+            highp float s = dot(nLight, nViewPosition) - dotLightNormal * dotViewNormal;
+            highp float t = mix(1.0, max(dotLightNormal, dotViewNormal), step(0.0, s));
+            highp float orenNayerA = 1.0 - 0.5 * (roughness / (roughness + 0.33));
+            highp float orenNayerB = 0.45 * (roughness / (roughness + 0.09));
+
+            highp vec3 diffuse = 0.8 * albedo * max(dotLightNormal, 0.0) * (orenNayerA + orenNayerB * s / t);
             highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));
 
-            // did gamma correction
-            highp vec3 fragmentColor = pow(ambient + diffuse + specular, vec3(1.0 / 2.2));
+            highp vec3 fragmentColor = ambient + diffuse + specular;
 
-            gl_FragColor = vec4(fragmentColor, 1.0);
+            gl_FragColor = vec4(vec3(fragmentColor), 1.0);
         }
     |]
 
