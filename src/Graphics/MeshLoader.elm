@@ -58,12 +58,12 @@ update msg model =
                         Err e ->
                             { model | errors = e :: model.errors }
 
-                        Ok ( vertices, indices ) ->
+                        Ok vertices ->
                             let
                                 updatedMeshes =
                                     Dict.union model.meshes <|
                                         Dict.fromList
-                                            [ ( name, WebGL.indexedTriangles vertices indices )
+                                            [ ( name, WebGL.triangles vertices )
                                             ]
                             in
                             { model | meshes = updatedMeshes }
@@ -201,7 +201,7 @@ sequence list =
 
 {-| OFFパーサの結果には法線ベクトルが含まれていないので付与する
 -}
-convertMesh : OFF.Mesh -> Result String ( List Attributes, List ( Int, Int, Int ) )
+convertMesh : OFF.Mesh -> Result String (List ( Attributes, Attributes, Attributes ))
 convertMesh { vertices, indices } =
     let
         -- O(1) for getting i-th element of vertices
@@ -211,7 +211,7 @@ convertMesh { vertices, indices } =
         calcNormal v0 v1 v2 =
             Vec3.normalize (Vec3.cross (Vec3.sub v1 v0) (Vec3.sub v2 v0))
 
-        calcTriangle i ( a, b, c ) =
+        calcTriangle ( a, b, c ) =
             let
                 errMsg =
                     "invalid face: (" ++ String.join ", " (List.map String.fromInt [ a, b, c ]) ++ ")"
@@ -222,11 +222,9 @@ convertMesh { vertices, indices } =
                         normal =
                             calcNormal x y z
                     in
-                    ( [ { position = x, normal = normal }
-                      , { position = y, normal = normal }
-                      , { position = z, normal = normal }
-                      ]
-                    , ( 3 * i, 3 * i + 1, 3 * i + 2 )
+                    ( { position = x, normal = normal }
+                    , { position = y, normal = normal }
+                    , { position = z, normal = normal }
                     )
                 )
                 (Array.get a verticesArray)
@@ -234,11 +232,5 @@ convertMesh { vertices, indices } =
                 (Array.get c verticesArray)
                 |> Result.fromMaybe errMsg
     in
-    List.indexedMap calcTriangle indices
+    List.map calcTriangle indices
         |> sequence
-        |> Result.map
-            (\vs ->
-                ( List.concatMap Tuple.first vs
-                , List.map Tuple.second vs
-                )
-            )
