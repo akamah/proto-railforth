@@ -7550,17 +7550,6 @@ var $elm_explorations$webgl$WebGL$Internal$ClearColor = F4(
 		return {$: 'ClearColor', a: a, b: b, c: c, d: d};
 	});
 var $elm_explorations$webgl$WebGL$clearColor = $elm_explorations$webgl$WebGL$Internal$ClearColor;
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
 var $elm_explorations$webgl$WebGL$Internal$Depth = function (a) {
 	return {$: 'Depth', a: a};
 };
@@ -7624,6 +7613,257 @@ var $author$project$Main$onWheelHandler = A2(
 	'wheel',
 	$author$project$Main$preventDefaultDecoder(
 		A2($elm$json$Json$Decode$map, $author$project$Main$Wheel, $author$project$Main$wheelEventDecoder)));
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $author$project$Graphics$Render$floorFragmentShader = {
+	src: '\n        uniform highp vec3 color;\n\n        void main() {\n            gl_FragColor = vec4(color, 1.0);\n        }\n    ',
+	attributes: {},
+	uniforms: {color: 'color'}
+};
+var $elm_explorations$webgl$WebGL$Mesh1 = F2(
+	function (a, b) {
+		return {$: 'Mesh1', a: a, b: b};
+	});
+var $elm_explorations$webgl$WebGL$triangleFan = $elm_explorations$webgl$WebGL$Mesh1(
+	{elemSize: 1, indexSize: 0, mode: 6});
+var $author$project$Graphics$Render$floorMesh = function () {
+	var inf = 1000000;
+	return $elm_explorations$webgl$WebGL$triangleFan(
+		_List_fromArray(
+			[
+				{
+				position: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, inf, inf, 0)
+			},
+				{
+				position: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, -inf, inf, 0)
+			},
+				{
+				position: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, -inf, -inf, 0)
+			},
+				{
+				position: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, inf, -inf, 0)
+			}
+			]));
+}();
+var $author$project$Graphics$Render$floorVertexShader = {
+	src: '\n        attribute highp vec3 position;\n        \n        uniform highp mat4 modelViewMatrix;\n        uniform highp mat4 projectionMatrix;\n\n        void main() {\n            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n        }\n    ',
+	attributes: {position: 'position'},
+	uniforms: {modelViewMatrix: 'modelViewMatrix', projectionMatrix: 'projectionMatrix'}
+};
+var $elm_explorations$webgl$WebGL$Settings$FaceMode = function (a) {
+	return {$: 'FaceMode', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$back = $elm_explorations$webgl$WebGL$Settings$FaceMode(1029);
+var $elm_explorations$webgl$WebGL$Internal$CullFace = function (a) {
+	return {$: 'CullFace', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$cullFace = function (_v0) {
+	var faceMode = _v0.a;
+	return $elm_explorations$webgl$WebGL$Internal$CullFace(faceMode);
+};
+var $elm_explorations$webgl$WebGL$Internal$DepthTest = F4(
+	function (a, b, c, d) {
+		return {$: 'DepthTest', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$Settings$DepthTest$less = function (_v0) {
+	var write = _v0.write;
+	var near = _v0.near;
+	var far = _v0.far;
+	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 513, write, near, far);
+};
+var $elm_explorations$webgl$WebGL$Settings$DepthTest$default = $elm_explorations$webgl$WebGL$Settings$DepthTest$less(
+	{far: 1, near: 0, write: true});
+var $elm_explorations$webgl$WebGL$Internal$enableOption = F2(
+	function (ctx, option) {
+		switch (option.$) {
+			case 'Alpha':
+				return A2(_WebGL_enableAlpha, ctx, option);
+			case 'Depth':
+				return A2(_WebGL_enableDepth, ctx, option);
+			case 'Stencil':
+				return A2(_WebGL_enableStencil, ctx, option);
+			case 'Antialias':
+				return A2(_WebGL_enableAntialias, ctx, option);
+			case 'ClearColor':
+				return A2(_WebGL_enableClearColor, ctx, option);
+			default:
+				return A2(_WebGL_enablePreserveDrawingBuffer, ctx, option);
+		}
+	});
+var $elm_explorations$webgl$WebGL$Internal$enableSetting = F2(
+	function (cache, setting) {
+		switch (setting.$) {
+			case 'Blend':
+				return A2(_WebGL_enableBlend, cache, setting);
+			case 'DepthTest':
+				return A2(_WebGL_enableDepthTest, cache, setting);
+			case 'StencilTest':
+				return A2(_WebGL_enableStencilTest, cache, setting);
+			case 'Scissor':
+				return A2(_WebGL_enableScissor, cache, setting);
+			case 'ColorMask':
+				return A2(_WebGL_enableColorMask, cache, setting);
+			case 'CullFace':
+				return A2(_WebGL_enableCullFace, cache, setting);
+			case 'PolygonOffset':
+				return A2(_WebGL_enablePolygonOffset, cache, setting);
+			case 'SampleCoverage':
+				return A2(_WebGL_enableSampleCoverage, cache, setting);
+			default:
+				return _WebGL_enableSampleAlphaToCoverage(cache);
+		}
+	});
+var $elm_explorations$webgl$WebGL$entityWith = _WebGL_entity;
+var $author$project$Graphics$Render$renderBody = F4(
+	function (vertexShader, fragmentShader, mesh, uniforms) {
+		return _List_fromArray(
+			[
+				A5(
+				$elm_explorations$webgl$WebGL$entityWith,
+				_List_fromArray(
+					[
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
+						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
+					]),
+				vertexShader,
+				fragmentShader,
+				mesh,
+				uniforms)
+			]);
+	});
+var $author$project$Graphics$Render$renderFloor = F3(
+	function (viewMatrix, projectionMatrix, color) {
+		return A4(
+			$author$project$Graphics$Render$renderBody,
+			$author$project$Graphics$Render$floorVertexShader,
+			$author$project$Graphics$Render$floorFragmentShader,
+			$author$project$Graphics$Render$floorMesh,
+			{color: color, modelViewMatrix: viewMatrix, projectionMatrix: projectionMatrix});
+	});
+var $author$project$Graphics$Render$ambientFragmentShader = {
+	src: '\n        uniform highp vec3 color;\n\n        void main() {\n            gl_FragColor = vec4(color, 1.0);\n        }\n    ',
+	attributes: {},
+	uniforms: {color: 'color'}
+};
+var $author$project$Graphics$Render$ambientVertexShader = {
+	src: '\n        attribute highp vec3 position;\n        \n        uniform highp mat4 modelViewMatrix;\n        uniform highp mat4 projectionMatrix;\n\n        void main() {\n            highp vec4 pos = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n\n            // increment the value to draw the shadow in front of objects\n            gl_Position = pos + vec4(0.0, 0.0, -0.5, 0.0);\n        }\n    ',
+	attributes: {position: 'position'},
+	uniforms: {modelViewMatrix: 'modelViewMatrix', projectionMatrix: 'projectionMatrix'}
+};
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation = function (a) {
+	return {$: 'Operation', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$keep = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(7680);
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$Test = function (a) {
+	return {$: 'Test', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$lessOrEqual = $elm_explorations$webgl$WebGL$Settings$StencilTest$Test(515);
+var $elm_explorations$webgl$WebGL$Internal$StencilTest = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return function (k) {
+											return {$: 'StencilTest', a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h, i: i, j: j, k: k};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate = F3(
+	function (_v0, options1, options2) {
+		var ref = _v0.ref;
+		var mask = _v0.mask;
+		var writeMask = _v0.writeMask;
+		var expandTest = F2(
+			function (_v2, fn) {
+				var expandedTest = _v2.a;
+				return fn(expandedTest);
+			});
+		var expandOp = F2(
+			function (_v1, fn) {
+				var op = _v1.a;
+				return fn(op);
+			});
+		var expand = function (options) {
+			return A2(
+				$elm$core$Basics$composeR,
+				expandTest(options.test),
+				A2(
+					$elm$core$Basics$composeR,
+					expandOp(options.fail),
+					A2(
+						$elm$core$Basics$composeR,
+						expandOp(options.zfail),
+						expandOp(options.zpass))));
+		};
+		return A2(
+			expand,
+			options2,
+			A2(
+				expand,
+				options1,
+				A3($elm_explorations$webgl$WebGL$Internal$StencilTest, ref, mask, writeMask)));
+	});
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$test = function (stencilTest) {
+	return A3(
+		$elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate,
+		{mask: stencilTest.mask, ref: stencilTest.ref, writeMask: stencilTest.writeMask},
+		{fail: stencilTest.fail, test: stencilTest.test, zfail: stencilTest.zfail, zpass: stencilTest.zpass},
+		{fail: stencilTest.fail, test: stencilTest.test, zfail: stencilTest.zfail, zpass: stencilTest.zpass});
+};
+var $author$project$Graphics$Render$renderAmbient = F2(
+	function (mesh, uniforms) {
+		return _List_fromArray(
+			[
+				A5(
+				$elm_explorations$webgl$WebGL$entityWith,
+				_List_fromArray(
+					[
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$less(
+						{far: 1, near: 0, write: true}),
+						$elm_explorations$webgl$WebGL$Settings$StencilTest$test(
+						{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, mask: 255, ref: 1, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$lessOrEqual, writeMask: 0, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep})
+					]),
+				$author$project$Graphics$Render$ambientVertexShader,
+				$author$project$Graphics$Render$ambientFragmentShader,
+				mesh,
+				uniforms)
+			]);
+	});
+var $author$project$Graphics$Render$renderFloorAmbient = F3(
+	function (viewMatrix, projectionMatrix, color) {
+		return A2(
+			$author$project$Graphics$Render$renderAmbient,
+			$author$project$Graphics$Render$floorMesh,
+			{color: color, modelViewMatrix: viewMatrix, projectionMatrix: projectionMatrix});
+	});
 var $elm$core$List$concatMap = F2(
 	function (f, list) {
 		return $elm$core$List$concat(
@@ -7697,70 +7937,6 @@ var $author$project$Graphics$MeshLoader$getPierMesh = F2(
 				$author$project$Types$Pier$toString(pier),
 				model.meshes));
 	});
-var $elm_explorations$webgl$WebGL$Settings$FaceMode = function (a) {
-	return {$: 'FaceMode', a: a};
-};
-var $elm_explorations$webgl$WebGL$Settings$back = $elm_explorations$webgl$WebGL$Settings$FaceMode(1029);
-var $elm_explorations$webgl$WebGL$Internal$CullFace = function (a) {
-	return {$: 'CullFace', a: a};
-};
-var $elm_explorations$webgl$WebGL$Settings$cullFace = function (_v0) {
-	var faceMode = _v0.a;
-	return $elm_explorations$webgl$WebGL$Internal$CullFace(faceMode);
-};
-var $elm_explorations$webgl$WebGL$Internal$DepthTest = F4(
-	function (a, b, c, d) {
-		return {$: 'DepthTest', a: a, b: b, c: c, d: d};
-	});
-var $elm_explorations$webgl$WebGL$Settings$DepthTest$less = function (_v0) {
-	var write = _v0.write;
-	var near = _v0.near;
-	var far = _v0.far;
-	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 513, write, near, far);
-};
-var $elm_explorations$webgl$WebGL$Settings$DepthTest$default = $elm_explorations$webgl$WebGL$Settings$DepthTest$less(
-	{far: 1, near: 0, write: true});
-var $elm_explorations$webgl$WebGL$Internal$enableOption = F2(
-	function (ctx, option) {
-		switch (option.$) {
-			case 'Alpha':
-				return A2(_WebGL_enableAlpha, ctx, option);
-			case 'Depth':
-				return A2(_WebGL_enableDepth, ctx, option);
-			case 'Stencil':
-				return A2(_WebGL_enableStencil, ctx, option);
-			case 'Antialias':
-				return A2(_WebGL_enableAntialias, ctx, option);
-			case 'ClearColor':
-				return A2(_WebGL_enableClearColor, ctx, option);
-			default:
-				return A2(_WebGL_enablePreserveDrawingBuffer, ctx, option);
-		}
-	});
-var $elm_explorations$webgl$WebGL$Internal$enableSetting = F2(
-	function (cache, setting) {
-		switch (setting.$) {
-			case 'Blend':
-				return A2(_WebGL_enableBlend, cache, setting);
-			case 'DepthTest':
-				return A2(_WebGL_enableDepthTest, cache, setting);
-			case 'StencilTest':
-				return A2(_WebGL_enableStencilTest, cache, setting);
-			case 'Scissor':
-				return A2(_WebGL_enableScissor, cache, setting);
-			case 'ColorMask':
-				return A2(_WebGL_enableColorMask, cache, setting);
-			case 'CullFace':
-				return A2(_WebGL_enableCullFace, cache, setting);
-			case 'PolygonOffset':
-				return A2(_WebGL_enablePolygonOffset, cache, setting);
-			case 'SampleCoverage':
-				return A2(_WebGL_enableSampleCoverage, cache, setting);
-			default:
-				return _WebGL_enableSampleAlphaToCoverage(cache);
-		}
-	});
-var $elm_explorations$webgl$WebGL$entityWith = _WebGL_entity;
 var $elm_explorations$linear_algebra$Math$Vector3$normalize = _MJS_v3normalize;
 var $author$project$Graphics$Render$lightFromAbove = $elm_explorations$linear_algebra$Math$Vector3$normalize(
 	A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 2, 1, 5));
@@ -7804,45 +7980,37 @@ var $author$project$Graphics$Render$railFragmentShader = {
 	uniforms: {albedo: 'albedo', light: 'light', roughness: 'roughness'}
 };
 var $author$project$Graphics$Render$railVertexShader = {
-	src: '\n        attribute vec3 position;\n        attribute vec3 normal;\n        \n        uniform mat4 modelViewMatrix;\n        uniform mat4 projectionMatrix;\n        uniform mat4 normalMatrix;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n\n        void main() {\n            highp vec4 cameraPosition = modelViewMatrix * vec4(position, 1.0);\n            varyingNormal = (normalMatrix * vec4(normal, 0.0)).xyz;\n            varyingViewPosition = -cameraPosition.xyz;\n\n            gl_Position = projectionMatrix * cameraPosition;\n        }\n    ',
+	src: '\n        attribute highp vec3 position;\n        attribute highp vec3 normal;\n        \n        uniform highp mat4 modelViewMatrix;\n        uniform highp mat4 projectionMatrix;\n        uniform highp mat4 normalMatrix;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n        void main() {\n            highp vec4 cameraPosition = modelViewMatrix * vec4(position, 1.0);\n            varyingNormal = (normalMatrix * vec4(normal, 0.0)).xyz;\n            varyingViewPosition = -cameraPosition.xyz;\n\n            gl_Position = projectionMatrix * cameraPosition;\n        }\n    ',
 	attributes: {normal: 'normal', position: 'position'},
 	uniforms: {modelViewMatrix: 'modelViewMatrix', normalMatrix: 'normalMatrix', projectionMatrix: 'projectionMatrix'}
 };
 var $elm_explorations$linear_algebra$Math$Matrix4$transform = _MJS_v3mul4x4;
-var $author$project$Graphics$Render$renderRail = F6(
+var $author$project$Graphics$Render$renderRailBody = F6(
 	function (viewMatrix, projectionMatrix, mesh, origin, angle, color) {
 		var modelMatrix = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
 		var modelViewMatrix = A2($elm_explorations$linear_algebra$Math$Matrix4$mul, viewMatrix, modelMatrix);
 		var normalMat = $author$project$Graphics$Render$normalMatrix(modelViewMatrix);
-		return _List_fromArray(
-			[
-				A5(
-				$elm_explorations$webgl$WebGL$entityWith,
-				_List_fromArray(
-					[
-						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
-						$elm_explorations$webgl$WebGL$Settings$cullFace($elm_explorations$webgl$WebGL$Settings$back)
-					]),
-				$author$project$Graphics$Render$railVertexShader,
-				$author$project$Graphics$Render$railFragmentShader,
-				mesh,
-				{
-					albedo: color,
-					light: A2(
-						$elm_explorations$linear_algebra$Math$Matrix4$transform,
-						$author$project$Graphics$Render$normalMatrix(viewMatrix),
-						$author$project$Graphics$Render$lightFromAbove),
-					modelViewMatrix: modelViewMatrix,
-					normalMatrix: normalMat,
-					projectionMatrix: projectionMatrix,
-					roughness: 1.0
-				})
-			]);
+		return A4(
+			$author$project$Graphics$Render$renderBody,
+			$author$project$Graphics$Render$railVertexShader,
+			$author$project$Graphics$Render$railFragmentShader,
+			mesh,
+			{
+				albedo: color,
+				light: A2(
+					$elm_explorations$linear_algebra$Math$Matrix4$transform,
+					$author$project$Graphics$Render$normalMatrix(viewMatrix),
+					$author$project$Graphics$Render$lightFromAbove),
+				modelViewMatrix: modelViewMatrix,
+				normalMatrix: normalMat,
+				projectionMatrix: projectionMatrix,
+				roughness: 1.0
+			});
 	});
 var $author$project$Graphics$Render$renderPier = F5(
 	function (viewMatrix, projectionMatrix, mesh, origin, angle) {
 		return A6(
-			$author$project$Graphics$Render$renderRail,
+			$author$project$Graphics$Render$renderRailBody,
 			viewMatrix,
 			projectionMatrix,
 			mesh,
@@ -7865,12 +8033,52 @@ var $author$project$Graphics$MeshLoader$renderPiers = F4(
 			},
 			piers);
 	});
+var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
+var $author$project$Graphics$Render$renderRailAmbient = F6(
+	function (viewMatrix, projectionMatrix, mesh, origin, angle, color) {
+		var modelMatrix = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
+		var modelViewMatrix = A2($elm_explorations$linear_algebra$Math$Matrix4$mul, viewMatrix, modelMatrix);
+		return A2(
+			$author$project$Graphics$Render$renderAmbient,
+			mesh,
+			{
+				color: A2($elm_explorations$linear_algebra$Math$Vector3$scale, 0.3, color),
+				modelViewMatrix: modelViewMatrix,
+				projectionMatrix: projectionMatrix
+			});
+	});
+var $author$project$Graphics$Render$renderPierAmbient = F5(
+	function (viewMatrix, projectionMatrix, mesh, origin, angle) {
+		return A6(
+			$author$project$Graphics$Render$renderRailAmbient,
+			viewMatrix,
+			projectionMatrix,
+			mesh,
+			origin,
+			angle,
+			A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 0.85, 0.3));
+	});
+var $author$project$Graphics$MeshLoader$renderPiersAmbient = F4(
+	function (model, piers, viewMatrix, projectionMatrix) {
+		return A2(
+			$elm$core$List$concatMap,
+			function (pierPlacement) {
+				return A5(
+					$author$project$Graphics$Render$renderPierAmbient,
+					viewMatrix,
+					projectionMatrix,
+					A2($author$project$Graphics$MeshLoader$getPierMesh, model, pierPlacement.pier),
+					pierPlacement.position,
+					pierPlacement.angle);
+			},
+			piers);
+	});
 var $author$project$Graphics$MeshLoader$getRailColor = function (rail) {
 	var skyblue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.47, 0.8, 1.0);
 	var red = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 0.2, 0.4);
 	var green = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 1.0, 0.56);
 	var gray = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.8, 0.8, 0.8);
-	var blue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 0.56, 1.0);
+	var blue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.0, 0.5, 1.0);
 	switch (rail.$) {
 		case 'UTurn':
 			return red;
@@ -7999,7 +8207,7 @@ var $author$project$Graphics$MeshLoader$renderRails = F4(
 			$elm$core$List$concatMap,
 			function (railPosition) {
 				return A6(
-					$author$project$Graphics$Render$renderRail,
+					$author$project$Graphics$Render$renderRailBody,
 					viewMatrix,
 					projectionMatrix,
 					A2($author$project$Graphics$MeshLoader$getRailMesh, model, railPosition.rail),
@@ -8008,6 +8216,119 @@ var $author$project$Graphics$MeshLoader$renderRails = F4(
 					$author$project$Graphics$MeshLoader$getRailColor(railPosition.rail));
 			},
 			rails);
+	});
+var $author$project$Graphics$MeshLoader$renderRailsAmbient = F4(
+	function (model, rails, viewMatrix, projectionMatrix) {
+		return A2(
+			$elm$core$List$concatMap,
+			function (railPosition) {
+				return A6(
+					$author$project$Graphics$Render$renderRailAmbient,
+					viewMatrix,
+					projectionMatrix,
+					A2($author$project$Graphics$MeshLoader$getRailMesh, model, railPosition.rail),
+					railPosition.position,
+					railPosition.angle,
+					$author$project$Graphics$MeshLoader$getRailColor(railPosition.rail));
+			},
+			rails);
+	});
+var $author$project$Graphics$MeshLoader$getShadowMesh = function (model) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		$author$project$Graphics$MeshLoader$dummyMesh,
+		A2($elm$core$Dict$get, 'shadow', model.meshes));
+};
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$always = $elm_explorations$webgl$WebGL$Settings$StencilTest$Test(519);
+var $elm_explorations$webgl$WebGL$Internal$ColorMask = F4(
+	function (a, b, c, d) {
+		return {$: 'ColorMask', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$Settings$colorMask = $elm_explorations$webgl$WebGL$Internal$ColorMask;
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$decrementWrap = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(34056);
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$incrementWrap = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(34055);
+var $author$project$Graphics$Render$renderShadow = F4(
+	function (vertexShader, fragmentShader, mesh, uniforms) {
+		return _List_fromArray(
+			[
+				A5(
+				$elm_explorations$webgl$WebGL$entityWith,
+				_List_fromArray(
+					[
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$default,
+						$elm_explorations$webgl$WebGL$Settings$DepthTest$less(
+						{far: 1, near: 0, write: false}),
+						A4($elm_explorations$webgl$WebGL$Settings$colorMask, false, false, false, false),
+						A3(
+						$elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate,
+						{mask: 255, ref: 0, writeMask: 255},
+						{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$always, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$incrementWrap},
+						{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$always, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$decrementWrap})
+					]),
+				vertexShader,
+				fragmentShader,
+				mesh,
+				uniforms)
+			]);
+	});
+var $author$project$Graphics$Render$renderRailShadow = F5(
+	function (viewMatrix, projectionMatrix, mesh, origin, angle) {
+		var modelMatrix = A2($author$project$Graphics$Render$makeMeshMatrix, origin, angle);
+		var modelViewMatrix = A2($elm_explorations$linear_algebra$Math$Matrix4$mul, viewMatrix, modelMatrix);
+		var normalMat = $author$project$Graphics$Render$normalMatrix(modelViewMatrix);
+		return A4(
+			$author$project$Graphics$Render$renderShadow,
+			$author$project$Graphics$Render$railVertexShader,
+			$author$project$Graphics$Render$railFragmentShader,
+			mesh,
+			{
+				albedo: A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.5, 0.5, 0.5),
+				light: A2(
+					$elm_explorations$linear_algebra$Math$Matrix4$transform,
+					$author$project$Graphics$Render$normalMatrix(viewMatrix),
+					$author$project$Graphics$Render$lightFromAbove),
+				modelViewMatrix: modelViewMatrix,
+				normalMatrix: normalMat,
+				projectionMatrix: projectionMatrix,
+				roughness: 1.0
+			});
+	});
+var $author$project$Graphics$MeshLoader$renderShadow = F4(
+	function (model, rails, viewMatrix, projectionMatrix) {
+		return A2(
+			$elm$core$List$concatMap,
+			function (railPosition) {
+				return A5(
+					$author$project$Graphics$Render$renderRailShadow,
+					viewMatrix,
+					projectionMatrix,
+					$author$project$Graphics$MeshLoader$getShadowMesh(model),
+					railPosition.position,
+					railPosition.angle);
+			},
+			rails);
+	});
+var $author$project$Graphics$MeshLoader$render = F5(
+	function (model, rails, piers, viewMatrix, projectionMatrix) {
+		return $elm$core$List$concat(
+			_List_fromArray(
+				[
+					A3(
+					$author$project$Graphics$Render$renderFloor,
+					viewMatrix,
+					projectionMatrix,
+					A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 1.0, 1.0)),
+					A4($author$project$Graphics$MeshLoader$renderRails, model, rails, viewMatrix, projectionMatrix),
+					A4($author$project$Graphics$MeshLoader$renderPiers, model, piers, viewMatrix, projectionMatrix),
+					A4($author$project$Graphics$MeshLoader$renderShadow, model, rails, viewMatrix, projectionMatrix),
+					A3(
+					$author$project$Graphics$Render$renderFloorAmbient,
+					viewMatrix,
+					projectionMatrix,
+					A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.5, 0.5, 0.5)),
+					A4($author$project$Graphics$MeshLoader$renderRailsAmbient, model, rails, viewMatrix, projectionMatrix),
+					A4($author$project$Graphics$MeshLoader$renderPiersAmbient, model, piers, viewMatrix, projectionMatrix)
+				]));
 	});
 var $elm$core$Basics$round = _Basics_round;
 var $elm_explorations$webgl$WebGL$Internal$Stencil = function (a) {
@@ -8075,12 +8396,7 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				$author$project$Main$onPointerUpHandler,
 				$author$project$Main$onContextMenuHandler
 			]),
-		$elm$core$List$concat(
-			_List_fromArray(
-				[
-					A4($author$project$Graphics$MeshLoader$renderRails, meshes, rails, viewMatrix, projectionMatrix),
-					A4($author$project$Graphics$MeshLoader$renderPiers, meshes, piers, viewMatrix, projectionMatrix)
-				])));
+		A5($author$project$Graphics$MeshLoader$render, meshes, rails, piers, viewMatrix, projectionMatrix));
 };
 var $author$project$Main$view = function (model) {
 	var railViewTop = 0;
@@ -11187,7 +11503,10 @@ var $author$project$Types$Rail$allRails = _Utils_ap(
 					[$author$project$Types$Rail$Inverted, $author$project$Types$Rail$NotInverted])))));
 var $author$project$Graphics$MeshLoader$allMeshNames = _Utils_ap(
 	A2($elm$core$List$map, $author$project$Types$Rail$toString, $author$project$Types$Rail$allRails),
-	A2($elm$core$List$map, $author$project$Types$Pier$toString, $author$project$Types$Pier$allPiers));
+	_Utils_ap(
+		A2($elm$core$List$map, $author$project$Types$Pier$toString, $author$project$Types$Pier$allPiers),
+		_List_fromArray(
+			['shadow'])));
 var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.off');
 };
@@ -11245,11 +11564,6 @@ var $elm$core$Result$mapError = F2(
 			return $elm$core$Result$Err(
 				f(e));
 		}
-	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
 	});
 var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
@@ -12569,10 +12883,6 @@ var $elm$core$Maybe$map3 = F4(
 			}
 		}
 	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
 var $author$project$Graphics$MeshLoader$sequence = function (list) {
 	var rec = F2(
 		function (ls, accum) {
@@ -12608,56 +12918,38 @@ var $author$project$Graphics$MeshLoader$convertMesh = function (_v0) {
 					A2($elm_explorations$linear_algebra$Math$Vector3$sub, v1, v0),
 					A2($elm_explorations$linear_algebra$Math$Vector3$sub, v2, v0)));
 		});
-	var calcTriangle = F2(
-		function (i, _v1) {
-			var a = _v1.a;
-			var b = _v1.b;
-			var c = _v1.c;
-			var errMsg = 'invalid face: (' + (A2(
-				$elm$core$String$join,
-				', ',
-				A2(
-					$elm$core$List$map,
-					$elm$core$String$fromInt,
-					_List_fromArray(
-						[a, b, c]))) + ')');
-			return A2(
-				$elm$core$Result$fromMaybe,
-				errMsg,
-				A4(
-					$elm$core$Maybe$map3,
-					F3(
-						function (x, y, z) {
-							var normal = A3(calcNormal, x, y, z);
-							return _Utils_Tuple2(
-								_List_fromArray(
-									[
-										{normal: normal, position: x},
-										{normal: normal, position: y},
-										{normal: normal, position: z}
-									]),
-								_Utils_Tuple3(3 * i, (3 * i) + 1, (3 * i) + 2));
-						}),
-					A2($elm$core$Array$get, a, verticesArray),
-					A2($elm$core$Array$get, b, verticesArray),
-					A2($elm$core$Array$get, c, verticesArray)));
-		});
-	return A2(
-		$elm$core$Result$map,
-		function (vs) {
-			return _Utils_Tuple2(
-				A2($elm$core$List$concatMap, $elm$core$Tuple$first, vs),
-				A2($elm$core$List$map, $elm$core$Tuple$second, vs));
-		},
-		$author$project$Graphics$MeshLoader$sequence(
-			A2($elm$core$List$indexedMap, calcTriangle, indices)));
+	var calcTriangle = function (_v1) {
+		var a = _v1.a;
+		var b = _v1.b;
+		var c = _v1.c;
+		var errMsg = 'invalid face: (' + (A2(
+			$elm$core$String$join,
+			', ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$String$fromInt,
+				_List_fromArray(
+					[a, b, c]))) + ')');
+		return A2(
+			$elm$core$Result$fromMaybe,
+			errMsg,
+			A4(
+				$elm$core$Maybe$map3,
+				F3(
+					function (x, y, z) {
+						var normal = A3(calcNormal, x, y, z);
+						return _Utils_Tuple3(
+							{normal: normal, position: x},
+							{normal: normal, position: y},
+							{normal: normal, position: z});
+					}),
+				A2($elm$core$Array$get, a, verticesArray),
+				A2($elm$core$Array$get, b, verticesArray),
+				A2($elm$core$Array$get, c, verticesArray)));
+	};
+	return $author$project$Graphics$MeshLoader$sequence(
+		A2($elm$core$List$map, calcTriangle, indices));
 };
-var $elm_explorations$webgl$WebGL$MeshIndexed3 = F3(
-	function (a, b, c) {
-		return {$: 'MeshIndexed3', a: a, b: b, c: c};
-	});
-var $elm_explorations$webgl$WebGL$indexedTriangles = $elm_explorations$webgl$WebGL$MeshIndexed3(
-	{elemSize: 1, indexSize: 3, mode: 4});
 var $author$project$Graphics$MeshLoader$update = F2(
 	function (msg, model) {
 		var name = msg.a;
@@ -12680,9 +12972,7 @@ var $author$project$Graphics$MeshLoader$update = F2(
 						errors: A2($elm$core$List$cons, e, model.errors)
 					});
 			} else {
-				var _v3 = _v2.a;
-				var vertices = _v3.a;
-				var indices = _v3.b;
+				var vertices = _v2.a;
 				var updatedMeshes = A2(
 					$elm$core$Dict$union,
 					model.meshes,
@@ -12691,7 +12981,7 @@ var $author$project$Graphics$MeshLoader$update = F2(
 							[
 								_Utils_Tuple2(
 								name,
-								A2($elm_explorations$webgl$WebGL$indexedTriangles, vertices, indices))
+								$elm_explorations$webgl$WebGL$triangles(vertices))
 							])));
 				return _Utils_update(
 					model,
@@ -12713,7 +13003,6 @@ var $author$project$Graphics$OrbitControl$updatePointerDown = F4(
 					points: A3($elm$core$Dict$insert, pointerId, pos, model.points)
 				}));
 	});
-var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
 var $author$project$Graphics$OrbitControlImpl$doPanning = F3(
 	function (_v0, dx, dy) {
 		var model = _v0.a;

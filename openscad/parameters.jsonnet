@@ -12,6 +12,8 @@ local rails = {
     'pier_single',
     'pier_double',
     'pier_mini',
+
+    'shadow', // for tinkering
   ],
   cannot_flip_can_invert: [
     'straight1',

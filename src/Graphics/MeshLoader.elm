@@ -4,8 +4,7 @@ module Graphics.MeshLoader exposing
     , getErrors
     , init
     , loadMeshCmd
-    , renderPiers
-    , renderRails
+    , render
     , update
     )
 
@@ -82,7 +81,7 @@ since the definition of (Rail -> String) is moved to Rail module
 -}
 allMeshNames : List String
 allMeshNames =
-    List.map Rail.toString Rail.allRails ++ List.map Pier.toString Pier.allPiers
+    List.map Rail.toString Rail.allRails ++ List.map Pier.toString Pier.allPiers ++ [ "shadow" ]
 
 
 loadMeshCmd : (Msg -> msg) -> Cmd msg
@@ -113,11 +112,61 @@ getPierMesh model pier =
         |> Maybe.withDefault dummyMesh
 
 
+getShadowMesh : Model -> Mesh Render.Attributes
+getShadowMesh model =
+    Dict.get "shadow" model.meshes |> Maybe.withDefault dummyMesh
+
+
+render : Model -> List RailPlacement -> List PierPlacement -> Mat4 -> Mat4 -> List Entity
+render model rails piers viewMatrix projectionMatrix =
+    List.concat
+        [ Render.renderFloor viewMatrix projectionMatrix (vec3 1.0 1.0 1.0)
+        , renderRails model rails viewMatrix projectionMatrix
+        , renderPiers model piers viewMatrix projectionMatrix
+
+        -- render shadow volumes
+        , renderShadow model rails viewMatrix projectionMatrix
+
+        -- render ambient
+        , Render.renderFloorAmbient viewMatrix projectionMatrix (vec3 0.5 0.5 0.5)
+        , renderRailsAmbient model rails viewMatrix projectionMatrix
+        , renderPiersAmbient model piers viewMatrix projectionMatrix
+        ]
+
+
+renderShadow : Model -> List RailPlacement -> Mat4 -> Mat4 -> List Entity
+renderShadow model rails viewMatrix projectionMatrix =
+    List.concatMap
+        (\railPosition ->
+            Render.renderRailShadow
+                viewMatrix
+                projectionMatrix
+                (getShadowMesh model)
+                railPosition.position
+                railPosition.angle
+        )
+        rails
+
+
 renderRails : Model -> List RailPlacement -> Mat4 -> Mat4 -> List Entity
 renderRails model rails viewMatrix projectionMatrix =
     List.concatMap
         (\railPosition ->
-            Render.renderRail
+            Render.renderRailBody
+                viewMatrix
+                projectionMatrix
+                (getRailMesh model railPosition.rail)
+                railPosition.position
+                railPosition.angle
+                (getRailColor railPosition.rail)
+        )
+        rails
+
+
+renderRailsAmbient model rails viewMatrix projectionMatrix =
+    List.concatMap
+        (\railPosition ->
+            Render.renderRailAmbient
                 viewMatrix
                 projectionMatrix
                 (getRailMesh model railPosition.rail)
@@ -132,7 +181,7 @@ getRailColor : Rail a b -> Vec3
 getRailColor rail =
     let
         blue =
-            vec3 0.12 0.56 1.0
+            vec3 0.0 0.5 1.0
 
         red =
             vec3 1.0 0.2 0.4
@@ -171,6 +220,19 @@ renderPiers model piers viewMatrix projectionMatrix =
     List.concatMap
         (\pierPlacement ->
             Render.renderPier
+                viewMatrix
+                projectionMatrix
+                (getPierMesh model pierPlacement.pier)
+                pierPlacement.position
+                pierPlacement.angle
+        )
+        piers
+
+
+renderPiersAmbient model piers viewMatrix projectionMatrix =
+    List.concatMap
+        (\pierPlacement ->
+            Render.renderPierAmbient
                 viewMatrix
                 projectionMatrix
                 (getPierMesh model pierPlacement.pier)

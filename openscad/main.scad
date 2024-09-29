@@ -121,6 +121,11 @@ if (name == "straight1") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
   pier_mini();
+} else if (name == "shadow") {
+  minkowski() {
+    straight(4, false);
+    shadow(60, 22.5);
+  }
 } else {
   assert(false, str(name, " is not a valid rail name"));
 }

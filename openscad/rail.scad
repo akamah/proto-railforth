@@ -547,3 +547,17 @@ module pier_mini() {
         }
     }
 }
+
+module shadow(light_altitude, light_azimuth) {
+    shadow_length = 100000;
+    shadow_gap = 0.1;
+    shadow_radius = 0.001; // need volume for minkowski sum
+
+    translate([0, -shadow_gap, -shadow_gap]) { // avoid z-fighting
+        rotate([0, light_altitude, -light_azimuth]) {
+            translate([0, -shadow_radius, -shadow_radius]) {
+                cube([shadow_length, 2 * shadow_radius, 2 * shadow_radius]);
+            }
+        }
+    }
+}

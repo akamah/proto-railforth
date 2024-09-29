@@ -267,10 +267,7 @@ viewCanvas { right, top, width, height, meshes, rails, piers, viewMatrix, projec
         , onContextMenuHandler
         ]
     <|
-        List.concat
-            [ MeshLoader.renderRails meshes rails viewMatrix projectionMatrix
-            , MeshLoader.renderPiers meshes piers viewMatrix projectionMatrix
-            ]
+        MeshLoader.render meshes rails piers viewMatrix projectionMatrix
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
