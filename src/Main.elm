@@ -5,12 +5,11 @@ import Browser.Dom
 import Browser.Events
 import Dict
 import Forth
-import Forth.Statistics exposing (getRailCount)
 import Graphics.MeshLoader as MeshLoader
 import Graphics.OrbitControl as OC
 import Html exposing (Html)
 import Html.Attributes as HA exposing (style)
-import Html.Events as HE exposing (onClick)
+import Html.Events as HE
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 exposing (vec3)
@@ -92,7 +91,7 @@ init flags =
       , program = flags.program
       , rails = execResult.rails
       , piers = execResult.piers
-      , errMsg = execResult.errMsg -- Just <| formatRailCount execResult.railCount
+      , errMsg = execResult.errMsg
       , isSplitBarDragging = False
       , splitBarPosition = 300.0
       , showEditor = True
@@ -107,8 +106,6 @@ init flags =
 
 formatRailCount : Dict.Dict String Int -> String
 formatRailCount dict =
-    -- TODO: HTMLElementを返す方が望ましいかもしれない
-    -- TODO: なんらかのUIでレールの数を常に表示するようにする
     Dict.foldl (\name count accum -> accum ++ "\n" ++ name ++ ": " ++ String.fromInt count) "" dict
         ++ "\nTotal: "
         ++ String.fromInt (Dict.foldl (\_ count accum -> count + accum) 0 dict)
@@ -263,17 +260,18 @@ view model =
             [ style "position" "absolute"
             , style "top" (px railViewTop)
             , style "right" (px railViewRight)
+            , style "touch-action" "none"
             , style "z-index" "1000"
             ]
-            [ makeButton "📝" ToggleShowEditor
-            , makeButton "👀" ResetView
-            , makeButton "🛒" ToggleShowRailCount
+            [ makeButton "📝" ToggleShowEditor model.showEditor
+            , makeButton "👀" ResetView True
+            , makeButton "🛒" ToggleShowRailCount model.showRailCount
             ]
         ]
 
 
-makeButton : String -> Msg -> Html Msg
-makeButton title action =
+makeButton : String -> Msg -> Bool -> Html Msg
+makeButton title action isButtonOn =
     Html.button
         [ style "font-size" "30px"
         , style "box-sizing" "border-box"
@@ -282,6 +280,14 @@ makeButton title action =
         , style "cursor" "pointer"
         , style "user-select" "none"
         , style "-webkit-user-select" "none"
+        , style "border" "outset 3px black"
+        , style "touch-action" "none"
+        , style "background-color" <|
+            if isButtonOn then
+                "white"
+
+            else
+                "lightgray"
         , HE.onClick action
         ]
         [ Html.text title ]

@@ -7407,8 +7407,8 @@ var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$makeButton = F2(
-	function (title, action) {
+var $author$project$Main$makeButton = F3(
+	function (title, action, isButtonOn) {
 		return A2(
 			$elm$html$Html$button,
 			_List_fromArray(
@@ -7420,6 +7420,12 @@ var $author$project$Main$makeButton = F2(
 					A2($elm$html$Html$Attributes$style, 'cursor', 'pointer'),
 					A2($elm$html$Html$Attributes$style, 'user-select', 'none'),
 					A2($elm$html$Html$Attributes$style, '-webkit-user-select', 'none'),
+					A2($elm$html$Html$Attributes$style, 'border', 'outset 3px black'),
+					A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'background-color',
+					isButtonOn ? 'white' : 'lightgray'),
 					$elm$html$Html$Events$onClick(action)
 				]),
 			_List_fromArray(
@@ -8277,13 +8283,14 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$Attributes$style,
 						'right',
 						$author$project$Main$px(railViewRight)),
+						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
 						A2($elm$html$Html$Attributes$style, 'z-index', '1000')
 					]),
 				_List_fromArray(
 					[
-						A2($author$project$Main$makeButton, '📝', $author$project$Main$ToggleShowEditor),
-						A2($author$project$Main$makeButton, '👀', $author$project$Main$ResetView),
-						A2($author$project$Main$makeButton, '🛒', $author$project$Main$ToggleShowRailCount)
+						A3($author$project$Main$makeButton, '📝', $author$project$Main$ToggleShowEditor, model.showEditor),
+						A3($author$project$Main$makeButton, '👀', $author$project$Main$ResetView, true),
+						A3($author$project$Main$makeButton, '🛒', $author$project$Main$ToggleShowRailCount, model.showRailCount)
 					]))
 			]));
 };
