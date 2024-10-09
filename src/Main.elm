@@ -47,9 +47,7 @@ type alias Model =
         }
     , orbitControl : OC.Model
     , program : String
-    , rails : List RailPlacement
-    , piers : List PierPlacement
-    , errMsg : Maybe String
+    , execResult : Forth.Result
     , isSplitBarDragging : Bool
     , splitBarPosition : Float
     , showEditor : Bool
@@ -89,9 +87,7 @@ init flags =
       , viewport = { width = 0, height = 0 }
       , orbitControl = OC.init (degrees 0) (degrees 90) 1 (vec3 0 0 0)
       , program = flags.program
-      , rails = execResult.rails
-      , piers = execResult.piers
-      , errMsg = execResult.errMsg
+      , execResult = execResult
       , isSplitBarDragging = False
       , splitBarPosition = 300.0
       , showEditor = True
@@ -106,8 +102,12 @@ init flags =
 
 formatRailCount : Dict.Dict String Int -> String
 formatRailCount dict =
-    Dict.foldl (\name count accum -> accum ++ "\n" ++ name ++ ": " ++ String.fromInt count) "" dict
-        ++ "\nTotal: "
+    (dict
+        |> Dict.map (\name count -> name ++ ": " ++ String.fromInt count)
+        |> Dict.values
+        |> String.join "\n"
+    )
+        ++ "\n\nTotal: "
         ++ String.fromInt (Dict.foldl (\_ count accum -> count + accum) 0 dict)
 
 
@@ -171,19 +171,21 @@ view model =
             , height = railViewHeight
             , top = railViewTop
             , right = railViewRight
-            , rails = model.rails
-            , piers = model.piers
+            , rails = model.execResult.rails
+            , piers = model.execResult.piers
             , meshes = model.meshes
             , viewMatrix = OC.makeViewMatrix model.orbitControl
             , projectionMatrix = OC.makeProjectionMatrix model.orbitControl
             }
+
+        -- message
         , Html.pre
             [ style "display" <|
-                if model.errMsg == Nothing then
-                    "none"
+                if model.execResult.errMsg /= Nothing || model.showRailCount then
+                    "block"
 
                 else
-                    "block"
+                    "none"
             , style "position" "absolute"
             , style "top" (px railViewTop)
             , style "right" (px railViewRight)
@@ -197,7 +199,16 @@ view model =
             , style "box-sizing" "border-box"
             , style "z-index" "100"
             ]
-            [ Html.text <| Maybe.withDefault "" <| model.errMsg ]
+            [ Html.text <|
+                if model.execResult.errMsg /= Nothing then
+                    Maybe.withDefault "" <| model.execResult.errMsg
+
+                else if model.showRailCount then
+                    formatRailCount model.execResult.railCount
+
+                else
+                    ""
+            ]
 
         -- bar
         , Html.div
@@ -372,31 +383,10 @@ update msg model =
             ( updateViewport width height model, Cmd.none )
 
         UpdateScript program ->
-            let
-                execResult =
-                    Forth.execute program
-
-                console =
-                    if model.showRailCount then
-                        Just <| formatRailCount execResult.railCount
-
-                    else
-                        Nothing
-            in
-            ( case execResult.errMsg of
-                Nothing ->
-                    { model
-                        | program = program
-                        , rails = execResult.rails
-                        , piers = execResult.piers
-                        , errMsg = console
-                    }
-
-                Just errMsg ->
-                    { model
-                        | program = program
-                        , errMsg = Just errMsg
-                    }
+            ( { model
+                | program = program
+                , execResult = Forth.execute program
+              }
             , Storage.save program
             )
 
