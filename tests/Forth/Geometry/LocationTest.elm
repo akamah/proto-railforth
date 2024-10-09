@@ -1,7 +1,6 @@
 module Forth.Geometry.LocationTest exposing (..)
 
 import Expect exposing (FloatingPointTolerance(..))
-import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.DirTest exposing (dir)
 import Forth.Geometry.Location as Location exposing (..)
 import Forth.Geometry.Rot45Test exposing (rot45)

@@ -7364,6 +7364,9 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$document = _Browser_document;
+var $author$project$Main$ResetView = {$: 'ResetView'};
+var $author$project$Main$ToggleShowEditor = {$: 'ToggleShowEditor'};
+var $author$project$Main$ToggleShowRailCount = {$: 'ToggleShowRailCount'};
 var $author$project$Main$UpdateScript = function (a) {
 	return {$: 'UpdateScript', a: a};
 };
@@ -7382,6 +7385,134 @@ var $elm$html$Html$Attributes$autocomplete = function (bool) {
 		bool ? 'on' : 'off');
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2($elm$core$Dict$map, func, left),
+				A2($elm$core$Dict$map, func, right));
+		}
+	});
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $author$project$Main$formatRailCount = function (dict) {
+	return A2(
+		$elm$core$String$join,
+		'\n',
+		$elm$core$Dict$values(
+			A2(
+				$elm$core$Dict$map,
+				F2(
+					function (name, count) {
+						return name + (': ' + $elm$core$String$fromInt(count));
+					}),
+				dict))) + ('\n\nTotal: ' + $elm$core$String$fromInt(
+		A3(
+			$elm$core$Dict$foldl,
+			F3(
+				function (_v0, count, accum) {
+					return count + accum;
+				}),
+			0,
+			dict)));
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$makeButton = F3(
+	function (title, action, isButtonOn) {
+		return A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'font-size', '30px'),
+					A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
+					A2($elm$html$Html$Attributes$style, 'width', '50px'),
+					A2($elm$html$Html$Attributes$style, 'height', '50px'),
+					A2($elm$html$Html$Attributes$style, 'cursor', 'pointer'),
+					A2($elm$html$Html$Attributes$style, 'user-select', 'none'),
+					A2($elm$html$Html$Attributes$style, '-webkit-user-select', 'none'),
+					A2($elm$html$Html$Attributes$style, 'border', 'outset 3px black'),
+					A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'background-color',
+					isButtonOn ? 'white' : 'lightgray'),
+					$elm$html$Html$Events$onClick(action)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(title)
+				]));
+	});
 var $elm_explorations$linear_algebra$Math$Matrix4$makeOrtho = _MJS_m4x4makeOrtho;
 var $elm$core$Basics$negate = function (n) {
 	return -n;
@@ -7425,13 +7556,13 @@ var $author$project$Graphics$OrbitControl$makeViewMatrix = function (_v0) {
 	var model = _v0.a;
 	return $author$project$Graphics$OrbitControlImpl$makeViewMatrix(model.ocImpl);
 };
+var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
 var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
 	return {$: 'MayStopPropagation', a: a};
 };
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var $elm$html$Html$Events$stopPropagationOn = F2(
 	function (event, decoder) {
 		return A2(
@@ -7534,10 +7665,6 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 			$elm$json$Json$Encode$bool(bool));
 	});
 var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm_explorations$webgl$WebGL$Internal$Alpha = function (a) {
 	return {$: 'Alpha', a: a};
@@ -7580,16 +7707,6 @@ var $author$project$Main$onContextMenuHandler = A2(
 var $author$project$Main$PointerDown = function (a) {
 	return {$: 'PointerDown', a: a};
 };
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
 var $author$project$Main$onPointerDownHandler = A2(
 	$elm$html$Html$Events$on,
 	'pointerdown',
@@ -8069,6 +8186,8 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				'height',
 				$author$project$Main$px(height)),
 				A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+				A2($elm$html$Html$Attributes$style, 'user-select', 'none'),
+				A2($elm$html$Html$Attributes$style, '-webkit-user-select', 'none'),
 				$author$project$Main$onWheelHandler,
 				$author$project$Main$onPointerDownHandler,
 				$author$project$Main$onPointerMoveHandler,
@@ -8083,6 +8202,7 @@ var $author$project$Main$viewCanvas = function (_v0) {
 				])));
 };
 var $author$project$Main$view = function (model) {
+	var splitBarPosition = model.showEditor ? model.splitBarPosition : 0;
 	var railViewTop = 0;
 	var railViewRight = 0;
 	var railViewHeight = model.viewport.height;
@@ -8092,9 +8212,9 @@ var $author$project$Main$view = function (model) {
 	var barTop = 0;
 	var barThickness = 8;
 	var barWidth = barThickness;
-	var editorWidth = model.splitBarPosition - (barThickness / 2);
-	var railViewWidth = (model.viewport.width - model.splitBarPosition) - (barThickness / 2);
-	var barLeft = model.splitBarPosition - (barThickness / 2);
+	var editorWidth = splitBarPosition - (barThickness / 2);
+	var railViewWidth = (model.viewport.width - splitBarPosition) - (barThickness / 2);
+	var barLeft = splitBarPosition - (barThickness / 2);
 	var barHeight = model.viewport.height;
 	return A2(
 		$elm$html$Html$div,
@@ -8105,9 +8225,9 @@ var $author$project$Main$view = function (model) {
 				{
 					height: railViewHeight,
 					meshes: model.meshes,
-					piers: model.piers,
+					piers: model.execResult.piers,
 					projectionMatrix: $author$project$Graphics$OrbitControl$makeProjectionMatrix(model.orbitControl),
-					rails: model.rails,
+					rails: model.execResult.rails,
 					right: railViewRight,
 					top: railViewTop,
 					viewMatrix: $author$project$Graphics$OrbitControl$makeViewMatrix(model.orbitControl),
@@ -8120,7 +8240,7 @@ var $author$project$Main$view = function (model) {
 						A2(
 						$elm$html$Html$Attributes$style,
 						'display',
-						_Utils_eq(model.errMsg, $elm$core$Maybe$Nothing) ? 'none' : 'block'),
+						((!_Utils_eq(model.execResult.errMsg, $elm$core$Maybe$Nothing)) || model.showRailCount) ? 'block' : 'none'),
 						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 						A2(
 						$elm$html$Html$Attributes$style,
@@ -8141,18 +8261,24 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'font-size', '1rem'),
 						A2($elm$html$Html$Attributes$style, 'pointer-events', 'none'),
 						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+						A2($elm$html$Html$Attributes$style, 'margin', '0'),
+						A2($elm$html$Html$Attributes$style, 'padding', '1em'),
+						A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
 						A2($elm$html$Html$Attributes$style, 'z-index', '100')
 					]),
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						A2($elm$core$Maybe$withDefault, '', model.errMsg))
+						(!_Utils_eq(model.execResult.errMsg, $elm$core$Maybe$Nothing)) ? A2($elm$core$Maybe$withDefault, '', model.execResult.errMsg) : (model.showRailCount ? $author$project$Main$formatRailCount(model.execResult.railCount) : ''))
 					])),
 				A2(
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'display', 'block'),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'display',
+						model.showEditor ? 'block' : 'none'),
 						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 						A2(
 						$elm$html$Html$Attributes$style,
@@ -8176,6 +8302,8 @@ var $author$project$Main$view = function (model) {
 						A2($elm$html$Html$Attributes$style, 'border-style', 'outset'),
 						A2($elm$html$Html$Attributes$style, 'border-width', '1px'),
 						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+						A2($elm$html$Html$Attributes$style, 'user-select', 'none'),
+						A2($elm$html$Html$Attributes$style, '-webkit-user-select', 'none'),
 						$author$project$Main$onSplitBarDragBegin(model),
 						$author$project$Main$onSplitBarDragMove(model),
 						$author$project$Main$onSplitBarDragEnd(model)
@@ -8185,7 +8313,10 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$textarea,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'display', 'block'),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'display',
+						model.showEditor ? 'block' : 'none'),
 						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 						A2($elm$html$Html$Attributes$style, 'resize', 'none'),
 						A2(
@@ -8219,6 +8350,28 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text(model.program)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'top',
+						$author$project$Main$px(railViewTop)),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'right',
+						$author$project$Main$px(railViewRight)),
+						A2($elm$html$Html$Attributes$style, 'touch-action', 'none'),
+						A2($elm$html$Html$Attributes$style, 'z-index', '1000')
+					]),
+				_List_fromArray(
+					[
+						A3($author$project$Main$makeButton, '📝', $author$project$Main$ToggleShowEditor, model.showEditor),
+						A3($author$project$Main$makeButton, '👀', $author$project$Main$ResetView, true),
+						A3($author$project$Main$makeButton, '🛒', $author$project$Main$ToggleShowRailCount, model.showRailCount)
 					]))
 			]));
 };
@@ -8242,7 +8395,6 @@ var $elm$core$Basics$pi = _Basics_pi;
 var $elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * $elm$core$Basics$pi) / 180;
 };
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $author$project$Forth$Interpreter$executeDrop = F3(
 	function (cont, err, status) {
@@ -8348,10 +8500,6 @@ var $author$project$Forth$Interpreter$executeSwap = F3(
 		}
 	});
 var $elm$core$Dict$Black = {$: 'Black'};
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
 var $elm$core$Dict$Red = {$: 'Red'};
 var $elm$core$Dict$balance = F5(
 	function (color, key, value, left, right) {
@@ -9819,7 +9967,6 @@ var $author$project$Types$Rail$map = F2(
 					f(a));
 		}
 	});
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Types$Rail$canInvert = function (rail) {
 	return !_Utils_eq(
 		A2(
@@ -12123,7 +12270,7 @@ var $author$project$Main$init = function (flags) {
 	var execResult = $author$project$Forth$execute(flags.program);
 	return _Utils_Tuple2(
 		{
-			errMsg: execResult.errMsg,
+			execResult: execResult,
 			isSplitBarDragging: false,
 			meshes: $author$project$Graphics$MeshLoader$init,
 			orbitControl: A4(
@@ -12132,9 +12279,9 @@ var $author$project$Main$init = function (flags) {
 				$elm$core$Basics$degrees(90),
 				1,
 				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 0)),
-			piers: execResult.piers,
 			program: flags.program,
-			rails: execResult.rails,
+			showEditor: true,
+			showRailCount: false,
 			splitBarPosition: 300.0,
 			viewport: {height: 0, width: 0}
 		},
@@ -12178,31 +12325,6 @@ var $elm$browser$Browser$Events$addKey = function (sub) {
 		sub);
 };
 var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
 var $elm$core$Dict$merge = F6(
 	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
 		var stepState = F3(
@@ -12457,6 +12579,32 @@ var $elm$core$Basics$clamp = F3(
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Graphics$OrbitControlImpl$updateViewport = F3(
+	function (_v0, w, h) {
+		var model = _v0.a;
+		return $author$project$Graphics$OrbitControlImpl$Model(
+			_Utils_update(
+				model,
+				{viewportHeight: h, viewportWidth: w}));
+	});
+var $author$project$Graphics$OrbitControl$updateViewport = F3(
+	function (w, h, _v0) {
+		var model = _v0.a;
+		return $author$project$Graphics$OrbitControl$Model(
+			_Utils_update(
+				model,
+				{
+					ocImpl: A3($author$project$Graphics$OrbitControlImpl$updateViewport, model.ocImpl, w, h)
+				}));
+	});
+var $author$project$Main$recalculateOC = function (model) {
+	var width = model.showEditor ? ((model.viewport.width - model.splitBarPosition) - 4) : model.viewport.width;
+	return _Utils_update(
+		model,
+		{
+			orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, width, model.viewport.height, model.orbitControl)
+		});
+};
 var $author$project$Storage$save = _Platform_outgoingPort('save', $elm$json$Json$Encode$string);
 var $author$project$PointerEvent$setPointerCaptureImpl = _Platform_outgoingPort('setPointerCaptureImpl', $elm$core$Basics$identity);
 var $author$project$PointerEvent$setPointerCapture = function (_v0) {
@@ -12831,16 +12979,6 @@ var $elm$core$Dict$partition = F2(
 			_Utils_Tuple2($elm$core$Dict$empty, $elm$core$Dict$empty),
 			dict);
 	});
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
 var $author$project$Graphics$OrbitControl$getOtherElement = function (key) {
 	return A2(
 		$elm$core$Basics$composeR,
@@ -12956,34 +13094,16 @@ var $author$project$Graphics$OrbitControl$updatePointerUp = F2(
 					points: A2($elm$core$Dict$remove, pointerId, model.points)
 				}));
 	});
-var $author$project$Graphics$OrbitControlImpl$updateViewport = F3(
-	function (_v0, w, h) {
-		var model = _v0.a;
-		return $author$project$Graphics$OrbitControlImpl$Model(
-			_Utils_update(
-				model,
-				{viewportHeight: h, viewportWidth: w}));
-	});
-var $author$project$Graphics$OrbitControl$updateViewport = F3(
-	function (w, h, _v0) {
-		var model = _v0.a;
-		return $author$project$Graphics$OrbitControl$Model(
-			_Utils_update(
-				model,
-				{
-					ocImpl: A3($author$project$Graphics$OrbitControlImpl$updateViewport, model.ocImpl, w, h)
-				}));
-	});
 var $author$project$Main$updateViewport = F3(
 	function (w, h, model) {
 		var splitBarPosition = A3($elm$core$Basics$clamp, 10, w - 10, w * 0.3);
-		return _Utils_update(
-			model,
-			{
-				orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (w - splitBarPosition) - 4, h, model.orbitControl),
-				splitBarPosition: splitBarPosition,
-				viewport: {height: h, width: w}
-			});
+		return $author$project$Main$recalculateOC(
+			_Utils_update(
+				model,
+				{
+					splitBarPosition: splitBarPosition,
+					viewport: {height: h, width: w}
+				}));
 	});
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -13081,24 +13201,13 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'UpdateScript':
 				var program = msg.a;
-				var execResult = $author$project$Forth$execute(program);
 				return _Utils_Tuple2(
-					function () {
-						var _v1 = execResult.errMsg;
-						if (_v1.$ === 'Nothing') {
-							return _Utils_update(
-								model,
-								{errMsg: $elm$core$Maybe$Nothing, piers: execResult.piers, program: program, rails: execResult.rails});
-						} else {
-							var errMsg = _v1.a;
-							return _Utils_update(
-								model,
-								{
-									errMsg: $elm$core$Maybe$Just(errMsg),
-									program: program
-								});
-						}
-					}(),
+					_Utils_update(
+						model,
+						{
+							execResult: $author$project$Forth$execute(program),
+							program: program
+						}),
 					$author$project$Storage$save(program));
 			case 'SplitBarBeginMove':
 				var event = msg.a;
@@ -13112,21 +13221,45 @@ var $author$project$Main$update = F2(
 				if (model.isSplitBarDragging) {
 					var splitBarPosition = A3($elm$core$Basics$clamp, 100, model.viewport.width - 100, event.clientX);
 					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								orbitControl: A3($author$project$Graphics$OrbitControl$updateViewport, (model.viewport.width - splitBarPosition) - 4, model.viewport.height, model.orbitControl),
-								splitBarPosition: splitBarPosition
-							}),
+						$author$project$Main$recalculateOC(
+							_Utils_update(
+								model,
+								{splitBarPosition: splitBarPosition})),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'SplitBarEndMove':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{isSplitBarDragging: false}),
+					$elm$core$Platform$Cmd$none);
+			case 'ToggleShowEditor':
+				return _Utils_Tuple2(
+					$author$project$Main$recalculateOC(
+						_Utils_update(
+							model,
+							{showEditor: !model.showEditor})),
+					$elm$core$Platform$Cmd$none);
+			case 'ToggleShowRailCount':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{showRailCount: !model.showRailCount}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var newOC = A4(
+					$author$project$Graphics$OrbitControl$init,
+					$elm$core$Basics$degrees(0),
+					$elm$core$Basics$degrees(90),
+					1,
+					A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 0));
+				return _Utils_Tuple2(
+					$author$project$Main$recalculateOC(
+						_Utils_update(
+							model,
+							{orbitControl: newOC})),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
