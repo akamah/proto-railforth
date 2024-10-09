@@ -5,11 +5,12 @@ import Browser.Dom
 import Browser.Events
 import Dict
 import Forth
+import Forth.Statistics exposing (getRailCount)
 import Graphics.MeshLoader as MeshLoader
 import Graphics.OrbitControl as OC
 import Html exposing (Html)
 import Html.Attributes as HA exposing (style)
-import Html.Events as HE
+import Html.Events as HE exposing (onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 exposing (vec3)
@@ -34,6 +35,9 @@ type Msg
     | SplitBarBeginMove PE.PointerEvent
     | SplitBarUpdateMove PE.PointerEvent
     | SplitBarEndMove PE.PointerEvent
+    | ToggleShowEditor
+    | ToggleShowRailCount
+    | ResetView
 
 
 type alias Model =
@@ -49,6 +53,8 @@ type alias Model =
     , errMsg : Maybe String
     , isSplitBarDragging : Bool
     , splitBarPosition : Float
+    , showEditor : Bool
+    , showRailCount : Bool
     }
 
 
@@ -89,6 +95,8 @@ init flags =
       , errMsg = execResult.errMsg -- Just <| formatRailCount execResult.railCount
       , isSplitBarDragging = False
       , splitBarPosition = 300.0
+      , showEditor = True
+      , showRailCount = False
       }
     , Cmd.batch
         [ Task.perform SetViewport Browser.Dom.getViewport
@@ -113,8 +121,14 @@ px x =
 
 view : Model -> Html Msg
 view model =
-    -- TODO: もう少し分離する
     let
+        splitBarPosition =
+            if model.showEditor then
+                model.splitBarPosition
+
+            else
+                0
+
         barThickness =
             8
 
@@ -128,13 +142,13 @@ view model =
             model.viewport.height
 
         railViewWidth =
-            model.viewport.width - model.splitBarPosition - barThickness / 2
+            model.viewport.width - splitBarPosition - barThickness / 2
 
         barTop =
             0
 
         barLeft =
-            model.splitBarPosition - barThickness / 2
+            splitBarPosition - barThickness / 2
 
         barWidth =
             barThickness
@@ -149,7 +163,7 @@ view model =
             0
 
         editorWidth =
-            model.splitBarPosition - barThickness / 2
+            splitBarPosition - barThickness / 2
 
         editorHeight =
             model.viewport.height
@@ -181,13 +195,21 @@ view model =
             , style "font-size" "1rem"
             , style "pointer-events" "none"
             , style "touch-action" "none"
+            , style "margin" "0"
+            , style "padding" "1em"
+            , style "box-sizing" "border-box"
             , style "z-index" "100"
             ]
             [ Html.text <| Maybe.withDefault "" <| model.errMsg ]
 
         -- bar
         , Html.div
-            [ style "display" "block"
+            [ style "display" <|
+                if model.showEditor then
+                    "block"
+
+                else
+                    "none"
             , style "position" "absolute"
             , style "top" (px barTop)
             , style "left" (px barLeft)
@@ -199,6 +221,8 @@ view model =
             , style "border-style" "outset"
             , style "border-width" "1px"
             , style "touch-action" "none"
+            , style "user-select" "none"
+            , style "-webkit-user-select" "none"
             , onSplitBarDragBegin model
             , onSplitBarDragMove model
             , onSplitBarDragEnd model
@@ -207,7 +231,12 @@ view model =
 
         -- editor
         , Html.textarea
-            [ style "display" "block"
+            [ style "display" <|
+                if model.showEditor then
+                    "block"
+
+                else
+                    "none"
             , style "position" "absolute"
             , style "resize" "none"
             , style "top" (px editorTop)
@@ -228,7 +257,34 @@ view model =
             ]
             [ Html.text model.program
             ]
+
+        -- buttons
+        , Html.div
+            [ style "position" "absolute"
+            , style "top" (px railViewTop)
+            , style "right" (px railViewRight)
+            , style "z-index" "1000"
+            ]
+            [ makeButton "📝" ToggleShowEditor
+            , makeButton "👀" ResetView
+            , makeButton "🛒" ToggleShowRailCount
+            ]
         ]
+
+
+makeButton : String -> Msg -> Html Msg
+makeButton title action =
+    Html.button
+        [ style "font-size" "30px"
+        , style "box-sizing" "border-box"
+        , style "width" "50px"
+        , style "height" "50px"
+        , style "cursor" "pointer"
+        , style "user-select" "none"
+        , style "-webkit-user-select" "none"
+        , HE.onClick action
+        ]
+        [ Html.text title ]
 
 
 viewCanvas :
@@ -253,13 +309,15 @@ viewCanvas { right, top, width, height, meshes, rails, piers, viewMatrix, projec
         ]
         [ HA.width (round (2.0 * width))
         , HA.height (round (2.0 * height))
-        , HA.style "display" "block"
-        , HA.style "position" "absolute"
-        , HA.style "right" (right |> px)
-        , HA.style "top" (top |> px)
-        , HA.style "width" (width |> px)
-        , HA.style "height" (height |> px)
-        , HA.style "touch-action" "none"
+        , style "display" "block"
+        , style "position" "absolute"
+        , style "right" (right |> px)
+        , style "top" (top |> px)
+        , style "width" (width |> px)
+        , style "height" (height |> px)
+        , style "touch-action" "none"
+        , style "user-select" "none"
+        , style "-webkit-user-select" "none"
         , onWheelHandler
         , onPointerDownHandler
         , onPointerMoveHandler
@@ -311,6 +369,13 @@ update msg model =
             let
                 execResult =
                     Forth.execute program
+
+                console =
+                    if model.showRailCount then
+                        Just <| formatRailCount execResult.railCount
+
+                    else
+                        Nothing
             in
             ( case execResult.errMsg of
                 Nothing ->
@@ -318,7 +383,7 @@ update msg model =
                         | program = program
                         , rails = execResult.rails
                         , piers = execResult.piers
-                        , errMsg = Nothing
+                        , errMsg = console
                     }
 
                 Just errMsg ->
@@ -340,8 +405,8 @@ update msg model =
                 in
                 ( { model
                     | splitBarPosition = splitBarPosition
-                    , orbitControl = OC.updateViewport (model.viewport.width - splitBarPosition - 4) model.viewport.height model.orbitControl
                   }
+                    |> recalculateOC
                 , Cmd.none
                 )
 
@@ -350,6 +415,19 @@ update msg model =
 
         SplitBarEndMove _ ->
             ( { model | isSplitBarDragging = False }, Cmd.none )
+
+        ToggleShowEditor ->
+            ( { model | showEditor = not model.showEditor } |> recalculateOC, Cmd.none )
+
+        ToggleShowRailCount ->
+            ( { model | showRailCount = not model.showRailCount }, Cmd.none )
+
+        ResetView ->
+            let
+                newOC =
+                    OC.init (degrees 0) (degrees 90) 1 (vec3 0 0 0)
+            in
+            ( { model | orbitControl = newOC } |> recalculateOC, Cmd.none )
 
 
 updateViewport : Float -> Float -> Model -> Model
@@ -360,9 +438,22 @@ updateViewport w h model =
     in
     { model
         | viewport = { width = w, height = h }
-        , orbitControl = OC.updateViewport (w - splitBarPosition - 4) h model.orbitControl
         , splitBarPosition = splitBarPosition
     }
+        |> recalculateOC
+
+
+recalculateOC : Model -> Model
+recalculateOC model =
+    let
+        width =
+            if model.showEditor then
+                model.viewport.width - model.splitBarPosition - 4
+
+            else
+                model.viewport.width
+    in
+    { model | orbitControl = OC.updateViewport width model.viewport.height model.orbitControl }
 
 
 wheelEventDecoder : Decoder ( Float, Float )
