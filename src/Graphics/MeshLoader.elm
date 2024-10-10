@@ -11,6 +11,7 @@ module Graphics.MeshLoader exposing
 
 import Array
 import Dict exposing (Dict)
+import Forth.RailPiece as RailPiece
 import Graphics.OFF as OFF
 import Graphics.Render as Render
 import Math.Matrix4 exposing (Mat4)
@@ -124,6 +125,7 @@ renderRails model rails viewMatrix projectionMatrix =
                 railPosition.position
                 railPosition.angle
                 (getRailColor railPosition.rail)
+                (RailPiece.getRailTerminals railPosition.rail).minus
         )
         rails
 

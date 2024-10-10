@@ -20,4 +20,21 @@ suite =
                         True
                         (canInvert <| Straight4 ())
             ]
+        , describe "isInverted" <|
+            [ test "Straight4 inverted ===> true" <|
+                \_ ->
+                    Expect.equal
+                        True
+                        (isInverted <| Straight4 Inverted)
+            , test "Straight4 not inverted ==> false" <|
+                \_ ->
+                    Expect.equal
+                        False
+                        (isInverted <| Straight4 NotInverted)
+            , test "Uturn ==> false" <|
+                \_ ->
+                    Expect.equal
+                        False
+                        (isInverted <| UTurn)
+            ]
         ]
