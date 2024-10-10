@@ -5,6 +5,7 @@ module Types.Rail exposing
     , allRails
     , canInvert
     , isFlippedToString
+    , isInverted
     , isInvertedToString
     , map
     , toString
@@ -67,6 +68,14 @@ type Rail invert flip
 canInvert : Rail invert flip -> Bool
 canInvert rail =
     map (always True) rail /= map (always False) rail
+
+
+{-| invertを解除したら異なっているならばinvertされてると判定する。
+というのも、invertの概念がないものに対してはFalseを返す必要があるため。
+-}
+isInverted : Rail IsInverted flip -> Bool
+isInverted rail =
+    map (always NotInverted) rail /= rail
 
 
 map : (a -> b) -> Rail a flip -> Rail b flip
@@ -233,8 +242,8 @@ toStringWith flipped inverted rail =
 
 
 isInvertedToString : IsInverted -> String
-isInvertedToString isInverted =
-    case isInverted of
+isInvertedToString inverted =
+    case inverted of
         NotInverted ->
             ""
 
