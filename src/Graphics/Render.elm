@@ -21,6 +21,12 @@ type alias Uniforms =
     , light : Vec3
     , albedo : Vec3
     , roughness : Float
+
+    -- この場所に近いほど白くなることにする
+    -- シェーダに可変長の要素を渡す方法があんまり分からなかったので固定長で行く
+    , highlight1 : Vec3
+    , highlight2 : Vec3
+    , highlight3 : Vec3
     }
 
 
@@ -35,8 +41,8 @@ lightFromAbove =
     Vec3.normalize <| vec3 2 1 5
 
 
-renderRail : Mat4 -> Mat4 -> Mesh Attributes -> Vec3 -> Float -> Vec3 -> List Entity
-renderRail viewMatrix projectionMatrix mesh origin angle color =
+renderRail : Mat4 -> Mat4 -> Mesh Attributes -> Vec3 -> Float -> Vec3 -> List Vec3 -> List Entity
+renderRail viewMatrix projectionMatrix mesh origin angle color minusTerminals =
     let
         modelMatrix =
             makeMeshMatrix origin angle
@@ -46,6 +52,9 @@ renderRail viewMatrix projectionMatrix mesh origin angle color =
 
         normalMat =
             normalMatrix modelViewMatrix
+
+        ( highlight1, highlight2, highlight3 ) =
+            makeHighlight <| List.map (Mat4.transform modelViewMatrix) minusTerminals
     in
     [ WebGL.entityWith
         [ WebGL.Settings.DepthTest.default
@@ -60,13 +69,36 @@ renderRail viewMatrix projectionMatrix mesh origin angle color =
         , light = Mat4.transform (normalMatrix viewMatrix) lightFromAbove
         , albedo = color
         , roughness = 1.0
+        , highlight1 = highlight1
+        , highlight2 = highlight2
+        , highlight3 = highlight3
         }
     ]
 
 
+makeHighlight : List Vec3 -> ( Vec3, Vec3, Vec3 )
+makeHighlight vecs =
+    let
+        inf =
+            vec3 10000000 10000000 10000000
+    in
+    case vecs of
+        [] ->
+            ( inf, inf, inf )
+
+        [ x ] ->
+            ( x, inf, inf )
+
+        [ x, y ] ->
+            ( x, y, inf )
+
+        x :: y :: z :: _ ->
+            ( x, y, z )
+
+
 renderPier : Mat4 -> Mat4 -> Mesh Attributes -> Vec3 -> Float -> List Entity
 renderPier viewMatrix projectionMatrix mesh origin angle =
-    renderRail viewMatrix projectionMatrix mesh origin angle (vec3 1.0 0.85 0.3)
+    renderRail viewMatrix projectionMatrix mesh origin angle (vec3 1.0 0.85 0.3) []
 
 
 makeMeshMatrix : Vec3 -> Float -> Mat4
@@ -112,8 +144,16 @@ railFragmentShader =
         uniform highp vec3 albedo;
         uniform highp float roughness;
 
+        uniform highp vec3 highlight1;
+        uniform highp vec3 highlight2;
+        uniform highp vec3 highlight3;
+
         varying highp vec3 varyingViewPosition;
         varying highp vec3 varyingNormal;
+
+        highp float getHighlightIntensity(in highp vec3 highlight) {
+            return pow((distance(-varyingViewPosition, highlight) + 1.0) / 10.0, -2.0);
+        }
 
         void main() {
             highp vec3 nLight = normalize(light);
@@ -134,7 +174,11 @@ railFragmentShader =
             highp vec3 diffuse = 0.8 * albedo * max(dotLightNormal, 0.0) * (orenNayerA + orenNayerB * s / t);
             highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));
 
-            highp vec3 fragmentColor = ambient + diffuse + specular;
+            highp float highlight = getHighlightIntensity(highlight1) + getHighlightIntensity(highlight2) + getHighlightIntensity(highlight3);
+
+
+            highp vec3 fragmentColor = mix(ambient + diffuse + specular, vec3(1.0, 1.0, 1.0), highlight);
+
 
             gl_FragColor = vec4(vec3(fragmentColor), 1.0);
         }

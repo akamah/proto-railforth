@@ -1,4 +1,4 @@
-module Forth.RailPiece exposing (getRailPiece, initialLocation, placeRail, rotateRailPiece)
+module Forth.RailPiece exposing (getRailPiece, getRailTerminals, initialLocation, placeRail, rotateRailPiece)
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
@@ -7,6 +7,7 @@ import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
 import List.Nonempty as Nonempty exposing (Nonempty(..))
+import Math.Vector3 exposing (Vec3)
 import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailPlacement exposing (RailPlacement)
 
@@ -391,3 +392,20 @@ placeRail params =
 initialLocation : RailLocation
 initialLocation =
     RailLocation.make Rot45.zero Rot45.zero 0 Dir.e Joint.Plus
+
+
+getRailTerminals : Rail IsInverted IsFlipped -> { minus : List Vec3, plus : List Vec3 }
+getRailTerminals rail =
+    let
+        railPiece =
+            if Rail.isInverted rail then
+                invert Rail.Inverted <| getRailPiece (Rail.map (always ()) rail)
+
+            else
+                getRailPiece (Rail.map (always ()) rail)
+    in
+    { minus =
+        List.map RailLocation.toVec3 <| List.filter (\loc -> loc.joint == Joint.Minus) <| Nonempty.toList railPiece.railLocations
+    , plus =
+        List.map RailLocation.toVec3 <| List.filter (\loc -> loc.joint == Joint.Plus) <| Nonempty.toList railPiece.railLocations
+    }
