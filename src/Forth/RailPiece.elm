@@ -344,14 +344,9 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
         Nothing
 
 
-toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> List RailLocation -> List RailLocation -> RailPlacement
-toRailPlacement rail location minusTerminals plusTerminals =
-    Types.RailPlacement.make
-        rail
-        (RailLocation.toVec3 location)
-        (Dir.toRadian location.location.dir)
-        (List.map RailLocation.toVec3 minusTerminals)
-        (List.map RailLocation.toVec3 plusTerminals)
+toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
+toRailPlacement rail location =
+    Types.RailPlacement.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
 
 
 type alias PlaceRailParams =
@@ -378,11 +373,7 @@ placeRail params =
                 , nextLocations =
                     List.map (RailLocation.mul params.location.location) <| Nonempty.tail railPiece.railLocations
                 , railPlacement =
-                    toRailPlacement
-                        rail
-                        (RailLocation.mul params.location.location railPiece.origin)
-                        (List.filter (\loc -> loc.joint == Joint.Minus) <| Nonempty.toList railPiece.railLocations)
-                        (List.filter (\loc -> loc.joint == Joint.Plus) <| Nonempty.toList railPiece.railLocations)
+                    toRailPlacement rail (RailLocation.mul params.location.location railPiece.origin)
                 , pierLocations =
                     List.map (PierLocation.mul params.location.location) <| railPiece.pierLocations
                 }

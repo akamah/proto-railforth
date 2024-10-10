@@ -17,19 +17,12 @@ type alias RailPlacement =
     -- 今後の進展次第で変化することは大いに有り得る。
     , position : Vec3
     , angle : Float -- in radian
-
-    -- 描画の際にハイライトしたいので、端点の情報を渡すことにした。
-    -- モデル座標系なので配置場所に応じて変換が必要となる
-    , minusTerminals : List Vec3
-    , plusTerminals : List Vec3
     }
 
 
-make : Rail IsInverted IsFlipped -> Vec3 -> Float -> List Vec3 -> List Vec3 -> RailPlacement
-make rail position angle minusTerminals plusTerminals =
+make : Rail IsInverted IsFlipped -> Vec3 -> Float -> RailPlacement
+make rail position angle =
     { rail = rail
     , position = position
     , angle = angle
-    , minusTerminals = minusTerminals
-    , plusTerminals = plusTerminals
     }

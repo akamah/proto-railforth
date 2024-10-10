@@ -10739,19 +10739,17 @@ var $mgold$elm_nonempty_list$List$Nonempty$tail = function (_v0) {
 	var xs = _v0.b;
 	return xs;
 };
-var $author$project$Types$RailPlacement$make = F5(
-	function (rail, position, angle, minusTerminals, plusTerminals) {
-		return {angle: angle, minusTerminals: minusTerminals, plusTerminals: plusTerminals, position: position, rail: rail};
+var $author$project$Types$RailPlacement$make = F3(
+	function (rail, position, angle) {
+		return {angle: angle, position: position, rail: rail};
 	});
-var $author$project$Forth$RailPiece$toRailPlacement = F4(
-	function (rail, location, minusTerminals, plusTerminals) {
-		return A5(
+var $author$project$Forth$RailPiece$toRailPlacement = F2(
+	function (rail, location) {
+		return A3(
 			$author$project$Types$RailPlacement$make,
 			rail,
 			$author$project$Forth$Geometry$RailLocation$toVec3(location),
-			$author$project$Forth$Geometry$Dir$toRadian(location.location.dir),
-			A2($elm$core$List$map, $author$project$Forth$Geometry$RailLocation$toVec3, minusTerminals),
-			A2($elm$core$List$map, $author$project$Forth$Geometry$RailLocation$toVec3, plusTerminals));
+			$author$project$Forth$Geometry$Dir$toRadian(location.location.dir));
 	});
 var $author$project$Forth$RailPiece$placeRail = function (params) {
 	return A2(
@@ -10769,22 +10767,10 @@ var $author$project$Forth$RailPiece$placeRail = function (params) {
 					$author$project$Forth$Geometry$PierLocation$mul(params.location.location),
 					railPiece.pierLocations),
 				rail: rail,
-				railPlacement: A4(
+				railPlacement: A2(
 					$author$project$Forth$RailPiece$toRailPlacement,
 					rail,
-					A2($author$project$Forth$Geometry$RailLocation$mul, params.location.location, railPiece.origin),
-					A2(
-						$elm$core$List$filter,
-						function (loc) {
-							return _Utils_eq(loc.joint, $author$project$Forth$Geometry$Joint$Minus);
-						},
-						$mgold$elm_nonempty_list$List$Nonempty$toList(railPiece.railLocations)),
-					A2(
-						$elm$core$List$filter,
-						function (loc) {
-							return _Utils_eq(loc.joint, $author$project$Forth$Geometry$Joint$Plus);
-						},
-						$mgold$elm_nonempty_list$List$Nonempty$toList(railPiece.railLocations)))
+					A2($author$project$Forth$Geometry$RailLocation$mul, params.location.location, railPiece.origin))
 			};
 		},
 		A3($author$project$Forth$RailPiece$getAppropriateRailAndPieceForJoint, params.location.joint, params.railType, params.rotation));
