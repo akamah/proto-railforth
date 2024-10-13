@@ -11,7 +11,7 @@ dr
   ol ol s h l r at1 
     save a0-out-0 j .
 
-  ll l at2 swap
+  l l l at2 swap
     rr rr dr uturn . . ( ターンの部分を作る )
     bk ss j
 
@@ -31,7 +31,7 @@ q h dc .
 
 ss j dc .
   .
-s ss s h shl ll h j
+ss ss h shl ll h j
 
 ( 入力B )
 dr
@@ -50,7 +50,7 @@ owl nip at1
 
 j ac1 rot
   ( ループを作る )
-  j rr rr dr uturn . .
+  j rr rr s dr uturn . .
   
   j fw at1
     save b1-out-1
@@ -75,11 +75,11 @@ load b1-out-1
 load b1-out-0
   l j shr ol ol
   ac3
-    rot r r r r bk s r tl2 . .
+    rot r r rr bk s r tl2 . .
 
     h s ol ol .
   
-    fw owl swap l . l l dr1 . r r r .
+    fw owl swap l . l l dr1 . rr r .
 
 ( B0 の出力をつなげる )
 load b0-out-0
@@ -87,11 +87,11 @@ load b0-out-0
     ll j q h r
       at2
         bk r .
-        r .
-    l j q h l .
+        el . .
+    l j q h r .
 
 load b0-out-1
-  l er . er1 . s rr s s r
+  l l el1 . s rr ss r
   at2 
     ( ここでC0の出力 = 1 の部分の線路を作っておく。どうもそうするしかないっぽい )
     dl h at1 . .
@@ -99,38 +99,36 @@ load b0-out-1
       save c0-out-1
 
 ( ここからCの途中から線路を引くことになる )
-
+ 
 j q at1
   save c1-out-0
 
-h j ac1 rot
+j ac1 rot
   ( ループを作る )
   j rr rr s dr uturn . . 
 
   j fw at1
     save c1-out-1
-  ol ol .
+  h ol ol .
 
-  j ss l l dr1 . s
-
-s j at nip ( C1を読む方向から繋がる )
+  j ss h l l dr1 . ss j at nip ( C1を読む方向から繋がる )
 
 ( Bを読みに行く線路に繋げる ) 
 ss ss ss s j ol ol ss ss ss .
 
 load c1-out-1
-  l s q r .
+  l q .
 
 load c1-out-0
-  l j dr nip ol ol h
-  ac3 rot
-    bk r r .
+  l j shr ol ol
+  ac3
+    rot r r rr bk s r tl2 r . .
     
     h s .
 
     fw owl nip dl1 .
-  s q ll q
-  ss ss ss ss ss ss ss s s
+  s h q ll q
+  ss ss ss ss ss ss ss ss
   ll
   q ss ss ss shr shr
   at1
@@ -170,11 +168,11 @@ load read-c-1
       j .
 
 load read-c-0
-  s ss ss ll ss ss ss ss ss s h q j
+  s ss ss l l ss ss ss ss ss s h q j
   tr2 nip
     h ll l
     owr1
-      rr ll ll s h .
+      rr ll l l s h .
       bk ll l .
 
 load c0-out-0
