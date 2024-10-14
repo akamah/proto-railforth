@@ -109,6 +109,11 @@ if (name == "straight1") {
 } else if (name == "backward") {
   assert_cannot_flip(name, flipped);
   straight(2, inverted);
+} else if (name == "double_track_straight4") {
+  assert_cannot_flip(name, flipped);
+  double_track_straight(4, inverted);
+} else if (name == "double_track_curve45") {
+  double_track_curve(45, flipped, inverted, 1 * resolution);
 } else if (name == "pier_single") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);

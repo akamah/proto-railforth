@@ -42,9 +42,11 @@ type Rail invert flip
     | Straight2 invert
     | Straight4 invert
     | Straight8 invert
+    | DoubleStraight4 invert
     | Curve45 flip invert
     | Curve90 flip invert
     | OuterCurve45 flip invert
+    | DoubleCurve45 flip invert
     | Turnout flip invert
     | SingleDouble flip invert
     | DoubleWide flip invert
@@ -93,6 +95,9 @@ map f rail =
         Straight8 a ->
             Straight8 (f a)
 
+        DoubleStraight4 a ->
+            DoubleStraight4 (f a)
+
         Curve45 a b ->
             Curve45 a (f b)
 
@@ -101,6 +106,9 @@ map f rail =
 
         OuterCurve45 a b ->
             OuterCurve45 a (f b)
+
+        DoubleCurve45 a b ->
+            DoubleCurve45 a (f b)
 
         SingleDouble a b ->
             SingleDouble a (f b)
@@ -177,6 +185,9 @@ toStringWith flipped inverted rail =
         Straight8 inv ->
             "straight8" ++ inverted inv
 
+        DoubleStraight4 inv ->
+            "double_track_straight4" ++ inverted inv
+
         Curve45 flip inv ->
             "curve45" ++ inverted inv ++ flipped flip
 
@@ -185,6 +196,9 @@ toStringWith flipped inverted rail =
 
         OuterCurve45 flip inv ->
             "outer_curve45" ++ inverted inv ++ flipped flip
+
+        DoubleCurve45 flip inv ->
+            "double_track_curve45" ++ inverted inv ++ flipped flip
 
         Turnout flip inv ->
             "turnout" ++ inverted inv ++ flipped flip
@@ -285,6 +299,7 @@ allRails =
                         , Straight2 invert
                         , Straight4 invert
                         , Straight8 invert
+                        , DoubleStraight4 invert
                         , JointChange invert
                         , Stop invert
                         , Forward invert
@@ -301,6 +316,7 @@ allRails =
                                     [ Curve45 flip invert
                                     , Curve90 flip invert
                                     , OuterCurve45 flip invert
+                                    , DoubleCurve45 flip invert
                                     , Turnout flip invert
                                     , SingleDouble flip invert
                                     , DoubleWide flip invert

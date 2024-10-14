@@ -184,6 +184,9 @@ getRailPiece rail =
         Straight8 _ ->
             twoEnds minusZero <| goStraightPlus 16
 
+        DoubleStraight4 _ ->
+            fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight (goStraightPlus 8)
+
         Curve45 f _ ->
             flip f <| twoEnds minusZero turnLeft45deg
 
@@ -196,6 +199,14 @@ getRailPiece rail =
 
         OuterCurve45 f _ ->
             flip f <| twoEnds minusZero turnLeftOuter45deg
+
+        DoubleCurve45 f _ ->
+            flip f <|
+                fourEnds
+                    minusZero
+                    doubleTrackRightZeroMinus
+                    (RailLocation.make (Rot45.make 0 0 8 -8) (Rot45.make 0 0 0 -2) 0 Dir.ne Joint.Plus)
+                    turnLeft45deg
 
         Turnout f _ ->
             flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
