@@ -8072,6 +8072,9 @@ var $author$project$Types$Rail$toStringWith = F3(
 			case 'Straight8':
 				var inv = rail.a;
 				return 'straight8' + inverted(inv);
+			case 'DoubleStraight4':
+				var inv = rail.a;
+				return 'double_track_straight4' + inverted(inv);
 			case 'Curve45':
 				var flip = rail.a;
 				var inv = rail.b;
@@ -8084,6 +8087,10 @@ var $author$project$Types$Rail$toStringWith = F3(
 				var flip = rail.a;
 				var inv = rail.b;
 				return 'outer_curve45' + (inverted(inv) + flipped(flip));
+			case 'DoubleCurve45':
+				var flip = rail.a;
+				var inv = rail.b;
+				return 'double_track_curve45' + (inverted(inv) + flipped(flip));
 			case 'Turnout':
 				var flip = rail.a;
 				var inv = rail.b;
@@ -8538,6 +8545,13 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 				$author$project$Forth$RailPiece$twoEnds,
 				$author$project$Forth$RailPiece$minusZero,
 				$author$project$Forth$RailPiece$goStraightPlus(16));
+		case 'DoubleStraight4':
+			return A4(
+				$author$project$Forth$RailPiece$fourEnds,
+				$author$project$Forth$RailPiece$minusZero,
+				$author$project$Forth$RailPiece$doubleTrackRightZeroMinus,
+				$author$project$Forth$RailPiece$doubleTrackRight,
+				$author$project$Forth$RailPiece$goStraightPlus(8));
 		case 'Curve45':
 			var f = rail.a;
 			return A2(
@@ -8568,6 +8582,23 @@ var $author$project$Forth$RailPiece$getRailPiece = function (rail) {
 				$author$project$Forth$RailPiece$flip,
 				f,
 				A2($author$project$Forth$RailPiece$twoEnds, $author$project$Forth$RailPiece$minusZero, $author$project$Forth$RailPiece$turnLeftOuter45deg));
+		case 'DoubleCurve45':
+			var f = rail.a;
+			return A2(
+				$author$project$Forth$RailPiece$flip,
+				f,
+				A4(
+					$author$project$Forth$RailPiece$fourEnds,
+					$author$project$Forth$RailPiece$minusZero,
+					$author$project$Forth$RailPiece$doubleTrackRightZeroMinus,
+					A5(
+						$author$project$Forth$Geometry$RailLocation$make,
+						A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 8, -8),
+						A4($author$project$Forth$Geometry$Rot45$make, 0, 0, 0, -2),
+						0,
+						$author$project$Forth$Geometry$Dir$ne,
+						$author$project$Forth$Geometry$Joint$Plus),
+					$author$project$Forth$RailPiece$turnLeft45deg));
 		case 'Turnout':
 			var f = rail.a;
 			return A2(
@@ -8810,6 +8841,13 @@ var $author$project$Types$Rail$Curve90 = F2(
 	function (a, b) {
 		return {$: 'Curve90', a: a, b: b};
 	});
+var $author$project$Types$Rail$DoubleCurve45 = F2(
+	function (a, b) {
+		return {$: 'DoubleCurve45', a: a, b: b};
+	});
+var $author$project$Types$Rail$DoubleStraight4 = function (a) {
+	return {$: 'DoubleStraight4', a: a};
+};
 var $author$project$Types$Rail$DoubleWide = F2(
 	function (a, b) {
 		return {$: 'DoubleWide', a: a, b: b};
@@ -8885,6 +8923,10 @@ var $author$project$Types$Rail$map = F2(
 				var a = rail.a;
 				return $author$project$Types$Rail$Straight8(
 					f(a));
+			case 'DoubleStraight4':
+				var a = rail.a;
+				return $author$project$Types$Rail$DoubleStraight4(
+					f(a));
 			case 'Curve45':
 				var a = rail.a;
 				var b = rail.b;
@@ -8904,6 +8946,13 @@ var $author$project$Types$Rail$map = F2(
 				var b = rail.b;
 				return A2(
 					$author$project$Types$Rail$OuterCurve45,
+					a,
+					f(b));
+			case 'DoubleCurve45':
+				var a = rail.a;
+				var b = rail.b;
+				return A2(
+					$author$project$Types$Rail$DoubleCurve45,
 					a,
 					f(b));
 			case 'SingleDouble':
