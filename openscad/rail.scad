@@ -499,8 +499,45 @@ module render_pier(depth, roofWidth, pillarWidth, baseWidth, roofHeight, pillarH
     }
 }
 
+DOUBLE_TRACK_STICK = 15;
 
+module double_track_straight(length, inverted) {
+    union() {
+        straight(length, inverted);
+        translate([0, -DOUBLE_TRACK, 0]) {
+            straight(length, inverted);
+        }
 
+        for (x = [1:length]) {
+            translate([(x - 0.5) * UNIT, -DOUBLE_TRACK / 2, THICKNESS / 4]) {
+                cube([DOUBLE_TRACK_STICK, DOUBLE_TRACK, THICKNESS / 2], center=true);
+            }
+        }
+    }
+}
+
+module double_track_curve(degree, flipped, inverted, divs) {
+    curve_def = flip_if(flipped, curve_raildef(4 * UNIT, degree, 0, divs));
+    outer_def = flip_if(flipped, translate_raildef([0, -DOUBLE_TRACK, 0], curve_raildef(4 * UNIT + DOUBLE_TRACK, degree, 0, divs)));
+
+    union() {
+        render_rail([curve_def, outer_def], [start_mat(curve_def), start_mat(outer_def)], [end_mat(curve_def), end_mat(outer_def)], inverted);
+
+        for (theta = [45/8:45/4:degree]) {
+            translate([0, 0, THICKNESS / 4]) {
+                rotate([flipped ? 180 : 0, 0, 0]) {
+                    translate([0, 4 * UNIT, 0]) {
+                        rotate([0, 0, theta + 180]) {
+                            translate([0, 4 * UNIT + DOUBLE_TRACK / 2, 0]) {
+                                cube([DOUBLE_TRACK_STICK, DOUBLE_TRACK, THICKNESS / 2], center=true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 PIER_DEPTH = 30;
 PIER_PILLAR_WIDTH = 12;
