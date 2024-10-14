@@ -147,6 +147,9 @@ getRailColor rail =
 
         skyblue =
             vec3 0.47 0.8 1.0
+
+        darkblue =
+            vec3 0.12 0.4 0.7
     in
     case rail of
         UTurn ->
@@ -163,6 +166,9 @@ getRailColor rail =
 
         Backward _ ->
             skyblue
+
+        OuterCurve45 _ _ ->
+            darkblue
 
         _ ->
             blue

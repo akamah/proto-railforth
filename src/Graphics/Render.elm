@@ -152,7 +152,7 @@ railFragmentShader =
         varying highp vec3 varyingNormal;
 
         highp float getHighlightIntensity(in highp vec3 highlight) {
-            return pow((distance(-varyingViewPosition, highlight) + 1.0) / 10.0, -2.0);
+            return min(pow((distance(-varyingViewPosition, highlight) + 1.0) / 15.0, -2.5), 1.0);
         }
 
         void main() {
@@ -174,7 +174,7 @@ railFragmentShader =
             highp vec3 diffuse = 0.8 * albedo * max(dotLightNormal, 0.0) * (orenNayerA + orenNayerB * s / t);
             highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));
 
-            highp float highlight = getHighlightIntensity(highlight1) + getHighlightIntensity(highlight2) + getHighlightIntensity(highlight3);
+            highp float highlight =max(getHighlightIntensity(highlight1), max(getHighlightIntensity(highlight2), getHighlightIntensity(highlight3)));
 
 
             highp vec3 fragmentColor = mix(ambient + diffuse + specular, vec3(1.0, 1.0, 1.0), highlight);

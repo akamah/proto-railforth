@@ -7941,7 +7941,7 @@ var $author$project$Graphics$Render$normalMatrix = function (mat) {
 	}
 };
 var $author$project$Graphics$Render$railFragmentShader = {
-	src: '\n        uniform highp vec3 light;\n        uniform highp vec3 albedo;\n        uniform highp float roughness;\n\n        uniform highp vec3 highlight1;\n        uniform highp vec3 highlight2;\n        uniform highp vec3 highlight3;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n        highp float getHighlightIntensity(in highp vec3 highlight) {\n            return pow((distance(-varyingViewPosition, highlight) + 1.0) / 10.0, -2.0);\n        }\n\n        void main() {\n            highp vec3 nLight = normalize(light);\n            highp vec3 nViewPosition = normalize(varyingViewPosition);\n            highp vec3 nNormal = normalize(varyingNormal);\n            highp vec3 nHalfway = normalize(nLight + nViewPosition);\n\n            highp vec3 ambient = 0.3 * albedo;\n\n            // https://mimosa-pudica.net/improved-oren-nayar.html\n            highp float dotLightNormal = dot(nLight, nNormal);\n            highp float dotViewNormal = dot(nViewPosition, nNormal);\n            highp float s = dot(nLight, nViewPosition) - dotLightNormal * dotViewNormal;\n            highp float t = mix(1.0, max(dotLightNormal, dotViewNormal), step(0.0, s));\n            highp float orenNayerA = 1.0 - 0.5 * (roughness / (roughness + 0.33));\n            highp float orenNayerB = 0.45 * (roughness / (roughness + 0.09));\n\n            highp vec3 diffuse = 0.8 * albedo * max(dotLightNormal, 0.0) * (orenNayerA + orenNayerB * s / t);\n            highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));\n\n            highp float highlight = getHighlightIntensity(highlight1) + getHighlightIntensity(highlight2) + getHighlightIntensity(highlight3);\n\n\n            highp vec3 fragmentColor = mix(ambient + diffuse + specular, vec3(1.0, 1.0, 1.0), highlight);\n\n\n            gl_FragColor = vec4(vec3(fragmentColor), 1.0);\n        }\n    ',
+	src: '\n        uniform highp vec3 light;\n        uniform highp vec3 albedo;\n        uniform highp float roughness;\n\n        uniform highp vec3 highlight1;\n        uniform highp vec3 highlight2;\n        uniform highp vec3 highlight3;\n\n        varying highp vec3 varyingViewPosition;\n        varying highp vec3 varyingNormal;\n\n        highp float getHighlightIntensity(in highp vec3 highlight) {\n            return min(pow((distance(-varyingViewPosition, highlight) + 1.0) / 15.0, -2.5), 1.0);\n        }\n\n        void main() {\n            highp vec3 nLight = normalize(light);\n            highp vec3 nViewPosition = normalize(varyingViewPosition);\n            highp vec3 nNormal = normalize(varyingNormal);\n            highp vec3 nHalfway = normalize(nLight + nViewPosition);\n\n            highp vec3 ambient = 0.3 * albedo;\n\n            // https://mimosa-pudica.net/improved-oren-nayar.html\n            highp float dotLightNormal = dot(nLight, nNormal);\n            highp float dotViewNormal = dot(nViewPosition, nNormal);\n            highp float s = dot(nLight, nViewPosition) - dotLightNormal * dotViewNormal;\n            highp float t = mix(1.0, max(dotLightNormal, dotViewNormal), step(0.0, s));\n            highp float orenNayerA = 1.0 - 0.5 * (roughness / (roughness + 0.33));\n            highp float orenNayerB = 0.45 * (roughness / (roughness + 0.09));\n\n            highp vec3 diffuse = 0.8 * albedo * max(dotLightNormal, 0.0) * (orenNayerA + orenNayerB * s / t);\n            highp vec3 specular = vec3(0.2 * pow(clamp(dot(nHalfway, nNormal), 0.0, 1.0), 30.0));\n\n            highp float highlight =max(getHighlightIntensity(highlight1), max(getHighlightIntensity(highlight2), getHighlightIntensity(highlight3)));\n\n\n            highp vec3 fragmentColor = mix(ambient + diffuse + specular, vec3(1.0, 1.0, 1.0), highlight);\n\n\n            gl_FragColor = vec4(vec3(fragmentColor), 1.0);\n        }\n    ',
 	attributes: {},
 	uniforms: {albedo: 'albedo', highlight1: 'highlight1', highlight2: 'highlight2', highlight3: 'highlight3', light: 'light', roughness: 'roughness'}
 };
@@ -8024,6 +8024,7 @@ var $author$project$Graphics$MeshLoader$getRailColor = function (rail) {
 	var red = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1.0, 0.2, 0.4);
 	var green = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 1.0, 0.56);
 	var gray = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.8, 0.8, 0.8);
+	var darkblue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 0.4, 0.7);
 	var blue = A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0.12, 0.56, 1.0);
 	switch (rail.$) {
 		case 'UTurn':
@@ -8036,6 +8037,8 @@ var $author$project$Graphics$MeshLoader$getRailColor = function (rail) {
 			return green;
 		case 'Backward':
 			return skyblue;
+		case 'OuterCurve45':
+			return darkblue;
 		default:
 			return blue;
 	}
