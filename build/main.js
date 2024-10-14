@@ -10884,6 +10884,18 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 				$author$project$Types$Rail$Straight8(_Utils_Tuple0),
 				0)),
 			_Utils_Tuple2(
+			'dts',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$DoubleStraight4(_Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
+			'dts1',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				$author$project$Types$Rail$DoubleStraight4(_Utils_Tuple0),
+				1)),
+			_Utils_Tuple2(
 			'l',
 			A2(
 				$author$project$Forth$Interpreter$executePlaceRail,
@@ -10919,6 +10931,30 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 				$author$project$Forth$Interpreter$executePlaceRail,
 				A2($author$project$Types$Rail$OuterCurve45, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
 				0)),
+			_Utils_Tuple2(
+			'dtl',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				A2($author$project$Types$Rail$DoubleCurve45, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
+			'dtl1',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				A2($author$project$Types$Rail$DoubleCurve45, $author$project$Types$Rail$NotFlipped, _Utils_Tuple0),
+				1)),
+			_Utils_Tuple2(
+			'dtr',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				A2($author$project$Types$Rail$DoubleCurve45, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
+				0)),
+			_Utils_Tuple2(
+			'dtr3',
+			A2(
+				$author$project$Forth$Interpreter$executePlaceRail,
+				A2($author$project$Types$Rail$DoubleCurve45, $author$project$Types$Rail$Flipped, _Utils_Tuple0),
+				3)),
 			_Utils_Tuple2(
 			'tl',
 			A2(
@@ -11443,6 +11479,7 @@ var $author$project$Types$Rail$allRails = _Utils_ap(
 							$author$project$Types$Rail$Straight2(invert),
 							$author$project$Types$Rail$Straight4(invert),
 							$author$project$Types$Rail$Straight8(invert),
+							$author$project$Types$Rail$DoubleStraight4(invert),
 							$author$project$Types$Rail$JointChange(invert),
 							$author$project$Types$Rail$Stop(invert),
 							$author$project$Types$Rail$Forward(invert),
@@ -11462,6 +11499,7 @@ var $author$project$Types$Rail$allRails = _Utils_ap(
 									A2($author$project$Types$Rail$Curve45, flip, invert),
 									A2($author$project$Types$Rail$Curve90, flip, invert),
 									A2($author$project$Types$Rail$OuterCurve45, flip, invert),
+									A2($author$project$Types$Rail$DoubleCurve45, flip, invert),
 									A2($author$project$Types$Rail$Turnout, flip, invert),
 									A2($author$project$Types$Rail$SingleDouble, flip, invert),
 									A2($author$project$Types$Rail$DoubleWide, flip, invert),

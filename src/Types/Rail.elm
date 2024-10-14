@@ -299,6 +299,7 @@ allRails =
                         , Straight2 invert
                         , Straight4 invert
                         , Straight8 invert
+                        , DoubleStraight4 invert
                         , JointChange invert
                         , Stop invert
                         , Forward invert
@@ -315,6 +316,7 @@ allRails =
                                     [ Curve45 flip invert
                                     , Curve90 flip invert
                                     , OuterCurve45 flip invert
+                                    , DoubleCurve45 flip invert
                                     , Turnout flip invert
                                     , SingleDouble flip invert
                                     , DoubleWide flip invert
