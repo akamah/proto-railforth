@@ -87,7 +87,7 @@ if (name == "straight1") {
   shift(flipped, inverted, 1 * resolution);
 } else if (name == "stop") {
   assert_cannot_flip(name, flipped);
-  stop(flipped);
+  stop(inverted);
 } else if (name == "uturn") {
   assert_cannot_flip(name, flipped);
   assert_cannot_invert(name, inverted);
