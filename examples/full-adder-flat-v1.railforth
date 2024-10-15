@@ -1,0 +1,368 @@
+( ***** 入力Cの開始 ***** )
+invert 
+
+dts .
+  ss .
+ss
+dts .
+  ss .
+ss
+dts .
+  ss .
+ss
+dts .
+  ss .
+ss
+dts .
+  ss .
+ss
+
+dtl . . dtl .
+  save c=1-start
+  save c=0-start
+
+load c=0-start
+  q j l owl2
+    save c=0-after-oneway
+  save c=0-uturn
+
+load c=0-uturn
+  rr j dr
+    uturn .
+  .
+
+load c=1-start
+  s l r at1
+    save c0-out-0
+  j .
+
+load c=0-after-oneway
+  bk s h q
+  ac .
+    save c=1-after-cross
+  save c=0-after-cross
+
+load c=1-after-cross
+  j at1
+    save c0-out-1
+  .
+
+load c=0-after-cross
+  at
+    save c=0-join
+  . ( C0の入力をスキップする線路から繋がる )
+
+load c=0-join
+  j dl1
+    .
+  j at
+    save c1-start
+  . ( C0を読む方向の線路と繋がる )
+
+load c1-start
+  j at1
+    save c1-out-0
+  j ac1
+      save c1=1-after-cross
+    save c1=0-after-cross
+  save c1-uturn
+
+load c1-uturn
+  j rr rr dr
+    uturn .
+  .
+
+load c1=1-after-cross
+ j fw at1
+   save c1-out-1
+ .
+
+load c1=0-after-cross
+  j ss dtl . . dtl . . dl1 .
+  save c1-end
+
+load c1-end
+  q j h at
+    save from-c1-to-read-b-before-cross
+  .
+
+load from-c1-to-read-b-before-cross
+  ss ss s
+  l r ll r l
+  shr shr
+  ss ss ss
+  j
+  dc1
+     j . ( Sを書き込んだ後にやってくる )
+    save read-b-after-cross
+  save read-a1-after-cross-b
+
+load read-b-after-cross
+  q shl s h
+  ll h j dr
+    save b=1-start
+  save b=0-start
+
+( ***** Cからの出力 ****** )
+
+load c0-out-0
+  s q tl2 nip
+  uturn
+  ss ss q
+  dl2 nip q
+
+  ss ss ss ss 
+  ol s q ol
+
+  . ( save c-out-to-read-c )
+
+load c0-out-1
+  s j at2
+    fw j q h .
+  j .
+
+
+load c1-out-1
+  j at2
+    nip
+  fw ac3
+      -rot
+      bk .
+    s .
+  h tl1
+    j .
+  j uturn
+  j dr
+    nip
+  ss h dl2
+    nip
+  dl2
+    nip
+  h l j l
+
+  save s-out-to-read-a
+
+
+( ***** 入力Bの開始 ***** )
+
+load b=1-start
+  q h s ss
+  ol ol at1
+    save b0-out-0
+  j ac1
+      save b=1-after-cross
+    save b=0-after-cross
+  .
+
+load b=0-start
+  q h s ll q at1
+    l ll h . ( クロスレールと繋がる )
+  bk .
+
+load b=1-after-cross
+  j at1
+    save b0-out-1
+  .
+
+load b=0-after-cross
+  j s h dl1
+    .
+  save b0-end
+
+load b0-end
+  j at
+    save b1-start
+    . ( b0を読むレールと繋がる )
+
+load b1-start
+  j at1
+    save b1-out-0
+  j ac1
+      save b1=1-after-cross
+    save b1=0-after-cross
+  save b1-uturn
+
+load b1-uturn
+  j rr rr dr
+    uturn .
+  .
+
+load b1=1-after-cross
+  j fw at1
+    save b1-out-1
+  .
+
+load b1=0-after-cross
+  j ss dtl . . dtl . . dl1 .
+  j q at
+    save b1-end
+  .
+
+( *** Bからの出力部分 *** )
+
+load b0-out-0
+  l ss ll shr j ll r
+  at2
+    save b0-out-0-end
+  h uturn1 j
+  .
+
+load b0-out-0-end
+  rr bk r
+  . 
+
+load b0-out-1
+  ll tr1
+    .
+  ss h j shr rr h r
+  .
+
+load b1-out-1
+  j at2
+    nip
+  fw ac3
+      -rot
+      bk .
+    s .
+  h tl1
+    j .
+  j uturn
+  j dr
+    nip
+  ss h dl2
+    nip
+  dr2
+    nip
+  l j rr
+  .
+
+load b1-end  
+  h
+  l r ll r l
+  j
+  dc1
+      save middle-line-double-cross
+    save read-a-after-cross
+  .
+
+load middle-line-double-cross
+  j ss ss s q .
+
+load read-a-after-cross
+  j q ss ss ss h l r ll
+  save define-a
+
+
+( ***** 入力Aの開始 ***** )
+
+load define-a
+  dr . dtl . . dtl .
+    save a=1-start
+  save a=0-start
+
+load a=1-start
+  ss l r at1
+    save a0-out-0
+  j .
+
+load a=0-start
+  j l owl2
+    save a=0-after-oneway
+  save a-uturn
+
+load a-uturn
+  j rr rr dr
+    uturn .
+  .
+
+load a=0-after-oneway
+  bk ss s
+  ac
+      .
+    save a=1-after-cross
+  save a=0-after-cross
+
+load a=1-after-cross
+  j at1
+    save a0-out-1
+  .
+
+load a=0-after-cross
+  j s h dl1
+    .
+  j at
+    j q h r .
+    save from-a-to-cross
+
+load from-a-to-cross
+  l s ll q .
+
+
+( ***** Aの出力 ***** )
+load a0-out-0
+  l r owl2
+    s .
+  ss r tl2
+    r .
+  .
+
+load a0-out-1
+  l j q h .
+
+
+( ***** エンコードされた S, Cからデコーダーを目指す ***** )
+load s-out-to-read-a
+  dts .
+    ss .
+  ss
+  dts .
+    ss .
+  ss
+  dts .
+    ss .
+  ss
+  dts .
+    save c-out-to-read-c
+
+  h s
+  ll
+  shr shr shr shr
+  ss ss h tr . ( 極性変換のため )
+  save decode-s
+
+load decode-s
+  at1
+    el1 .
+    ll shr ss .
+  fw rr ll
+  ac2 . .
+  dtl . . dtl . .
+  dl1 . l l
+  l r shr
+  
+load c-out-to-read-c
+  h s
+  ol ol rr ll
+  shl ss tr .
+  save decode-c
+
+load decode-c
+  at1
+    el1 .
+    ll shr ss .
+  fw rr ll
+  ac2 .
+    ss .
+  ss
+  dts .
+    s h .
+  s h
+  dtl . .
+  dtl .
+    h .
+  h
+  
+  
+  .
+
+  
