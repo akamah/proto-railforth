@@ -26,181 +26,369 @@ Shift+ドラッグ / 二本指スワイプ → 移動
 なお、ライセンスは MIT ライセンスで提供されます。
 )
 
-( 最初は凹側から始めるため逆転させる )
-invert
+( ***** 入力Cの開始 ***** )
+invert 
 
-( 入力A )
-dr
-  ol ol s h l r at1 
-    save a0-out-0 j .
+dts .
+  ss .
+ss
+dts .
+  s stop . ( 入力Cの開始地点 )
+s stop
+dts .
+  ss .
+ss
+dts .
+  ss .
+ss
+dts .
+  ss h .
+ss h
 
-  l l l at2 swap
-    rr rr dr uturn . . ( ターンの部分を作る )
-    bk ss j
+dtl . . dtl .
+  save c=1-start
+  save c=0-start
 
-ac .
-  ( 外側 )
-  j at1
-    save a0-out-1 .
+load c=0-start
+  q j l owl2
+    save c=0-after-oneway
+  save c=0-uturn
 
-  j s h dl1 .
-
-j q at j q . ( B1を読む方向に進むやつ )
-
-l s ll  ( 分岐して入力の読み取り方向へ )
-q h dc .
-  swap
-  ss j ss ss l r ll .
-
-ss j dc .
+load c=0-uturn
+  rr j dr
+    uturn .
   .
-ss ss h shl ll h j
 
-( 入力B )
-dr
-  q ss s h ol ol h at1
-    save b0-out-0 j .
-
-  q s h ll at1 swap j q bk at . .
-  l ll s q
-  ac .
-    j at1
-      save b0-out-1 .
-    j h s dl1 .
-
-owl nip at1
-  save b1-out-0
-
-j ac1 rot
-  ( ループを作る )
-  j rr rr s dr uturn . .
-  
-  j fw at1
-    save b1-out-1
-  ol ol dl2 nip swap
-
-  j ss l l .
-
-j q at swap l . ss h ll ss j .
-
-( Aの出力をつなげる )
-load a0-out-0
-  l el . tr1 . s r tl2 r . .
-
-load a0-out-1
-  l s .
-
-
-( 次にB1の出力をつなげるやつを描く )
-load b1-out-1
-  l q .
-
-load b1-out-0
-  l j shr ol ol
-  ac3
-    rot r r rr bk s r tl2 . .
-
-    h s ol ol .
-  
-    fw owl swap l . l l dr1 . rr r .
-
-( B0 の出力をつなげる )
-load b0-out-0
-  l tl
-    ll j q h r
-      at2
-        bk r .
-        el . .
-    l j q h r .
-
-load b0-out-1
-  l l el1 . s rr ss r
-  at2 
-    ( ここでC0の出力 = 1 の部分の線路を作っておく。どうもそうするしかないっぽい )
-    dl h at1 . .
-    j q at .
-      save c0-out-1
-
-( ここからCの途中から線路を引くことになる )
- 
-j q at1
-  save c1-out-0
-
-j ac1 rot
-  ( ループを作る )
-  j rr rr s dr uturn . . 
-
-  j fw at1
-    save c1-out-1
-  h ol ol .
-
-  j ss h l l dr1 . ss j at nip ( C1を読む方向から繋がる )
-
-( Bを読みに行く線路に繋げる ) 
-ss ss ss s j ol ol ss ss ss .
-
-load c1-out-1
-  l q .
-
-load c1-out-0
-  l j shr ol ol
-  ac3
-    rot r r rr bk s r tl2 r . .
-    
-    h s .
-
-    fw owl nip dl1 .
-  s h q ll q
-  ss ss ss ss ss ss ss ss
-  ll
-  q ss ss ss shr shr
-  at1
-    l ll q j h shr s .
-
-    fw rr ll ac2 .
-      ol ol .
-
-      l l dl1 . ll
-  s q j ss ss .
-
-load c0-out-1
-  l ll j q
-  at1
-    ll .
-    
-    fw rr l tr1
-      s j q h tr . .
-
-  ss ss ss q ll ss ss ss ss ss ss ss ss ss h ll
-  q h s ss shr
-  at1
-    l ll h q j shr s .
-
-    fw rr ll ac2 .
-      save read-c-1
-      save read-c-0
-
-load read-c-1
-  s ss ss ol ol ss ss ss ss ss ss ss ss h
-  ol ol at1
+load c=1-start
+  s l r at1
     save c0-out-0
+  j .
 
-    j ac1
-      j .
-      q .
-      j .
+load c=0-after-oneway
+  bk s h q
+  ac .
+    save c=1-after-cross
+  save c=0-after-cross
 
-load read-c-0
-  s ss ss l l ss ss ss ss ss s h q j
-  tr2 nip
-    h ll l
-    owr1
-      rr ll l l s h .
-      bk ll l .
+load c=1-after-cross
+  j at1
+    save c0-out-1
+  .
+
+load c=0-after-cross
+  at
+    save c=0-join
+  . ( C0の入力をスキップする線路から繋がる )
+
+load c=0-join
+  j dl1
+    .
+  j at
+    save c1-start
+  . ( C0を読む方向の線路と繋がる )
+
+load c1-start
+  j at1
+    save c1-out-0
+  j ac1
+      save c1=1-after-cross
+    save c1=0-after-cross
+  save c1-uturn
+
+load c1-uturn
+  j rr rr dr
+    uturn .
+  .
+
+load c1=1-after-cross
+ j fw at1
+   save c1-out-1
+ .
+
+load c1=0-after-cross
+  j ss dtl . . dtl . . dl1 .
+  save c1-end
+
+load c1-end
+  q j h at
+    save from-c1-to-read-b-before-cross
+  .
+
+load from-c1-to-read-b-before-cross
+  ss ss s
+  l r ll r l
+  shr shr
+  ss ss ss
+  j
+  dc1
+     j . ( Sを書き込んだ後にやってくる )
+    save read-b-after-cross
+  save read-a1-after-cross-b
+
+load read-b-after-cross
+  q shl s h
+  ll h j dr
+    save b=1-start
+  save b=0-start
+
+( ***** Cからの出力 ****** )
 
 load c0-out-0
-  l ss ll ss s h .
+  s q tl2 nip
+  uturn
+  ss ss q
+  dl2 nip q
 
+  ss ss ss ss 
+  ol s q ol
+
+  . ( save c-out-to-read-c )
+
+load c0-out-1
+  s j at2
+    fw j q h .
+  j .
+
+
+load c1-out-1
+  j at2
+    nip
+  fw ac3
+      -rot
+      bk .
+    s .
+  h tl1
+    j .
+  j uturn
+  j dr
+    nip
+  ss h dl2
+    nip
+  dl2
+    nip
+  h l j l
+
+  save s-out-to-read-a
+
+
+( ***** 入力Bの開始 ***** )
+
+load b=1-start
+  q h s ss
+  ol ol at1
+    save b0-out-0
+  j ac1
+      save b=1-after-cross
+    save b=0-after-cross
+  .
+
+load b=0-start
+  q h s ll q at1
+    l ll h . ( クロスレールと繋がる )
+  bk .
+
+load b=1-after-cross
+  j at1
+    save b0-out-1
+  .
+
+load b=0-after-cross
+  j s h dl1
+    .
+  save b0-end
+
+load b0-end
+  j at
+    save b1-start
+    . ( b0を読むレールと繋がる )
+
+load b1-start
+  j at1
+    save b1-out-0
+  j ac1
+      save b1=1-after-cross
+    save b1=0-after-cross
+  save b1-uturn
+
+load b1-uturn
+  j rr rr dr
+    uturn .
+  .
+
+load b1=1-after-cross
+  j fw at1
+    save b1-out-1
+  .
+
+load b1=0-after-cross
+  j ss dtl . . dtl . . dl1 .
+  j q at
+    save b1-end
+  .
+
+( *** Bからの出力部分 *** )
+
+load b0-out-0
+  l ss ll shr j ll r
+  at2
+    save b0-out-0-end
+  h uturn1 j
+  .
+
+load b0-out-0-end
+  rr bk r
+  . 
+
+load b0-out-1
+  ll tr1
+    .
+  ss h j shr rr h r
+  .
+
+load b1-out-1
+  j at2
+    nip
+  fw ac3
+      -rot
+      bk .
+    s .
+  h tl1
+    j .
+  j uturn
+  j dr
+    nip
+  ss h dl2
+    nip
+  dr2
+    nip
+  l j rr
+  .
+
+load b1-end  
+  l r h ll h r l
+  q j
+  dc1
+      save middle-line-double-cross
+    save read-a-after-cross
+  .
+
+load middle-line-double-cross
+  ss ss h j .
+
+load read-a-after-cross
+  ss ss ss j l r ll
+  save define-a
+
+
+( ***** 入力Aの開始 ***** )
+
+load define-a
+  dr . dtl . . dtl .
+    save a=1-start
+  save a=0-start
+
+load a=1-start
+  ss l r at1
+    save a0-out-0
+  j .
+
+load a=0-start
+  j l owl2
+    save a=0-after-oneway
+  save a-uturn
+
+load a-uturn
+  j rr rr dr
+    uturn .
+  .
+
+load a=0-after-oneway
+  bk ss s
+  ac
+      .
+    save a=1-after-cross
+  save a=0-after-cross
+
+load a=1-after-cross
+  j at1
+    save a0-out-1
+  .
+
+load a=0-after-cross
+  j s h dl1
+    .
+  owl
+    q h s r .
+    save from-a-to-cross
+
+load from-a-to-cross
+  l s ll j .
+
+
+( ***** Aの出力 ***** )
+load a0-out-0
+  l r owl2
+    s .
+  ss r tl2
+    r .
+  .
+
+load a0-out-1
+  l j q h .
+
+
+( ***** エンコードされた S, Cからデコーダーを目指す ***** )
+load s-out-to-read-a
+  dts .
+    ss .
+  ss
+  dts .
+    ss .
+  ss
+  dts .
+    ss .
+  ss
+  dts .
+    save c-out-to-read-c
+
+  h s
+  ll
+  shr shr shr shr
+  ss ss h tr . ( 極性変換のため )
+  save decode-s
+
+load decode-s
+  at1
+    el1 .
+    ll shr ss .
+  fw rr ll
+  ac2 . .
+  dtl . . dtl . .
+  dl1 . l l
+  l r shr
+  
+load c-out-to-read-c
+  h ss
+  shl
+  ll
+  ss ss s tr .
+
+  save decode-c
+
+load decode-c
+  at1
+    el1 .
+    ll shr ss .
+  fw rr ll
+  ac2 .
+    ss .
+  ss
+  dts .
+    s h .
+  s h
+  dtl . .
+  dtl . .
+  .
 
 (
 Copyright 2024 AKAMA Hitoshi
