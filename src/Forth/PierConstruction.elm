@@ -33,8 +33,12 @@ foldlResult f b list =
             Ok b
 
         x :: xs ->
-            f x b
-                |> Result.andThen (\b2 -> foldlResult f b2 xs)
+            case f x b of
+                Ok b2 ->
+                    foldlResult f b2 xs
+
+                Err err ->
+                    Err err
 
 
 updateWithResult : comparable -> (Maybe v -> Result e v) -> Dict comparable v -> Result e (Dict comparable v)
