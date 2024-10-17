@@ -16,7 +16,7 @@ import Math.Vector3 exposing (vec3)
 import PointerEvent as PE
 import Storage
 import Task
-import Types.PierPlacement exposing (PierPlacement)
+import Types.PierRenderData exposing (PierRenderData)
 import Types.RailRenderData exposing (RailRenderData)
 import WebGL
 
@@ -311,7 +311,7 @@ viewCanvas :
     , height : Float
     , meshes : MeshLoader.Model
     , rails : List RailRenderData
-    , piers : List PierPlacement
+    , piers : List PierRenderData
     , viewMatrix : Mat4
     , projectionMatrix : Mat4
     }

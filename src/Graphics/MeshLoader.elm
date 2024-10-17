@@ -17,7 +17,7 @@ import Graphics.Render as Render
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Types.Pier as Pier exposing (Pier)
-import Types.PierPlacement exposing (PierPlacement)
+import Types.PierRenderData exposing (PierRenderData)
 import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailRenderData exposing (RailRenderData)
 import WebGL exposing (Entity, Mesh)
@@ -174,16 +174,16 @@ getRailColor rail =
             blue
 
 
-renderPiers : Model -> List PierPlacement -> Mat4 -> Mat4 -> List Entity
+renderPiers : Model -> List PierRenderData -> Mat4 -> Mat4 -> List Entity
 renderPiers model piers viewMatrix projectionMatrix =
     List.concatMap
-        (\pierPlacement ->
+        (\pier ->
             Render.renderPier
                 viewMatrix
                 projectionMatrix
-                (getPierMesh model pierPlacement.pier)
-                pierPlacement.position
-                pierPlacement.angle
+                (getPierMesh model pier.pier)
+                pier.position
+                pier.angle
         )
         piers
 

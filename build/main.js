@@ -8008,14 +8008,14 @@ var $author$project$Graphics$MeshLoader$renderPiers = F4(
 	function (model, piers, viewMatrix, projectionMatrix) {
 		return A2(
 			$elm$core$List$concatMap,
-			function (pierPlacement) {
+			function (pier) {
 				return A5(
 					$author$project$Graphics$Render$renderPier,
 					viewMatrix,
 					projectionMatrix,
-					A2($author$project$Graphics$MeshLoader$getPierMesh, model, pierPlacement.pier),
-					pierPlacement.position,
-					pierPlacement.angle);
+					A2($author$project$Graphics$MeshLoader$getPierMesh, model, pier.pier),
+					pier.position,
+					pier.angle);
 			},
 			piers);
 	});
@@ -10046,19 +10046,18 @@ var $author$project$Forth$Geometry$Dir$toUndirectedDir = function (_v0) {
 	var x = _v0.a;
 	return (x >= 4) ? $author$project$Forth$Geometry$Dir$Dir(x - 4) : $author$project$Forth$Geometry$Dir$Dir(x);
 };
-var $author$project$Forth$PierConstruction$cleansePierPlacements = $elm$core$List$map(
-	function (placement) {
-		var loc = placement.location;
-		return _Utils_update(
-			placement,
-			{
-				location: _Utils_update(
-					loc,
-					{
-						dir: $author$project$Forth$Geometry$Dir$toUndirectedDir(loc.dir)
-					})
-			});
-	});
+var $author$project$Forth$PierConstruction$cleansePierLocations = function (placement) {
+	var loc = placement.location;
+	return _Utils_update(
+		placement,
+		{
+			location: _Utils_update(
+				loc,
+				{
+					dir: $author$project$Forth$Geometry$Dir$toUndirectedDir(loc.dir)
+				})
+		});
+};
 var $author$project$Forth$PierConstruction$foldlResult = F3(
 	function (f, b, list) {
 		foldlResult:
@@ -10543,7 +10542,7 @@ var $author$project$Forth$PierConstruction$singlePier = function (single) {
 		_List_Nil,
 		$elm$core$Dict$toList(single));
 };
-var $author$project$Forth$PierConstruction$toPierPlacement = function (list) {
+var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
 	return A2(
 		$elm$core$Result$andThen,
 		function (_v0) {
@@ -10562,15 +10561,15 @@ var $author$project$Forth$PierConstruction$toPierPlacement = function (list) {
 			$elm$core$Result$andThen,
 			$author$project$Forth$PierConstruction$doubleTrackPiers,
 			$author$project$Forth$PierConstruction$divideIntoDict(
-				$author$project$Forth$PierConstruction$cleansePierPlacements(list))));
+				A2($elm$core$List$map, $author$project$Forth$PierConstruction$cleansePierLocations, list))));
 };
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
-	var _v0 = $author$project$Forth$PierConstruction$toPierPlacement(status.global.piers);
+	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(status.global.piers);
 	if (_v0.$ === 'Ok') {
-		var pierPlacement = _v0.a;
+		var pierRenderData = _v0.a;
 		return {
 			errMsg: $elm$core$Maybe$Nothing,
-			piers: pierPlacement,
+			piers: pierRenderData,
 			railCount: $author$project$Forth$Statistics$getRailCount(
 				A2(
 					$elm$core$List$map,

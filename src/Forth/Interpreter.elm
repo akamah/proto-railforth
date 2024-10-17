@@ -7,7 +7,7 @@ import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
 import Forth.Statistics as Statistics
 import Types.Pier exposing (Pier(..))
-import Types.PierPlacement exposing (PierPlacement)
+import Types.PierRenderData exposing (PierRenderData)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailRenderData exposing (RailRenderData)
 
@@ -43,7 +43,7 @@ type alias ExecStatus =
 
 type alias ExecResult =
     { rails : List RailRenderData
-    , piers : List PierPlacement
+    , piers : List PierRenderData
     , errMsg : Maybe String
     , railCount : Dict String Int
     }
@@ -223,12 +223,12 @@ haltWithError status errMsg =
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    case PierConstruction.toPierPlacement status.global.piers of
-        Ok pierPlacement ->
+    case PierConstruction.toPierRenderData status.global.piers of
+        Ok pierRenderData ->
             { rails = status.global.rails
             , errMsg = Nothing
             , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
-            , piers = pierPlacement
+            , piers = pierRenderData
             }
 
         Err err ->
