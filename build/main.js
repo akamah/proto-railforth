@@ -10061,17 +10061,28 @@ var $author$project$Forth$PierConstruction$cleansePierPlacements = $elm$core$Lis
 	});
 var $author$project$Forth$PierConstruction$foldlResult = F3(
 	function (f, b, list) {
-		if (!list.b) {
-			return $elm$core$Result$Ok(b);
-		} else {
-			var x = list.a;
-			var xs = list.b;
-			return A2(
-				$elm$core$Result$andThen,
-				function (b2) {
-					return A3($author$project$Forth$PierConstruction$foldlResult, f, b2, xs);
-				},
-				A2(f, x, b));
+		foldlResult:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Result$Ok(b);
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var _v1 = A2(f, x, b);
+				if (_v1.$ === 'Ok') {
+					var b2 = _v1.a;
+					var $temp$f = f,
+						$temp$b = b2,
+						$temp$list = xs;
+					f = $temp$f;
+					b = $temp$b;
+					list = $temp$list;
+					continue foldlResult;
+				} else {
+					var err = _v1.a;
+					return $elm$core$Result$Err(err);
+				}
+			}
 		}
 	});
 var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
