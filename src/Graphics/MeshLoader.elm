@@ -19,7 +19,7 @@ import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import Types.Pier as Pier exposing (Pier)
 import Types.PierPlacement exposing (PierPlacement)
 import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import Types.RailPlacement exposing (RailPlacement)
+import Types.RailRenderData exposing (RailRenderData)
 import WebGL exposing (Entity, Mesh)
 
 
@@ -114,7 +114,7 @@ getPierMesh model pier =
         |> Maybe.withDefault dummyMesh
 
 
-renderRails : Model -> List RailPlacement -> Mat4 -> Mat4 -> List Entity
+renderRails : Model -> List RailRenderData -> Mat4 -> Mat4 -> List Entity
 renderRails model rails viewMatrix projectionMatrix =
     List.concatMap
         (\railPosition ->

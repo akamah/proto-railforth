@@ -9,7 +9,7 @@ import Forth.Statistics as Statistics
 import Types.Pier exposing (Pier(..))
 import Types.PierPlacement exposing (PierPlacement)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import Types.RailPlacement exposing (RailPlacement)
+import Types.RailRenderData exposing (RailRenderData)
 
 
 type alias Word =
@@ -36,13 +36,13 @@ type alias ForthError =
 type alias ExecStatus =
     ForthStatus
         RailLocation
-        { rails : List RailPlacement
+        { rails : List RailRenderData
         , piers : List PierLocation
         }
 
 
 type alias ExecResult =
-    { rails : List RailPlacement
+    { rails : List RailRenderData
     , piers : List PierPlacement
     , errMsg : Maybe String
     , railCount : Dict String Int
@@ -365,12 +365,12 @@ executePlaceRail railType rotation cont status =
 
         top :: restOfStack ->
             case RailPiece.placeRail { railType = railType, location = top, rotation = rotation } of
-                Just { nextLocations, railPlacement, pierLocations } ->
+                Just { nextLocations, railRenderData, pierLocations } ->
                     cont
                         { status
                             | stack = nextLocations ++ restOfStack
                             , global =
-                                { rails = railPlacement :: status.global.rails
+                                { rails = railRenderData :: status.global.rails
                                 , piers = pierLocations ++ status.global.piers
                                 }
                         }

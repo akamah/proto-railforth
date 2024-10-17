@@ -9,7 +9,7 @@ import Forth.Geometry.Rot45 as Rot45
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Math.Vector3 exposing (Vec3)
 import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import Types.RailPlacement exposing (RailPlacement)
+import Types.RailRenderData exposing (RailRenderData)
 
 
 
@@ -355,9 +355,9 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
         Nothing
 
 
-toRailPlacement : Rail IsInverted IsFlipped -> RailLocation -> RailPlacement
-toRailPlacement rail location =
-    Types.RailPlacement.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
+toRailRenderData : Rail IsInverted IsFlipped -> RailLocation -> RailRenderData
+toRailRenderData rail location =
+    Types.RailRenderData.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
 
 
 type alias PlaceRailParams =
@@ -370,7 +370,7 @@ type alias PlaceRailParams =
 type alias PlaceRailResult =
     { rail : Rail IsInverted IsFlipped
     , nextLocations : List RailLocation
-    , railPlacement : RailPlacement
+    , railRenderData : RailRenderData
     , pierLocations : List PierLocation
     }
 
@@ -383,8 +383,8 @@ placeRail params =
                 { rail = rail
                 , nextLocations =
                     List.map (RailLocation.mul params.location.location) <| Nonempty.tail railPiece.railLocations
-                , railPlacement =
-                    toRailPlacement rail (RailLocation.mul params.location.location railPiece.origin)
+                , railRenderData =
+                    toRailRenderData rail (RailLocation.mul params.location.location railPiece.origin)
                 , pierLocations =
                     List.map (PierLocation.mul params.location.location) <| railPiece.pierLocations
                 }
