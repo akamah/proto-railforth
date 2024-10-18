@@ -355,24 +355,29 @@ executeLoad toks status =
 
 
 executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executePlaceRail railType rotation cont status =
-    case status.stack of
-        [] ->
-            haltWithError status "スタックが空です"
+executePlaceRail railType rotation =
+    let
+        railPlaceFunc =
+            RailPiece.placeRail railType rotation
+    in
+    \cont status ->
+        case status.stack of
+            [] ->
+                haltWithError status "スタックが空です"
 
-        top :: restOfStack ->
-            case RailPiece.placeRail { railType = railType, railLocation = top, rotation = rotation } of
-                Just { nextLocations, railPlacement } ->
-                    cont
-                        { status
-                            | stack = nextLocations ++ restOfStack
-                            , global =
-                                { rails = railPlacement :: status.global.rails
-                                }
-                        }
+            top :: restOfStack ->
+                case railPlaceFunc top of
+                    Just { nextLocations, railPlacement } ->
+                        cont
+                            { status
+                                | stack = nextLocations ++ restOfStack
+                                , global =
+                                    { rails = railPlacement :: status.global.rails
+                                    }
+                            }
 
-                Nothing ->
-                    haltWithError status "配置するレールの凹凸が合いません"
+                    Nothing ->
+                        haltWithError status "配置するレールの凹凸が合いません"
 
 
 executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult

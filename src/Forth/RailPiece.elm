@@ -169,65 +169,67 @@ flip flipped piece =
             }
 
 
-getRailPiece : Rail () IsFlipped -> RailPiece
+getRailPiece : Rail IsInverted IsFlipped -> RailPiece
 getRailPiece rail =
     case rail of
-        Straight1 _ ->
-            twoEnds minusZero <| goStraightPlus 2
+        Straight1 i ->
+            invert i <| twoEnds minusZero <| goStraightPlus 2
 
-        Straight2 _ ->
-            twoEnds minusZero <| goStraightPlus 4
+        Straight2 i ->
+            invert i <| twoEnds minusZero <| goStraightPlus 4
 
-        Straight4 _ ->
-            twoEnds minusZero <| goStraightPlus 8
+        Straight4 i ->
+            invert i <| twoEnds minusZero <| goStraightPlus 8
 
-        Straight8 _ ->
-            twoEnds minusZero <| goStraightPlus 16
+        Straight8 i ->
+            invert i <| twoEnds minusZero <| goStraightPlus 16
 
-        DoubleStraight4 _ ->
-            fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight (goStraightPlus 8)
+        DoubleStraight4 i ->
+            invert i <| fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight (goStraightPlus 8)
 
-        Curve45 f _ ->
-            flip f <| twoEnds minusZero turnLeft45deg
+        Curve45 f i ->
+            invert i <| flip f <| twoEnds minusZero turnLeft45deg
 
-        Curve90 f _ ->
-            flip f <|
-                { railLocations = Nonempty minusZero [ turnLeft90deg ]
-                , pierLocations = List.map (PierLocation.fromRailLocation PierLocation.flatRailMargin) [ minusZero, turnLeft45deg, turnLeft90deg ]
-                , origin = RailLocation.zero
-                }
+        Curve90 f i ->
+            invert i <|
+                flip f <|
+                    { railLocations = Nonempty minusZero [ turnLeft90deg ]
+                    , pierLocations = List.map (PierLocation.fromRailLocation PierLocation.flatRailMargin) [ minusZero, turnLeft45deg, turnLeft90deg ]
+                    , origin = RailLocation.zero
+                    }
 
-        OuterCurve45 f _ ->
-            flip f <| twoEnds minusZero turnLeftOuter45deg
+        OuterCurve45 f i ->
+            invert i <| flip f <| twoEnds minusZero turnLeftOuter45deg
 
-        DoubleCurve45 f _ ->
-            flip f <|
-                fourEnds
-                    minusZero
-                    doubleTrackRightZeroMinus
-                    (RailLocation.make (Rot45.make 0 0 8 -8) (Rot45.make 0 0 0 -2) 0 Dir.ne Joint.Plus)
-                    turnLeft45deg
+        DoubleCurve45 f i ->
+            invert i <|
+                flip f <|
+                    fourEnds
+                        minusZero
+                        doubleTrackRightZeroMinus
+                        (RailLocation.make (Rot45.make 0 0 8 -8) (Rot45.make 0 0 0 -2) 0 Dir.ne Joint.Plus)
+                        turnLeft45deg
 
-        Turnout f _ ->
-            flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
+        Turnout f i ->
+            invert i <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
 
-        SingleDouble f _ ->
-            flip f <| threeEnds minusZero (goStraightPlus 8) doubleTrackLeft
+        SingleDouble f i ->
+            invert i <| flip f <| threeEnds minusZero (goStraightPlus 8) doubleTrackLeft
 
-        DoubleWide f _ ->
-            flip f <| fourEnds minusZero (goStraightMinus 10) doubleTrackWideLeft doubleTrackLeftZeroMinus
+        DoubleWide f i ->
+            invert i <| flip f <| fourEnds minusZero (goStraightMinus 10) doubleTrackWideLeft doubleTrackLeftZeroMinus
 
-        EightPoint f _ ->
-            flip f <| threeEnds minusZero turnRight45degMinus turnLeft45deg
+        EightPoint f i ->
+            invert i <| flip f <| threeEnds minusZero turnRight45degMinus turnLeft45deg
 
-        JointChange _ ->
-            twoEnds minusZero (goStraightMinus 2)
+        JointChange i ->
+            invert i <| twoEnds minusZero (goStraightMinus 2)
 
-        Slope f _ ->
-            flip f <| twoEnds minusZero (RailLocation.setHeight 4 (goStraightPlus 16))
+        Slope f i ->
+            invert i <| flip f <| twoEnds minusZero (RailLocation.setHeight 4 (goStraightPlus 16))
 
-        Shift f _ ->
-            flip f <| twoEnds minusZero doubleTrackLeft
+        Shift f i ->
+            invert i <| flip f <| twoEnds minusZero doubleTrackLeft
 
         SlopeCurveA ->
             { railLocations =
@@ -249,8 +251,8 @@ getRailPiece rail =
             , origin = RailLocation.zero
             }
 
-        Stop _ ->
-            twoEnds minusZero (goStraightPlus 8)
+        Stop i ->
+            invert i <| twoEnds minusZero (goStraightPlus 8)
 
         AutoTurnout ->
             threeEnds minusZero (goStraightPlus 12) (RailLocation.mul (goStraightPlus 4).location turnLeft45deg)
@@ -289,11 +291,11 @@ getRailPiece rail =
                 (RailLocation.make (Rot45.make 8 0 -4 0) Rot45.zero 0 Dir.e Joint.Minus)
                 (goStraightPlus 8)
 
-        Forward _ ->
-            twoEnds minusZero (goStraightPlus 4)
+        Forward i ->
+            invert i <| twoEnds minusZero (goStraightPlus 4)
 
-        Backward _ ->
-            twoEnds minusZero (goStraightPlus 4)
+        Backward i ->
+            invert i <| twoEnds minusZero (goStraightPlus 4)
 
 
 {-| remove the first element from the list and append it to the end
@@ -337,27 +339,29 @@ rotateRailPiece piece =
 getAppropriateRailAndPieceForJoint : Joint -> Rail () IsFlipped -> Int -> Maybe ( Rail IsInverted IsFlipped, RailPiece )
 getAppropriateRailAndPieceForJoint joint railType rotation =
     let
-        railPiece =
-            loop rotation rotateRailPiece <| getRailPiece railType
-    in
-    if Joint.match joint (Nonempty.head railPiece.railLocations).joint then
-        -- これから置く予定のレールと、スタックトップの方向がマッチしたのでそのまま配置する
-        Just ( Rail.map (always Rail.NotInverted) railType, railPiece )
+        railNotInverted =
+            Rail.map (always NotInverted) railType
 
-    else if Rail.canInvert railType then
+        railInverted =
+            Rail.map (always Inverted) railType
+
+        railPieceMinus =
+            loop rotation rotateRailPiece <| getRailPiece railNotInverted
+
+        railPiecePlus =
+            loop rotation rotateRailPiece <| getRailPiece railInverted
+    in
+    if Joint.match joint (Nonempty.head railPieceMinus.railLocations).joint then
+        -- これから置く予定のレールと、スタックトップの方向がマッチしたのでそのまま配置する
+        Just ( railNotInverted, railPieceMinus )
+
+    else if Joint.match joint (Nonempty.head railPiecePlus.railLocations).joint then
         -- これから置くレールの凹凸を反転させることで配置することが可能である。
-        Just ( Rail.map (always Rail.Inverted) railType, invert Rail.Inverted railPiece )
+        Just ( railInverted, railPiecePlus )
 
     else
         -- 凹凸がマッチしないため、配置することができない
         Nothing
-
-
-type alias PlaceRailParams =
-    { railType : Rail () IsFlipped
-    , railLocation : RailLocation
-    , rotation : Int
-    }
 
 
 type alias PlaceRailResult =
@@ -366,18 +370,31 @@ type alias PlaceRailResult =
     }
 
 
-placeRail : PlaceRailParams -> Maybe PlaceRailResult
-placeRail params =
-    getAppropriateRailAndPieceForJoint params.railLocation.joint params.railType params.rotation
-        |> Maybe.map
-            (\( rail, railPiece ) ->
-                { railPlacement =
-                    RailPlacement.make rail <|
-                        (RailLocation.mul params.railLocation.location railPiece.origin).location
-                , nextLocations =
-                    List.map (RailLocation.mul params.railLocation.location) <| Nonempty.tail railPiece.railLocations
-                }
-            )
+placeRail : Rail () IsFlipped -> Int -> RailLocation -> Maybe PlaceRailResult
+placeRail railType rotation =
+    let
+        plusCase =
+            getAppropriateRailAndPieceForJoint Joint.Plus railType rotation
+
+        minusCase =
+            getAppropriateRailAndPieceForJoint Joint.Minus railType rotation
+    in
+    \railLocation ->
+        (if railLocation.joint == Joint.Plus then
+            plusCase
+
+         else
+            minusCase
+        )
+            |> Maybe.map
+                (\( rail, railPiece ) ->
+                    { railPlacement =
+                        RailPlacement.make rail <|
+                            (RailLocation.mul railLocation.location railPiece.origin).location
+                    , nextLocations =
+                        List.map (RailLocation.mul railLocation.location) <| Nonempty.tail railPiece.railLocations
+                    }
+                )
 
 
 initialLocation : RailLocation
@@ -389,11 +406,7 @@ getRailTerminals : Rail IsInverted IsFlipped -> { minus : List Vec3, plus : List
 getRailTerminals rail =
     let
         railPiece =
-            if Rail.isInverted rail then
-                invert Rail.Inverted <| getRailPiece (Rail.map (always ()) rail)
-
-            else
-                getRailPiece (Rail.map (always ()) rail)
+            getRailPiece rail
     in
     { minus =
         List.map RailLocation.toVec3 <| List.filter (\loc -> loc.joint == Joint.Minus) <| Nonempty.toList railPiece.railLocations
@@ -404,4 +417,4 @@ getRailTerminals rail =
 
 getPierLocations : RailPlacement -> List PierLocation
 getPierLocations railPlacement =
-    []
+    List.map (PierLocation.mul railPlacement.location) (getRailPiece railPlacement.rail).pierLocations
