@@ -1,5 +1,6 @@
 module Forth.RailPlacement exposing
     ( RailPlacement
+    , make
     , toRailRenderData
     )
 
@@ -20,6 +21,11 @@ type alias RailPlacement =
     { rail : Rail IsInverted IsFlipped
     , location : Location
     }
+
+
+make : Rail IsInverted IsFlipped -> Location -> RailPlacement
+make rail location =
+    { rail = rail, location = location }
 
 
 toRailRenderData : RailPlacement -> RailRenderData

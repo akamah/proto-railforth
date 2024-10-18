@@ -9622,15 +9622,33 @@ var $author$project$Forth$Interpreter$coreGlossary = $elm$core$Dict$fromList(
 			_Utils_Tuple2('-rot', $author$project$Forth$Interpreter$executeInverseRot),
 			_Utils_Tuple2('nip', $author$project$Forth$Interpreter$executeNip)
 		]));
+var $author$project$Types$RailRenderData$make = F3(
+	function (rail, position, angle) {
+		return {angle: angle, position: position, rail: rail};
+	});
+var $author$project$Forth$Geometry$Dir$toRadian = function (_v0) {
+	var d = _v0.a;
+	return ($elm$core$Basics$pi / 4.0) * d;
+};
+var $author$project$Forth$RailPlacement$toRailRenderData = function (placement) {
+	return A3(
+		$author$project$Types$RailRenderData$make,
+		placement.rail,
+		$author$project$Forth$Geometry$Location$toVec3(placement.location),
+		$author$project$Forth$Geometry$Dir$toRadian(placement.location.dir));
+};
 var $author$project$Forth$Interpreter$haltWithError = F2(
 	function (status, errMsg) {
 		return {
 			errMsg: $elm$core$Maybe$Just(errMsg),
 			piers: _List_Nil,
 			railCount: $elm$core$Dict$empty,
-			rails: status.global.rails
+			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
 		};
 	});
+var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) {
+	return _List_Nil;
+};
 var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
 	return A3(
 		$author$project$Types$Rail$toStringWith,
@@ -10162,10 +10180,6 @@ var $author$project$Types$Pier$getHeight = function (pier) {
 			return 1;
 	}
 };
-var $author$project$Forth$Geometry$Dir$toRadian = function (_v0) {
-	var d = _v0.a;
-	return ($elm$core$Basics$pi / 4.0) * d;
-};
 var $author$project$Forth$Geometry$PierLocation$toVec3 = function (loc) {
 	return $author$project$Forth$Geometry$Location$toVec3(loc.location);
 };
@@ -10564,7 +10578,8 @@ var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
 				A2($elm$core$List$map, $author$project$Forth$PierConstruction$cleansePierLocations, list))));
 };
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
-	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(status.global.piers);
+	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(
+		A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, status.global.rails));
 	if (_v0.$ === 'Ok') {
 		var pierRenderData = _v0.a;
 		return {
@@ -10577,7 +10592,7 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 						return x.rail;
 					},
 					status.global.rails)),
-			rails: status.global.rails
+			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
 		};
 	} else {
 		var err = _v0.a;
@@ -10591,7 +10606,7 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 						return x.rail;
 					},
 					status.global.rails)),
-			rails: status.global.rails
+			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
 		};
 	}
 };
@@ -10786,6 +10801,10 @@ var $author$project$Forth$RailPiece$getAppropriateRailAndPieceForJoint = F3(
 					railType),
 				A2($author$project$Forth$RailPiece$invert, $author$project$Types$Rail$Inverted, railPiece))) : $elm$core$Maybe$Nothing);
 	});
+var $author$project$Forth$RailPlacement$make = F2(
+	function (rail, location) {
+		return {location: location, rail: rail};
+	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -10801,18 +10820,6 @@ var $mgold$elm_nonempty_list$List$Nonempty$tail = function (_v0) {
 	var xs = _v0.b;
 	return xs;
 };
-var $author$project$Types$RailRenderData$make = F3(
-	function (rail, position, angle) {
-		return {angle: angle, position: position, rail: rail};
-	});
-var $author$project$Forth$RailPiece$toRailRenderData = F2(
-	function (rail, location) {
-		return A3(
-			$author$project$Types$RailRenderData$make,
-			rail,
-			$author$project$Forth$Geometry$RailLocation$toVec3(location),
-			$author$project$Forth$Geometry$Dir$toRadian(location.location.dir));
-	});
 var $author$project$Forth$RailPiece$placeRail = function (params) {
 	return A2(
 		$elm$core$Maybe$map,
@@ -10822,20 +10829,15 @@ var $author$project$Forth$RailPiece$placeRail = function (params) {
 			return {
 				nextLocations: A2(
 					$elm$core$List$map,
-					$author$project$Forth$Geometry$RailLocation$mul(params.location.location),
+					$author$project$Forth$Geometry$RailLocation$mul(params.railLocation.location),
 					$mgold$elm_nonempty_list$List$Nonempty$tail(railPiece.railLocations)),
-				pierLocations: A2(
-					$elm$core$List$map,
-					$author$project$Forth$Geometry$PierLocation$mul(params.location.location),
-					railPiece.pierLocations),
-				rail: rail,
-				railRenderData: A2(
-					$author$project$Forth$RailPiece$toRailRenderData,
+				railPlacement: A2(
+					$author$project$Forth$RailPlacement$make,
 					rail,
-					A2($author$project$Forth$Geometry$RailLocation$mul, params.location.location, railPiece.origin))
+					A2($author$project$Forth$Geometry$RailLocation$mul, params.railLocation.location, railPiece.origin).location)
 			};
 		},
-		A3($author$project$Forth$RailPiece$getAppropriateRailAndPieceForJoint, params.location.joint, params.railType, params.rotation));
+		A3($author$project$Forth$RailPiece$getAppropriateRailAndPieceForJoint, params.railLocation.joint, params.railType, params.rotation));
 };
 var $author$project$Forth$Interpreter$executePlaceRail = F4(
 	function (railType, rotation, cont, status) {
@@ -10846,18 +10848,16 @@ var $author$project$Forth$Interpreter$executePlaceRail = F4(
 			var top = _v0.a;
 			var restOfStack = _v0.b;
 			var _v1 = $author$project$Forth$RailPiece$placeRail(
-				{location: top, railType: railType, rotation: rotation});
+				{railLocation: top, railType: railType, rotation: rotation});
 			if (_v1.$ === 'Just') {
 				var nextLocations = _v1.a.nextLocations;
-				var railRenderData = _v1.a.railRenderData;
-				var pierLocations = _v1.a.pierLocations;
+				var railPlacement = _v1.a.railPlacement;
 				return cont(
 					_Utils_update(
 						status,
 						{
 							global: {
-								piers: _Utils_ap(pierLocations, status.global.piers),
-								rails: A2($elm$core$List$cons, railRenderData, status.global.rails)
+								rails: A2($elm$core$List$cons, railPlacement, status.global.rails)
 							},
 							stack: _Utils_ap(nextLocations, restOfStack)
 						}));
@@ -11426,7 +11426,7 @@ var $author$project$Forth$Interpreter$execute = function (src) {
 		return $elm$core$String$words(string);
 	};
 	var initialStatus = {
-		global: {piers: _List_Nil, rails: _List_Nil},
+		global: {rails: _List_Nil},
 		savepoints: $elm$core$Dict$empty,
 		stack: _List_fromArray(
 			[$author$project$Forth$RailPiece$initialLocation])

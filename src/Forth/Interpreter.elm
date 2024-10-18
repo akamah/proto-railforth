@@ -5,6 +5,7 @@ import Forth.Geometry.PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
+import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import Forth.Statistics as Statistics
 import Types.Pier exposing (Pier(..))
 import Types.PierRenderData exposing (PierRenderData)
@@ -36,8 +37,7 @@ type alias ForthError =
 type alias ExecStatus =
     ForthStatus
         RailLocation
-        { rails : List RailRenderData
-        , piers : List PierLocation
+        { rails : List RailPlacement
         }
 
 
@@ -59,10 +59,7 @@ execute src =
         initialStatus : ExecStatus
         initialStatus =
             { stack = [ RailPiece.initialLocation ]
-            , global =
-                { rails = []
-                , piers = []
-                }
+            , global = { rails = [] }
             , savepoints = Dict.empty
             }
     in
@@ -214,7 +211,7 @@ executeRec toks status =
 -}
 haltWithError : ExecStatus -> ExecError -> ExecResult
 haltWithError status errMsg =
-    { rails = status.global.rails
+    { rails = List.map RailPlacement.toRailRenderData status.global.rails
     , errMsg = Just errMsg
     , railCount = Dict.empty
     , piers = []
@@ -223,16 +220,16 @@ haltWithError status errMsg =
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    case PierConstruction.toPierRenderData status.global.piers of
+    case PierConstruction.toPierRenderData (List.concatMap RailPiece.getPierLocations status.global.rails) of
         Ok pierRenderData ->
-            { rails = status.global.rails
+            { rails = List.map RailPlacement.toRailRenderData status.global.rails
             , errMsg = Nothing
             , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
             , piers = pierRenderData
             }
 
         Err err ->
-            { rails = status.global.rails
+            { rails = List.map RailPlacement.toRailRenderData status.global.rails
             , errMsg = Just err
             , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
             , piers = []
@@ -364,14 +361,13 @@ executePlaceRail railType rotation cont status =
             haltWithError status "スタックが空です"
 
         top :: restOfStack ->
-            case RailPiece.placeRail { railType = railType, location = top, rotation = rotation } of
-                Just { nextLocations, railRenderData, pierLocations } ->
+            case RailPiece.placeRail { railType = railType, railLocation = top, rotation = rotation } of
+                Just { nextLocations, railPlacement } ->
                     cont
                         { status
                             | stack = nextLocations ++ restOfStack
                             , global =
-                                { rails = railRenderData :: status.global.rails
-                                , piers = pierLocations ++ status.global.piers
+                                { rails = railPlacement :: status.global.rails
                                 }
                         }
 

@@ -1,4 +1,4 @@
-module Forth.RailPiece exposing (getRailPiece, getRailTerminals, initialLocation, placeRail, rotateRailPiece)
+module Forth.RailPiece exposing (getPierLocations, getRailPiece, getRailTerminals, initialLocation, placeRail, rotateRailPiece)
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
@@ -6,6 +6,7 @@ import Forth.Geometry.Location as Location
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
+import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Math.Vector3 exposing (Vec3)
 import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -27,7 +28,6 @@ type alias RailPiece =
 
     --| 主に表示用として、レールの種類的にはどこに配置するべきか、の情報。回転を考慮すると、locationsの先頭のほかにこれを用意する他なかった
     --| 基本の形から回転していない場合は、locationsの先頭とちょうど逆になる。表示用なので凹凸は考慮しない
-    --| TODO: 凹凸の情報を抜いた Location 型がほしい
     , origin : RailLocation
     }
 
@@ -330,8 +330,6 @@ rotateRailPiece piece =
             in
             { origin = RailLocation.mul rot.location piece.origin
             , railLocations = rotate <| Nonempty.map (RailLocation.mul rot.location) piece.railLocations
-
-            --            , margins = piece.margins
             , pierLocations = List.map (PierLocation.mul rot.location) piece.pierLocations
             }
 
@@ -355,38 +353,29 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
         Nothing
 
 
-toRailRenderData : Rail IsInverted IsFlipped -> RailLocation -> RailRenderData
-toRailRenderData rail location =
-    Types.RailRenderData.make rail (RailLocation.toVec3 location) (Dir.toRadian location.location.dir)
-
-
 type alias PlaceRailParams =
     { railType : Rail () IsFlipped
-    , location : RailLocation
+    , railLocation : RailLocation
     , rotation : Int
     }
 
 
 type alias PlaceRailResult =
-    { rail : Rail IsInverted IsFlipped
+    { railPlacement : RailPlacement
     , nextLocations : List RailLocation
-    , railRenderData : RailRenderData
-    , pierLocations : List PierLocation
     }
 
 
 placeRail : PlaceRailParams -> Maybe PlaceRailResult
 placeRail params =
-    getAppropriateRailAndPieceForJoint params.location.joint params.railType params.rotation
+    getAppropriateRailAndPieceForJoint params.railLocation.joint params.railType params.rotation
         |> Maybe.map
             (\( rail, railPiece ) ->
-                { rail = rail
+                { railPlacement =
+                    RailPlacement.make rail <|
+                        (RailLocation.mul params.railLocation.location railPiece.origin).location
                 , nextLocations =
-                    List.map (RailLocation.mul params.location.location) <| Nonempty.tail railPiece.railLocations
-                , railRenderData =
-                    toRailRenderData rail (RailLocation.mul params.location.location railPiece.origin)
-                , pierLocations =
-                    List.map (PierLocation.mul params.location.location) <| railPiece.pierLocations
+                    List.map (RailLocation.mul params.railLocation.location) <| Nonempty.tail railPiece.railLocations
                 }
             )
 
@@ -411,3 +400,8 @@ getRailTerminals rail =
     , plus =
         List.map RailLocation.toVec3 <| List.filter (\loc -> loc.joint == Joint.Plus) <| Nonempty.toList railPiece.railLocations
     }
+
+
+getPierLocations : RailPlacement -> List PierLocation
+getPierLocations railPlacement =
+    []
