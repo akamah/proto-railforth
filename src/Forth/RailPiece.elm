@@ -10,7 +10,6 @@ import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Math.Vector3 exposing (Vec3)
 import Types.Rail as Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import Types.RailRenderData exposing (RailRenderData)
 
 
 

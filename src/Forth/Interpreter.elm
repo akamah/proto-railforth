@@ -1,7 +1,6 @@
 module Forth.Interpreter exposing (ExecResult, execute)
 
 import Dict exposing (Dict)
-import Forth.Geometry.PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
