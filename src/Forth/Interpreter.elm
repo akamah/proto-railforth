@@ -6,6 +6,7 @@ import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
 import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import Forth.Statistics as Statistics
+import Forth.Validator as Validator
 import Types.Pier exposing (Pier(..))
 import Types.PierRenderData exposing (PierRenderData)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))

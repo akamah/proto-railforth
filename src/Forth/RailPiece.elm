@@ -1,4 +1,4 @@
-module Forth.RailPiece exposing (getPierLocations, getRailPiece, getRailTerminals, initialLocation, placeRail, rotateRailPiece)
+module Forth.RailPiece exposing (getPierLocations, getRailLocations, getRailPiece, getRailTerminals, initialLocation, placeRail, rotateRailPiece)
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
@@ -412,6 +412,11 @@ getRailTerminals rail =
     , plus =
         List.map RailLocation.toVec3 <| List.filter (\loc -> loc.joint == Joint.Plus) <| Nonempty.toList railPiece.railLocations
     }
+
+
+getRailLocations : RailPlacement -> List RailLocation
+getRailLocations railPlacement =
+    List.map (RailLocation.mul railPlacement.location) <| Nonempty.toList (getRailPiece railPlacement.rail).railLocations
 
 
 getPierLocations : RailPlacement -> List PierLocation
