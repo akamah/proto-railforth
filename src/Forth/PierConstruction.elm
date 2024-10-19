@@ -1,4 +1,4 @@
-module Forth.PierConstruction exposing (toPierPlacement)
+module Forth.PierConstruction exposing (toPierRenderData)
 
 import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir exposing (Dir)
@@ -6,19 +6,16 @@ import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
 import Forth.Geometry.Rot45 as Rot45
 import Types.Pier as Pier exposing (Pier)
-import Types.PierPlacement exposing (PierPlacement)
+import Types.PierRenderData exposing (PierRenderData)
 
 
-cleansePierPlacements : List PierLocation -> List PierLocation
-cleansePierPlacements =
-    List.map
-        (\placement ->
-            let
-                loc =
-                    placement.location
-            in
-            { placement | location = { loc | dir = Dir.toUndirectedDir loc.dir } }
-        )
+cleansePierLocations : PierLocation -> PierLocation
+cleansePierLocations placement =
+    let
+        loc =
+            placement.location
+    in
+    { placement | location = { loc | dir = Dir.toUndirectedDir loc.dir } }
 
 
 pierKey : Location -> String
@@ -68,7 +65,7 @@ divideIntoDict =
         Dict.empty
 
 
-pierLocationToPlacement : Pier -> PierLocation -> PierPlacement
+pierLocationToPlacement : Pier -> PierLocation -> PierRenderData
 pierLocationToPlacement kind loc =
     { pier = kind
     , position = PierLocation.toVec3 loc
@@ -76,12 +73,12 @@ pierLocationToPlacement kind loc =
     }
 
 
-constructSinglePier : List PierLocation -> Result String (List PierPlacement)
+constructSinglePier : List PierLocation -> Result String (List PierRenderData)
 constructSinglePier list =
     constructSinglePierRec [] 0 0 <| mergePierLocations list
 
 
-constructSinglePierRec : List PierPlacement -> Int -> Int -> List ( Int, PierLocation ) -> Result String (List PierPlacement)
+constructSinglePierRec : List PierRenderData -> Int -> Int -> List ( Int, PierLocation ) -> Result String (List PierRenderData)
 constructSinglePierRec accum current top locs =
     case locs of
         [] ->
@@ -101,7 +98,7 @@ constructSinglePierRec accum current top locs =
                     ls
 
 
-buildSingleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
+buildSingleUpto : PierLocation -> List PierRenderData -> Int -> Int -> List PierRenderData
 buildSingleUpto template accum to from =
     if from >= to then
         accum
@@ -146,7 +143,7 @@ mergePierLocations list =
             list
 
 
-singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierPlacement)
+singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierRenderData)
 singlePier single =
     foldlResult
         (\( _, ( _, pierLocs ) ) result ->
@@ -223,7 +220,7 @@ doubleTrackPiersRec single double open list =
                         doubleTrackPiersRec single double open xs
 
 
-doublePier : Dict String ( Dir, List PierLocation, List PierLocation ) -> Result String (List PierPlacement)
+doublePier : Dict String ( Dir, List PierLocation, List PierLocation ) -> Result String (List PierRenderData)
 doublePier double =
     foldlResult
         (\( _, ( _, centerLocs, leftLocs ) ) result ->
@@ -236,7 +233,7 @@ doublePier double =
 
 {-| 現状では、複線橋脚だけで建設することにする
 -}
-constructDoublePier : List PierLocation -> List PierLocation -> Result String (List PierPlacement)
+constructDoublePier : List PierLocation -> List PierLocation -> Result String (List PierRenderData)
 constructDoublePier center left =
     let
         maxHeight =
@@ -250,7 +247,7 @@ constructDoublePier center left =
             Ok <| buildDoubleUpto loc [] maxHeight 0
 
 
-buildDoubleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
+buildDoubleUpto : PierLocation -> List PierRenderData -> Int -> Int -> List PierRenderData
 buildDoubleUpto template accum to from =
     if from >= to then
         accum
@@ -268,28 +265,12 @@ maximumHeight ls =
     List.foldl (\loc -> Basics.max loc.location.height) 0 ls
 
 
-
--- {-| 現状では、複線橋脚だけで建設することにする
--- -}
--- constructDoublePierRec : List PierPlacement -> Int -> Int -> List ( Int, PierLocation ) -> List ( Int, PierLocation ) -> Result String (List PierPlacement)
--- constructDoublePierRec accum current top centers lefts =
---     case ( centers, lefts ) of
---         ( [], [] ) ->
---             Ok accum
---         ( [], ( h1, l1 ) :: ys ) ->
---             ys
---         ( ( h0, l0 ) :: xs, [] ) ->
---             ys
---         ( [], ( h1, l1 ) :: ys ) ->
---             ys
-
-
 {-| the main function of pier-construction
 -}
-toPierPlacement : List PierLocation -> Result String (List PierPlacement)
-toPierPlacement list =
+toPierRenderData : List PierLocation -> Result String (List PierRenderData)
+toPierRenderData list =
     list
-        |> cleansePierPlacements
+        |> List.map cleansePierLocations
         |> divideIntoDict
         |> Result.andThen doubleTrackPiers
         |> Result.andThen

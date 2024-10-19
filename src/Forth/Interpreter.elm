@@ -1,15 +1,16 @@
 module Forth.Interpreter exposing (ExecResult, execute)
 
 import Dict exposing (Dict)
-import Forth.Geometry.PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
+import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import Forth.Statistics as Statistics
+import Forth.Validator as Validator
 import Types.Pier exposing (Pier(..))
-import Types.PierPlacement exposing (PierPlacement)
+import Types.PierRenderData exposing (PierRenderData)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import Types.RailPlacement exposing (RailPlacement)
+import Types.RailRenderData exposing (RailRenderData)
 
 
 type alias Word =
@@ -37,13 +38,12 @@ type alias ExecStatus =
     ForthStatus
         RailLocation
         { rails : List RailPlacement
-        , piers : List PierLocation
         }
 
 
 type alias ExecResult =
-    { rails : List RailPlacement
-    , piers : List PierPlacement
+    { rails : List RailRenderData
+    , piers : List PierRenderData
     , errMsg : Maybe String
     , railCount : Dict String Int
     }
@@ -59,10 +59,7 @@ execute src =
         initialStatus : ExecStatus
         initialStatus =
             { stack = [ RailPiece.initialLocation ]
-            , global =
-                { rails = []
-                , piers = []
-                }
+            , global = { rails = [] }
             , savepoints = Dict.empty
             }
     in
@@ -214,7 +211,7 @@ executeRec toks status =
 -}
 haltWithError : ExecStatus -> ExecError -> ExecResult
 haltWithError status errMsg =
-    { rails = status.global.rails
+    { rails = List.map RailPlacement.toRailRenderData status.global.rails
     , errMsg = Just errMsg
     , railCount = Dict.empty
     , piers = []
@@ -223,16 +220,16 @@ haltWithError status errMsg =
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    case PierConstruction.toPierPlacement status.global.piers of
-        Ok pierPlacement ->
-            { rails = status.global.rails
+    case PierConstruction.toPierRenderData (List.concatMap RailPiece.getPierLocations status.global.rails) of
+        Ok pierRenderData ->
+            { rails = List.map RailPlacement.toRailRenderData status.global.rails
             , errMsg = Nothing
             , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
-            , piers = pierPlacement
+            , piers = pierRenderData
             }
 
         Err err ->
-            { rails = status.global.rails
+            { rails = List.map RailPlacement.toRailRenderData status.global.rails
             , errMsg = Just err
             , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
             , piers = []
@@ -358,25 +355,29 @@ executeLoad toks status =
 
 
 executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executePlaceRail railType rotation cont status =
-    case status.stack of
-        [] ->
-            haltWithError status "スタックが空です"
+executePlaceRail railType rotation =
+    let
+        railPlaceFunc =
+            RailPiece.placeRail railType rotation
+    in
+    \cont status ->
+        case status.stack of
+            [] ->
+                haltWithError status "スタックが空です"
 
-        top :: restOfStack ->
-            case RailPiece.placeRail { railType = railType, location = top, rotation = rotation } of
-                Just { nextLocations, railPlacement, pierLocations } ->
-                    cont
-                        { status
-                            | stack = nextLocations ++ restOfStack
-                            , global =
-                                { rails = railPlacement :: status.global.rails
-                                , piers = pierLocations ++ status.global.piers
-                                }
-                        }
+            top :: restOfStack ->
+                case railPlaceFunc top of
+                    Just { nextLocations, railPlacement } ->
+                        cont
+                            { status
+                                | stack = nextLocations ++ restOfStack
+                                , global =
+                                    { rails = railPlacement :: status.global.rails
+                                    }
+                            }
 
-                Nothing ->
-                    haltWithError status "配置するレールの凹凸が合いません"
+                    Nothing ->
+                        haltWithError status "配置するレールの凹凸が合いません"
 
 
 executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult

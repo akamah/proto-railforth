@@ -33,8 +33,8 @@ dts .
   ss .
 ss
 dts .
-  s stop . ( 入力Cの開始地点 )
-s stop
+  q h stop . ( 入力Cの開始地点 )
+q h stop
 dts .
   ss .
 ss
@@ -42,30 +42,29 @@ dts .
   ss .
 ss
 dts .
-  ss h .
-ss h
+  ss .
+ss
 
 dtl . . dtl .
   save c=1-start
   save c=0-start
 
 load c=0-start
-  q j l owl2
+  s l j owl2
     save c=0-after-oneway
   save c=0-uturn
 
 load c=0-uturn
-  rr j dr
-    uturn .
+  j uturn1 j s h
   .
 
 load c=1-start
-  s l r at1
+  s at1
     save c0-out-0
-  j .
+  l j r .
 
 load c=0-after-oneway
-  bk s h q
+  bk dr2 nip
   ac .
     save c=1-after-cross
   save c=0-after-cross
@@ -110,7 +109,7 @@ load c1=0-after-cross
   save c1-end
 
 load c1-end
-  q j h at
+  q j at
     save from-c1-to-read-b-before-cross
   .
 
@@ -126,7 +125,7 @@ load from-c1-to-read-b-before-cross
   save read-a1-after-cross-b
 
 load read-b-after-cross
-  q shl s h
+  q s shl h
   ll h j dr
     save b=1-start
   save b=0-start
@@ -134,19 +133,19 @@ load read-b-after-cross
 ( ***** Cからの出力 ****** )
 
 load c0-out-0
-  s q tl2 nip
+  q tl2 nip
   uturn
-  ss ss q
+  ss ss 
   dl2 nip q
 
   ss ss ss ss 
-  ol s q ol
+  l q r ol q ol
 
   . ( save c-out-to-read-c )
 
 load c0-out-1
-  s j at2
-    fw j q h .
+  q r l j at2
+    fw j h .
   j .
 
 
@@ -229,20 +228,21 @@ load b1=0-after-cross
 ( *** Bからの出力部分 *** )
 
 load b0-out-0
-  l ss ll shr j ll r
+  (  l ss ll shr j ll r )
+  q r ll ll shr s h j l q
   at2
     save b0-out-0-end
-  h uturn1 j
+  uturn1 j
   .
 
 load b0-out-0-end
-  rr bk r
+  bk rr r
   . 
 
 load b0-out-1
   ll tr1
     .
-  ss h j shr rr h r
+  ss h j shr rr r
   .
 
 load b1-out-1
@@ -351,7 +351,7 @@ load s-out-to-read-a
   dts .
     save c-out-to-read-c
 
-  h s
+  s
   ll
   shr shr shr shr
   ss ss h tr . ( 極性変換のため )
@@ -366,9 +366,9 @@ load decode-s
   dtl . . dtl . .
   dl1 . l l
   l r shr
-  
+
 load c-out-to-read-c
-  h ss
+  s h q
   shl
   ll
   ss ss s tr .
@@ -384,9 +384,9 @@ load decode-c
     ss .
   ss
   dts .
-    s h .
-  s h
-  dtl . .
+    s q .
+  s q
+  dtl . q . q
   dtl . .
   .
 

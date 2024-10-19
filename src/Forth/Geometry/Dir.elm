@@ -2,6 +2,7 @@ module Forth.Geometry.Dir exposing
     ( Dir(..)
     , e
     , inv
+    , match
     , mul
     , n
     , ne
@@ -121,3 +122,12 @@ toUndirectedDir (Dir x) =
 toString : Dir -> String
 toString (Dir d) =
     "Dir " ++ String.fromInt d
+
+
+match : Dir -> Dir -> Bool
+match (Dir x) (Dir y) =
+    if x >= 4 then
+        y == x - 4
+
+    else
+        y == x + 4

@@ -1,4 +1,4 @@
-module Types.RailPlacement exposing (RailPlacement, make)
+module Types.RailRenderData exposing (RailRenderData, make)
 
 import Math.Vector3 exposing (Vec3)
 import Types.Rail exposing (IsFlipped, IsInverted, Rail)
@@ -8,7 +8,7 @@ import Types.Rail exposing (IsFlipped, IsInverted, Rail)
 処理系の内部のデータ構造に依存せず、描画エンジンにぽっと渡せば描画できそうな情報を含ませる。
 レールの種類、およびどこに置くべきかを保持する。
 -}
-type alias RailPlacement =
+type alias RailRenderData =
     { rail : Rail IsInverted IsFlipped
 
     -- 場所の単位は mm とする。理由としては、単線・複線レールなどが存在している都合上、
@@ -20,7 +20,7 @@ type alias RailPlacement =
     }
 
 
-make : Rail IsInverted IsFlipped -> Vec3 -> Float -> RailPlacement
+make : Rail IsInverted IsFlipped -> Vec3 -> Float -> RailRenderData
 make rail position angle =
     { rail = rail
     , position = position
