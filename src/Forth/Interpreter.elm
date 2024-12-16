@@ -82,8 +82,8 @@ execute src =
 {-| Forthの普遍的なワードで、Railforthとしてのワードではないもの。スタック操作など
 -}
 type alias CoreWord result stack global =
-    (ForthStatus result stack global -> result)
-    -> (ForthError -> ForthStatus result stack global -> result)
+    (ForthError -> ForthStatus result stack global -> result)
+    -> (ForthStatus result stack global -> result)
     -> ForthStatus result stack global
     -> result
 
@@ -105,7 +105,7 @@ controlWords =
 coreGlossary : Dict Word (CoreWord result stack global)
 coreGlossary =
     Dict.fromList
-        [ ( "", \cont _ status -> cont status {- do nothing -} )
+        [ ( "", \_ cont status -> cont status {- do nothing -} )
         , ( ".", executeDrop )
         , ( "drop", executeDrop )
         , ( "swap", executeSwap )
@@ -217,7 +217,7 @@ executeRec toks =
                 Nothing ->
                     case Dict.get t coreGlossary of
                         Just thread ->
-                            \status -> thread (executeRec ts) haltWithError status
+                            \status -> thread haltWithError (executeRec ts) status
 
                         Nothing ->
                             case Dict.get t railForthGlossary of
@@ -308,7 +308,7 @@ haltWithSuccess status =
 
 
 executeDrop : CoreWord result stack global
-executeDrop cont err status =
+executeDrop err cont status =
     case status.stack of
         [] ->
             err "スタックが空です" status
@@ -318,7 +318,7 @@ executeDrop cont err status =
 
 
 executeSwap : CoreWord result stack global
-executeSwap cont err status =
+executeSwap err cont status =
     case status.stack of
         x :: y :: restOfStack ->
             cont { status | stack = y :: x :: restOfStack }
@@ -328,7 +328,7 @@ executeSwap cont err status =
 
 
 executeRot : CoreWord result stack global
-executeRot cont err status =
+executeRot err cont status =
     case status.stack of
         x :: y :: z :: restOfStack ->
             cont { status | stack = z :: x :: y :: restOfStack }
@@ -338,7 +338,7 @@ executeRot cont err status =
 
 
 executeInverseRot : CoreWord result stack global
-executeInverseRot cont err status =
+executeInverseRot err cont status =
     case status.stack of
         x :: y :: z :: restOfStack ->
             cont { status | stack = y :: z :: x :: restOfStack }
@@ -348,7 +348,7 @@ executeInverseRot cont err status =
 
 
 executeNip : CoreWord result stack global
-executeNip cont err status =
+executeNip err cont status =
     case status.stack of
         x :: _ :: restOfStack ->
             cont { status | stack = x :: restOfStack }
