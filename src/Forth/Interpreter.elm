@@ -88,19 +88,6 @@ type alias CoreWord result stack global =
     -> result
 
 
-coreGlossary : Dict Word (CoreWord result stack global)
-coreGlossary =
-    Dict.fromList
-        [ ( "", \cont _ status -> cont status {- do nothing -} )
-        , ( ".", executeDrop )
-        , ( "drop", executeDrop )
-        , ( "swap", executeSwap )
-        , ( "rot", executeRot )
-        , ( "-rot", executeInverseRot )
-        , ( "nip", executeNip )
-        ]
-
-
 {-| -}
 controlWords : Dict Word (List Word -> ( Thread, List Word ))
 controlWords =
@@ -115,7 +102,20 @@ controlWords =
         ]
 
 
-railForthGlossary : Dict Word ((ExecStatus -> ExecResult) -> ExecStatus -> ExecResult)
+coreGlossary : Dict Word (CoreWord result stack global)
+coreGlossary =
+    Dict.fromList
+        [ ( "", \cont _ status -> cont status {- do nothing -} )
+        , ( ".", executeDrop )
+        , ( "drop", executeDrop )
+        , ( "swap", executeSwap )
+        , ( "rot", executeRot )
+        , ( "-rot", executeInverseRot )
+        , ( "nip", executeNip )
+        ]
+
+
+railForthGlossary : Dict Word Thread
 railForthGlossary =
     Dict.fromList
         [ ( "q", executePlaceRail (Straight1 ()) 0 )
@@ -222,7 +222,7 @@ executeRec toks =
                         Nothing ->
                             case Dict.get t railForthGlossary of
                                 Just thread ->
-                                    \status -> thread (executeRec ts) status
+                                    \status -> thread haltWithError (executeRec ts) status
 
                                 Nothing ->
                                     \status -> haltWithError ("未定義のワードです: " ++ t) status
@@ -460,16 +460,16 @@ doLoad name err cont status =
             err ("セーブポイント (" ++ name ++ ") が見つかりません") status
 
 
-executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executePlaceRail : Rail () IsFlipped -> Int -> Thread
 executePlaceRail railType rotation =
     let
         railPlaceFunc =
             RailPiece.placeRail railType rotation
     in
-    \cont status ->
+    \err cont status ->
         case status.stack of
             [] ->
-                haltWithError "スタックが空です" status
+                err "スタックが空です" status
 
             top :: restOfStack ->
                 case railPlaceFunc top of
@@ -483,24 +483,24 @@ executePlaceRail railType rotation =
                             }
 
                     Nothing ->
-                        haltWithError "配置するレールの凹凸が合いません" status
+                        err "配置するレールの凹凸が合いません" status
 
 
-executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeAscend amount cont status =
+executeAscend : Int -> Thread
+executeAscend amount err cont status =
     case status.stack of
         [] ->
-            haltWithError "スタックが空です" status
+            err "スタックが空です" status
 
         top :: restOfStack ->
             cont { status | stack = RailLocation.addHeight amount top :: restOfStack }
 
 
-executeInvert : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeInvert cont status =
+executeInvert : Thread
+executeInvert err cont status =
     case status.stack of
         [] ->
-            haltWithError "スタックが空です" status
+            err "スタックが空です" status
 
         top :: restOfStack ->
             cont { status | stack = RailLocation.invertJoint top :: restOfStack }
