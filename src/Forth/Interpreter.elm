@@ -83,7 +83,7 @@ execute src =
 -}
 type alias CoreWord result stack global =
     (ForthStatus result stack global -> result)
-    -> (ForthStatus result stack global -> ForthError -> result)
+    -> (ForthError -> ForthStatus result stack global -> result)
     -> ForthStatus result stack global
     -> result
 
@@ -102,16 +102,16 @@ coreGlossary =
 
 
 {-| -}
-controlWords : Dict Word (List Word -> ExecStatus -> ExecResult)
+controlWords : Dict Word (List Word -> ( Thread, List Word ))
 controlWords =
     Dict.fromList
-        [ ( "(", executeComment 1 )
-        , ( ")", \_ status -> haltWithError status "余分なコメント終了文字 ) があります" )
-        , ( "save", executeSave )
-        , ( "load", executeLoad )
+        [ ( "(", analyzeComment 1 )
+        , ( ")", \toks -> ( fail "余分なコメント終了文字 ) があります", toks ) )
+        , ( "save", analyzeSave )
+        , ( "load", analyzeLoad )
 
         --        , ( ":", executeWordDef )
-        , ( ";", \_ status -> haltWithError status "ワードの定義の外で ; が出現しました" )
+        , ( ";", \toks -> ( fail "ワードの定義の外で ; が出現しました", toks ) )
         ]
 
 
@@ -205,9 +205,14 @@ executeRec toks =
             \status -> haltWithSuccess status
 
         t :: ts ->
+            -- analyzeを使ってはいるが、とりあえず挙動を壊さないために変な使い方をしている。
             case Dict.get t controlWords of
-                Just thread ->
-                    \status -> thread ts status
+                Just analyzer ->
+                    let
+                        ( thread, nextToks ) =
+                            analyzer ts
+                    in
+                    \status -> thread haltWithError (executeRec nextToks) status
 
                 Nothing ->
                     case Dict.get t coreGlossary of
@@ -220,18 +225,24 @@ executeRec toks =
                                     \status -> thread (executeRec ts) status
 
                                 Nothing ->
-                                    \status -> haltWithError status ("未定義のワードです: " ++ t)
+                                    \status -> haltWithError ("未定義のワードです: " ++ t) status
 
 
+{-| 気持ち: 失敗した際にそれを報告する継続、成功した際の継続、現在の状態を受け取り、いい感じに結果を作るみたいなやつ
+-}
 type alias Thread =
     (ForthError -> ExecStatus -> ExecResult) -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
 
 
+{-| 無条件で成功するスレッド
+-}
 success : Thread
 success _ cont status =
     cont status
 
 
+{-| エラーメッセージとともに失敗するスレッド
+-}
 fail : ForthError -> Thread
 fail msg err _ status =
     err msg status
@@ -269,8 +280,8 @@ fail msg err _ status =
 
 {-| haltWithError
 -}
-haltWithError : ExecStatus -> ExecError -> ExecResult
-haltWithError status errMsg =
+haltWithError : ExecError -> ExecStatus -> ExecResult
+haltWithError errMsg status =
     { rails = List.map RailPlacement.toRailRenderData status.global.rails
     , errMsg = Just errMsg
     , railCount = Dict.empty
@@ -300,7 +311,7 @@ executeDrop : CoreWord result stack global
 executeDrop cont err status =
     case status.stack of
         [] ->
-            err status "スタックが空です"
+            err "スタックが空です" status
 
         _ :: restOfStack ->
             cont { status | stack = restOfStack }
@@ -313,7 +324,7 @@ executeSwap cont err status =
             cont { status | stack = y :: x :: restOfStack }
 
         _ ->
-            err status "スタックに最低2つの要素がある必要があります"
+            err "スタックに最低2つの要素がある必要があります" status
 
 
 executeRot : CoreWord result stack global
@@ -323,7 +334,7 @@ executeRot cont err status =
             cont { status | stack = z :: x :: y :: restOfStack }
 
         _ ->
-            err status "スタックに最低3つの要素がある必要があります"
+            err "スタックに最低3つの要素がある必要があります" status
 
 
 executeInverseRot : CoreWord result stack global
@@ -333,7 +344,7 @@ executeInverseRot cont err status =
             cont { status | stack = y :: z :: x :: restOfStack }
 
         _ ->
-            err status "スタックに最低3つの要素がある必要があります"
+            err "スタックに最低3つの要素がある必要があります" status
 
 
 executeNip : CoreWord result stack global
@@ -343,7 +354,7 @@ executeNip cont err status =
             cont { status | stack = x :: restOfStack }
 
         _ ->
-            err status "スタックに最低2つの要素がある必要があります"
+            err "スタックに最低2つの要素がある必要があります" status
 
 
 analyzeComment : Int -> List Word -> ( Thread, List Word )
@@ -364,15 +375,6 @@ analyzeComment depth toks =
 
             _ :: ts ->
                 analyzeComment depth ts
-
-
-executeComment : Int -> List Word -> ExecStatus -> ExecResult
-executeComment depth toks status =
-    let
-        ( thread, nextToks ) =
-            analyzeComment depth toks
-    in
-    thread (\e s -> haltWithError s e) (executeRec nextToks) status
 
 
 
@@ -410,50 +412,52 @@ executeComment depth toks status =
 --                     executeComment depth ts status
 
 
-{-| 現在の位置に名前をつけて保存する。
--}
-executeSave : List Word -> ExecStatus -> ExecResult
-executeSave toks status =
-    case ( toks, status.stack ) of
-        ( name :: restToks, top :: restOfStack ) ->
-            let
-                nextStatus =
-                    { status
-                        | savepoints = Dict.insert name top status.savepoints
-                        , stack = restOfStack
-                    }
-            in
-            executeRec restToks nextStatus
-
-        ( _ :: _, _ ) ->
-            haltWithError status "定義時のスタックが空です"
-
-        _ ->
-            haltWithError status "セーブする定数の名前を与えてください"
-
-
-{-| 名前をつけて保存した位置をロードする。一度ロードすると消えてしまう
--}
-executeLoad : List Word -> ExecStatus -> ExecResult
-executeLoad toks status =
+analyzeSave : List Word -> ( Thread, List Word )
+analyzeSave toks =
     case toks of
         name :: restToks ->
-            case Dict.get name status.savepoints of
-                Just val ->
-                    let
-                        nextStatus =
-                            { status
-                                | savepoints = Dict.remove name status.savepoints
-                                , stack = val :: status.stack
-                            }
-                    in
-                    executeRec restToks nextStatus
+            ( doSave name, restToks )
 
-                Nothing ->
-                    haltWithError status ("セーブポイント (" ++ name ++ ") が見つかりません")
+        [] ->
+            ( fail "セーブする定数の名前を与えてください", toks )
+
+
+doSave : Word -> Thread
+doSave name err cont status =
+    case status.stack of
+        top :: restOfStack ->
+            cont
+                { status
+                    | savepoints = Dict.insert name top status.savepoints
+                    , stack = restOfStack
+                }
 
         _ ->
-            haltWithError status "ロードする定数の名前を与えてください"
+            err "save時のスタックが空です" status
+
+
+analyzeLoad : List Word -> ( Thread, List Word )
+analyzeLoad toks =
+    case toks of
+        name :: restToks ->
+            ( doLoad name, restToks )
+
+        [] ->
+            ( fail "ロードする定数の名前を与えてください", toks )
+
+
+doLoad : Word -> Thread
+doLoad name err cont status =
+    case Dict.get name status.savepoints of
+        Just val ->
+            cont
+                { status
+                    | savepoints = Dict.remove name status.savepoints
+                    , stack = val :: status.stack
+                }
+
+        Nothing ->
+            err ("セーブポイント (" ++ name ++ ") が見つかりません") status
 
 
 executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
@@ -465,7 +469,7 @@ executePlaceRail railType rotation =
     \cont status ->
         case status.stack of
             [] ->
-                haltWithError status "スタックが空です"
+                haltWithError "スタックが空です" status
 
             top :: restOfStack ->
                 case railPlaceFunc top of
@@ -479,14 +483,14 @@ executePlaceRail railType rotation =
                             }
 
                     Nothing ->
-                        haltWithError status "配置するレールの凹凸が合いません"
+                        haltWithError "配置するレールの凹凸が合いません" status
 
 
 executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
 executeAscend amount cont status =
     case status.stack of
         [] ->
-            haltWithError status "スタックが空です"
+            haltWithError "スタックが空です" status
 
         top :: restOfStack ->
             cont { status | stack = RailLocation.addHeight amount top :: restOfStack }
@@ -496,7 +500,7 @@ executeInvert : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
 executeInvert cont status =
     case status.stack of
         [] ->
-            haltWithError status "スタックが空です"
+            haltWithError "スタックが空です" status
 
         top :: restOfStack ->
             cont { status | stack = RailLocation.invertJoint top :: restOfStack }
