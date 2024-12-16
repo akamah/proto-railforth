@@ -64,9 +64,13 @@ type alias ExecResult =
 execute : String -> ExecResult
 execute src =
     let
-        tokenize : String -> List Word
-        tokenize string =
-            String.words string
+        tokens : List Word
+        tokens =
+            String.words src
+
+        thread : Thread
+        thread =
+            analyzeWords tokens
 
         initialStatus : ExecStatus
         initialStatus =
@@ -76,7 +80,7 @@ execute src =
             , frame = Dict.empty
             }
     in
-    executeRec (tokenize src) initialStatus
+    thread haltWithError haltWithSuccess initialStatus
 
 
 {-| Forthの普遍的なワードで、Railforthとしてのワードではないもの。スタック操作など
@@ -86,6 +90,16 @@ type alias CoreWord result stack global =
     -> (ForthStatus result stack global -> result)
     -> ForthStatus result stack global
     -> result
+
+
+{-| 気持ち: 失敗した際にそれを報告する継続、成功した際の継続、現在の状態を受け取り、いい感じに結果を作るみたいなやつ
+よく見たらもう上とほとんど同じやな
+-}
+type alias Thread =
+    (ForthError -> ExecStatus -> ExecResult)
+    -> (ExecStatus -> ExecResult)
+    -> ExecStatus
+    -> ExecResult
 
 
 {-| -}
@@ -198,42 +212,6 @@ railForthGlossary =
         ]
 
 
-executeRec : List Word -> ExecStatus -> ExecResult
-executeRec toks =
-    case toks of
-        [] ->
-            \status -> haltWithSuccess status
-
-        t :: ts ->
-            -- analyzeを使ってはいるが、とりあえず挙動を壊さないために変な使い方をしている。
-            case Dict.get t controlWords of
-                Just analyzer ->
-                    let
-                        ( thread, nextToks ) =
-                            analyzer ts
-                    in
-                    \status -> thread haltWithError (executeRec nextToks) status
-
-                Nothing ->
-                    case Dict.get t coreGlossary of
-                        Just thread ->
-                            \status -> thread haltWithError (executeRec ts) status
-
-                        Nothing ->
-                            case Dict.get t railForthGlossary of
-                                Just thread ->
-                                    \status -> thread haltWithError (executeRec ts) status
-
-                                Nothing ->
-                                    \status -> haltWithError ("未定義のワードです: " ++ t) status
-
-
-{-| 気持ち: 失敗した際にそれを報告する継続、成功した際の継続、現在の状態を受け取り、いい感じに結果を作るみたいなやつ
--}
-type alias Thread =
-    (ForthError -> ExecStatus -> ExecResult) -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-
-
 {-| 無条件で成功するスレッド
 -}
 success : Thread
@@ -248,34 +226,40 @@ fail msg err _ status =
     err msg status
 
 
+sequence : Thread -> Thread -> Thread
+sequence x y =
+    \err cont ->
+        x err (y err cont)
 
--- analyzeWords : List Word -> Thread
--- analyzeWords toks =
---     case toks of
---         [] ->
---             success
---         t :: ts ->
---             case Dict.get t controlWords of
---                 Just thread ->
---                     \err cont status -> thread ts status
---                 Nothing ->
---                     case Dict.get t coreGlossary of
---                         Just thread ->
---                             let
---                                 rest =
---                                     analyzeWords toks
---                             in
---                             \err cont status -> thread (\s -> rest err cont s) err status
---                         Nothing ->
---                             case Dict.get t railForthGlossary of
---                                 Just thread ->
---                                     let
---                                         rest =
---                                             analyzeWords toks
---                                     in
---                                     \err cont status -> thread (rest err cont) status
---                                 Nothing ->
---                                     \err _ _ -> err ("未定義のワードです: " ++ t)
+
+analyzeWords : List Word -> Thread
+analyzeWords toks =
+    -- TODO: tail recursion
+    case toks of
+        [] ->
+            success
+
+        t :: ts ->
+            case Dict.get t controlWords of
+                Just analyzer ->
+                    let
+                        ( thread, restToks ) =
+                            analyzer ts
+                    in
+                    sequence thread <| analyzeWords restToks
+
+                Nothing ->
+                    case Dict.get t coreGlossary of
+                        Just thread ->
+                            sequence thread <| analyzeWords ts
+
+                        Nothing ->
+                            case Dict.get t railForthGlossary of
+                                Just thread ->
+                                    sequence thread <| analyzeWords ts
+
+                                Nothing ->
+                                    fail ("未定義のワードです: " ++ t)
 
 
 {-| haltWithError
