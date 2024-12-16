@@ -19,11 +19,22 @@ type alias Word =
 
 {-| Forthの状態。スタックがあり、そのほか余計な情報がある。
 -}
-type alias ForthStatus stack global =
+type alias ForthStatus result stack global =
     { stack : List stack
     , global : global
     , savepoints : Dict Word stack
+    , frame : Dict Word (Cont result stack global)
     }
+
+
+{-| Continuation
+-}
+type Cont result stack global
+    = Cont
+        ((ForthStatus result stack global -> result)
+         -> ForthStatus result stack global
+         -> result
+        )
 
 
 type alias ExecError =
@@ -36,6 +47,7 @@ type alias ForthError =
 
 type alias ExecStatus =
     ForthStatus
+        ExecResult
         RailLocation
         { rails : List RailPlacement
         }
@@ -61,6 +73,7 @@ execute src =
             { stack = [ RailPiece.initialLocation ]
             , global = { rails = [] }
             , savepoints = Dict.empty
+            , frame = Dict.empty
             }
     in
     executeRec (tokenize src) initialStatus
@@ -69,9 +82,9 @@ execute src =
 {-| Forthの普遍的なワードで、Railforthとしてのワードではないもの。スタック操作など
 -}
 type alias CoreWord result stack global =
-    (ForthStatus stack global -> result)
-    -> (ForthStatus stack global -> ForthError -> result)
-    -> ForthStatus stack global
+    (ForthStatus result stack global -> result)
+    -> (ForthStatus result stack global -> ForthError -> result)
+    -> ForthStatus result stack global
     -> result
 
 
@@ -96,6 +109,9 @@ controlWords =
         , ( ")", \_ status -> haltWithError status "余分なコメント終了文字 ) があります" )
         , ( "save", executeSave )
         , ( "load", executeLoad )
+
+        --        , ( ":", executeWordDef )
+        , ( ";", \_ status -> haltWithError status "ワードの定義の外で ; が出現しました" )
         ]
 
 
@@ -183,28 +199,72 @@ railForthGlossary =
 
 
 executeRec : List Word -> ExecStatus -> ExecResult
-executeRec toks status =
+executeRec toks =
     case toks of
         [] ->
-            haltWithSuccess status
+            \status -> haltWithSuccess status
 
         t :: ts ->
             case Dict.get t controlWords of
                 Just thread ->
-                    thread ts status
+                    \status -> thread ts status
 
                 Nothing ->
                     case Dict.get t coreGlossary of
                         Just thread ->
-                            thread (executeRec ts) haltWithError status
+                            \status -> thread (executeRec ts) haltWithError status
 
                         Nothing ->
                             case Dict.get t railForthGlossary of
                                 Just thread ->
-                                    thread (executeRec ts) status
+                                    \status -> thread (executeRec ts) status
 
                                 Nothing ->
-                                    haltWithError status ("未定義のワードです: " ++ t)
+                                    \status -> haltWithError status ("未定義のワードです: " ++ t)
+
+
+type alias Thread =
+    (ForthError -> ExecStatus -> ExecResult) -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+
+
+success : Thread
+success _ cont status =
+    cont status
+
+
+fail : ForthError -> Thread
+fail msg err _ status =
+    err msg status
+
+
+
+-- analyzeWords : List Word -> Thread
+-- analyzeWords toks =
+--     case toks of
+--         [] ->
+--             success
+--         t :: ts ->
+--             case Dict.get t controlWords of
+--                 Just thread ->
+--                     \err cont status -> thread ts status
+--                 Nothing ->
+--                     case Dict.get t coreGlossary of
+--                         Just thread ->
+--                             let
+--                                 rest =
+--                                     analyzeWords toks
+--                             in
+--                             \err cont status -> thread (\s -> rest err cont s) err status
+--                         Nothing ->
+--                             case Dict.get t railForthGlossary of
+--                                 Just thread ->
+--                                     let
+--                                         rest =
+--                                             analyzeWords toks
+--                                     in
+--                                     \err cont status -> thread (rest err cont) status
+--                                 Nothing ->
+--                                     \err _ _ -> err ("未定義のワードです: " ++ t)
 
 
 {-| haltWithError
@@ -286,26 +346,68 @@ executeNip cont err status =
             err status "スタックに最低2つの要素がある必要があります"
 
 
-executeComment : Int -> List Word -> ExecStatus -> ExecResult
-executeComment depth tok status =
+analyzeComment : Int -> List Word -> ( Thread, List Word )
+analyzeComment depth toks =
     if depth <= 0 then
-        executeRec tok status
+        ( success, toks )
 
     else
-        case tok of
+        case toks of
             [] ->
-                haltWithError status "[コメント文]"
+                ( fail "[コメント文]", toks )
 
-            t :: ts ->
-                case t of
-                    "(" ->
-                        executeComment (depth + 1) ts status
+            "(" :: ts ->
+                analyzeComment (depth + 1) ts
 
-                    ")" ->
-                        executeComment (depth - 1) ts status
+            ")" :: ts ->
+                analyzeComment (depth - 1) ts
 
-                    _ ->
-                        executeComment depth ts status
+            _ :: ts ->
+                analyzeComment depth ts
+
+
+executeComment : Int -> List Word -> ExecStatus -> ExecResult
+executeComment depth toks status =
+    let
+        ( thread, nextToks ) =
+            analyzeComment depth toks
+    in
+    thread (\e s -> haltWithError s e) (executeRec nextToks) status
+
+
+
+-- splitAt : comparable -> List comparable -> Maybe ( List comparable, List comparable )
+-- splitAt needle list =
+--     let
+--         splitAtRec accum rest =
+--             case rest of
+--                 [] ->
+--                     Nothing
+--                 x :: xs ->
+--                     if x == needle then
+--                         Just ( List.reverse accum, xs )
+--                     else
+--                         splitAtRec (x :: accum) xs
+--     in
+--     splitAtRec [] list
+-- sequence : ((a -> b) -> a -> b) -> ((a -> b) -> a -> b) -> ((a -> b) -> a -> b)
+-- sequence f g =
+--     \k -> f (g k)
+-- executeWordDef : List Word -> ExecStatus -> ExecResult
+-- executeWordDef toks =
+--     case splitAt ";" toks of
+--         Nothing ->
+--             \status -> haltWithError status "[ワード定義]"
+--         Just ( body, rest ) ->
+--             case t of
+--                 ";" ->
+--                     let
+--                         thread =
+--                             executeRec body
+--                     in
+--                     \status -> executeComment (depth + 1) ts status
+--                 _ ->
+--                     executeComment depth ts status
 
 
 {-| 現在の位置に名前をつけて保存する。
