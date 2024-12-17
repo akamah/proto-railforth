@@ -30,11 +30,7 @@ type alias ForthStatus result stack global =
 {-| Continuation
 -}
 type Cont result stack global
-    = Cont
-        ((ForthStatus result stack global -> result)
-         -> ForthStatus result stack global
-         -> result
-        )
+    = Cont Thread
 
 
 type alias ExecError =
@@ -110,8 +106,7 @@ controlWords =
         , ( ")", \toks -> ( fail "余分なコメント終了文字 ) があります", toks ) )
         , ( "save", analyzeSave )
         , ( "load", analyzeLoad )
-
-        --        , ( ":", executeWordDef )
+        , ( ":", analyzeWordDef )
         , ( ";", \toks -> ( fail "ワードの定義の外で ; が出現しました", toks ) )
         ]
 
@@ -227,17 +222,40 @@ fail msg err _ status =
 
 
 sequence : Thread -> Thread -> Thread
-sequence x y =
-    \err cont ->
-        x err (y err cont)
+sequence x y err cont =
+    x err (y err cont)
 
 
-analyzeWords : List Word -> Thread
-analyzeWords toks =
-    -- TODO: tail recursion
+analyzeNormalWord : Word -> Thread
+analyzeNormalWord word =
+    case Dict.get word coreGlossary of
+        Just thread ->
+            thread
+
+        Nothing ->
+            case Dict.get word railForthGlossary of
+                Just thread ->
+                    thread
+
+                Nothing ->
+                    \err cont status ->
+                        case Dict.get word status.frame of
+                            Just (Cont thread) ->
+                                thread err cont status
+
+                            Nothing ->
+                                err ("未定義のワードです: " ++ word) status
+
+
+{-| 継続渡しスタイルの場合、どうしてもsequenceを右結合にしたかった。
+そのためそれぞれのワードに対してanalyzeを行う際は戻り値のリストを逆向きにする。
+その後、foldlによってうまい感じにsequenceする
+-}
+analyzeWordsRec : List Thread -> List Word -> List Thread
+analyzeWordsRec accum toks =
     case toks of
         [] ->
-            success
+            accum
 
         t :: ts ->
             case Dict.get t controlWords of
@@ -246,20 +264,19 @@ analyzeWords toks =
                         ( thread, restToks ) =
                             analyzer ts
                     in
-                    sequence thread <| analyzeWords restToks
+                    analyzeWordsRec (thread :: accum) restToks
 
                 Nothing ->
-                    case Dict.get t coreGlossary of
-                        Just thread ->
-                            sequence thread <| analyzeWords ts
+                    analyzeWordsRec (analyzeNormalWord t :: accum) ts
 
-                        Nothing ->
-                            case Dict.get t railForthGlossary of
-                                Just thread ->
-                                    sequence thread <| analyzeWords ts
 
-                                Nothing ->
-                                    fail ("未定義のワードです: " ++ t)
+analyzeWords : List Word -> Thread
+analyzeWords toks =
+    let
+        threadsInReverseOrder =
+            analyzeWordsRec [] toks
+    in
+    List.foldl sequence success threadsInReverseOrder
 
 
 {-| haltWithError
@@ -361,39 +378,46 @@ analyzeComment depth toks =
                 analyzeComment depth ts
 
 
+splitAt : comparable -> List comparable -> Maybe ( List comparable, List comparable )
+splitAt needle list =
+    let
+        splitAtRec accum rest =
+            case rest of
+                [] ->
+                    Nothing
 
--- splitAt : comparable -> List comparable -> Maybe ( List comparable, List comparable )
--- splitAt needle list =
---     let
---         splitAtRec accum rest =
---             case rest of
---                 [] ->
---                     Nothing
---                 x :: xs ->
---                     if x == needle then
---                         Just ( List.reverse accum, xs )
---                     else
---                         splitAtRec (x :: accum) xs
---     in
---     splitAtRec [] list
--- sequence : ((a -> b) -> a -> b) -> ((a -> b) -> a -> b) -> ((a -> b) -> a -> b)
--- sequence f g =
---     \k -> f (g k)
--- executeWordDef : List Word -> ExecStatus -> ExecResult
--- executeWordDef toks =
---     case splitAt ";" toks of
---         Nothing ->
---             \status -> haltWithError status "[ワード定義]"
---         Just ( body, rest ) ->
---             case t of
---                 ";" ->
---                     let
---                         thread =
---                             executeRec body
---                     in
---                     \status -> executeComment (depth + 1) ts status
---                 _ ->
---                     executeComment depth ts status
+                x :: xs ->
+                    if x == needle then
+                        Just ( List.reverse accum, xs )
+
+                    else
+                        splitAtRec (x :: accum) xs
+    in
+    splitAtRec [] list
+
+
+analyzeWordDef : List Word -> ( Thread, List Word )
+analyzeWordDef toks =
+    case toks of
+        name :: toks2 ->
+            case splitAt ";" toks2 of
+                Just ( bodyToks, restToks ) ->
+                    let
+                        bodyThread =
+                            analyzeWords bodyToks
+                    in
+                    ( buildWordDef name bodyThread, restToks )
+
+                Nothing ->
+                    ( fail "ワードの定義の末尾に ; がありません", toks2 )
+
+        [] ->
+            ( fail "ワード定義の名前がありません", toks )
+
+
+buildWordDef : Word -> Thread -> Thread
+buildWordDef name thread _ cont status =
+    cont { status | frame = Dict.insert name (Cont thread) status.frame }
 
 
 analyzeSave : List Word -> ( Thread, List Word )
