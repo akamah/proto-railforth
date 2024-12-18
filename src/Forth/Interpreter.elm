@@ -98,6 +98,49 @@ type alias Thread =
     -> ExecResult
 
 
+
+{-
+
+   instance Functor ((->) r) where
+       fmap = (.)
+
+   instance Applicative ((->) r) where
+       pure = const
+       (<*>) f g x = f x (g x)
+
+   instance Monad ((->) r) where
+       f >>= k = \ r -> k (f r) r
+
+
+   data Free f a = Pure a | Free (f (Free f a))
+
+   instance Functor f => Monad (Free f) where
+     return = Pure
+     Pure a >>= f = f a
+     Free m >>= f = Free ((>>= f) <$> m)
+
+   instance Monad Trampoline where
+       return = Done
+       Done a >>= f = f a
+       More m >>= f = More ((\x -> x >>= f) . m)
+                    = More ((andThen f) . m)
+
+
+-}
+-- f :: a -> b, g :: r -> a, f << g :: r -> b
+{-
+
+     composeFoo x (composeFoo y z)
+   = composeFoo x (\s -> z (y s))
+   = \t -> (\s -> z (y s)) (x t)
+
+     composeFoo (composeFoo x y) z
+   = composeFoo (\s -> y (x s)) z
+   = \t -> z ((\s -> y (x s)) t)
+
+-}
+
+
 {-| -}
 controlWords : Dict Word (List Word -> ( Thread, List Word ))
 controlWords =
@@ -251,7 +294,7 @@ analyzeNormalWord word =
 そのためそれぞれのワードに対してanalyzeを行う際は戻り値のリストを逆向きにする。
 その後、foldlによってうまい感じにsequenceする
 -}
-analyzeWordsRec : List Thread -> List Word -> List Thread
+analyzeWordsRec : Thread -> List Word -> Thread
 analyzeWordsRec accum toks =
     case toks of
         [] ->
@@ -264,19 +307,15 @@ analyzeWordsRec accum toks =
                         ( thread, restToks ) =
                             analyzer ts
                     in
-                    analyzeWordsRec (thread :: accum) restToks
+                    analyzeWordsRec (sequence accum thread) restToks
 
                 Nothing ->
-                    analyzeWordsRec (analyzeNormalWord t :: accum) ts
+                    analyzeWordsRec (sequence accum <| analyzeNormalWord t) ts
 
 
 analyzeWords : List Word -> Thread
 analyzeWords toks =
-    let
-        threadsInReverseOrder =
-            analyzeWordsRec [] toks
-    in
-    List.foldl sequence success threadsInReverseOrder
+    analyzeWordsRec success toks
 
 
 {-| haltWithError

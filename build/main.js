@@ -10907,8 +10907,7 @@ var $author$project$Forth$Interpreter$analyzeWordDef = function (toks) {
 	}
 };
 var $author$project$Forth$Interpreter$analyzeWords = function (toks) {
-	var threadsInReverseOrder = A2($author$project$Forth$Interpreter$analyzeWordsRec, _List_Nil, toks);
-	return A3($elm$core$List$foldl, $author$project$Forth$Interpreter$sequence, $author$project$Forth$Interpreter$success, threadsInReverseOrder);
+	return A2($author$project$Forth$Interpreter$analyzeWordsRec, $author$project$Forth$Interpreter$success, toks);
 };
 var $author$project$Forth$Interpreter$analyzeWordsRec = F2(
 	function (accum, toks) {
@@ -10928,16 +10927,16 @@ var $author$project$Forth$Interpreter$analyzeWordsRec = F2(
 					var _v2 = analyzer(ts);
 					var thread = _v2.a;
 					var restToks = _v2.b;
-					var $temp$accum = A2($elm$core$List$cons, thread, accum),
+					var $temp$accum = A2($author$project$Forth$Interpreter$sequence, accum, thread),
 						$temp$toks = restToks;
 					accum = $temp$accum;
 					toks = $temp$toks;
 					continue analyzeWordsRec;
 				} else {
 					var $temp$accum = A2(
-						$elm$core$List$cons,
-						$author$project$Forth$Interpreter$analyzeNormalWord(t),
-						accum),
+						$author$project$Forth$Interpreter$sequence,
+						accum,
+						$author$project$Forth$Interpreter$analyzeNormalWord(t)),
 						$temp$toks = ts;
 					accum = $temp$accum;
 					toks = $temp$toks;
