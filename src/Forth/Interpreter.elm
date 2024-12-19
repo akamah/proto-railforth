@@ -21,7 +21,7 @@ type alias Word =
 type alias ForthStatus stack global =
     { stack : List stack
     , global : global
-    , savepoints : Dict Word stack
+    , savepoints : List (Dict Word stack)
     , frame : Dict Word FrameEntry
     }
 
@@ -68,7 +68,7 @@ execute src =
         initialStatus =
             { stack = [ RailPiece.initialLocation ]
             , global = { rails = [] }
-            , savepoints = Dict.empty
+            , savepoints = [ Dict.empty ]
             , frame = Dict.empty
             }
     in
@@ -430,16 +430,21 @@ analyzeSave toks =
 
 doSave : Word -> Exec
 doSave name status =
-    case status.stack of
-        top :: restOfStack ->
-            Ok
-                { status
-                    | savepoints = Dict.insert name top status.savepoints
-                    , stack = restOfStack
-                }
+    case status.savepoints of
+        env :: envs ->
+            case status.stack of
+                top :: restOfStack ->
+                    Ok
+                        { status
+                            | savepoints = Dict.insert name top env :: envs
+                            , stack = restOfStack
+                        }
 
-        _ ->
-            Err <| ExecError "save時のスタックが空です" status
+                _ ->
+                    Err <| ExecError "save時のスタックが空です" status
+
+        [] ->
+            Err <| ExecError "致命的なエラーがsaveで発生しました" status
 
 
 analyzeLoad : List Word -> Result AnalyzeError ( Exec, List Word )
@@ -452,18 +457,25 @@ analyzeLoad toks =
             Err "ロードする定数の名前を与えてください"
 
 
+{-| 変数のルックアップでは上の方にたどらない。セーブした変数はロードしたら消えるということは、同じ階層で使ってほしいため
+-}
 doLoad : Word -> Exec
 doLoad name status =
-    case Dict.get name status.savepoints of
-        Just val ->
-            Ok
-                { status
-                    | savepoints = Dict.remove name status.savepoints
-                    , stack = val :: status.stack
-                }
+    case status.savepoints of
+        env :: envs ->
+            case Dict.get name env of
+                Just val ->
+                    Ok
+                        { status
+                            | savepoints = Dict.remove name env :: envs
+                            , stack = val :: status.stack
+                        }
 
-        Nothing ->
-            Err <| ExecError ("セーブポイント (" ++ name ++ ") が見つかりません") status
+                Nothing ->
+                    Err <| ExecError ("セーブポイント (" ++ name ++ ") が見つかりません") status
+
+        [] ->
+            Err <| ExecError "致命的なエラーがloadで発生しました" status
 
 
 executePlaceRail : Rail () IsFlipped -> Int -> Exec

@@ -9695,19 +9695,30 @@ var $elm$core$Dict$remove = F2(
 	});
 var $author$project$Forth$Interpreter$doLoad = F2(
 	function (name, status) {
-		var _v0 = A2($elm$core$Dict$get, name, status.savepoints);
-		if (_v0.$ === 'Just') {
-			var val = _v0.a;
-			return $elm$core$Result$Ok(
-				_Utils_update(
-					status,
-					{
-						savepoints: A2($elm$core$Dict$remove, name, status.savepoints),
-						stack: A2($elm$core$List$cons, val, status.stack)
-					}));
+		var _v0 = status.savepoints;
+		if (_v0.b) {
+			var env = _v0.a;
+			var envs = _v0.b;
+			var _v1 = A2($elm$core$Dict$get, name, env);
+			if (_v1.$ === 'Just') {
+				var val = _v1.a;
+				return $elm$core$Result$Ok(
+					_Utils_update(
+						status,
+						{
+							savepoints: A2(
+								$elm$core$List$cons,
+								A2($elm$core$Dict$remove, name, env),
+								envs),
+							stack: A2($elm$core$List$cons, val, status.stack)
+						}));
+			} else {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'セーブポイント (' + (name + ') が見つかりません'), status));
+			}
 		} else {
 			return $elm$core$Result$Err(
-				A2($author$project$Forth$Interpreter$ExecError, 'セーブポイント (' + (name + ') が見つかりません'), status));
+				A2($author$project$Forth$Interpreter$ExecError, '致命的なエラーがloadで発生しました', status));
 		}
 	});
 var $author$project$Forth$Interpreter$analyzeLoad = function (toks) {
@@ -10821,20 +10832,31 @@ var $author$project$Forth$Interpreter$analyzeNormalWord = function (word) {
 };
 var $author$project$Forth$Interpreter$doSave = F2(
 	function (name, status) {
-		var _v0 = status.stack;
+		var _v0 = status.savepoints;
 		if (_v0.b) {
-			var top = _v0.a;
-			var restOfStack = _v0.b;
-			return $elm$core$Result$Ok(
-				_Utils_update(
-					status,
-					{
-						savepoints: A3($elm$core$Dict$insert, name, top, status.savepoints),
-						stack: restOfStack
-					}));
+			var env = _v0.a;
+			var envs = _v0.b;
+			var _v1 = status.stack;
+			if (_v1.b) {
+				var top = _v1.a;
+				var restOfStack = _v1.b;
+				return $elm$core$Result$Ok(
+					_Utils_update(
+						status,
+						{
+							savepoints: A2(
+								$elm$core$List$cons,
+								A3($elm$core$Dict$insert, name, top, env),
+								envs),
+							stack: restOfStack
+						}));
+			} else {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'save時のスタックが空です', status));
+			}
 		} else {
 			return $elm$core$Result$Err(
-				A2($author$project$Forth$Interpreter$ExecError, 'save時のスタックが空です', status));
+				A2($author$project$Forth$Interpreter$ExecError, '致命的なエラーがsaveで発生しました', status));
 		}
 	});
 var $author$project$Forth$Interpreter$analyzeSave = function (toks) {
@@ -11629,7 +11651,8 @@ var $author$project$Forth$Interpreter$execute = function (src) {
 	var initialStatus = {
 		frame: $elm$core$Dict$empty,
 		global: {rails: _List_Nil},
-		savepoints: $elm$core$Dict$empty,
+		savepoints: _List_fromArray(
+			[$elm$core$Dict$empty]),
 		stack: _List_fromArray(
 			[$author$project$Forth$RailPiece$initialLocation])
 	};
