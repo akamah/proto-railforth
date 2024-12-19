@@ -9233,6 +9233,10 @@ var $elm$core$Basics$pi = _Basics_pi;
 var $elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * $elm$core$Basics$pi) / 180;
 };
+var $author$project$Forth$Interpreter$ExecError = F2(
+	function (message, status) {
+		return {message: message, status: status};
+	});
 var $author$project$Forth$Interpreter$analyzeComment = F2(
 	function (depth, toks) {
 		analyzeComment:
@@ -9702,7 +9706,8 @@ var $author$project$Forth$Interpreter$doLoad = F2(
 						stack: A2($elm$core$List$cons, val, status.stack)
 					}));
 		} else {
-			return $elm$core$Result$Err('セーブポイント (' + (name + ') が見つかりません'));
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, 'セーブポイント (' + (name + ') が見つかりません'), status));
 		}
 	});
 var $author$project$Forth$Interpreter$analyzeLoad = function (toks) {
@@ -9720,7 +9725,8 @@ var $author$project$Forth$Interpreter$analyzeLoad = function (toks) {
 var $author$project$Forth$Interpreter$executeDrop = function (status) {
 	var _v0 = status.stack;
 	if (!_v0.b) {
-		return $elm$core$Result$Err('スタックが空です');
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
 	} else {
 		var restOfStack = _v0.b;
 		return $elm$core$Result$Ok(
@@ -9751,7 +9757,8 @@ var $author$project$Forth$Interpreter$executeInverseRot = function (status) {
 							A2($elm$core$List$cons, x, restOfStack)))
 				}));
 	} else {
-		return $elm$core$Result$Err('スタックに最低3つの要素がある必要があります');
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低3つの要素がある必要があります', status));
 	}
 };
 var $author$project$Forth$Interpreter$executeNip = function (status) {
@@ -9767,7 +9774,8 @@ var $author$project$Forth$Interpreter$executeNip = function (status) {
 					stack: A2($elm$core$List$cons, x, restOfStack)
 				}));
 	} else {
-		return $elm$core$Result$Err('スタックに最低2つの要素がある必要があります');
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低2つの要素がある必要があります', status));
 	}
 };
 var $author$project$Forth$Interpreter$executeRot = function (status) {
@@ -9792,7 +9800,8 @@ var $author$project$Forth$Interpreter$executeRot = function (status) {
 							A2($elm$core$List$cons, y, restOfStack)))
 				}));
 	} else {
-		return $elm$core$Result$Err('スタックに最低3つの要素がある必要があります');
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低3つの要素がある必要があります', status));
 	}
 };
 var $author$project$Forth$Interpreter$executeSwap = function (status) {
@@ -9812,7 +9821,8 @@ var $author$project$Forth$Interpreter$executeSwap = function (status) {
 						A2($elm$core$List$cons, x, restOfStack))
 				}));
 	} else {
-		return $elm$core$Result$Err('スタックに最低2つの要素がある必要があります');
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低2つの要素がある必要があります', status));
 	}
 };
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -9918,7 +9928,8 @@ var $author$project$Forth$Interpreter$lookupWord = F2(
 			var execs = _v0.a.a;
 			return A2($author$project$Forth$Interpreter$executeMulti, execs, status);
 		} else {
-			return $elm$core$Result$Err('未定義のワードです: ' + word);
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '未定義のワードです: ' + word, status));
 		}
 	});
 var $author$project$Types$Rail$AutoCross = {$: 'AutoCross'};
@@ -10018,7 +10029,8 @@ var $author$project$Forth$Interpreter$executeAscend = F2(
 	function (amount, status) {
 		var _v0 = status.stack;
 		if (!_v0.b) {
-			return $elm$core$Result$Err('スタックが空です');
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
 		} else {
 			var top = _v0.a;
 			var restOfStack = _v0.b;
@@ -10036,7 +10048,8 @@ var $author$project$Forth$Interpreter$executeAscend = F2(
 var $author$project$Forth$Interpreter$executeInvert = function (status) {
 	var _v0 = status.stack;
 	if (!_v0.b) {
-		return $elm$core$Result$Err('スタックが空です');
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
 	} else {
 		var top = _v0.a;
 		var restOfStack = _v0.b;
@@ -10365,7 +10378,8 @@ var $author$project$Forth$Interpreter$executePlaceRail = F2(
 		return function (status) {
 			var _v0 = status.stack;
 			if (!_v0.b) {
-				return $elm$core$Result$Err('スタックが空です');
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
 			} else {
 				var top = _v0.a;
 				var restOfStack = _v0.b;
@@ -10383,7 +10397,8 @@ var $author$project$Forth$Interpreter$executePlaceRail = F2(
 								stack: _Utils_ap(nextLocations, restOfStack)
 							}));
 				} else {
-					return $elm$core$Result$Err('配置するレールの凹凸が合いません');
+					return $elm$core$Result$Err(
+						A2($author$project$Forth$Interpreter$ExecError, '配置するレールの凹凸が合いません', status));
 				}
 			}
 		};
@@ -10818,7 +10833,8 @@ var $author$project$Forth$Interpreter$doSave = F2(
 						stack: restOfStack
 					}));
 		} else {
-			return $elm$core$Result$Err('save時のスタックが空です');
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, 'save時のスタックが空です', status));
 		}
 	});
 var $author$project$Forth$Interpreter$analyzeSave = function (toks) {
@@ -10993,15 +11009,14 @@ var $author$project$Forth$RailPlacement$toRailRenderData = function (placement) 
 		$author$project$Forth$Geometry$Location$toVec3(placement.location),
 		$author$project$Forth$Geometry$Dir$toRadian(placement.location.dir));
 };
-var $author$project$Forth$Interpreter$haltWithError = F2(
-	function (errMsg, status) {
-		return {
-			errMsg: $elm$core$Maybe$Just(errMsg),
-			piers: _List_Nil,
-			railCount: $elm$core$Dict$empty,
-			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
-		};
-	});
+var $author$project$Forth$Interpreter$haltWithError = function (err) {
+	return {
+		errMsg: $elm$core$Maybe$Just(err.message),
+		piers: _List_Nil,
+		railCount: $elm$core$Dict$empty,
+		rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, err.status.global.rails)
+	};
+};
 var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) {
 	return A2(
 		$elm$core$List$map,
@@ -11627,11 +11642,12 @@ var $author$project$Forth$Interpreter$execute = function (src) {
 			return $author$project$Forth$Interpreter$haltWithSuccess(finalStatus);
 		} else {
 			var execError = _v1.a;
-			return A2($author$project$Forth$Interpreter$haltWithError, execError, initialStatus);
+			return $author$project$Forth$Interpreter$haltWithError(execError);
 		}
 	} else {
 		var analyzeError = _v0.a;
-		return A2($author$project$Forth$Interpreter$haltWithError, analyzeError, initialStatus);
+		return $author$project$Forth$Interpreter$haltWithError(
+			A2($author$project$Forth$Interpreter$ExecError, analyzeError, initialStatus));
 	}
 };
 var $author$project$Forth$execute = $author$project$Forth$Interpreter$execute;

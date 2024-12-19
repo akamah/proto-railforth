@@ -33,7 +33,9 @@ type FrameEntry
 
 
 type alias ExecError =
-    String
+    { message : String
+    , status : ExecStatus
+    }
 
 
 type alias AnalyzeError =
@@ -77,11 +79,11 @@ execute src =
                     haltWithSuccess finalStatus
 
                 Err execError ->
-                    haltWithError execError initialStatus
+                    haltWithError execError
 
         -- the status is STUB
         Err analyzeError ->
-            haltWithError analyzeError initialStatus
+            haltWithError (ExecError analyzeError initialStatus)
 
 
 
@@ -227,7 +229,7 @@ lookupWord word status =
             executeMulti execs status
 
         Nothing ->
-            Err ("未定義のワードです: " ++ word)
+            Err <| ExecError ("未定義のワードです: " ++ word) status
 
 
 {-| 与えられた複数のワードをパースする
@@ -276,10 +278,10 @@ executeMulti execs status =
 
 {-| haltWithError
 -}
-haltWithError : ExecError -> ExecStatus -> ExecResult
-haltWithError errMsg status =
-    { rails = List.map RailPlacement.toRailRenderData status.global.rails
-    , errMsg = Just errMsg
+haltWithError : ExecError -> ExecResult
+haltWithError err =
+    { rails = List.map RailPlacement.toRailRenderData err.status.global.rails
+    , errMsg = Just err.message
     , railCount = Dict.empty
     , piers = []
     }
@@ -307,7 +309,7 @@ executeDrop : Exec
 executeDrop status =
     case status.stack of
         [] ->
-            Err "スタックが空です"
+            Err <| ExecError "スタックが空です" status
 
         _ :: restOfStack ->
             Ok { status | stack = restOfStack }
@@ -320,7 +322,7 @@ executeSwap status =
             Ok { status | stack = y :: x :: restOfStack }
 
         _ ->
-            Err "スタックに最低2つの要素がある必要があります"
+            Err <| ExecError "スタックに最低2つの要素がある必要があります" status
 
 
 executeRot : Exec
@@ -330,7 +332,7 @@ executeRot status =
             Ok { status | stack = z :: x :: y :: restOfStack }
 
         _ ->
-            Err "スタックに最低3つの要素がある必要があります"
+            Err <| ExecError "スタックに最低3つの要素がある必要があります" status
 
 
 executeInverseRot : Exec
@@ -340,7 +342,7 @@ executeInverseRot status =
             Ok { status | stack = y :: z :: x :: restOfStack }
 
         _ ->
-            Err "スタックに最低3つの要素がある必要があります"
+            Err <| ExecError "スタックに最低3つの要素がある必要があります" status
 
 
 executeNip : Exec
@@ -350,7 +352,7 @@ executeNip status =
             Ok { status | stack = x :: restOfStack }
 
         _ ->
-            Err "スタックに最低2つの要素がある必要があります"
+            Err <| ExecError "スタックに最低2つの要素がある必要があります" status
 
 
 analyzeComment : Int -> List Word -> Result AnalyzeError ( Exec, List Word )
@@ -437,7 +439,7 @@ doSave name status =
                 }
 
         _ ->
-            Err "save時のスタックが空です"
+            Err <| ExecError "save時のスタックが空です" status
 
 
 analyzeLoad : List Word -> Result AnalyzeError ( Exec, List Word )
@@ -461,7 +463,7 @@ doLoad name status =
                 }
 
         Nothing ->
-            Err ("セーブポイント (" ++ name ++ ") が見つかりません")
+            Err <| ExecError ("セーブポイント (" ++ name ++ ") が見つかりません") status
 
 
 executePlaceRail : Rail () IsFlipped -> Int -> Exec
@@ -473,7 +475,7 @@ executePlaceRail railType rotation =
     \status ->
         case status.stack of
             [] ->
-                Err "スタックが空です"
+                Err <| ExecError "スタックが空です" status
 
             top :: restOfStack ->
                 case railPlaceFunc top of
@@ -487,14 +489,14 @@ executePlaceRail railType rotation =
                             }
 
                     Nothing ->
-                        Err "配置するレールの凹凸が合いません"
+                        Err <| ExecError "配置するレールの凹凸が合いません" status
 
 
 executeAscend : Int -> Exec
 executeAscend amount status =
     case status.stack of
         [] ->
-            Err "スタックが空です"
+            Err <| ExecError "スタックが空です" status
 
         top :: restOfStack ->
             Ok { status | stack = RailLocation.addHeight amount top :: restOfStack }
@@ -504,7 +506,7 @@ executeInvert : Exec
 executeInvert status =
     case status.stack of
         [] ->
-            Err "スタックが空です"
+            Err <| ExecError "スタックが空です" status
 
         top :: restOfStack ->
             Ok { status | stack = RailLocation.invertJoint top :: restOfStack }
