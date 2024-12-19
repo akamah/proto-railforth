@@ -9908,6 +9908,36 @@ var $author$project$Forth$Interpreter$coreGlossary = $elm$core$Dict$fromList(
 			_Utils_Tuple2('-rot', $author$project$Forth$Interpreter$executeInverseRot),
 			_Utils_Tuple2('nip', $author$project$Forth$Interpreter$executeNip)
 		]));
+var $author$project$Forth$Interpreter$executeInNestedFrame = F2(
+	function (exec, status) {
+		var extendedStatus = _Utils_update(
+			status,
+			{
+				frame: A2($elm$core$List$cons, $elm$core$Dict$empty, status.frame),
+				savepoints: A2($elm$core$List$cons, $elm$core$Dict$empty, status.savepoints)
+			});
+		var _v0 = exec(extendedStatus);
+		if (_v0.$ === 'Ok') {
+			var status2 = _v0.a;
+			var _v1 = _Utils_Tuple2(status2.frame, status2.savepoints);
+			if (_v1.a.b && _v1.b.b) {
+				var _v2 = _v1.a;
+				var oldFrame = _v2.b;
+				var _v3 = _v1.b;
+				var oldSavepoints = _v3.b;
+				return $elm$core$Result$Ok(
+					_Utils_update(
+						status2,
+						{frame: oldFrame, savepoints: oldSavepoints}));
+			} else {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'フレームがなんか変です', status2));
+			}
+		} else {
+			var err = _v0.a;
+			return $elm$core$Result$Err(err);
+		}
+	});
 var $author$project$Forth$Interpreter$executeMulti = F2(
 	function (execs, status) {
 		executeMulti:
@@ -9932,12 +9962,38 @@ var $author$project$Forth$Interpreter$executeMulti = F2(
 			}
 		}
 	});
-var $author$project$Forth$Interpreter$lookupWord = F2(
+var $author$project$Forth$Interpreter$getFromDicts = F2(
+	function (k, dicts) {
+		getFromDicts:
+		while (true) {
+			if (!dicts.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var d = dicts.a;
+				var ds = dicts.b;
+				var _v1 = A2($elm$core$Dict$get, k, d);
+				if (_v1.$ === 'Just') {
+					var v = _v1.a;
+					return $elm$core$Maybe$Just(v);
+				} else {
+					var $temp$k = k,
+						$temp$dicts = ds;
+					k = $temp$k;
+					dicts = $temp$dicts;
+					continue getFromDicts;
+				}
+			}
+		}
+	});
+var $author$project$Forth$Interpreter$executeWordInFrame = F2(
 	function (word, status) {
-		var _v0 = A2($elm$core$Dict$get, word, status.frame);
+		var _v0 = A2($author$project$Forth$Interpreter$getFromDicts, word, status.frame);
 		if (_v0.$ === 'Just') {
 			var execs = _v0.a.a;
-			return A2($author$project$Forth$Interpreter$executeMulti, execs, status);
+			return A2(
+				$author$project$Forth$Interpreter$executeInNestedFrame,
+				$author$project$Forth$Interpreter$executeMulti(execs),
+				status);
 		} else {
 			return $elm$core$Result$Err(
 				A2($author$project$Forth$Interpreter$ExecError, '未定義のワードです: ' + word, status));
@@ -10826,7 +10882,7 @@ var $author$project$Forth$Interpreter$analyzeNormalWord = function (word) {
 			var exec = _v1.a;
 			return exec;
 		} else {
-			return $author$project$Forth$Interpreter$lookupWord(word);
+			return $author$project$Forth$Interpreter$executeWordInFrame(word);
 		}
 	}
 };
@@ -10876,16 +10932,27 @@ var $author$project$Forth$Interpreter$FrameEntry = function (a) {
 };
 var $author$project$Forth$Interpreter$buildWordDef = F3(
 	function (name, thread, status) {
-		return $elm$core$Result$Ok(
-			_Utils_update(
-				status,
-				{
-					frame: A3(
-						$elm$core$Dict$insert,
-						name,
-						$author$project$Forth$Interpreter$FrameEntry(thread),
-						status.frame)
-				}));
+		var _v0 = status.frame;
+		if (_v0.b) {
+			var f = _v0.a;
+			var fs = _v0.b;
+			return $elm$core$Result$Ok(
+				_Utils_update(
+					status,
+					{
+						frame: A2(
+							$elm$core$List$cons,
+							A3(
+								$elm$core$Dict$insert,
+								name,
+								$author$project$Forth$Interpreter$FrameEntry(thread),
+								f),
+							fs)
+					}));
+		} else {
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '致命的エラーがワードの定義時に発生しました', status));
+		}
 	});
 var $author$project$Forth$Interpreter$splitAt = F2(
 	function (needle, list) {
@@ -11649,7 +11716,8 @@ var $elm$core$String$words = _String_words;
 var $author$project$Forth$Interpreter$execute = function (src) {
 	var tokens = $elm$core$String$words(src);
 	var initialStatus = {
-		frame: $elm$core$Dict$empty,
+		frame: _List_fromArray(
+			[$elm$core$Dict$empty]),
 		global: {rails: _List_Nil},
 		savepoints: _List_fromArray(
 			[$elm$core$Dict$empty]),

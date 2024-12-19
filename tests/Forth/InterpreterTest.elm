@@ -13,6 +13,16 @@ suite =
                 Expect.equal
                     (execute ": foo l r s r l ; foo")
                     (execute "l r s r l")
+        , test "word and variable" <|
+            \_ ->
+                Expect.equal
+                    (execute ": foo l r ; tr save hoge foo . load hoge s")
+                    (execute "tr swap l r . s")
+        , test "nestedword" <|
+            \_ ->
+                Expect.equal
+                    (execute ": foo l r ; : bar foo foo ; bar")
+                    (execute "l r l r")
         , test "comment" <|
             \_ ->
                 Expect.equal

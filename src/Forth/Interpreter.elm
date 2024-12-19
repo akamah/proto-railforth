@@ -22,7 +22,7 @@ type alias ForthStatus stack global =
     { stack : List stack
     , global : global
     , savepoints : List (Dict Word stack)
-    , frame : Dict Word FrameEntry
+    , frame : List (Dict Word FrameEntry)
     }
 
 
@@ -69,7 +69,7 @@ execute src =
             { stack = [ RailPiece.initialLocation ]
             , global = { rails = [] }
             , savepoints = [ Dict.empty ]
-            , frame = Dict.empty
+            , frame = [ Dict.empty ]
             }
     in
     case analyzeWords tokens of
@@ -219,17 +219,54 @@ analyzeNormalWord word =
                     exec
 
                 Nothing ->
-                    lookupWord word
+                    executeWordInFrame word
 
 
-lookupWord : Word -> Exec
-lookupWord word status =
-    case Dict.get word status.frame of
+getFromDicts : comparable -> List (Dict comparable v) -> Maybe v
+getFromDicts k dicts =
+    case dicts of
+        [] ->
+            Nothing
+
+        d :: ds ->
+            case Dict.get k d of
+                Just v ->
+                    Just v
+
+                Nothing ->
+                    getFromDicts k ds
+
+
+executeWordInFrame : Word -> Exec
+executeWordInFrame word status =
+    case getFromDicts word status.frame of
         Just (FrameEntry execs) ->
-            executeMulti execs status
+            executeInNestedFrame (executeMulti execs) status
 
         Nothing ->
             Err <| ExecError ("未定義のワードです: " ++ word) status
+
+
+executeInNestedFrame : Exec -> Exec
+executeInNestedFrame exec status =
+    let
+        extendedStatus =
+            { status
+                | frame = Dict.empty :: status.frame
+                , savepoints = Dict.empty :: status.savepoints
+            }
+    in
+    case exec extendedStatus of
+        Ok status2 ->
+            case ( status2.frame, status2.savepoints ) of
+                ( _ :: oldFrame, _ :: oldSavepoints ) ->
+                    Ok { status2 | frame = oldFrame, savepoints = oldSavepoints }
+
+                _ ->
+                    Err <| ExecError "フレームがなんか変です" status2
+
+        Err err ->
+            Err err
 
 
 {-| 与えられた複数のワードをパースする
@@ -415,7 +452,12 @@ analyzeWordDef toks =
 
 buildWordDef : Word -> List Exec -> Exec
 buildWordDef name thread status =
-    Ok { status | frame = Dict.insert name (FrameEntry thread) status.frame }
+    case status.frame of
+        f :: fs ->
+            Ok { status | frame = Dict.insert name (FrameEntry thread) f :: fs }
+
+        [] ->
+            Err <| ExecError "致命的エラーがワードの定義時に発生しました" status
 
 
 analyzeSave : List Word -> Result AnalyzeError ( Exec, List Word )
