@@ -17,19 +17,26 @@ type alias Word =
 
 
 {-| Forthの状態。スタックがあり、そのほか余計な情報がある。
+frameにはワードに対して定義されたスレッドと変数がある
 -}
 type alias ForthStatus stack global =
     { stack : List stack
     , global : global
     , savepoints : List (Dict Word stack)
-    , frame : List (Dict Word FrameEntry)
+    , frame : List (Dict Word Thread)
     }
 
 
-{-| 状態に突っ込むための型
+{-| 状態に突っ込むため、型の再帰を避けるための型
 -}
-type FrameEntry
-    = FrameEntry (List Exec)
+type Thread
+    = Thread (List Code)
+
+
+{-| Forthの状態機械に対する状態遷移関数
+-}
+type alias Code =
+    ExecStatus -> Result ExecError ExecStatus
 
 
 type alias ExecError =
@@ -87,19 +94,11 @@ execute src =
 
 
 
--- STUB too
-
-
-type alias Exec =
-    ExecStatus -> Result ExecError ExecStatus
-
-
-
 --  辞書の定義
 
 
 {-| -}
-controlWords : Dict Word (List Word -> Result AnalyzeError ( Exec, List Word ))
+controlWords : Dict Word (List Word -> Result AnalyzeError ( Code, List Word ))
 controlWords =
     Dict.fromList
         [ ( "(", analyzeComment 1 )
@@ -111,7 +110,7 @@ controlWords =
         ]
 
 
-coreGlossary : Dict Word Exec
+coreGlossary : Dict Word Code
 coreGlossary =
     Dict.fromList
         [ ( "", Ok {- do nothing -} )
@@ -124,7 +123,7 @@ coreGlossary =
         ]
 
 
-railForthGlossary : Dict Word Exec
+railForthGlossary : Dict Word Code
 railForthGlossary =
     Dict.fromList
         [ ( "q", executePlaceRail (Straight1 ()) 0 )
@@ -207,7 +206,7 @@ railForthGlossary =
         ]
 
 
-analyzeNormalWord : Word -> Exec
+analyzeNormalWord : Word -> Code
 analyzeNormalWord word =
     case Dict.get word coreGlossary of
         Just exec ->
@@ -237,17 +236,17 @@ getFromDicts k dicts =
                     getFromDicts k ds
 
 
-executeWordInFrame : Word -> Exec
+executeWordInFrame : Word -> Code
 executeWordInFrame word status =
     case getFromDicts word status.frame of
-        Just (FrameEntry execs) ->
-            executeInNestedFrame (executeMulti execs) status
+        Just (Thread code) ->
+            executeInNestedFrame (executeMulti code) status
 
         Nothing ->
             Err <| ExecError ("未定義のワードです: " ++ word) status
 
 
-executeInNestedFrame : Exec -> Exec
+executeInNestedFrame : Code -> Code
 executeInNestedFrame exec status =
     let
         extendedStatus =
@@ -271,7 +270,7 @@ executeInNestedFrame exec status =
 
 {-| 与えられた複数のワードをパースする
 -}
-analyzeWordsRec : List Exec -> List Word -> Result AnalyzeError (List Exec)
+analyzeWordsRec : List Code -> List Word -> Result AnalyzeError (List Code)
 analyzeWordsRec accum toks =
     case toks of
         [] ->
@@ -293,12 +292,12 @@ analyzeWordsRec accum toks =
                             analyzeWordsRec (exec :: accum) ts
 
 
-analyzeWords : List Word -> Result AnalyzeError (List Exec)
+analyzeWords : List Word -> Result AnalyzeError (List Code)
 analyzeWords toks =
     analyzeWordsRec [] toks
 
 
-executeMulti : List Exec -> Exec
+executeMulti : List Code -> Code
 executeMulti execs status =
     case execs of
         e :: es ->
@@ -342,7 +341,7 @@ haltWithSuccess status =
             }
 
 
-executeDrop : Exec
+executeDrop : Code
 executeDrop status =
     case status.stack of
         [] ->
@@ -352,7 +351,7 @@ executeDrop status =
             Ok { status | stack = restOfStack }
 
 
-executeSwap : Exec
+executeSwap : Code
 executeSwap status =
     case status.stack of
         x :: y :: restOfStack ->
@@ -362,7 +361,7 @@ executeSwap status =
             Err <| ExecError "スタックに最低2つの要素がある必要があります" status
 
 
-executeRot : Exec
+executeRot : Code
 executeRot status =
     case status.stack of
         x :: y :: z :: restOfStack ->
@@ -372,7 +371,7 @@ executeRot status =
             Err <| ExecError "スタックに最低3つの要素がある必要があります" status
 
 
-executeInverseRot : Exec
+executeInverseRot : Code
 executeInverseRot status =
     case status.stack of
         x :: y :: z :: restOfStack ->
@@ -382,7 +381,7 @@ executeInverseRot status =
             Err <| ExecError "スタックに最低3つの要素がある必要があります" status
 
 
-executeNip : Exec
+executeNip : Code
 executeNip status =
     case status.stack of
         x :: _ :: restOfStack ->
@@ -392,7 +391,7 @@ executeNip status =
             Err <| ExecError "スタックに最低2つの要素がある必要があります" status
 
 
-analyzeComment : Int -> List Word -> Result AnalyzeError ( Exec, List Word )
+analyzeComment : Int -> List Word -> Result AnalyzeError ( Code, List Word )
 analyzeComment depth toks =
     if depth <= 0 then
         Ok ( Ok, toks )
@@ -430,7 +429,7 @@ splitAt needle list =
     splitAtRec [] list
 
 
-analyzeWordDef : List Word -> Result AnalyzeError ( Exec, List Word )
+analyzeWordDef : List Word -> Result AnalyzeError ( Code, List Word )
 analyzeWordDef toks =
     case toks of
         name :: toks2 ->
@@ -450,17 +449,17 @@ analyzeWordDef toks =
             Err "ワード定義の名前がありません"
 
 
-buildWordDef : Word -> List Exec -> Exec
+buildWordDef : Word -> List Code -> Code
 buildWordDef name thread status =
     case status.frame of
         f :: fs ->
-            Ok { status | frame = Dict.insert name (FrameEntry thread) f :: fs }
+            Ok { status | frame = Dict.insert name (Thread thread) f :: fs }
 
         [] ->
             Err <| ExecError "致命的エラーがワードの定義時に発生しました" status
 
 
-analyzeSave : List Word -> Result AnalyzeError ( Exec, List Word )
+analyzeSave : List Word -> Result AnalyzeError ( Code, List Word )
 analyzeSave toks =
     case toks of
         name :: restToks ->
@@ -470,7 +469,7 @@ analyzeSave toks =
             Err "セーブする定数の名前を与えてください"
 
 
-doSave : Word -> Exec
+doSave : Word -> Code
 doSave name status =
     case status.savepoints of
         env :: envs ->
@@ -489,7 +488,7 @@ doSave name status =
             Err <| ExecError "致命的なエラーがsaveで発生しました" status
 
 
-analyzeLoad : List Word -> Result AnalyzeError ( Exec, List Word )
+analyzeLoad : List Word -> Result AnalyzeError ( Code, List Word )
 analyzeLoad toks =
     case toks of
         name :: restToks ->
@@ -501,7 +500,7 @@ analyzeLoad toks =
 
 {-| 変数のルックアップでは上の方にたどらない。セーブした変数はロードしたら消えるということは、同じ階層で使ってほしいため
 -}
-doLoad : Word -> Exec
+doLoad : Word -> Code
 doLoad name status =
     case status.savepoints of
         env :: envs ->
@@ -520,7 +519,7 @@ doLoad name status =
             Err <| ExecError "致命的なエラーがloadで発生しました" status
 
 
-executePlaceRail : Rail () IsFlipped -> Int -> Exec
+executePlaceRail : Rail () IsFlipped -> Int -> Code
 executePlaceRail railType rotation =
     let
         railPlaceFunc =
@@ -546,7 +545,7 @@ executePlaceRail railType rotation =
                         Err <| ExecError "配置するレールの凹凸が合いません" status
 
 
-executeAscend : Int -> Exec
+executeAscend : Int -> Code
 executeAscend amount status =
     case status.stack of
         [] ->
@@ -556,7 +555,7 @@ executeAscend amount status =
             Ok { status | stack = RailLocation.addHeight amount top :: restOfStack }
 
 
-executeInvert : Exec
+executeInvert : Code
 executeInvert status =
     case status.stack of
         [] ->

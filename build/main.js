@@ -9989,10 +9989,10 @@ var $author$project$Forth$Interpreter$executeWordInFrame = F2(
 	function (word, status) {
 		var _v0 = A2($author$project$Forth$Interpreter$getFromDicts, word, status.frame);
 		if (_v0.$ === 'Just') {
-			var execs = _v0.a.a;
+			var code = _v0.a.a;
 			return A2(
 				$author$project$Forth$Interpreter$executeInNestedFrame,
-				$author$project$Forth$Interpreter$executeMulti(execs),
+				$author$project$Forth$Interpreter$executeMulti(code),
 				status);
 		} else {
 			return $elm$core$Result$Err(
@@ -10927,8 +10927,8 @@ var $author$project$Forth$Interpreter$analyzeSave = function (toks) {
 		return $elm$core$Result$Err('セーブする定数の名前を与えてください');
 	}
 };
-var $author$project$Forth$Interpreter$FrameEntry = function (a) {
-	return {$: 'FrameEntry', a: a};
+var $author$project$Forth$Interpreter$Thread = function (a) {
+	return {$: 'Thread', a: a};
 };
 var $author$project$Forth$Interpreter$buildWordDef = F3(
 	function (name, thread, status) {
@@ -10945,7 +10945,7 @@ var $author$project$Forth$Interpreter$buildWordDef = F3(
 							A3(
 								$elm$core$Dict$insert,
 								name,
-								$author$project$Forth$Interpreter$FrameEntry(thread),
+								$author$project$Forth$Interpreter$Thread(thread),
 								f),
 							fs)
 					}));
