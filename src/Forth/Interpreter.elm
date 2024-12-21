@@ -6,11 +6,11 @@ import Forth.PierConstruction as PierConstruction
 import Forth.RailPiece as RailPiece
 import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import Forth.Statistics as Statistics
-import Forth.Validator as Validator
 import Types.Pier exposing (Pier(..))
 import Types.PierRenderData exposing (PierRenderData)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailRenderData exposing (RailRenderData)
+import Util exposing (foldlResult)
 
 
 type alias Word =
@@ -18,19 +18,35 @@ type alias Word =
 
 
 {-| Forthの状態。スタックがあり、そのほか余計な情報がある。
+frameにはワードに対して定義されたスレッドと変数がある
 -}
 type alias ForthStatus stack global =
     { stack : List stack
     , global : global
-    , savepoints : Dict Word stack
+    , savepoints : List (Dict Word stack)
+    , frame : List (Dict Word Thread)
     }
 
 
+{-| 状態に突っ込むため、型の再帰を避けるための型
+-}
+type Thread
+    = Thread (List Code)
+
+
+{-| Forthの状態機械に対する状態遷移関数
+-}
+type alias Code =
+    ExecStatus -> Result ExecError ExecStatus
+
+
 type alias ExecError =
-    String
+    { message : String
+    , status : ExecStatus
+    }
 
 
-type alias ForthError =
+type alias AnalyzeError =
     String
 
 
@@ -52,33 +68,53 @@ type alias ExecResult =
 execute : String -> ExecResult
 execute src =
     let
-        tokenize : String -> List Word
-        tokenize string =
-            String.words string
+        tokens : List Word
+        tokens =
+            String.words src
 
         initialStatus : ExecStatus
         initialStatus =
             { stack = [ RailPiece.initialLocation ]
             , global = { rails = [] }
-            , savepoints = Dict.empty
+            , savepoints = [ Dict.empty ]
+            , frame = [ Dict.empty ]
             }
     in
-    executeRec (tokenize src) initialStatus
+    case analyzeWords tokens of
+        Ok execs ->
+            case executeMulti execs initialStatus of
+                Ok finalStatus ->
+                    haltWithSuccess finalStatus
+
+                Err execError ->
+                    haltWithError execError
+
+        -- the status is STUB
+        Err analyzeError ->
+            haltWithError (ExecError analyzeError initialStatus)
 
 
-{-| Forthの普遍的なワードで、Railforthとしてのワードではないもの。スタック操作など
--}
-type alias CoreWord result stack global =
-    (ForthStatus stack global -> result)
-    -> (ForthStatus stack global -> ForthError -> result)
-    -> ForthStatus stack global
-    -> result
+
+--  辞書の定義
 
 
-coreGlossary : Dict Word (CoreWord result stack global)
+{-| -}
+controlWords : Dict Word (List Word -> Result AnalyzeError ( Code, List Word ))
+controlWords =
+    Dict.fromList
+        [ ( "(", analyzeComment 1 )
+        , ( ")", \_ -> Err "余分なコメント終了文字 ) があります" )
+        , ( "save", analyzeSave )
+        , ( "load", analyzeLoad )
+        , ( ":", analyzeWordDef )
+        , ( ";", \_ -> Err "ワードの定義の外で ; が出現しました" )
+        ]
+
+
+coreGlossary : Dict Word Code
 coreGlossary =
     Dict.fromList
-        [ ( "", \cont _ status -> cont status {- do nothing -} )
+        [ ( "", Ok {- do nothing -} )
         , ( ".", executeDrop )
         , ( "drop", executeDrop )
         , ( "swap", executeSwap )
@@ -88,18 +124,7 @@ coreGlossary =
         ]
 
 
-{-| -}
-controlWords : Dict Word (List Word -> ExecStatus -> ExecResult)
-controlWords =
-    Dict.fromList
-        [ ( "(", executeComment 1 )
-        , ( ")", \_ status -> haltWithError status "余分なコメント終了文字 ) があります" )
-        , ( "save", executeSave )
-        , ( "load", executeLoad )
-        ]
-
-
-railForthGlossary : Dict Word ((ExecStatus -> ExecResult) -> ExecStatus -> ExecResult)
+railForthGlossary : Dict Word Code
 railForthGlossary =
     Dict.fromList
         [ ( "q", executePlaceRail (Straight1 ()) 0 )
@@ -182,37 +207,112 @@ railForthGlossary =
         ]
 
 
-executeRec : List Word -> ExecStatus -> ExecResult
-executeRec toks status =
+getFromDicts : comparable -> List (Dict comparable v) -> Maybe v
+getFromDicts k dicts =
+    case dicts of
+        [] ->
+            Nothing
+
+        d :: ds ->
+            case Dict.get k d of
+                Just v ->
+                    Just v
+
+                Nothing ->
+                    getFromDicts k ds
+
+
+executeWordInFrame : Word -> Code
+executeWordInFrame word status =
+    case getFromDicts word status.frame of
+        Just (Thread code) ->
+            executeInNestedFrame (executeMulti code) status
+
+        Nothing ->
+            Err <| ExecError ("未定義のワードです: " ++ word) status
+
+
+executeInNestedFrame : Code -> Code
+executeInNestedFrame exec status =
+    let
+        extendedStatus =
+            { status
+                | frame = Dict.empty :: status.frame
+                , savepoints = Dict.empty :: status.savepoints
+            }
+    in
+    case exec extendedStatus of
+        Ok status2 ->
+            case ( status2.frame, status2.savepoints ) of
+                ( _ :: oldFrame, _ :: oldSavepoints ) ->
+                    Ok { status2 | frame = oldFrame, savepoints = oldSavepoints }
+
+                _ ->
+                    Err <| ExecError "フレームがなんか変です" status2
+
+        Err err ->
+            Err err
+
+
+{-| 複数のワードの列から、1つをパースする。
+-}
+analyzeWord : List Word -> Result AnalyzeError ( Code, List Word )
+analyzeWord toks =
     case toks of
         [] ->
-            haltWithSuccess status
+            Err "empty word list"
 
         t :: ts ->
             case Dict.get t controlWords of
-                Just thread ->
-                    thread ts status
+                Just analyzer ->
+                    analyzer ts
 
                 Nothing ->
                     case Dict.get t coreGlossary of
-                        Just thread ->
-                            thread (executeRec ts) haltWithError status
+                        Just exec ->
+                            Ok ( exec, ts )
 
                         Nothing ->
                             case Dict.get t railForthGlossary of
-                                Just thread ->
-                                    thread (executeRec ts) status
+                                Just exec ->
+                                    Ok ( exec, ts )
 
                                 Nothing ->
-                                    haltWithError status ("未定義のワードです: " ++ t)
+                                    Ok ( executeWordInFrame t, ts )
+
+
+{-| 与えられた複数のワードをパースする
+-}
+analyzeWordsRec : List Code -> List Word -> Result AnalyzeError (List Code)
+analyzeWordsRec accum toks =
+    if List.isEmpty toks then
+        Ok (List.reverse accum)
+
+    else
+        case analyzeWord toks of
+            Ok ( exec, ts ) ->
+                analyzeWordsRec (exec :: accum) ts
+
+            Err err ->
+                Err err
+
+
+analyzeWords : List Word -> Result AnalyzeError (List Code)
+analyzeWords toks =
+    analyzeWordsRec [] toks
+
+
+executeMulti : List Code -> Code
+executeMulti execs status =
+    foldlResult (<|) status execs
 
 
 {-| haltWithError
 -}
-haltWithError : ExecStatus -> ExecError -> ExecResult
-haltWithError status errMsg =
-    { rails = List.map RailPlacement.toRailRenderData status.global.rails
-    , errMsg = Just errMsg
+haltWithError : ExecError -> ExecResult
+haltWithError err =
+    { rails = List.map RailPlacement.toRailRenderData err.status.global.rails
+    , errMsg = Just err.message
     , railCount = Dict.empty
     , piers = []
     }
@@ -236,139 +336,199 @@ haltWithSuccess status =
             }
 
 
-executeDrop : CoreWord result stack global
-executeDrop cont err status =
+executeDrop : Code
+executeDrop status =
     case status.stack of
         [] ->
-            err status "スタックが空です"
+            Err <| ExecError "スタックが空です" status
 
         _ :: restOfStack ->
-            cont { status | stack = restOfStack }
+            Ok { status | stack = restOfStack }
 
 
-executeSwap : CoreWord result stack global
-executeSwap cont err status =
+executeSwap : Code
+executeSwap status =
     case status.stack of
         x :: y :: restOfStack ->
-            cont { status | stack = y :: x :: restOfStack }
+            Ok { status | stack = y :: x :: restOfStack }
 
         _ ->
-            err status "スタックに最低2つの要素がある必要があります"
+            Err <| ExecError "スタックに最低2つの要素がある必要があります" status
 
 
-executeRot : CoreWord result stack global
-executeRot cont err status =
+executeRot : Code
+executeRot status =
     case status.stack of
         x :: y :: z :: restOfStack ->
-            cont { status | stack = z :: x :: y :: restOfStack }
+            Ok { status | stack = z :: x :: y :: restOfStack }
 
         _ ->
-            err status "スタックに最低3つの要素がある必要があります"
+            Err <| ExecError "スタックに最低3つの要素がある必要があります" status
 
 
-executeInverseRot : CoreWord result stack global
-executeInverseRot cont err status =
+executeInverseRot : Code
+executeInverseRot status =
     case status.stack of
         x :: y :: z :: restOfStack ->
-            cont { status | stack = y :: z :: x :: restOfStack }
+            Ok { status | stack = y :: z :: x :: restOfStack }
 
         _ ->
-            err status "スタックに最低3つの要素がある必要があります"
+            Err <| ExecError "スタックに最低3つの要素がある必要があります" status
 
 
-executeNip : CoreWord result stack global
-executeNip cont err status =
+executeNip : Code
+executeNip status =
     case status.stack of
         x :: _ :: restOfStack ->
-            cont { status | stack = x :: restOfStack }
+            Ok { status | stack = x :: restOfStack }
 
         _ ->
-            err status "スタックに最低2つの要素がある必要があります"
+            Err <| ExecError "スタックに最低2つの要素がある必要があります" status
 
 
-executeComment : Int -> List Word -> ExecStatus -> ExecResult
-executeComment depth tok status =
+analyzeComment : Int -> List Word -> Result AnalyzeError ( Code, List Word )
+analyzeComment depth toks =
     if depth <= 0 then
-        executeRec tok status
+        Ok ( Ok, toks )
 
     else
-        case tok of
+        case toks of
             [] ->
-                haltWithError status "[コメント文]"
+                Err "コメント文の終了が見つかりません"
 
-            t :: ts ->
-                case t of
-                    "(" ->
-                        executeComment (depth + 1) ts status
+            "(" :: ts ->
+                analyzeComment (depth + 1) ts
 
-                    ")" ->
-                        executeComment (depth - 1) ts status
+            ")" :: ts ->
+                analyzeComment (depth - 1) ts
 
-                    _ ->
-                        executeComment depth ts status
+            _ :: ts ->
+                analyzeComment depth ts
 
 
-{-| 現在の位置に名前をつけて保存する。
--}
-executeSave : List Word -> ExecStatus -> ExecResult
-executeSave toks status =
-    case ( toks, status.stack ) of
-        ( name :: restToks, top :: restOfStack ) ->
-            let
-                nextStatus =
-                    { status
-                        | savepoints = Dict.insert name top status.savepoints
-                        , stack = restOfStack
-                    }
-            in
-            executeRec restToks nextStatus
+analyzeWordsUntilEndOfWordDefRec : List Code -> List Word -> Result AnalyzeError ( List Code, List Word )
+analyzeWordsUntilEndOfWordDefRec accum toks =
+    case toks of
+        [] ->
+            Err "ワードの定義の末尾に ; がありません"
 
-        ( _ :: _, _ ) ->
-            haltWithError status "定義時のスタックが空です"
+        ";" :: ts ->
+            Ok ( List.reverse accum, ts )
 
-        _ ->
-            haltWithError status "セーブする定数の名前を与えてください"
+        t :: ts ->
+            case analyzeWord (t :: ts) of
+                Ok ( exec, ts2 ) ->
+                    analyzeWordsUntilEndOfWordDefRec (exec :: accum) ts2
+
+                Err err ->
+                    Err err
 
 
-{-| 名前をつけて保存した位置をロードする。一度ロードすると消えてしまう
--}
-executeLoad : List Word -> ExecStatus -> ExecResult
-executeLoad toks status =
+analyzeWordsUntilEndOfWordDef : List Word -> Result AnalyzeError ( List Code, List Word )
+analyzeWordsUntilEndOfWordDef toks =
+    analyzeWordsUntilEndOfWordDefRec [] toks
+
+
+analyzeWordDef : List Word -> Result AnalyzeError ( Code, List Word )
+analyzeWordDef toks =
+    case toks of
+        name :: toks2 ->
+            case analyzeWordsUntilEndOfWordDef toks2 of
+                Ok ( thread, restToks ) ->
+                    Ok ( buildWordDef name thread, restToks )
+
+                Err err ->
+                    Err err
+
+        [] ->
+            Err "ワード定義の名前がありません"
+
+
+buildWordDef : Word -> List Code -> Code
+buildWordDef name thread status =
+    case status.frame of
+        f :: fs ->
+            Ok { status | frame = Dict.insert name (Thread thread) f :: fs }
+
+        [] ->
+            Err <| ExecError "致命的エラーがワードの定義時に発生しました" status
+
+
+analyzeSave : List Word -> Result AnalyzeError ( Code, List Word )
+analyzeSave toks =
     case toks of
         name :: restToks ->
-            case Dict.get name status.savepoints of
+            Ok ( doSave name, restToks )
+
+        [] ->
+            Err "セーブする定数の名前を与えてください"
+
+
+doSave : Word -> Code
+doSave name status =
+    case status.savepoints of
+        env :: envs ->
+            case status.stack of
+                top :: restOfStack ->
+                    Ok
+                        { status
+                            | savepoints = Dict.insert name top env :: envs
+                            , stack = restOfStack
+                        }
+
+                _ ->
+                    Err <| ExecError "save時のスタックが空です" status
+
+        [] ->
+            Err <| ExecError "致命的なエラーがsaveで発生しました" status
+
+
+analyzeLoad : List Word -> Result AnalyzeError ( Code, List Word )
+analyzeLoad toks =
+    case toks of
+        name :: restToks ->
+            Ok ( doLoad name, restToks )
+
+        [] ->
+            Err "ロードする定数の名前を与えてください"
+
+
+{-| 変数のルックアップでは上の方にたどらない。セーブした変数はロードしたら消えるということは、同じ階層で使ってほしいため
+-}
+doLoad : Word -> Code
+doLoad name status =
+    case status.savepoints of
+        env :: envs ->
+            case Dict.get name env of
                 Just val ->
-                    let
-                        nextStatus =
-                            { status
-                                | savepoints = Dict.remove name status.savepoints
-                                , stack = val :: status.stack
-                            }
-                    in
-                    executeRec restToks nextStatus
+                    Ok
+                        { status
+                            | savepoints = Dict.remove name env :: envs
+                            , stack = val :: status.stack
+                        }
 
                 Nothing ->
-                    haltWithError status ("セーブポイント (" ++ name ++ ") が見つかりません")
+                    Err <| ExecError ("セーブポイント (" ++ name ++ ") が見つかりません") status
 
-        _ ->
-            haltWithError status "ロードする定数の名前を与えてください"
+        [] ->
+            Err <| ExecError "致命的なエラーがloadで発生しました" status
 
 
-executePlaceRail : Rail () IsFlipped -> Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
+executePlaceRail : Rail () IsFlipped -> Int -> Code
 executePlaceRail railType rotation =
     let
         railPlaceFunc =
             RailPiece.placeRail railType rotation
     in
-    \cont status ->
+    \status ->
         case status.stack of
             [] ->
-                haltWithError status "スタックが空です"
+                Err <| ExecError "スタックが空です" status
 
             top :: restOfStack ->
                 case railPlaceFunc top of
                     Just { nextLocations, railPlacement } ->
-                        cont
+                        Ok
                             { status
                                 | stack = nextLocations ++ restOfStack
                                 , global =
@@ -377,24 +537,24 @@ executePlaceRail railType rotation =
                             }
 
                     Nothing ->
-                        haltWithError status "配置するレールの凹凸が合いません"
+                        Err <| ExecError "配置するレールの凹凸が合いません" status
 
 
-executeAscend : Int -> (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeAscend amount cont status =
+executeAscend : Int -> Code
+executeAscend amount status =
     case status.stack of
         [] ->
-            haltWithError status "スタックが空です"
+            Err <| ExecError "スタックが空です" status
 
         top :: restOfStack ->
-            cont { status | stack = RailLocation.addHeight amount top :: restOfStack }
+            Ok { status | stack = RailLocation.addHeight amount top :: restOfStack }
 
 
-executeInvert : (ExecStatus -> ExecResult) -> ExecStatus -> ExecResult
-executeInvert cont status =
+executeInvert : Code
+executeInvert status =
     case status.stack of
         [] ->
-            haltWithError status "スタックが空です"
+            Err <| ExecError "スタックが空です" status
 
         top :: restOfStack ->
-            cont { status | stack = RailLocation.invertJoint top :: restOfStack }
+            Ok { status | stack = RailLocation.invertJoint top :: restOfStack }

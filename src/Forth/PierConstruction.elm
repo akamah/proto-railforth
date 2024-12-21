@@ -7,6 +7,7 @@ import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierM
 import Forth.Geometry.Rot45 as Rot45
 import Types.Pier as Pier exposing (Pier)
 import Types.PierRenderData exposing (PierRenderData)
+import Util exposing (foldlResult)
 
 
 cleansePierLocations : PierLocation -> PierLocation
@@ -21,21 +22,6 @@ cleansePierLocations placement =
 pierKey : Location -> String
 pierKey loc =
     Rot45.toString loc.single ++ "," ++ Rot45.toString loc.double
-
-
-foldlResult : (a -> b -> Result err b) -> b -> List a -> Result err b
-foldlResult f b list =
-    case list of
-        [] ->
-            Ok b
-
-        x :: xs ->
-            case f x b of
-                Ok b2 ->
-                    foldlResult f b2 xs
-
-                Err err ->
-                    Err err
 
 
 updateWithResult : comparable -> (Maybe v -> Result e v) -> Dict comparable v -> Result e (Dict comparable v)

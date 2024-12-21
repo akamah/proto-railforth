@@ -9233,108 +9233,46 @@ var $elm$core$Basics$pi = _Basics_pi;
 var $elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * $elm$core$Basics$pi) / 180;
 };
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$Forth$Interpreter$executeDrop = F3(
-	function (cont, err, status) {
-		var _v0 = status.stack;
-		if (!_v0.b) {
-			return A2(err, status, 'スタックが空です');
-		} else {
-			var restOfStack = _v0.b;
-			return cont(
-				_Utils_update(
-					status,
-					{stack: restOfStack}));
-		}
+var $author$project$Forth$Interpreter$ExecError = F2(
+	function (message, status) {
+		return {message: message, status: status};
 	});
-var $author$project$Forth$Interpreter$executeInverseRot = F3(
-	function (cont, err, status) {
-		var _v0 = status.stack;
-		if ((_v0.b && _v0.b.b) && _v0.b.b.b) {
-			var x = _v0.a;
-			var _v1 = _v0.b;
-			var y = _v1.a;
-			var _v2 = _v1.b;
-			var z = _v2.a;
-			var restOfStack = _v2.b;
-			return cont(
-				_Utils_update(
-					status,
-					{
-						stack: A2(
-							$elm$core$List$cons,
-							y,
-							A2(
-								$elm$core$List$cons,
-								z,
-								A2($elm$core$List$cons, x, restOfStack)))
-					}));
-		} else {
-			return A2(err, status, 'スタックに最低3つの要素がある必要があります');
-		}
-	});
-var $author$project$Forth$Interpreter$executeNip = F3(
-	function (cont, err, status) {
-		var _v0 = status.stack;
-		if (_v0.b && _v0.b.b) {
-			var x = _v0.a;
-			var _v1 = _v0.b;
-			var restOfStack = _v1.b;
-			return cont(
-				_Utils_update(
-					status,
-					{
-						stack: A2($elm$core$List$cons, x, restOfStack)
-					}));
-		} else {
-			return A2(err, status, 'スタックに最低2つの要素がある必要があります');
-		}
-	});
-var $author$project$Forth$Interpreter$executeRot = F3(
-	function (cont, err, status) {
-		var _v0 = status.stack;
-		if ((_v0.b && _v0.b.b) && _v0.b.b.b) {
-			var x = _v0.a;
-			var _v1 = _v0.b;
-			var y = _v1.a;
-			var _v2 = _v1.b;
-			var z = _v2.a;
-			var restOfStack = _v2.b;
-			return cont(
-				_Utils_update(
-					status,
-					{
-						stack: A2(
-							$elm$core$List$cons,
-							z,
-							A2(
-								$elm$core$List$cons,
-								x,
-								A2($elm$core$List$cons, y, restOfStack)))
-					}));
-		} else {
-			return A2(err, status, 'スタックに最低3つの要素がある必要があります');
-		}
-	});
-var $author$project$Forth$Interpreter$executeSwap = F3(
-	function (cont, err, status) {
-		var _v0 = status.stack;
-		if (_v0.b && _v0.b.b) {
-			var x = _v0.a;
-			var _v1 = _v0.b;
-			var y = _v1.a;
-			var restOfStack = _v1.b;
-			return cont(
-				_Utils_update(
-					status,
-					{
-						stack: A2(
-							$elm$core$List$cons,
-							y,
-							A2($elm$core$List$cons, x, restOfStack))
-					}));
-		} else {
-			return A2(err, status, 'スタックに最低2つの要素がある必要があります');
+var $author$project$Forth$Interpreter$analyzeComment = F2(
+	function (depth, toks) {
+		analyzeComment:
+		while (true) {
+			if (depth <= 0) {
+				return $elm$core$Result$Ok(
+					_Utils_Tuple2($elm$core$Result$Ok, toks));
+			} else {
+				if (!toks.b) {
+					return $elm$core$Result$Err('コメント文の終了が見つかりません');
+				} else {
+					switch (toks.a) {
+						case '(':
+							var ts = toks.b;
+							var $temp$depth = depth + 1,
+								$temp$toks = ts;
+							depth = $temp$depth;
+							toks = $temp$toks;
+							continue analyzeComment;
+						case ')':
+							var ts = toks.b;
+							var $temp$depth = depth - 1,
+								$temp$toks = ts;
+							depth = $temp$depth;
+							toks = $temp$toks;
+							continue analyzeComment;
+						default:
+							var ts = toks.b;
+							var $temp$depth = depth,
+								$temp$toks = ts;
+							depth = $temp$depth;
+							toks = $temp$toks;
+							continue analyzeComment;
+					}
+				}
+			}
 		}
 	});
 var $elm$core$Dict$Black = {$: 'Black'};
@@ -9393,128 +9331,6 @@ var $elm$core$Dict$balance = F5(
 			}
 		}
 	});
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1.$) {
-				case 'LT':
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
-var $author$project$Forth$Interpreter$coreGlossary = $elm$core$Dict$fromList(
-	_List_fromArray(
-		[
-			_Utils_Tuple2(
-			'',
-			F3(
-				function (cont, _v0, status) {
-					return cont(status);
-				})),
-			_Utils_Tuple2('.', $author$project$Forth$Interpreter$executeDrop),
-			_Utils_Tuple2('drop', $author$project$Forth$Interpreter$executeDrop),
-			_Utils_Tuple2('swap', $author$project$Forth$Interpreter$executeSwap),
-			_Utils_Tuple2('rot', $author$project$Forth$Interpreter$executeRot),
-			_Utils_Tuple2('-rot', $author$project$Forth$Interpreter$executeInverseRot),
-			_Utils_Tuple2('nip', $author$project$Forth$Interpreter$executeNip)
-		]));
-var $author$project$Types$RailRenderData$make = F3(
-	function (rail, position, angle) {
-		return {angle: angle, position: position, rail: rail};
-	});
-var $author$project$Forth$Geometry$Dir$toRadian = function (_v0) {
-	var d = _v0.a;
-	return ($elm$core$Basics$pi / 4.0) * d;
-};
-var $author$project$Forth$RailPlacement$toRailRenderData = function (placement) {
-	return A3(
-		$author$project$Types$RailRenderData$make,
-		placement.rail,
-		$author$project$Forth$Geometry$Location$toVec3(placement.location),
-		$author$project$Forth$Geometry$Dir$toRadian(placement.location.dir));
-};
-var $author$project$Forth$Interpreter$haltWithError = F2(
-	function (status, errMsg) {
-		return {
-			errMsg: $elm$core$Maybe$Just(errMsg),
-			piers: _List_Nil,
-			railCount: $elm$core$Dict$empty,
-			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
-		};
-	});
-var $author$project$Forth$Geometry$PierLocation$mul = F2(
-	function (global, local) {
-		return {
-			location: A2($author$project$Forth$Geometry$Location$mul, global, local.location),
-			margin: local.margin
-		};
-	});
-var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) {
-	return A2(
-		$elm$core$List$map,
-		$author$project$Forth$Geometry$PierLocation$mul(railPlacement.location),
-		$author$project$Forth$RailPiece$getRailPiece(railPlacement.rail).pierLocations);
-};
-var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
-	return A3(
-		$author$project$Types$Rail$toStringWith,
-		function (_v0) {
-			return '';
-		},
-		$author$project$Types$Rail$isInvertedToString,
-		rail);
-};
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
@@ -9877,63 +9693,320 @@ var $elm$core$Dict$remove = F2(
 			return x;
 		}
 	});
-var $elm$core$Dict$update = F3(
-	function (targetKey, alter, dictionary) {
-		var _v0 = alter(
-			A2($elm$core$Dict$get, targetKey, dictionary));
-		if (_v0.$ === 'Just') {
-			var value = _v0.a;
-			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+var $author$project$Forth$Interpreter$doLoad = F2(
+	function (name, status) {
+		var _v0 = status.savepoints;
+		if (_v0.b) {
+			var env = _v0.a;
+			var envs = _v0.b;
+			var _v1 = A2($elm$core$Dict$get, name, env);
+			if (_v1.$ === 'Just') {
+				var val = _v1.a;
+				return $elm$core$Result$Ok(
+					_Utils_update(
+						status,
+						{
+							savepoints: A2(
+								$elm$core$List$cons,
+								A2($elm$core$Dict$remove, name, env),
+								envs),
+							stack: A2($elm$core$List$cons, val, status.stack)
+						}));
+			} else {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'セーブポイント (' + (name + ') が見つかりません'), status));
+			}
 		} else {
-			return A2($elm$core$Dict$remove, targetKey, dictionary);
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '致命的なエラーがloadで発生しました', status));
 		}
 	});
-var $author$project$Forth$Statistics$getRailCount = function (rails) {
+var $author$project$Forth$Interpreter$analyzeLoad = function (toks) {
+	if (toks.b) {
+		var name = toks.a;
+		var restToks = toks.b;
+		return $elm$core$Result$Ok(
+			_Utils_Tuple2(
+				$author$project$Forth$Interpreter$doLoad(name),
+				restToks));
+	} else {
+		return $elm$core$Result$Err('ロードする定数の名前を与えてください');
+	}
+};
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $author$project$Forth$Interpreter$doSave = F2(
+	function (name, status) {
+		var _v0 = status.savepoints;
+		if (_v0.b) {
+			var env = _v0.a;
+			var envs = _v0.b;
+			var _v1 = status.stack;
+			if (_v1.b) {
+				var top = _v1.a;
+				var restOfStack = _v1.b;
+				return $elm$core$Result$Ok(
+					_Utils_update(
+						status,
+						{
+							savepoints: A2(
+								$elm$core$List$cons,
+								A3($elm$core$Dict$insert, name, top, env),
+								envs),
+							stack: restOfStack
+						}));
+			} else {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'save時のスタックが空です', status));
+			}
+		} else {
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '致命的なエラーがsaveで発生しました', status));
+		}
+	});
+var $author$project$Forth$Interpreter$analyzeSave = function (toks) {
+	if (toks.b) {
+		var name = toks.a;
+		var restToks = toks.b;
+		return $elm$core$Result$Ok(
+			_Utils_Tuple2(
+				$author$project$Forth$Interpreter$doSave(name),
+				restToks));
+	} else {
+		return $elm$core$Result$Err('セーブする定数の名前を与えてください');
+	}
+};
+var $author$project$Forth$Interpreter$Thread = function (a) {
+	return {$: 'Thread', a: a};
+};
+var $author$project$Forth$Interpreter$buildWordDef = F3(
+	function (name, thread, status) {
+		var _v0 = status.frame;
+		if (_v0.b) {
+			var f = _v0.a;
+			var fs = _v0.b;
+			return $elm$core$Result$Ok(
+				_Utils_update(
+					status,
+					{
+						frame: A2(
+							$elm$core$List$cons,
+							A3(
+								$elm$core$Dict$insert,
+								name,
+								$author$project$Forth$Interpreter$Thread(thread),
+								f),
+							fs)
+					}));
+		} else {
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '致命的エラーがワードの定義時に発生しました', status));
+		}
+	});
+var $author$project$Forth$Interpreter$executeDrop = function (status) {
+	var _v0 = status.stack;
+	if (!_v0.b) {
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
+	} else {
+		var restOfStack = _v0.b;
+		return $elm$core$Result$Ok(
+			_Utils_update(
+				status,
+				{stack: restOfStack}));
+	}
+};
+var $author$project$Forth$Interpreter$executeInverseRot = function (status) {
+	var _v0 = status.stack;
+	if ((_v0.b && _v0.b.b) && _v0.b.b.b) {
+		var x = _v0.a;
+		var _v1 = _v0.b;
+		var y = _v1.a;
+		var _v2 = _v1.b;
+		var z = _v2.a;
+		var restOfStack = _v2.b;
+		return $elm$core$Result$Ok(
+			_Utils_update(
+				status,
+				{
+					stack: A2(
+						$elm$core$List$cons,
+						y,
+						A2(
+							$elm$core$List$cons,
+							z,
+							A2($elm$core$List$cons, x, restOfStack)))
+				}));
+	} else {
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低3つの要素がある必要があります', status));
+	}
+};
+var $author$project$Forth$Interpreter$executeNip = function (status) {
+	var _v0 = status.stack;
+	if (_v0.b && _v0.b.b) {
+		var x = _v0.a;
+		var _v1 = _v0.b;
+		var restOfStack = _v1.b;
+		return $elm$core$Result$Ok(
+			_Utils_update(
+				status,
+				{
+					stack: A2($elm$core$List$cons, x, restOfStack)
+				}));
+	} else {
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低2つの要素がある必要があります', status));
+	}
+};
+var $author$project$Forth$Interpreter$executeRot = function (status) {
+	var _v0 = status.stack;
+	if ((_v0.b && _v0.b.b) && _v0.b.b.b) {
+		var x = _v0.a;
+		var _v1 = _v0.b;
+		var y = _v1.a;
+		var _v2 = _v1.b;
+		var z = _v2.a;
+		var restOfStack = _v2.b;
+		return $elm$core$Result$Ok(
+			_Utils_update(
+				status,
+				{
+					stack: A2(
+						$elm$core$List$cons,
+						z,
+						A2(
+							$elm$core$List$cons,
+							x,
+							A2($elm$core$List$cons, y, restOfStack)))
+				}));
+	} else {
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低3つの要素がある必要があります', status));
+	}
+};
+var $author$project$Forth$Interpreter$executeSwap = function (status) {
+	var _v0 = status.stack;
+	if (_v0.b && _v0.b.b) {
+		var x = _v0.a;
+		var _v1 = _v0.b;
+		var y = _v1.a;
+		var restOfStack = _v1.b;
+		return $elm$core$Result$Ok(
+			_Utils_update(
+				status,
+				{
+					stack: A2(
+						$elm$core$List$cons,
+						y,
+						A2($elm$core$List$cons, x, restOfStack))
+				}));
+	} else {
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックに最低2つの要素がある必要があります', status));
+	}
+};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$core$Dict$fromList = function (assocs) {
 	return A3(
 		$elm$core$List$foldl,
-		function (rail) {
-			return A2(
-				$elm$core$Dict$update,
-				rail,
-				function (x) {
-					if (x.$ === 'Nothing') {
-						return $elm$core$Maybe$Just(1);
-					} else {
-						var n = x.a;
-						return $elm$core$Maybe$Just(n + 1);
-					}
-				});
-		},
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
 		$elm$core$Dict$empty,
-		A2($elm$core$List$map, $author$project$Forth$Statistics$railToStringRegardlessOfFlipped, rails));
+		assocs);
 };
-var $elm$core$Result$andThen = F2(
-	function (callback, result) {
-		if (result.$ === 'Ok') {
-			var value = result.a;
-			return callback(value);
+var $author$project$Forth$Interpreter$coreGlossary = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2('', $elm$core$Result$Ok),
+			_Utils_Tuple2('.', $author$project$Forth$Interpreter$executeDrop),
+			_Utils_Tuple2('drop', $author$project$Forth$Interpreter$executeDrop),
+			_Utils_Tuple2('swap', $author$project$Forth$Interpreter$executeSwap),
+			_Utils_Tuple2('rot', $author$project$Forth$Interpreter$executeRot),
+			_Utils_Tuple2('-rot', $author$project$Forth$Interpreter$executeInverseRot),
+			_Utils_Tuple2('nip', $author$project$Forth$Interpreter$executeNip)
+		]));
+var $author$project$Forth$Interpreter$executeInNestedFrame = F2(
+	function (exec, status) {
+		var extendedStatus = _Utils_update(
+			status,
+			{
+				frame: A2($elm$core$List$cons, $elm$core$Dict$empty, status.frame),
+				savepoints: A2($elm$core$List$cons, $elm$core$Dict$empty, status.savepoints)
+			});
+		var _v0 = exec(extendedStatus);
+		if (_v0.$ === 'Ok') {
+			var status2 = _v0.a;
+			var _v1 = _Utils_Tuple2(status2.frame, status2.savepoints);
+			if (_v1.a.b && _v1.b.b) {
+				var _v2 = _v1.a;
+				var oldFrame = _v2.b;
+				var _v3 = _v1.b;
+				var oldSavepoints = _v3.b;
+				return $elm$core$Result$Ok(
+					_Utils_update(
+						status2,
+						{frame: oldFrame, savepoints: oldSavepoints}));
+			} else {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'フレームがなんか変です', status2));
+			}
 		} else {
-			var msg = result.a;
-			return $elm$core$Result$Err(msg);
+			var err = _v0.a;
+			return $elm$core$Result$Err(err);
 		}
 	});
-var $author$project$Forth$Geometry$Dir$toUndirectedDir = function (_v0) {
-	var x = _v0.a;
-	return (x >= 4) ? $author$project$Forth$Geometry$Dir$Dir(x - 4) : $author$project$Forth$Geometry$Dir$Dir(x);
-};
-var $author$project$Forth$PierConstruction$cleansePierLocations = function (placement) {
-	var loc = placement.location;
-	return _Utils_update(
-		placement,
-		{
-			location: _Utils_update(
-				loc,
-				{
-					dir: $author$project$Forth$Geometry$Dir$toUndirectedDir(loc.dir)
-				})
-		});
-};
-var $author$project$Forth$PierConstruction$foldlResult = F3(
+var $author$project$Util$foldlResult = F3(
 	function (f, b, list) {
 		foldlResult:
 		while (true) {
@@ -9959,514 +10032,47 @@ var $author$project$Forth$PierConstruction$foldlResult = F3(
 			}
 		}
 	});
-var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	var c = _v0.c;
-	var d = _v0.d;
-	return A2(
-		$elm$core$String$join,
-		' ',
-		A2(
-			$elm$core$List$cons,
-			'Rot45',
-			A2(
-				$elm$core$List$map,
-				$elm$core$String$fromInt,
-				_List_fromArray(
-					[a, b, c, d]))));
-};
-var $author$project$Forth$PierConstruction$pierKey = function (loc) {
-	return $author$project$Forth$Geometry$Rot45$toString(loc.single) + (',' + $author$project$Forth$Geometry$Rot45$toString(loc._double));
-};
-var $elm$core$Result$map = F2(
-	function (func, ra) {
-		if (ra.$ === 'Ok') {
-			var a = ra.a;
-			return $elm$core$Result$Ok(
-				func(a));
-		} else {
-			var e = ra.a;
-			return $elm$core$Result$Err(e);
-		}
+var $author$project$Forth$Interpreter$executeMulti = F2(
+	function (execs, status) {
+		return A3($author$project$Util$foldlResult, $elm$core$Basics$apL, status, execs);
 	});
-var $author$project$Forth$PierConstruction$updateWithResult = F3(
-	function (key, f, dict) {
-		return A2(
-			$elm$core$Result$map,
-			function (v) {
-				return A3($elm$core$Dict$insert, key, v, dict);
-			},
-			f(
-				A2($elm$core$Dict$get, key, dict)));
-	});
-var $author$project$Forth$PierConstruction$divideIntoDict = A2(
-	$author$project$Forth$PierConstruction$foldlResult,
-	function (loc) {
-		return A2(
-			$author$project$Forth$PierConstruction$updateWithResult,
-			$author$project$Forth$PierConstruction$pierKey(loc.location),
-			function (maybe) {
-				if (maybe.$ === 'Nothing') {
-					return $elm$core$Result$Ok(
-						_Utils_Tuple2(
-							loc.location.dir,
-							_List_fromArray(
-								[loc])));
-				} else {
-					var _v1 = maybe.a;
-					var dir = _v1.a;
-					var lis = _v1.b;
-					return _Utils_eq(dir, loc.location.dir) ? $elm$core$Result$Ok(
-						_Utils_Tuple2(
-							dir,
-							A2($elm$core$List$cons, loc, lis))) : $elm$core$Result$Err(
-						'橋脚の方向が一致しません ' + $author$project$Forth$PierConstruction$pierKey(loc.location));
-				}
-			});
-	},
-	$elm$core$Dict$empty);
-var $author$project$Types$Pier$Wide = {$: 'Wide'};
-var $author$project$Types$Pier$getHeight = function (pier) {
-	switch (pier.$) {
-		case 'Single':
-			return 4;
-		case 'Wide':
-			return 4;
-		default:
-			return 1;
-	}
-};
-var $author$project$Forth$Geometry$PierLocation$toVec3 = function (loc) {
-	return $author$project$Forth$Geometry$Location$toVec3(loc.location);
-};
-var $author$project$Forth$PierConstruction$pierLocationToPlacement = F2(
-	function (kind, loc) {
-		return {
-			angle: $author$project$Forth$Geometry$Dir$toRadian(loc.location.dir),
-			pier: kind,
-			position: $author$project$Forth$Geometry$PierLocation$toVec3(loc)
-		};
-	});
-var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
-	function (newHeight, loc) {
-		return _Utils_update(
-			loc,
-			{
-				location: A2($author$project$Forth$Geometry$Location$setHeight, newHeight, loc.location)
-			});
-	});
-var $author$project$Forth$PierConstruction$buildDoubleUpto = F4(
-	function (template, accum, to, from) {
-		buildDoubleUpto:
+var $author$project$Forth$Interpreter$getFromDicts = F2(
+	function (k, dicts) {
+		getFromDicts:
 		while (true) {
-			if (_Utils_cmp(from, to) > -1) {
-				return accum;
+			if (!dicts.b) {
+				return $elm$core$Maybe$Nothing;
 			} else {
-				var $temp$template = template,
-					$temp$accum = A2(
-					$elm$core$List$cons,
-					A2(
-						$author$project$Forth$PierConstruction$pierLocationToPlacement,
-						$author$project$Types$Pier$Wide,
-						A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
-					accum),
-					$temp$to = to,
-					$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide);
-				template = $temp$template;
-				accum = $temp$accum;
-				to = $temp$to;
-				from = $temp$from;
-				continue buildDoubleUpto;
+				var d = dicts.a;
+				var ds = dicts.b;
+				var _v1 = A2($elm$core$Dict$get, k, d);
+				if (_v1.$ === 'Just') {
+					var v = _v1.a;
+					return $elm$core$Maybe$Just(v);
+				} else {
+					var $temp$k = k,
+						$temp$dicts = ds;
+					k = $temp$k;
+					dicts = $temp$dicts;
+					continue getFromDicts;
+				}
 			}
 		}
 	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Forth$PierConstruction$maximumHeight = function (ls) {
-	return A3(
-		$elm$core$List$foldl,
-		function (loc) {
-			return $elm$core$Basics$max(loc.location.height);
-		},
-		0,
-		ls);
-};
-var $author$project$Forth$PierConstruction$constructDoublePier = F2(
-	function (center, left) {
-		var maxHeight = A2(
-			$elm$core$Basics$max,
-			$author$project$Forth$PierConstruction$maximumHeight(center),
-			$author$project$Forth$PierConstruction$maximumHeight(left));
-		var _v0 = $elm$core$List$head(center);
-		if (_v0.$ === 'Nothing') {
-			return $elm$core$Result$Err('複線橋脚の構築で内部的なエラーが発生しました');
-		} else {
-			var loc = _v0.a;
-			return $elm$core$Result$Ok(
-				A4($author$project$Forth$PierConstruction$buildDoubleUpto, loc, _List_Nil, maxHeight, 0));
-		}
-	});
-var $author$project$Forth$PierConstruction$doublePier = function (_double) {
-	return A3(
-		$author$project$Forth$PierConstruction$foldlResult,
-		F2(
-			function (_v0, result) {
-				var _v1 = _v0.b;
-				var centerLocs = _v1.b;
-				var leftLocs = _v1.c;
-				return A2(
-					$elm$core$Result$map,
-					function (r1) {
-						return A2($elm$core$List$append, r1, result);
-					},
-					A2($author$project$Forth$PierConstruction$constructDoublePier, centerLocs, leftLocs));
-			}),
-		_List_Nil,
-		$elm$core$Dict$toList(_double));
-};
-var $elm$core$Dict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$get, key, dict);
+var $author$project$Forth$Interpreter$executeWordInFrame = F2(
+	function (word, status) {
+		var _v0 = A2($author$project$Forth$Interpreter$getFromDicts, word, status.frame);
 		if (_v0.$ === 'Just') {
-			return true;
+			var code = _v0.a.a;
+			return A2(
+				$author$project$Forth$Interpreter$executeInNestedFrame,
+				$author$project$Forth$Interpreter$executeMulti(code),
+				status);
 		} else {
-			return false;
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '未定義のワードです: ' + word, status));
 		}
 	});
-var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = function (loc) {
-	return A2(
-		$author$project$Forth$Geometry$Location$mul,
-		loc,
-		A4(
-			$author$project$Forth$Geometry$Location$make,
-			$author$project$Forth$Geometry$Rot45$zero,
-			A2(
-				$author$project$Forth$Geometry$Rot45$add,
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
-			0,
-			$author$project$Forth$Geometry$Dir$e));
-};
-var $author$project$Forth$PierConstruction$doubleTrackPiersRec = F4(
-	function (single, _double, open, list) {
-		doubleTrackPiersRec:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Result$Ok(
-					_Utils_Tuple2(single, _double));
-			} else {
-				var _v1 = list.a;
-				var key = _v1.a;
-				var _v2 = _v1.b;
-				var dir = _v2.a;
-				var pierLocs = _v2.b;
-				var xs = list.b;
-				var _v3 = $elm$core$List$head(pierLocs);
-				if (_v3.$ === 'Nothing') {
-					return $elm$core$Result$Err('複線橋脚の構築で内部的なエラーが発生しました');
-				} else {
-					var pierLoc = _v3.a;
-					if (A2($elm$core$Dict$member, key, open)) {
-						var leftKey = $author$project$Forth$PierConstruction$pierKey(
-							$author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(pierLoc.location));
-						var _v4 = _Utils_Tuple2(
-							A2($elm$core$Dict$get, leftKey, single),
-							A2($elm$core$Dict$get, leftKey, open));
-						if (_v4.a.$ === 'Just') {
-							var _v5 = _v4.a.a;
-							var dir2 = _v5.a;
-							var pierLocs2 = _v5.b;
-							if (_Utils_eq(dir, dir2)) {
-								var $temp$single = A2($elm$core$Dict$remove, leftKey, single),
-									$temp$double = A3(
-									$elm$core$Dict$insert,
-									key,
-									_Utils_Tuple3(dir, pierLocs, pierLocs2),
-									_double),
-									$temp$open = A2($elm$core$Dict$remove, key, open),
-									$temp$list = xs;
-								single = $temp$single;
-								_double = $temp$double;
-								open = $temp$open;
-								list = $temp$list;
-								continue doubleTrackPiersRec;
-							} else {
-								return $elm$core$Result$Err('複線橋脚の構築時に隣のレールとの方向が合いません');
-							}
-						} else {
-							if (_v4.b.$ === 'Just') {
-								var _v6 = _v4.b.a;
-								var dir2 = _v6.a;
-								var pierLocs2 = _v6.b;
-								if (_Utils_eq(dir, dir2)) {
-									var $temp$single = single,
-										$temp$double = A3(
-										$elm$core$Dict$insert,
-										key,
-										_Utils_Tuple3(dir, pierLocs, pierLocs2),
-										_double),
-										$temp$open = A2(
-										$elm$core$Dict$remove,
-										leftKey,
-										A2($elm$core$Dict$remove, key, open)),
-										$temp$list = xs;
-									single = $temp$single;
-									_double = $temp$double;
-									open = $temp$open;
-									list = $temp$list;
-									continue doubleTrackPiersRec;
-								} else {
-									return $elm$core$Result$Err('複線橋脚の構築時に隣のレールとの方向が合いません');
-								}
-							} else {
-								var $temp$single = A3(
-									$elm$core$Dict$insert,
-									key,
-									_Utils_Tuple2(dir, pierLocs),
-									single),
-									$temp$double = _double,
-									$temp$open = A2($elm$core$Dict$remove, key, open),
-									$temp$list = xs;
-								single = $temp$single;
-								_double = $temp$double;
-								open = $temp$open;
-								list = $temp$list;
-								continue doubleTrackPiersRec;
-							}
-						}
-					} else {
-						var $temp$single = single,
-							$temp$double = _double,
-							$temp$open = open,
-							$temp$list = xs;
-						single = $temp$single;
-						_double = $temp$double;
-						open = $temp$open;
-						list = $temp$list;
-						continue doubleTrackPiersRec;
-					}
-				}
-			}
-		}
-	});
-var $author$project$Forth$PierConstruction$doubleTrackPiers = function (dict) {
-	return A4(
-		$author$project$Forth$PierConstruction$doubleTrackPiersRec,
-		$elm$core$Dict$empty,
-		$elm$core$Dict$empty,
-		dict,
-		$elm$core$Dict$toList(dict));
-};
-var $elm$core$Result$map2 = F3(
-	function (func, ra, rb) {
-		if (ra.$ === 'Err') {
-			var x = ra.a;
-			return $elm$core$Result$Err(x);
-		} else {
-			var a = ra.a;
-			if (rb.$ === 'Err') {
-				var x = rb.a;
-				return $elm$core$Result$Err(x);
-			} else {
-				var b = rb.a;
-				return $elm$core$Result$Ok(
-					A2(func, a, b));
-			}
-		}
-	});
-var $author$project$Types$Pier$Mini = {$: 'Mini'};
-var $author$project$Types$Pier$Single = {$: 'Single'};
-var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
-	function (template, accum, to, from) {
-		buildSingleUpto:
-		while (true) {
-			if (_Utils_cmp(from, to) > -1) {
-				return accum;
-			} else {
-				if (_Utils_cmp(
-					to,
-					from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single)) > -1) {
-					var $temp$template = template,
-						$temp$accum = A2(
-						$elm$core$List$cons,
-						A2(
-							$author$project$Forth$PierConstruction$pierLocationToPlacement,
-							$author$project$Types$Pier$Single,
-							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
-						accum),
-						$temp$to = to,
-						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single);
-					template = $temp$template;
-					accum = $temp$accum;
-					to = $temp$to;
-					from = $temp$from;
-					continue buildSingleUpto;
-				} else {
-					var $temp$template = template,
-						$temp$accum = A2(
-						$elm$core$List$cons,
-						A2(
-							$author$project$Forth$PierConstruction$pierLocationToPlacement,
-							$author$project$Types$Pier$Mini,
-							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
-						accum),
-						$temp$to = to,
-						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Mini);
-					template = $temp$template;
-					accum = $temp$accum;
-					to = $temp$to;
-					from = $temp$from;
-					continue buildSingleUpto;
-				}
-			}
-		}
-	});
-var $author$project$Forth$PierConstruction$constructSinglePierRec = F4(
-	function (accum, current, top, locs) {
-		constructSinglePierRec:
-		while (true) {
-			if (!locs.b) {
-				return $elm$core$Result$Ok(accum);
-			} else {
-				var _v1 = locs.a;
-				var h = _v1.a;
-				var l = _v1.b;
-				var ls = locs.b;
-				if (_Utils_cmp(top, h - l.margin.bottom) > 0) {
-					return $elm$core$Result$Err('ブロックの付いたレールとかの位置関係的に配置ができません');
-				} else {
-					var $temp$accum = A4($author$project$Forth$PierConstruction$buildSingleUpto, l, accum, h - l.margin.bottom, current),
-						$temp$current = h,
-						$temp$top = h + l.margin.top,
-						$temp$locs = ls;
-					accum = $temp$accum;
-					current = $temp$current;
-					top = $temp$top;
-					locs = $temp$locs;
-					continue constructSinglePierRec;
-				}
-			}
-		}
-	});
-var $author$project$Forth$PierConstruction$mergeMargin = F2(
-	function (x, y) {
-		return {
-			bottom: A2($elm$core$Basics$max, x.bottom, y.bottom),
-			top: A2($elm$core$Basics$max, x.top, y.top)
-		};
-	});
-var $author$project$Forth$PierConstruction$mergePierLocations = function (list) {
-	return $elm$core$Dict$toList(
-		A3(
-			$elm$core$List$foldl,
-			function (loc) {
-				return A2(
-					$elm$core$Dict$update,
-					loc.location.height,
-					function (elem) {
-						if (elem.$ === 'Nothing') {
-							return $elm$core$Maybe$Just(loc);
-						} else {
-							var x = elem.a;
-							return $elm$core$Maybe$Just(
-								_Utils_update(
-									x,
-									{
-										margin: A2($author$project$Forth$PierConstruction$mergeMargin, x.margin, loc.margin)
-									}));
-						}
-					});
-			},
-			$elm$core$Dict$empty,
-			list));
-};
-var $author$project$Forth$PierConstruction$constructSinglePier = function (list) {
-	return A4(
-		$author$project$Forth$PierConstruction$constructSinglePierRec,
-		_List_Nil,
-		0,
-		0,
-		$author$project$Forth$PierConstruction$mergePierLocations(list));
-};
-var $author$project$Forth$PierConstruction$singlePier = function (single) {
-	return A3(
-		$author$project$Forth$PierConstruction$foldlResult,
-		F2(
-			function (_v0, result) {
-				var _v1 = _v0.b;
-				var pierLocs = _v1.b;
-				return A2(
-					$elm$core$Result$map,
-					function (r1) {
-						return A2($elm$core$List$append, r1, result);
-					},
-					$author$project$Forth$PierConstruction$constructSinglePier(pierLocs));
-			}),
-		_List_Nil,
-		$elm$core$Dict$toList(single));
-};
-var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
-	return A2(
-		$elm$core$Result$andThen,
-		function (_v0) {
-			var single = _v0.a;
-			var _double = _v0.b;
-			return A3(
-				$elm$core$Result$map2,
-				F2(
-					function (s, d) {
-						return _Utils_ap(s, d);
-					}),
-				$author$project$Forth$PierConstruction$singlePier(single),
-				$author$project$Forth$PierConstruction$doublePier(_double));
-		},
-		A2(
-			$elm$core$Result$andThen,
-			$author$project$Forth$PierConstruction$doubleTrackPiers,
-			$author$project$Forth$PierConstruction$divideIntoDict(
-				A2($elm$core$List$map, $author$project$Forth$PierConstruction$cleansePierLocations, list))));
-};
-var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
-	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(
-		A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, status.global.rails));
-	if (_v0.$ === 'Ok') {
-		var pierRenderData = _v0.a;
-		return {
-			errMsg: $elm$core$Maybe$Nothing,
-			piers: pierRenderData,
-			railCount: $author$project$Forth$Statistics$getRailCount(
-				A2(
-					$elm$core$List$map,
-					function (x) {
-						return x.rail;
-					},
-					status.global.rails)),
-			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
-		};
-	} else {
-		var err = _v0.a;
-		return {
-			errMsg: $elm$core$Maybe$Just(err),
-			piers: _List_Nil,
-			railCount: $author$project$Forth$Statistics$getRailCount(
-				A2(
-					$elm$core$List$map,
-					function (x) {
-						return x.rail;
-					},
-					status.global.rails)),
-			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
-		};
-	}
-};
 var $author$project$Types$Rail$AutoCross = {$: 'AutoCross'};
 var $author$project$Types$Rail$AutoPoint = {$: 'AutoPoint'};
 var $author$project$Types$Rail$AutoTurnout = {$: 'AutoTurnout'};
@@ -10560,15 +10166,16 @@ var $author$project$Forth$Geometry$RailLocation$addHeight = F2(
 				location: A2($author$project$Forth$Geometry$Location$addHeight, diffHeight, railLocation.location)
 			});
 	});
-var $author$project$Forth$Interpreter$executeAscend = F3(
-	function (amount, cont, status) {
+var $author$project$Forth$Interpreter$executeAscend = F2(
+	function (amount, status) {
 		var _v0 = status.stack;
 		if (!_v0.b) {
-			return A2($author$project$Forth$Interpreter$haltWithError, status, 'スタックが空です');
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
 		} else {
 			var top = _v0.a;
 			var restOfStack = _v0.b;
-			return cont(
+			return $elm$core$Result$Ok(
 				_Utils_update(
 					status,
 					{
@@ -10579,25 +10186,25 @@ var $author$project$Forth$Interpreter$executeAscend = F3(
 					}));
 		}
 	});
-var $author$project$Forth$Interpreter$executeInvert = F2(
-	function (cont, status) {
-		var _v0 = status.stack;
-		if (!_v0.b) {
-			return A2($author$project$Forth$Interpreter$haltWithError, status, 'スタックが空です');
-		} else {
-			var top = _v0.a;
-			var restOfStack = _v0.b;
-			return cont(
-				_Utils_update(
-					status,
-					{
-						stack: A2(
-							$elm$core$List$cons,
-							$author$project$Forth$Geometry$RailLocation$invertJoint(top),
-							restOfStack)
-					}));
-		}
-	});
+var $author$project$Forth$Interpreter$executeInvert = function (status) {
+	var _v0 = status.stack;
+	if (!_v0.b) {
+		return $elm$core$Result$Err(
+			A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
+	} else {
+		var top = _v0.a;
+		var restOfStack = _v0.b;
+		return $elm$core$Result$Ok(
+			_Utils_update(
+				status,
+				{
+					stack: A2(
+						$elm$core$List$cons,
+						$author$project$Forth$Geometry$RailLocation$invertJoint(top),
+						restOfStack)
+				}));
+	}
+};
 var $author$project$Types$Rail$NotInverted = {$: 'NotInverted'};
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
@@ -10783,6 +10390,13 @@ var $author$project$Forth$Geometry$RailLocation$inv = function (loc) {
 		location: $author$project$Forth$Geometry$Location$inv(loc.location)
 	};
 };
+var $author$project$Forth$Geometry$PierLocation$mul = F2(
+	function (global, local) {
+		return {
+			location: A2($author$project$Forth$Geometry$Location$mul, global, local.location),
+			margin: local.margin
+		};
+	});
 var $author$project$Forth$RailPiece$rotate = function (_v0) {
 	var x = _v0.a;
 	var xs = _v0.b;
@@ -10902,32 +10516,33 @@ var $author$project$Forth$RailPiece$placeRail = F2(
 var $author$project$Forth$Interpreter$executePlaceRail = F2(
 	function (railType, rotation) {
 		var railPlaceFunc = A2($author$project$Forth$RailPiece$placeRail, railType, rotation);
-		return F2(
-			function (cont, status) {
-				var _v0 = status.stack;
-				if (!_v0.b) {
-					return A2($author$project$Forth$Interpreter$haltWithError, status, 'スタックが空です');
+		return function (status) {
+			var _v0 = status.stack;
+			if (!_v0.b) {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'スタックが空です', status));
+			} else {
+				var top = _v0.a;
+				var restOfStack = _v0.b;
+				var _v1 = railPlaceFunc(top);
+				if (_v1.$ === 'Just') {
+					var nextLocations = _v1.a.nextLocations;
+					var railPlacement = _v1.a.railPlacement;
+					return $elm$core$Result$Ok(
+						_Utils_update(
+							status,
+							{
+								global: {
+									rails: A2($elm$core$List$cons, railPlacement, status.global.rails)
+								},
+								stack: _Utils_ap(nextLocations, restOfStack)
+							}));
 				} else {
-					var top = _v0.a;
-					var restOfStack = _v0.b;
-					var _v1 = railPlaceFunc(top);
-					if (_v1.$ === 'Just') {
-						var nextLocations = _v1.a.nextLocations;
-						var railPlacement = _v1.a.railPlacement;
-						return cont(
-							_Utils_update(
-								status,
-								{
-									global: {
-										rails: A2($elm$core$List$cons, railPlacement, status.global.rails)
-									},
-									stack: _Utils_ap(nextLocations, restOfStack)
-								}));
-					} else {
-						return A2($author$project$Forth$Interpreter$haltWithError, status, '配置するレールの凹凸が合いません');
-					}
+					return $elm$core$Result$Err(
+						A2($author$project$Forth$Interpreter$ExecError, '配置するレールの凹凸が合いません', status));
 				}
-			});
+			}
+		};
 	});
 var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromList(
 	_List_fromArray(
@@ -11330,132 +10945,98 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			$author$project$Forth$Interpreter$executeAscend(4)),
 			_Utils_Tuple2('invert', $author$project$Forth$Interpreter$executeInvert)
 		]));
-var $author$project$Forth$Interpreter$executeComment = F3(
-	function (depth, tok, status) {
-		executeComment:
+var $author$project$Forth$Interpreter$analyzeWord = function (toks) {
+	if (!toks.b) {
+		return $elm$core$Result$Err('empty word list');
+	} else {
+		var t = toks.a;
+		var ts = toks.b;
+		var _v9 = A2(
+			$elm$core$Dict$get,
+			t,
+			$author$project$Forth$Interpreter$cyclic$controlWords());
+		if (_v9.$ === 'Just') {
+			var analyzer = _v9.a;
+			return analyzer(ts);
+		} else {
+			var _v10 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$coreGlossary);
+			if (_v10.$ === 'Just') {
+				var exec = _v10.a;
+				return $elm$core$Result$Ok(
+					_Utils_Tuple2(exec, ts));
+			} else {
+				var _v11 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$railForthGlossary);
+				if (_v11.$ === 'Just') {
+					var exec = _v11.a;
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(exec, ts));
+				} else {
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(
+							$author$project$Forth$Interpreter$executeWordInFrame(t),
+							ts));
+				}
+			}
+		}
+	}
+};
+var $author$project$Forth$Interpreter$analyzeWordDef = function (toks) {
+	if (toks.b) {
+		var name = toks.a;
+		var toks2 = toks.b;
+		var _v4 = $author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDef(toks2);
+		if (_v4.$ === 'Ok') {
+			var _v5 = _v4.a;
+			var thread = _v5.a;
+			var restToks = _v5.b;
+			return $elm$core$Result$Ok(
+				_Utils_Tuple2(
+					A2($author$project$Forth$Interpreter$buildWordDef, name, thread),
+					restToks));
+		} else {
+			var err = _v4.a;
+			return $elm$core$Result$Err(err);
+		}
+	} else {
+		return $elm$core$Result$Err('ワード定義の名前がありません');
+	}
+};
+var $author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDef = function (toks) {
+	return A2($author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDefRec, _List_Nil, toks);
+};
+var $author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDefRec = F2(
+	function (accum, toks) {
+		analyzeWordsUntilEndOfWordDefRec:
 		while (true) {
-			if (depth <= 0) {
-				return A2($author$project$Forth$Interpreter$executeRec, tok, status);
+			if (!toks.b) {
+				return $elm$core$Result$Err('ワードの定義の末尾に ; がありません');
 			} else {
-				if (!tok.b) {
-					return A2($author$project$Forth$Interpreter$haltWithError, status, '[コメント文]');
+				if (toks.a === ';') {
+					var ts = toks.b;
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(
+							$elm$core$List$reverse(accum),
+							ts));
 				} else {
-					var t = tok.a;
-					var ts = tok.b;
-					switch (t) {
-						case '(':
-							var $temp$depth = depth + 1,
-								$temp$tok = ts,
-								$temp$status = status;
-							depth = $temp$depth;
-							tok = $temp$tok;
-							status = $temp$status;
-							continue executeComment;
-						case ')':
-							var $temp$depth = depth - 1,
-								$temp$tok = ts,
-								$temp$status = status;
-							depth = $temp$depth;
-							tok = $temp$tok;
-							status = $temp$status;
-							continue executeComment;
-						default:
-							var $temp$depth = depth,
-								$temp$tok = ts,
-								$temp$status = status;
-							depth = $temp$depth;
-							tok = $temp$tok;
-							status = $temp$status;
-							continue executeComment;
-					}
-				}
-			}
-		}
-	});
-var $author$project$Forth$Interpreter$executeLoad = F2(
-	function (toks, status) {
-		if (toks.b) {
-			var name = toks.a;
-			var restToks = toks.b;
-			var _v9 = A2($elm$core$Dict$get, name, status.savepoints);
-			if (_v9.$ === 'Just') {
-				var val = _v9.a;
-				var nextStatus = _Utils_update(
-					status,
-					{
-						savepoints: A2($elm$core$Dict$remove, name, status.savepoints),
-						stack: A2($elm$core$List$cons, val, status.stack)
-					});
-				return A2($author$project$Forth$Interpreter$executeRec, restToks, nextStatus);
-			} else {
-				return A2($author$project$Forth$Interpreter$haltWithError, status, 'セーブポイント (' + (name + ') が見つかりません'));
-			}
-		} else {
-			return A2($author$project$Forth$Interpreter$haltWithError, status, 'ロードする定数の名前を与えてください');
-		}
-	});
-var $author$project$Forth$Interpreter$executeRec = F2(
-	function (toks, status) {
-		if (!toks.b) {
-			return $author$project$Forth$Interpreter$haltWithSuccess(status);
-		} else {
-			var t = toks.a;
-			var ts = toks.b;
-			var _v5 = A2(
-				$elm$core$Dict$get,
-				t,
-				$author$project$Forth$Interpreter$cyclic$controlWords());
-			if (_v5.$ === 'Just') {
-				var thread = _v5.a;
-				return A2(thread, ts, status);
-			} else {
-				var _v6 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$coreGlossary);
-				if (_v6.$ === 'Just') {
-					var thread = _v6.a;
-					return A3(
-						thread,
-						$author$project$Forth$Interpreter$executeRec(ts),
-						$author$project$Forth$Interpreter$haltWithError,
-						status);
-				} else {
-					var _v7 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$railForthGlossary);
-					if (_v7.$ === 'Just') {
-						var thread = _v7.a;
-						return A2(
-							thread,
-							$author$project$Forth$Interpreter$executeRec(ts),
-							status);
+					var t = toks.a;
+					var ts = toks.b;
+					var _v1 = $author$project$Forth$Interpreter$analyzeWord(
+						A2($elm$core$List$cons, t, ts));
+					if (_v1.$ === 'Ok') {
+						var _v2 = _v1.a;
+						var exec = _v2.a;
+						var ts2 = _v2.b;
+						var $temp$accum = A2($elm$core$List$cons, exec, accum),
+							$temp$toks = ts2;
+						accum = $temp$accum;
+						toks = $temp$toks;
+						continue analyzeWordsUntilEndOfWordDefRec;
 					} else {
-						return A2($author$project$Forth$Interpreter$haltWithError, status, '未定義のワードです: ' + t);
+						var err = _v1.a;
+						return $elm$core$Result$Err(err);
 					}
 				}
 			}
-		}
-	});
-var $author$project$Forth$Interpreter$executeSave = F2(
-	function (toks, status) {
-		var _v0 = _Utils_Tuple2(toks, status.stack);
-		if (_v0.a.b) {
-			if (_v0.b.b) {
-				var _v1 = _v0.a;
-				var name = _v1.a;
-				var restToks = _v1.b;
-				var _v2 = _v0.b;
-				var top = _v2.a;
-				var restOfStack = _v2.b;
-				var nextStatus = _Utils_update(
-					status,
-					{
-						savepoints: A3($elm$core$Dict$insert, name, top, status.savepoints),
-						stack: restOfStack
-					});
-				return A2($author$project$Forth$Interpreter$executeRec, restToks, nextStatus);
-			} else {
-				var _v3 = _v0.a;
-				return A2($author$project$Forth$Interpreter$haltWithError, status, '定義時のスタックが空です');
-			}
-		} else {
-			return A2($author$project$Forth$Interpreter$haltWithError, status, 'セーブする定数の名前を与えてください');
 		}
 	});
 function $author$project$Forth$Interpreter$cyclic$controlWords() {
@@ -11464,15 +11045,20 @@ function $author$project$Forth$Interpreter$cyclic$controlWords() {
 			[
 				_Utils_Tuple2(
 				'(',
-				$author$project$Forth$Interpreter$executeComment(1)),
+				$author$project$Forth$Interpreter$analyzeComment(1)),
 				_Utils_Tuple2(
 				')',
-				F2(
-					function (_v12, status) {
-						return A2($author$project$Forth$Interpreter$haltWithError, status, '余分なコメント終了文字 ) があります');
-					})),
-				_Utils_Tuple2('save', $author$project$Forth$Interpreter$executeSave),
-				_Utils_Tuple2('load', $author$project$Forth$Interpreter$executeLoad)
+				function (_v6) {
+					return $elm$core$Result$Err('余分なコメント終了文字 ) があります');
+				}),
+				_Utils_Tuple2('save', $author$project$Forth$Interpreter$analyzeSave),
+				_Utils_Tuple2('load', $author$project$Forth$Interpreter$analyzeLoad),
+				_Utils_Tuple2(':', $author$project$Forth$Interpreter$analyzeWordDef),
+				_Utils_Tuple2(
+				';',
+				function (_v7) {
+					return $elm$core$Result$Err('ワードの定義の外で ; が出現しました');
+				})
 			]));
 }
 try {
@@ -11481,23 +11067,673 @@ try {
 		return $author$project$Forth$Interpreter$controlWords;
 	};
 } catch ($) {
-	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    controlWords\n  │     ↓\n  │    executeComment\n  │     ↓\n  │    executeLoad\n  │     ↓\n  │    executeRec\n  │     ↓\n  │    executeSave\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    analyzeWord\n  │     ↓\n  │    controlWords\n  │     ↓\n  │    analyzeWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDefRec\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$Forth$Interpreter$analyzeWordsRec = F2(
+	function (accum, toks) {
+		analyzeWordsRec:
+		while (true) {
+			if ($elm$core$List$isEmpty(toks)) {
+				return $elm$core$Result$Ok(
+					$elm$core$List$reverse(accum));
+			} else {
+				var _v0 = $author$project$Forth$Interpreter$analyzeWord(toks);
+				if (_v0.$ === 'Ok') {
+					var _v1 = _v0.a;
+					var exec = _v1.a;
+					var ts = _v1.b;
+					var $temp$accum = A2($elm$core$List$cons, exec, accum),
+						$temp$toks = ts;
+					accum = $temp$accum;
+					toks = $temp$toks;
+					continue analyzeWordsRec;
+				} else {
+					var err = _v0.a;
+					return $elm$core$Result$Err(err);
+				}
+			}
+		}
+	});
+var $author$project$Forth$Interpreter$analyzeWords = function (toks) {
+	return A2($author$project$Forth$Interpreter$analyzeWordsRec, _List_Nil, toks);
+};
+var $author$project$Types$RailRenderData$make = F3(
+	function (rail, position, angle) {
+		return {angle: angle, position: position, rail: rail};
+	});
+var $author$project$Forth$Geometry$Dir$toRadian = function (_v0) {
+	var d = _v0.a;
+	return ($elm$core$Basics$pi / 4.0) * d;
+};
+var $author$project$Forth$RailPlacement$toRailRenderData = function (placement) {
+	return A3(
+		$author$project$Types$RailRenderData$make,
+		placement.rail,
+		$author$project$Forth$Geometry$Location$toVec3(placement.location),
+		$author$project$Forth$Geometry$Dir$toRadian(placement.location.dir));
+};
+var $author$project$Forth$Interpreter$haltWithError = function (err) {
+	return {
+		errMsg: $elm$core$Maybe$Just(err.message),
+		piers: _List_Nil,
+		railCount: $elm$core$Dict$empty,
+		rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, err.status.global.rails)
+	};
+};
+var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) {
+	return A2(
+		$elm$core$List$map,
+		$author$project$Forth$Geometry$PierLocation$mul(railPlacement.location),
+		$author$project$Forth$RailPiece$getRailPiece(railPlacement.rail).pierLocations);
+};
+var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
+	return A3(
+		$author$project$Types$Rail$toStringWith,
+		function (_v0) {
+			return '';
+		},
+		$author$project$Types$Rail$isInvertedToString,
+		rail);
+};
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var $author$project$Forth$Statistics$getRailCount = function (rails) {
+	return A3(
+		$elm$core$List$foldl,
+		function (rail) {
+			return A2(
+				$elm$core$Dict$update,
+				rail,
+				function (x) {
+					if (x.$ === 'Nothing') {
+						return $elm$core$Maybe$Just(1);
+					} else {
+						var n = x.a;
+						return $elm$core$Maybe$Just(n + 1);
+					}
+				});
+		},
+		$elm$core$Dict$empty,
+		A2($elm$core$List$map, $author$project$Forth$Statistics$railToStringRegardlessOfFlipped, rails));
+};
+var $elm$core$Result$andThen = F2(
+	function (callback, result) {
+		if (result.$ === 'Ok') {
+			var value = result.a;
+			return callback(value);
+		} else {
+			var msg = result.a;
+			return $elm$core$Result$Err(msg);
+		}
+	});
+var $author$project$Forth$Geometry$Dir$toUndirectedDir = function (_v0) {
+	var x = _v0.a;
+	return (x >= 4) ? $author$project$Forth$Geometry$Dir$Dir(x - 4) : $author$project$Forth$Geometry$Dir$Dir(x);
+};
+var $author$project$Forth$PierConstruction$cleansePierLocations = function (placement) {
+	var loc = placement.location;
+	return _Utils_update(
+		placement,
+		{
+			location: _Utils_update(
+				loc,
+				{
+					dir: $author$project$Forth$Geometry$Dir$toUndirectedDir(loc.dir)
+				})
+		});
+};
+var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
+	var a = _v0.a;
+	var b = _v0.b;
+	var c = _v0.c;
+	var d = _v0.d;
+	return A2(
+		$elm$core$String$join,
+		' ',
+		A2(
+			$elm$core$List$cons,
+			'Rot45',
+			A2(
+				$elm$core$List$map,
+				$elm$core$String$fromInt,
+				_List_fromArray(
+					[a, b, c, d]))));
+};
+var $author$project$Forth$PierConstruction$pierKey = function (loc) {
+	return $author$project$Forth$Geometry$Rot45$toString(loc.single) + (',' + $author$project$Forth$Geometry$Rot45$toString(loc._double));
+};
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $author$project$Forth$PierConstruction$updateWithResult = F3(
+	function (key, f, dict) {
+		return A2(
+			$elm$core$Result$map,
+			function (v) {
+				return A3($elm$core$Dict$insert, key, v, dict);
+			},
+			f(
+				A2($elm$core$Dict$get, key, dict)));
+	});
+var $author$project$Forth$PierConstruction$divideIntoDict = A2(
+	$author$project$Util$foldlResult,
+	function (loc) {
+		return A2(
+			$author$project$Forth$PierConstruction$updateWithResult,
+			$author$project$Forth$PierConstruction$pierKey(loc.location),
+			function (maybe) {
+				if (maybe.$ === 'Nothing') {
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(
+							loc.location.dir,
+							_List_fromArray(
+								[loc])));
+				} else {
+					var _v1 = maybe.a;
+					var dir = _v1.a;
+					var lis = _v1.b;
+					return _Utils_eq(dir, loc.location.dir) ? $elm$core$Result$Ok(
+						_Utils_Tuple2(
+							dir,
+							A2($elm$core$List$cons, loc, lis))) : $elm$core$Result$Err(
+						'橋脚の方向が一致しません ' + $author$project$Forth$PierConstruction$pierKey(loc.location));
+				}
+			});
+	},
+	$elm$core$Dict$empty);
+var $author$project$Types$Pier$Wide = {$: 'Wide'};
+var $author$project$Types$Pier$getHeight = function (pier) {
+	switch (pier.$) {
+		case 'Single':
+			return 4;
+		case 'Wide':
+			return 4;
+		default:
+			return 1;
+	}
+};
+var $author$project$Forth$Geometry$PierLocation$toVec3 = function (loc) {
+	return $author$project$Forth$Geometry$Location$toVec3(loc.location);
+};
+var $author$project$Forth$PierConstruction$pierLocationToPlacement = F2(
+	function (kind, loc) {
+		return {
+			angle: $author$project$Forth$Geometry$Dir$toRadian(loc.location.dir),
+			pier: kind,
+			position: $author$project$Forth$Geometry$PierLocation$toVec3(loc)
+		};
+	});
+var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
+	function (newHeight, loc) {
+		return _Utils_update(
+			loc,
+			{
+				location: A2($author$project$Forth$Geometry$Location$setHeight, newHeight, loc.location)
+			});
+	});
+var $author$project$Forth$PierConstruction$buildDoubleUpto = F4(
+	function (template, accum, to, from) {
+		buildDoubleUpto:
+		while (true) {
+			if (_Utils_cmp(from, to) > -1) {
+				return accum;
+			} else {
+				var $temp$template = template,
+					$temp$accum = A2(
+					$elm$core$List$cons,
+					A2(
+						$author$project$Forth$PierConstruction$pierLocationToPlacement,
+						$author$project$Types$Pier$Wide,
+						A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
+					accum),
+					$temp$to = to,
+					$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide);
+				template = $temp$template;
+				accum = $temp$accum;
+				to = $temp$to;
+				from = $temp$from;
+				continue buildDoubleUpto;
+			}
+		}
+	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Forth$PierConstruction$maximumHeight = function (ls) {
+	return A3(
+		$elm$core$List$foldl,
+		function (loc) {
+			return $elm$core$Basics$max(loc.location.height);
+		},
+		0,
+		ls);
+};
+var $author$project$Forth$PierConstruction$constructDoublePier = F2(
+	function (center, left) {
+		var maxHeight = A2(
+			$elm$core$Basics$max,
+			$author$project$Forth$PierConstruction$maximumHeight(center),
+			$author$project$Forth$PierConstruction$maximumHeight(left));
+		var _v0 = $elm$core$List$head(center);
+		if (_v0.$ === 'Nothing') {
+			return $elm$core$Result$Err('複線橋脚の構築で内部的なエラーが発生しました');
+		} else {
+			var loc = _v0.a;
+			return $elm$core$Result$Ok(
+				A4($author$project$Forth$PierConstruction$buildDoubleUpto, loc, _List_Nil, maxHeight, 0));
+		}
+	});
+var $author$project$Forth$PierConstruction$doublePier = function (_double) {
+	return A3(
+		$author$project$Util$foldlResult,
+		F2(
+			function (_v0, result) {
+				var _v1 = _v0.b;
+				var centerLocs = _v1.b;
+				var leftLocs = _v1.c;
+				return A2(
+					$elm$core$Result$map,
+					function (r1) {
+						return A2($elm$core$List$append, r1, result);
+					},
+					A2($author$project$Forth$PierConstruction$constructDoublePier, centerLocs, leftLocs));
+			}),
+		_List_Nil,
+		$elm$core$Dict$toList(_double));
+};
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = function (loc) {
+	return A2(
+		$author$project$Forth$Geometry$Location$mul,
+		loc,
+		A4(
+			$author$project$Forth$Geometry$Location$make,
+			$author$project$Forth$Geometry$Rot45$zero,
+			A2(
+				$author$project$Forth$Geometry$Rot45$add,
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
+			0,
+			$author$project$Forth$Geometry$Dir$e));
+};
+var $author$project$Forth$PierConstruction$doubleTrackPiersRec = F4(
+	function (single, _double, open, list) {
+		doubleTrackPiersRec:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Result$Ok(
+					_Utils_Tuple2(single, _double));
+			} else {
+				var _v1 = list.a;
+				var key = _v1.a;
+				var _v2 = _v1.b;
+				var dir = _v2.a;
+				var pierLocs = _v2.b;
+				var xs = list.b;
+				var _v3 = $elm$core$List$head(pierLocs);
+				if (_v3.$ === 'Nothing') {
+					return $elm$core$Result$Err('複線橋脚の構築で内部的なエラーが発生しました');
+				} else {
+					var pierLoc = _v3.a;
+					if (A2($elm$core$Dict$member, key, open)) {
+						var leftKey = $author$project$Forth$PierConstruction$pierKey(
+							$author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(pierLoc.location));
+						var _v4 = _Utils_Tuple2(
+							A2($elm$core$Dict$get, leftKey, single),
+							A2($elm$core$Dict$get, leftKey, open));
+						if (_v4.a.$ === 'Just') {
+							var _v5 = _v4.a.a;
+							var dir2 = _v5.a;
+							var pierLocs2 = _v5.b;
+							if (_Utils_eq(dir, dir2)) {
+								var $temp$single = A2($elm$core$Dict$remove, leftKey, single),
+									$temp$double = A3(
+									$elm$core$Dict$insert,
+									key,
+									_Utils_Tuple3(dir, pierLocs, pierLocs2),
+									_double),
+									$temp$open = A2($elm$core$Dict$remove, key, open),
+									$temp$list = xs;
+								single = $temp$single;
+								_double = $temp$double;
+								open = $temp$open;
+								list = $temp$list;
+								continue doubleTrackPiersRec;
+							} else {
+								return $elm$core$Result$Err('複線橋脚の構築時に隣のレールとの方向が合いません');
+							}
+						} else {
+							if (_v4.b.$ === 'Just') {
+								var _v6 = _v4.b.a;
+								var dir2 = _v6.a;
+								var pierLocs2 = _v6.b;
+								if (_Utils_eq(dir, dir2)) {
+									var $temp$single = single,
+										$temp$double = A3(
+										$elm$core$Dict$insert,
+										key,
+										_Utils_Tuple3(dir, pierLocs, pierLocs2),
+										_double),
+										$temp$open = A2(
+										$elm$core$Dict$remove,
+										leftKey,
+										A2($elm$core$Dict$remove, key, open)),
+										$temp$list = xs;
+									single = $temp$single;
+									_double = $temp$double;
+									open = $temp$open;
+									list = $temp$list;
+									continue doubleTrackPiersRec;
+								} else {
+									return $elm$core$Result$Err('複線橋脚の構築時に隣のレールとの方向が合いません');
+								}
+							} else {
+								var $temp$single = A3(
+									$elm$core$Dict$insert,
+									key,
+									_Utils_Tuple2(dir, pierLocs),
+									single),
+									$temp$double = _double,
+									$temp$open = A2($elm$core$Dict$remove, key, open),
+									$temp$list = xs;
+								single = $temp$single;
+								_double = $temp$double;
+								open = $temp$open;
+								list = $temp$list;
+								continue doubleTrackPiersRec;
+							}
+						}
+					} else {
+						var $temp$single = single,
+							$temp$double = _double,
+							$temp$open = open,
+							$temp$list = xs;
+						single = $temp$single;
+						_double = $temp$double;
+						open = $temp$open;
+						list = $temp$list;
+						continue doubleTrackPiersRec;
+					}
+				}
+			}
+		}
+	});
+var $author$project$Forth$PierConstruction$doubleTrackPiers = function (dict) {
+	return A4(
+		$author$project$Forth$PierConstruction$doubleTrackPiersRec,
+		$elm$core$Dict$empty,
+		$elm$core$Dict$empty,
+		dict,
+		$elm$core$Dict$toList(dict));
+};
+var $elm$core$Result$map2 = F3(
+	function (func, ra, rb) {
+		if (ra.$ === 'Err') {
+			var x = ra.a;
+			return $elm$core$Result$Err(x);
+		} else {
+			var a = ra.a;
+			if (rb.$ === 'Err') {
+				var x = rb.a;
+				return $elm$core$Result$Err(x);
+			} else {
+				var b = rb.a;
+				return $elm$core$Result$Ok(
+					A2(func, a, b));
+			}
+		}
+	});
+var $author$project$Types$Pier$Mini = {$: 'Mini'};
+var $author$project$Types$Pier$Single = {$: 'Single'};
+var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
+	function (template, accum, to, from) {
+		buildSingleUpto:
+		while (true) {
+			if (_Utils_cmp(from, to) > -1) {
+				return accum;
+			} else {
+				if (_Utils_cmp(
+					to,
+					from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single)) > -1) {
+					var $temp$template = template,
+						$temp$accum = A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Forth$PierConstruction$pierLocationToPlacement,
+							$author$project$Types$Pier$Single,
+							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
+						accum),
+						$temp$to = to,
+						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single);
+					template = $temp$template;
+					accum = $temp$accum;
+					to = $temp$to;
+					from = $temp$from;
+					continue buildSingleUpto;
+				} else {
+					var $temp$template = template,
+						$temp$accum = A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Forth$PierConstruction$pierLocationToPlacement,
+							$author$project$Types$Pier$Mini,
+							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
+						accum),
+						$temp$to = to,
+						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Mini);
+					template = $temp$template;
+					accum = $temp$accum;
+					to = $temp$to;
+					from = $temp$from;
+					continue buildSingleUpto;
+				}
+			}
+		}
+	});
+var $author$project$Forth$PierConstruction$constructSinglePierRec = F4(
+	function (accum, current, top, locs) {
+		constructSinglePierRec:
+		while (true) {
+			if (!locs.b) {
+				return $elm$core$Result$Ok(accum);
+			} else {
+				var _v1 = locs.a;
+				var h = _v1.a;
+				var l = _v1.b;
+				var ls = locs.b;
+				if (_Utils_cmp(top, h - l.margin.bottom) > 0) {
+					return $elm$core$Result$Err('ブロックの付いたレールとかの位置関係的に配置ができません');
+				} else {
+					var $temp$accum = A4($author$project$Forth$PierConstruction$buildSingleUpto, l, accum, h - l.margin.bottom, current),
+						$temp$current = h,
+						$temp$top = h + l.margin.top,
+						$temp$locs = ls;
+					accum = $temp$accum;
+					current = $temp$current;
+					top = $temp$top;
+					locs = $temp$locs;
+					continue constructSinglePierRec;
+				}
+			}
+		}
+	});
+var $author$project$Forth$PierConstruction$mergeMargin = F2(
+	function (x, y) {
+		return {
+			bottom: A2($elm$core$Basics$max, x.bottom, y.bottom),
+			top: A2($elm$core$Basics$max, x.top, y.top)
+		};
+	});
+var $author$project$Forth$PierConstruction$mergePierLocations = function (list) {
+	return $elm$core$Dict$toList(
+		A3(
+			$elm$core$List$foldl,
+			function (loc) {
+				return A2(
+					$elm$core$Dict$update,
+					loc.location.height,
+					function (elem) {
+						if (elem.$ === 'Nothing') {
+							return $elm$core$Maybe$Just(loc);
+						} else {
+							var x = elem.a;
+							return $elm$core$Maybe$Just(
+								_Utils_update(
+									x,
+									{
+										margin: A2($author$project$Forth$PierConstruction$mergeMargin, x.margin, loc.margin)
+									}));
+						}
+					});
+			},
+			$elm$core$Dict$empty,
+			list));
+};
+var $author$project$Forth$PierConstruction$constructSinglePier = function (list) {
+	return A4(
+		$author$project$Forth$PierConstruction$constructSinglePierRec,
+		_List_Nil,
+		0,
+		0,
+		$author$project$Forth$PierConstruction$mergePierLocations(list));
+};
+var $author$project$Forth$PierConstruction$singlePier = function (single) {
+	return A3(
+		$author$project$Util$foldlResult,
+		F2(
+			function (_v0, result) {
+				var _v1 = _v0.b;
+				var pierLocs = _v1.b;
+				return A2(
+					$elm$core$Result$map,
+					function (r1) {
+						return A2($elm$core$List$append, r1, result);
+					},
+					$author$project$Forth$PierConstruction$constructSinglePier(pierLocs));
+			}),
+		_List_Nil,
+		$elm$core$Dict$toList(single));
+};
+var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
+	return A2(
+		$elm$core$Result$andThen,
+		function (_v0) {
+			var single = _v0.a;
+			var _double = _v0.b;
+			return A3(
+				$elm$core$Result$map2,
+				F2(
+					function (s, d) {
+						return _Utils_ap(s, d);
+					}),
+				$author$project$Forth$PierConstruction$singlePier(single),
+				$author$project$Forth$PierConstruction$doublePier(_double));
+		},
+		A2(
+			$elm$core$Result$andThen,
+			$author$project$Forth$PierConstruction$doubleTrackPiers,
+			$author$project$Forth$PierConstruction$divideIntoDict(
+				A2($elm$core$List$map, $author$project$Forth$PierConstruction$cleansePierLocations, list))));
+};
+var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
+	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(
+		A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, status.global.rails));
+	if (_v0.$ === 'Ok') {
+		var pierRenderData = _v0.a;
+		return {
+			errMsg: $elm$core$Maybe$Nothing,
+			piers: pierRenderData,
+			railCount: $author$project$Forth$Statistics$getRailCount(
+				A2(
+					$elm$core$List$map,
+					function (x) {
+						return x.rail;
+					},
+					status.global.rails)),
+			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
+		};
+	} else {
+		var err = _v0.a;
+		return {
+			errMsg: $elm$core$Maybe$Just(err),
+			piers: _List_Nil,
+			railCount: $author$project$Forth$Statistics$getRailCount(
+				A2(
+					$elm$core$List$map,
+					function (x) {
+						return x.rail;
+					},
+					status.global.rails)),
+			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
+		};
+	}
+};
 var $author$project$Forth$RailPiece$initialLocation = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$e, $author$project$Forth$Geometry$Joint$Plus);
 var $elm$core$String$words = _String_words;
 var $author$project$Forth$Interpreter$execute = function (src) {
-	var tokenize = function (string) {
-		return $elm$core$String$words(string);
-	};
+	var tokens = $elm$core$String$words(src);
 	var initialStatus = {
+		frame: _List_fromArray(
+			[$elm$core$Dict$empty]),
 		global: {rails: _List_Nil},
-		savepoints: $elm$core$Dict$empty,
+		savepoints: _List_fromArray(
+			[$elm$core$Dict$empty]),
 		stack: _List_fromArray(
 			[$author$project$Forth$RailPiece$initialLocation])
 	};
-	return A2(
-		$author$project$Forth$Interpreter$executeRec,
-		tokenize(src),
-		initialStatus);
+	var _v0 = $author$project$Forth$Interpreter$analyzeWords(tokens);
+	if (_v0.$ === 'Ok') {
+		var execs = _v0.a;
+		var _v1 = A2($author$project$Forth$Interpreter$executeMulti, execs, initialStatus);
+		if (_v1.$ === 'Ok') {
+			var finalStatus = _v1.a;
+			return $author$project$Forth$Interpreter$haltWithSuccess(finalStatus);
+		} else {
+			var execError = _v1.a;
+			return $author$project$Forth$Interpreter$haltWithError(execError);
+		}
+	} else {
+		var analyzeError = _v0.a;
+		return $author$project$Forth$Interpreter$haltWithError(
+			A2($author$project$Forth$Interpreter$ExecError, analyzeError, initialStatus));
+	}
 };
 var $author$project$Forth$execute = $author$project$Forth$Interpreter$execute;
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
