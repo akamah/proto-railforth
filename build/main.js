@@ -9733,6 +9733,122 @@ var $author$project$Forth$Interpreter$analyzeLoad = function (toks) {
 		return $elm$core$Result$Err('ロードする定数の名前を与えてください');
 	}
 };
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $author$project$Forth$Interpreter$doSave = F2(
+	function (name, status) {
+		var _v0 = status.savepoints;
+		if (_v0.b) {
+			var env = _v0.a;
+			var envs = _v0.b;
+			var _v1 = status.stack;
+			if (_v1.b) {
+				var top = _v1.a;
+				var restOfStack = _v1.b;
+				return $elm$core$Result$Ok(
+					_Utils_update(
+						status,
+						{
+							savepoints: A2(
+								$elm$core$List$cons,
+								A3($elm$core$Dict$insert, name, top, env),
+								envs),
+							stack: restOfStack
+						}));
+			} else {
+				return $elm$core$Result$Err(
+					A2($author$project$Forth$Interpreter$ExecError, 'save時のスタックが空です', status));
+			}
+		} else {
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '致命的なエラーがsaveで発生しました', status));
+		}
+	});
+var $author$project$Forth$Interpreter$analyzeSave = function (toks) {
+	if (toks.b) {
+		var name = toks.a;
+		var restToks = toks.b;
+		return $elm$core$Result$Ok(
+			_Utils_Tuple2(
+				$author$project$Forth$Interpreter$doSave(name),
+				restToks));
+	} else {
+		return $elm$core$Result$Err('セーブする定数の名前を与えてください');
+	}
+};
+var $author$project$Forth$Interpreter$Thread = function (a) {
+	return {$: 'Thread', a: a};
+};
+var $author$project$Forth$Interpreter$buildWordDef = F3(
+	function (name, thread, status) {
+		var _v0 = status.frame;
+		if (_v0.b) {
+			var f = _v0.a;
+			var fs = _v0.b;
+			return $elm$core$Result$Ok(
+				_Utils_update(
+					status,
+					{
+						frame: A2(
+							$elm$core$List$cons,
+							A3(
+								$elm$core$Dict$insert,
+								name,
+								$author$project$Forth$Interpreter$Thread(thread),
+								f),
+							fs)
+					}));
+		} else {
+			return $elm$core$Result$Err(
+				A2($author$project$Forth$Interpreter$ExecError, '致命的エラーがワードの定義時に発生しました', status));
+		}
+	});
 var $author$project$Forth$Interpreter$executeDrop = function (status) {
 	var _v0 = status.stack;
 	if (!_v0.b) {
@@ -9837,54 +9953,6 @@ var $author$project$Forth$Interpreter$executeSwap = function (status) {
 	}
 };
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1.$) {
-				case 'LT':
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
 var $elm$core$Dict$fromList = function (assocs) {
 	return A3(
 		$elm$core$List$foldl,
@@ -9938,29 +10006,35 @@ var $author$project$Forth$Interpreter$executeInNestedFrame = F2(
 			return $elm$core$Result$Err(err);
 		}
 	});
-var $author$project$Forth$Interpreter$executeMulti = F2(
-	function (execs, status) {
-		executeMulti:
+var $author$project$Util$foldlResult = F3(
+	function (f, b, list) {
+		foldlResult:
 		while (true) {
-			if (execs.b) {
-				var e = execs.a;
-				var es = execs.b;
-				var _v1 = e(status);
+			if (!list.b) {
+				return $elm$core$Result$Ok(b);
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var _v1 = A2(f, x, b);
 				if (_v1.$ === 'Ok') {
-					var nextStatus = _v1.a;
-					var $temp$execs = es,
-						$temp$status = nextStatus;
-					execs = $temp$execs;
-					status = $temp$status;
-					continue executeMulti;
+					var b2 = _v1.a;
+					var $temp$f = f,
+						$temp$b = b2,
+						$temp$list = xs;
+					f = $temp$f;
+					b = $temp$b;
+					list = $temp$list;
+					continue foldlResult;
 				} else {
 					var err = _v1.a;
 					return $elm$core$Result$Err(err);
 				}
-			} else {
-				return $elm$core$Result$Ok(status);
 			}
 		}
+	});
+var $author$project$Forth$Interpreter$executeMulti = F2(
+	function (execs, status) {
+		return A3($author$project$Util$foldlResult, $elm$core$Basics$apL, status, execs);
 	});
 var $author$project$Forth$Interpreter$getFromDicts = F2(
 	function (k, dicts) {
@@ -10871,185 +10945,96 @@ var $author$project$Forth$Interpreter$railForthGlossary = $elm$core$Dict$fromLis
 			$author$project$Forth$Interpreter$executeAscend(4)),
 			_Utils_Tuple2('invert', $author$project$Forth$Interpreter$executeInvert)
 		]));
-var $author$project$Forth$Interpreter$analyzeNormalWord = function (word) {
-	var _v0 = A2($elm$core$Dict$get, word, $author$project$Forth$Interpreter$coreGlossary);
-	if (_v0.$ === 'Just') {
-		var exec = _v0.a;
-		return exec;
+var $author$project$Forth$Interpreter$analyzeWord = function (toks) {
+	if (!toks.b) {
+		return $elm$core$Result$Err('empty word list');
 	} else {
-		var _v1 = A2($elm$core$Dict$get, word, $author$project$Forth$Interpreter$railForthGlossary);
-		if (_v1.$ === 'Just') {
-			var exec = _v1.a;
-			return exec;
+		var t = toks.a;
+		var ts = toks.b;
+		var _v9 = A2(
+			$elm$core$Dict$get,
+			t,
+			$author$project$Forth$Interpreter$cyclic$controlWords());
+		if (_v9.$ === 'Just') {
+			var analyzer = _v9.a;
+			return analyzer(ts);
 		} else {
-			return $author$project$Forth$Interpreter$executeWordInFrame(word);
-		}
-	}
-};
-var $author$project$Forth$Interpreter$doSave = F2(
-	function (name, status) {
-		var _v0 = status.savepoints;
-		if (_v0.b) {
-			var env = _v0.a;
-			var envs = _v0.b;
-			var _v1 = status.stack;
-			if (_v1.b) {
-				var top = _v1.a;
-				var restOfStack = _v1.b;
+			var _v10 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$coreGlossary);
+			if (_v10.$ === 'Just') {
+				var exec = _v10.a;
 				return $elm$core$Result$Ok(
-					_Utils_update(
-						status,
-						{
-							savepoints: A2(
-								$elm$core$List$cons,
-								A3($elm$core$Dict$insert, name, top, env),
-								envs),
-							stack: restOfStack
-						}));
+					_Utils_Tuple2(exec, ts));
 			} else {
-				return $elm$core$Result$Err(
-					A2($author$project$Forth$Interpreter$ExecError, 'save時のスタックが空です', status));
+				var _v11 = A2($elm$core$Dict$get, t, $author$project$Forth$Interpreter$railForthGlossary);
+				if (_v11.$ === 'Just') {
+					var exec = _v11.a;
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(exec, ts));
+				} else {
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(
+							$author$project$Forth$Interpreter$executeWordInFrame(t),
+							ts));
+				}
 			}
-		} else {
-			return $elm$core$Result$Err(
-				A2($author$project$Forth$Interpreter$ExecError, '致命的なエラーがsaveで発生しました', status));
 		}
-	});
-var $author$project$Forth$Interpreter$analyzeSave = function (toks) {
-	if (toks.b) {
-		var name = toks.a;
-		var restToks = toks.b;
-		return $elm$core$Result$Ok(
-			_Utils_Tuple2(
-				$author$project$Forth$Interpreter$doSave(name),
-				restToks));
-	} else {
-		return $elm$core$Result$Err('セーブする定数の名前を与えてください');
 	}
 };
-var $author$project$Forth$Interpreter$Thread = function (a) {
-	return {$: 'Thread', a: a};
-};
-var $author$project$Forth$Interpreter$buildWordDef = F3(
-	function (name, thread, status) {
-		var _v0 = status.frame;
-		if (_v0.b) {
-			var f = _v0.a;
-			var fs = _v0.b;
-			return $elm$core$Result$Ok(
-				_Utils_update(
-					status,
-					{
-						frame: A2(
-							$elm$core$List$cons,
-							A3(
-								$elm$core$Dict$insert,
-								name,
-								$author$project$Forth$Interpreter$Thread(thread),
-								f),
-							fs)
-					}));
-		} else {
-			return $elm$core$Result$Err(
-				A2($author$project$Forth$Interpreter$ExecError, '致命的エラーがワードの定義時に発生しました', status));
-		}
-	});
-var $author$project$Forth$Interpreter$splitAt = F2(
-	function (needle, list) {
-		var splitAtRec = F2(
-			function (accum, rest) {
-				splitAtRec:
-				while (true) {
-					if (!rest.b) {
-						return $elm$core$Maybe$Nothing;
-					} else {
-						var x = rest.a;
-						var xs = rest.b;
-						if (_Utils_eq(x, needle)) {
-							return $elm$core$Maybe$Just(
-								_Utils_Tuple2(
-									$elm$core$List$reverse(accum),
-									xs));
-						} else {
-							var $temp$accum = A2($elm$core$List$cons, x, accum),
-								$temp$rest = xs;
-							accum = $temp$accum;
-							rest = $temp$rest;
-							continue splitAtRec;
-						}
-					}
-				}
-			});
-		return A2(splitAtRec, _List_Nil, list);
-	});
 var $author$project$Forth$Interpreter$analyzeWordDef = function (toks) {
 	if (toks.b) {
 		var name = toks.a;
 		var toks2 = toks.b;
-		var _v6 = A2($author$project$Forth$Interpreter$splitAt, ';', toks2);
-		if (_v6.$ === 'Just') {
-			var _v7 = _v6.a;
-			var bodyToks = _v7.a;
-			var restToks = _v7.b;
-			var _v8 = $author$project$Forth$Interpreter$analyzeWords(bodyToks);
-			if (_v8.$ === 'Ok') {
-				var thread = _v8.a;
-				return $elm$core$Result$Ok(
-					_Utils_Tuple2(
-						A2($author$project$Forth$Interpreter$buildWordDef, name, thread),
-						restToks));
-			} else {
-				var err = _v8.a;
-				return $elm$core$Result$Err(err);
-			}
+		var _v4 = $author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDef(toks2);
+		if (_v4.$ === 'Ok') {
+			var _v5 = _v4.a;
+			var thread = _v5.a;
+			var restToks = _v5.b;
+			return $elm$core$Result$Ok(
+				_Utils_Tuple2(
+					A2($author$project$Forth$Interpreter$buildWordDef, name, thread),
+					restToks));
 		} else {
-			return $elm$core$Result$Err('ワードの定義の末尾に ; がありません');
+			var err = _v4.a;
+			return $elm$core$Result$Err(err);
 		}
 	} else {
 		return $elm$core$Result$Err('ワード定義の名前がありません');
 	}
 };
-var $author$project$Forth$Interpreter$analyzeWords = function (toks) {
-	return A2($author$project$Forth$Interpreter$analyzeWordsRec, _List_Nil, toks);
+var $author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDef = function (toks) {
+	return A2($author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDefRec, _List_Nil, toks);
 };
-var $author$project$Forth$Interpreter$analyzeWordsRec = F2(
+var $author$project$Forth$Interpreter$analyzeWordsUntilEndOfWordDefRec = F2(
 	function (accum, toks) {
-		analyzeWordsRec:
+		analyzeWordsUntilEndOfWordDefRec:
 		while (true) {
 			if (!toks.b) {
-				return $elm$core$Result$Ok(
-					$elm$core$List$reverse(accum));
+				return $elm$core$Result$Err('ワードの定義の末尾に ; がありません');
 			} else {
-				var t = toks.a;
-				var ts = toks.b;
-				var _v1 = A2(
-					$elm$core$Dict$get,
-					t,
-					$author$project$Forth$Interpreter$cyclic$controlWords());
-				if (_v1.$ === 'Just') {
-					var analyzer = _v1.a;
-					var _v2 = analyzer(ts);
-					if (_v2.$ === 'Ok') {
-						var _v3 = _v2.a;
-						var exec = _v3.a;
-						var restToks = _v3.b;
+				if (toks.a === ';') {
+					var ts = toks.b;
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(
+							$elm$core$List$reverse(accum),
+							ts));
+				} else {
+					var t = toks.a;
+					var ts = toks.b;
+					var _v1 = $author$project$Forth$Interpreter$analyzeWord(
+						A2($elm$core$List$cons, t, ts));
+					if (_v1.$ === 'Ok') {
+						var _v2 = _v1.a;
+						var exec = _v2.a;
+						var ts2 = _v2.b;
 						var $temp$accum = A2($elm$core$List$cons, exec, accum),
-							$temp$toks = restToks;
+							$temp$toks = ts2;
 						accum = $temp$accum;
 						toks = $temp$toks;
-						continue analyzeWordsRec;
+						continue analyzeWordsUntilEndOfWordDefRec;
 					} else {
-						var err = _v2.a;
+						var err = _v1.a;
 						return $elm$core$Result$Err(err);
 					}
-				} else {
-					var _v4 = $author$project$Forth$Interpreter$analyzeNormalWord(t);
-					var exec = _v4;
-					var $temp$accum = A2($elm$core$List$cons, exec, accum),
-						$temp$toks = ts;
-					accum = $temp$accum;
-					toks = $temp$toks;
-					continue analyzeWordsRec;
 				}
 			}
 		}
@@ -11063,7 +11048,7 @@ function $author$project$Forth$Interpreter$cyclic$controlWords() {
 				$author$project$Forth$Interpreter$analyzeComment(1)),
 				_Utils_Tuple2(
 				')',
-				function (_v9) {
+				function (_v6) {
 					return $elm$core$Result$Err('余分なコメント終了文字 ) があります');
 				}),
 				_Utils_Tuple2('save', $author$project$Forth$Interpreter$analyzeSave),
@@ -11071,7 +11056,7 @@ function $author$project$Forth$Interpreter$cyclic$controlWords() {
 				_Utils_Tuple2(':', $author$project$Forth$Interpreter$analyzeWordDef),
 				_Utils_Tuple2(
 				';',
-				function (_v10) {
+				function (_v7) {
 					return $elm$core$Result$Err('ワードの定義の外で ; が出現しました');
 				})
 			]));
@@ -11082,7 +11067,42 @@ try {
 		return $author$project$Forth$Interpreter$controlWords;
 	};
 } catch ($) {
-	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    controlWords\n  │     ↓\n  │    analyzeWordDef\n  │     ↓\n  │    analyzeWords\n  │     ↓\n  │    analyzeWordsRec\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    analyzeWord\n  │     ↓\n  │    controlWords\n  │     ↓\n  │    analyzeWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDefRec\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$Forth$Interpreter$analyzeWordsRec = F2(
+	function (accum, toks) {
+		analyzeWordsRec:
+		while (true) {
+			if ($elm$core$List$isEmpty(toks)) {
+				return $elm$core$Result$Ok(
+					$elm$core$List$reverse(accum));
+			} else {
+				var _v0 = $author$project$Forth$Interpreter$analyzeWord(toks);
+				if (_v0.$ === 'Ok') {
+					var _v1 = _v0.a;
+					var exec = _v1.a;
+					var ts = _v1.b;
+					var $temp$accum = A2($elm$core$List$cons, exec, accum),
+						$temp$toks = ts;
+					accum = $temp$accum;
+					toks = $temp$toks;
+					continue analyzeWordsRec;
+				} else {
+					var err = _v0.a;
+					return $elm$core$Result$Err(err);
+				}
+			}
+		}
+	});
+var $author$project$Forth$Interpreter$analyzeWords = function (toks) {
+	return A2($author$project$Forth$Interpreter$analyzeWordsRec, _List_Nil, toks);
+};
 var $author$project$Types$RailRenderData$make = F3(
 	function (rail, position, angle) {
 		return {angle: angle, position: position, rail: rail};
@@ -11177,32 +11197,6 @@ var $author$project$Forth$PierConstruction$cleansePierLocations = function (plac
 				})
 		});
 };
-var $author$project$Forth$PierConstruction$foldlResult = F3(
-	function (f, b, list) {
-		foldlResult:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Result$Ok(b);
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				var _v1 = A2(f, x, b);
-				if (_v1.$ === 'Ok') {
-					var b2 = _v1.a;
-					var $temp$f = f,
-						$temp$b = b2,
-						$temp$list = xs;
-					f = $temp$f;
-					b = $temp$b;
-					list = $temp$list;
-					continue foldlResult;
-				} else {
-					var err = _v1.a;
-					return $elm$core$Result$Err(err);
-				}
-			}
-		}
-	});
 var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
 	var a = _v0.a;
 	var b = _v0.b;
@@ -11245,7 +11239,7 @@ var $author$project$Forth$PierConstruction$updateWithResult = F3(
 				A2($elm$core$Dict$get, key, dict)));
 	});
 var $author$project$Forth$PierConstruction$divideIntoDict = A2(
-	$author$project$Forth$PierConstruction$foldlResult,
+	$author$project$Util$foldlResult,
 	function (loc) {
 		return A2(
 			$author$project$Forth$PierConstruction$updateWithResult,
@@ -11360,7 +11354,7 @@ var $author$project$Forth$PierConstruction$constructDoublePier = F2(
 	});
 var $author$project$Forth$PierConstruction$doublePier = function (_double) {
 	return A3(
-		$author$project$Forth$PierConstruction$foldlResult,
+		$author$project$Util$foldlResult,
 		F2(
 			function (_v0, result) {
 				var _v1 = _v0.b;
@@ -11642,7 +11636,7 @@ var $author$project$Forth$PierConstruction$constructSinglePier = function (list)
 };
 var $author$project$Forth$PierConstruction$singlePier = function (single) {
 	return A3(
-		$author$project$Forth$PierConstruction$foldlResult,
+		$author$project$Util$foldlResult,
 		F2(
 			function (_v0, result) {
 				var _v1 = _v0.b;

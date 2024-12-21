@@ -10,6 +10,7 @@ import Types.Pier exposing (Pier(..))
 import Types.PierRenderData exposing (PierRenderData)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 import Types.RailRenderData exposing (RailRenderData)
+import Util exposing (foldlResult)
 
 
 type alias Word =
@@ -206,21 +207,6 @@ railForthGlossary =
         ]
 
 
-analyzeNormalWord : Word -> Code
-analyzeNormalWord word =
-    case Dict.get word coreGlossary of
-        Just exec ->
-            exec
-
-        Nothing ->
-            case Dict.get word railForthGlossary of
-                Just exec ->
-                    exec
-
-                Nothing ->
-                    executeWordInFrame word
-
-
 getFromDicts : comparable -> List (Dict comparable v) -> Maybe v
 getFromDicts k dicts =
     case dicts of
@@ -268,28 +254,47 @@ executeInNestedFrame exec status =
             Err err
 
 
-{-| 与えられた複数のワードをパースする
+{-| 複数のワードの列から、1つをパースする。
 -}
-analyzeWordsRec : List Code -> List Word -> Result AnalyzeError (List Code)
-analyzeWordsRec accum toks =
+analyzeWord : List Word -> Result AnalyzeError ( Code, List Word )
+analyzeWord toks =
     case toks of
         [] ->
-            Ok (List.reverse accum)
+            Err "empty word list"
 
         t :: ts ->
             case Dict.get t controlWords of
                 Just analyzer ->
-                    case analyzer ts of
-                        Ok ( exec, restToks ) ->
-                            analyzeWordsRec (exec :: accum) restToks
-
-                        Err err ->
-                            Err err
+                    analyzer ts
 
                 Nothing ->
-                    case analyzeNormalWord t of
-                        exec ->
-                            analyzeWordsRec (exec :: accum) ts
+                    case Dict.get t coreGlossary of
+                        Just exec ->
+                            Ok ( exec, ts )
+
+                        Nothing ->
+                            case Dict.get t railForthGlossary of
+                                Just exec ->
+                                    Ok ( exec, ts )
+
+                                Nothing ->
+                                    Ok ( executeWordInFrame t, ts )
+
+
+{-| 与えられた複数のワードをパースする
+-}
+analyzeWordsRec : List Code -> List Word -> Result AnalyzeError (List Code)
+analyzeWordsRec accum toks =
+    if List.isEmpty toks then
+        Ok (List.reverse accum)
+
+    else
+        case analyzeWord toks of
+            Ok ( exec, ts ) ->
+                analyzeWordsRec (exec :: accum) ts
+
+            Err err ->
+                Err err
 
 
 analyzeWords : List Word -> Result AnalyzeError (List Code)
@@ -299,17 +304,7 @@ analyzeWords toks =
 
 executeMulti : List Code -> Code
 executeMulti execs status =
-    case execs of
-        e :: es ->
-            case e status of
-                Ok nextStatus ->
-                    executeMulti es nextStatus
-
-                Err err ->
-                    Err err
-
-        [] ->
-            Ok status
+    foldlResult (<|) status execs
 
 
 {-| haltWithError
@@ -411,39 +406,39 @@ analyzeComment depth toks =
                 analyzeComment depth ts
 
 
-splitAt : comparable -> List comparable -> Maybe ( List comparable, List comparable )
-splitAt needle list =
-    let
-        splitAtRec accum rest =
-            case rest of
-                [] ->
-                    Nothing
+analyzeWordsUntilEndOfWordDefRec : List Code -> List Word -> Result AnalyzeError ( List Code, List Word )
+analyzeWordsUntilEndOfWordDefRec accum toks =
+    case toks of
+        [] ->
+            Err "ワードの定義の末尾に ; がありません"
 
-                x :: xs ->
-                    if x == needle then
-                        Just ( List.reverse accum, xs )
+        ";" :: ts ->
+            Ok ( List.reverse accum, ts )
 
-                    else
-                        splitAtRec (x :: accum) xs
-    in
-    splitAtRec [] list
+        t :: ts ->
+            case analyzeWord (t :: ts) of
+                Ok ( exec, ts2 ) ->
+                    analyzeWordsUntilEndOfWordDefRec (exec :: accum) ts2
+
+                Err err ->
+                    Err err
+
+
+analyzeWordsUntilEndOfWordDef : List Word -> Result AnalyzeError ( List Code, List Word )
+analyzeWordsUntilEndOfWordDef toks =
+    analyzeWordsUntilEndOfWordDefRec [] toks
 
 
 analyzeWordDef : List Word -> Result AnalyzeError ( Code, List Word )
 analyzeWordDef toks =
     case toks of
         name :: toks2 ->
-            case splitAt ";" toks2 of
-                Just ( bodyToks, restToks ) ->
-                    case analyzeWords bodyToks of
-                        Ok thread ->
-                            Ok ( buildWordDef name thread, restToks )
+            case analyzeWordsUntilEndOfWordDef toks2 of
+                Ok ( thread, restToks ) ->
+                    Ok ( buildWordDef name thread, restToks )
 
-                        Err err ->
-                            Err err
-
-                Nothing ->
-                    Err "ワードの定義の末尾に ; がありません"
+                Err err ->
+                    Err err
 
         [] ->
             Err "ワード定義の名前がありません"
