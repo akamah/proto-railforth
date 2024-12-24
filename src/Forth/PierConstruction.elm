@@ -1,267 +1,146 @@
 module Forth.PierConstruction exposing (toPierRenderData)
 
-import Dict exposing (Dict)
-import Forth.Geometry.Dir as Dir exposing (Dir)
-import Forth.Geometry.Location as Location exposing (Location)
-import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
-import Forth.Geometry.Rot45 as Rot45
-import Types.Pier as Pier exposing (Pier)
+import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
+import Forth.PierConstraction.Impl exposing (PierPlacement(..), construct)
+import Forth.RailPiece as RailPiece
+import Forth.RailPlacement exposing (RailPlacement)
 import Types.PierRenderData exposing (PierRenderData)
-import Util exposing (foldlResult)
+import Types.Rail exposing (Rail(..))
 
 
-cleansePierLocations : PierLocation -> PierLocation
-cleansePierLocations placement =
-    let
-        loc =
-            placement.location
-    in
-    { placement | location = { loc | dir = Dir.toUndirectedDir loc.dir } }
-
-
-pierKey : Location -> String
-pierKey loc =
-    Rot45.toString loc.single ++ "," ++ Rot45.toString loc.double
-
-
-updateWithResult : comparable -> (Maybe v -> Result e v) -> Dict comparable v -> Result e (Dict comparable v)
-updateWithResult key f dict =
-    f (Dict.get key dict)
-        |> Result.map (\v -> Dict.insert key v dict)
-
-
-divideIntoDict : List PierLocation -> Result String (Dict String ( Dir, List PierLocation ))
-divideIntoDict =
-    foldlResult
-        (\loc ->
-            updateWithResult (pierKey loc.location)
-                (\maybe ->
-                    case maybe of
-                        Nothing ->
-                            Ok ( loc.location.dir, [ loc ] )
-
-                        Just ( dir, lis ) ->
-                            if dir == loc.location.dir then
-                                Ok ( dir, loc :: lis )
-
-                            else
-                                Err <| "橋脚の方向が一致しません " ++ pierKey loc.location
-                )
-        )
-        Dict.empty
-
-
-pierLocationToPlacement : Pier -> PierLocation -> PierRenderData
-pierLocationToPlacement kind loc =
-    { pier = kind
-    , position = PierLocation.toVec3 loc
-    , angle = Dir.toRadian loc.location.dir
-    }
-
-
-constructSinglePier : List PierLocation -> Result String (List PierRenderData)
-constructSinglePier list =
-    constructSinglePierRec [] 0 0 <| mergePierLocations list
-
-
-constructSinglePierRec : List PierRenderData -> Int -> Int -> List ( Int, PierLocation ) -> Result String (List PierRenderData)
-constructSinglePierRec accum current top locs =
-    case locs of
-        [] ->
-            Ok accum
-
-        ( h, l ) :: ls ->
-            if top > h - l.margin.bottom then
-                -- もし交差していて設置できなかったらエラーとする
-                Err "ブロックの付いたレールとかの位置関係的に配置ができません"
-
-            else
-                -- current から h0 - l0.margin.bottom まで建設する。
-                constructSinglePierRec
-                    (buildSingleUpto l accum (h - l.margin.bottom) current)
-                    h
-                    (h + l.margin.top)
-                    ls
-
-
-buildSingleUpto : PierLocation -> List PierRenderData -> Int -> Int -> List PierRenderData
-buildSingleUpto template accum to from =
-    if from >= to then
-        accum
-
-    else if to >= from + Pier.getHeight Pier.Single then
-        buildSingleUpto
-            template
-            (pierLocationToPlacement Pier.Single (PierLocation.setHeight from template) :: accum)
-            to
-            (from + Pier.getHeight Pier.Single)
-
-    else
-        buildSingleUpto
-            template
-            (pierLocationToPlacement Pier.Mini (PierLocation.setHeight from template) :: accum)
-            to
-            (from + Pier.getHeight Pier.Mini)
-
-
-mergeMargin : PierMargin -> PierMargin -> PierMargin
-mergeMargin x y =
-    { top = max x.top y.top
-    , bottom = max x.bottom y.bottom
-    }
-
-
-mergePierLocations : List PierLocation -> List ( Int, PierLocation )
-mergePierLocations list =
-    Dict.toList <|
-        List.foldl
-            (\loc ->
-                Dict.update loc.location.height <|
-                    \elem ->
-                        case elem of
-                            Nothing ->
-                                Just loc
-
-                            Just x ->
-                                Just { x | margin = mergeMargin x.margin loc.margin }
-            )
-            Dict.empty
-            list
-
-
-singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierRenderData)
-singlePier single =
-    foldlResult
-        (\( _, ( _, pierLocs ) ) result ->
-            Result.map (\r1 -> List.append r1 result) (constructSinglePier pierLocs)
-        )
-        []
-    <|
-        Dict.toList single
-
-
-doubleTrackPiers : Dict String ( Dir, List PierLocation ) -> Result String ( Dict String ( Dir, List PierLocation ), Dict String ( Dir, List PierLocation, List PierLocation ) )
-doubleTrackPiers dict =
-    doubleTrackPiersRec Dict.empty Dict.empty dict (Dict.toList dict)
-
-
-doubleTrackPiersRec :
-    Dict String ( Dir, List PierLocation )
-    -> Dict String ( Dir, List PierLocation, List PierLocation )
-    -> Dict String ( Dir, List PierLocation )
-    -> List ( String, ( Dir, List PierLocation ) )
-    -> Result String ( Dict String ( Dir, List PierLocation ), Dict String ( Dir, List PierLocation, List PierLocation ) )
-doubleTrackPiersRec single double open list =
-    case list of
-        [] ->
-            Ok ( single, double )
-
-        ( key, ( dir, pierLocs ) ) :: xs ->
-            case List.head pierLocs of
-                Nothing ->
-                    Err "複線橋脚の構築で内部的なエラーが発生しました"
-
-                -- something is wrong
-                Just pierLoc ->
-                    -- 巡回済みでないことを確認する
-                    if Dict.member key open then
-                        let
-                            leftKey =
-                                pierKey (Location.moveLeftByDoubleTrackLength pierLoc.location)
-                        in
-                        case ( Dict.get leftKey single, Dict.get leftKey open ) of
-                            ( Just ( dir2, pierLocs2 ), _ ) ->
-                                -- single　の方にすでに入れられたものと併合する。
-                                if dir == dir2 then
-                                    doubleTrackPiersRec
-                                        (Dict.remove leftKey single)
-                                        (Dict.insert key ( dir, pierLocs, pierLocs2 ) double)
-                                        (Dict.remove key open)
-                                        xs
-
-                                else
-                                    Err "複線橋脚の構築時に隣のレールとの方向が合いません"
-
-                            ( _, Just ( dir2, pierLocs2 ) ) ->
-                                -- open の方にまだ残っていたものと併合する
-                                if dir == dir2 then
-                                    doubleTrackPiersRec
-                                        single
-                                        (Dict.insert key ( dir, pierLocs, pierLocs2 ) double)
-                                        (Dict.remove leftKey <| Dict.remove key open)
-                                        xs
-
-                                else
-                                    Err "複線橋脚の構築時に隣のレールとの方向が合いません"
-
-                            ( _, _ ) ->
-                                -- 横方向にはなさそうなので、singleに追加する
-                                doubleTrackPiersRec
-                                    (Dict.insert key ( dir, pierLocs ) single)
-                                    double
-                                    (Dict.remove key open)
-                                    xs
-
-                    else
-                        doubleTrackPiersRec single double open xs
-
-
-doublePier : Dict String ( Dir, List PierLocation, List PierLocation ) -> Result String (List PierRenderData)
-doublePier double =
-    foldlResult
-        (\( _, ( _, centerLocs, leftLocs ) ) result ->
-            Result.map (\r1 -> List.append r1 result) (constructDoublePier centerLocs leftLocs)
-        )
-        []
-    <|
-        Dict.toList double
-
-
-{-| 現状では、複線橋脚だけで建設することにする
+{-| レールを引くことに関してと、橋脚をどう設置するかについては別問題に思えたので、
+レールの端点の定義から橋脚の配置についての定義を分離する。
 -}
-constructDoublePier : List PierLocation -> List PierLocation -> Result String (List PierRenderData)
-constructDoublePier center left =
-    let
-        maxHeight =
-            Basics.max (maximumHeight center) (maximumHeight left)
-    in
-    case List.head center of
-        Nothing ->
-            Err "複線橋脚の構築で内部的なエラーが発生しました"
+getPierLocations : Rail invert flip -> List PierPlacement
+getPierLocations rail =
+    case rail of
+        Straight1 _ ->
+            [ Must <| PierLocation.make Rot45.zer
+            ]
 
-        Just loc ->
-            Ok <| buildDoubleUpto loc [] maxHeight 0
+        Straight2 i ->
+            invert i <| twoEnds minusZero <| goStraightPlus 4
+
+        Straight4 i ->
+            invert i <| twoEnds minusZero <| goStraightPlus 8
+
+        Straight8 i ->
+            invert i <| twoEnds minusZero <| goStraightPlus 16
+
+        DoubleStraight4 i ->
+            invert i <| fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight (goStraightPlus 8)
+
+        Curve45 f i ->
+            invert i <| flip f <| twoEnds minusZero turnLeft45deg
+
+        Curve90 f i ->
+            invert i <|
+                flip f <|
+                    { railLocations = Nonempty minusZero [ turnLeft90deg ]
+                    , pierLocations = List.map (PierLocation.fromRailLocation PierLocation.flatRailMargin) [ minusZero, turnLeft45deg, turnLeft90deg ]
+                    , origin = RailLocation.zero
+                    }
+
+        OuterCurve45 f i ->
+            invert i <| flip f <| twoEnds minusZero turnLeftOuter45deg
+
+        DoubleCurve45 f i ->
+            invert i <|
+                flip f <|
+                    fourEnds
+                        minusZero
+                        doubleTrackRightZeroMinus
+                        (RailLocation.make (Rot45.make 0 0 8 -8) (Rot45.make 0 0 0 -2) 0 Dir.ne Joint.Plus)
+                        turnLeft45deg
+
+        Turnout f i ->
+            invert i <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
+
+        SingleDouble f i ->
+            invert i <| flip f <| threeEnds minusZero (goStraightPlus 8) doubleTrackLeft
+
+        DoubleWide f i ->
+            invert i <| flip f <| fourEnds minusZero (goStraightMinus 10) doubleTrackWideLeft doubleTrackLeftZeroMinus
+
+        EightPoint f i ->
+            invert i <| flip f <| threeEnds minusZero turnRight45degMinus turnLeft45deg
+
+        JointChange i ->
+            invert i <| twoEnds minusZero (goStraightMinus 2)
+
+        Slope f i ->
+            invert i <| flip f <| twoEnds minusZero (RailLocation.setHeight 4 (goStraightPlus 16))
+
+        Shift f i ->
+            invert i <| flip f <| twoEnds minusZero doubleTrackLeft
+
+        SlopeCurveA ->
+            { railLocations =
+                Nonempty plusZero [ slopeCurveA ]
+            , pierLocations =
+                [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
+                , { location = slopeCurveA.location, margin = PierLocation.slopeCurveMargin }
+                ]
+            , origin = RailLocation.zero
+            }
+
+        SlopeCurveB ->
+            { railLocations =
+                Nonempty minusZero [ slopeCurveB ]
+            , pierLocations =
+                [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
+                , { location = slopeCurveB.location, margin = PierLocation.slopeCurveMargin }
+                ]
+            , origin = RailLocation.zero
+            }
+
+        Stop i ->
+            invert i <| twoEnds minusZero (goStraightPlus 8)
+
+        AutoTurnout ->
+            threeEnds minusZero (goStraightPlus 12) (RailLocation.mul (goStraightPlus 4).location turnLeft45deg)
+
+        AutoPoint ->
+            fourEnds minusZero (RailLocation.mul (goStraightPlus 4).location doubleTrackRight) (goStraightPlus 12) (RailLocation.mul (goStraightPlus 4).location turnLeft45deg)
+
+        AutoCross ->
+            fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRight (goStraightPlus 8)
+
+        UTurn ->
+            { railLocations =
+                Nonempty minusZero [ doubleTrackLeftZeroMinus ]
+            , pierLocations =
+                List.map (\loc -> { location = loc, margin = PierLocation.flatRailMargin })
+                    [ minusZero.location
+                    , Location.make (Rot45.make 10 -5 0 0) (Rot45.make 0 0 1 0) 0 Dir.se
+                    , Location.make (Rot45.make 10 0 -5 0) (Rot45.make 0 0 1 0) 0 Dir.e
+                    , Location.make (Rot45.make 10 0 0 -5) (Rot45.make 0 0 1 0) 0 Dir.ne
+                    , Location.make (Rot45.make 15 0 0 0) (Rot45.make 0 0 1 0) 0 Dir.n
+                    , Location.make (Rot45.make 10 5 0 0) (Rot45.make 0 0 1 0) 0 Dir.nw
+                    , Location.make (Rot45.make 10 0 5 0) (Rot45.make 0 0 1 0) 0 Dir.w
+                    , Location.make (Rot45.make 10 0 0 5) (Rot45.make 0 0 1 0) 0 Dir.sw
+                    , doubleTrackLeftZeroMinus.location
+                    ]
+            , origin = RailLocation.zero
+            }
+
+        Oneway f ->
+            invert Inverted <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45deg
+
+        WideCross ->
+            fourEnds
+                minusZero
+                (RailLocation.make (Rot45.make 0 0 -4 0) Rot45.zero 0 Dir.w Joint.Plus)
+                (RailLocation.make (Rot45.make 8 0 -4 0) Rot45.zero 0 Dir.e Joint.Minus)
+                (goStraightPlus 8)
+
+        Forward i ->
+            invert i <| twoEnds minusZero (goStraightPlus 4)
+
+        Backward i ->
+            invert i <| twoEnds minusZero (goStraightPlus 4)
 
 
-buildDoubleUpto : PierLocation -> List PierRenderData -> Int -> Int -> List PierRenderData
-buildDoubleUpto template accum to from =
-    if from >= to then
-        accum
-
-    else
-        buildDoubleUpto
-            template
-            (pierLocationToPlacement Pier.Wide (PierLocation.setHeight from template) :: accum)
-            to
-            (from + Pier.getHeight Pier.Wide)
-
-
-maximumHeight : List PierLocation -> Int
-maximumHeight ls =
-    List.foldl (\loc -> Basics.max loc.location.height) 0 ls
-
-
-{-| the main function of pier-construction
--}
-toPierRenderData : List PierLocation -> Result String (List PierRenderData)
+toPierRenderData : List RailPlacement -> Result String (List PierRenderData)
 toPierRenderData list =
-    list
-        |> List.map cleansePierLocations
-        |> divideIntoDict
-        |> Result.andThen doubleTrackPiers
-        |> Result.andThen
-            (\( single, double ) ->
-                Result.map2 (\s d -> s ++ d)
-                    (singlePier single)
-                    (doublePier double)
-            )
+    construct <| List.concatMap RailPiece.getPierLocations list

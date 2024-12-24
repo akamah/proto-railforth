@@ -320,7 +320,7 @@ haltWithError err =
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    case PierConstruction.toPierRenderData (List.concatMap RailPiece.getPierLocations status.global.rails) of
+    case PierConstruction.toPierRenderData status.global.rails of
         Ok pierRenderData ->
             { rails = List.map RailPlacement.toRailRenderData status.global.rails
             , errMsg = Nothing

@@ -11126,12 +11126,6 @@ var $author$project$Forth$Interpreter$haltWithError = function (err) {
 		rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, err.status.global.rails)
 	};
 };
-var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) {
-	return A2(
-		$elm$core$List$map,
-		$author$project$Forth$Geometry$PierLocation$mul(railPlacement.location),
-		$author$project$Forth$RailPiece$getRailPiece(railPlacement.rail).pierLocations);
-};
 var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
 	return A3(
 		$author$project$Types$Rail$toStringWith,
@@ -11185,7 +11179,7 @@ var $author$project$Forth$Geometry$Dir$toUndirectedDir = function (_v0) {
 	var x = _v0.a;
 	return (x >= 4) ? $author$project$Forth$Geometry$Dir$Dir(x - 4) : $author$project$Forth$Geometry$Dir$Dir(x);
 };
-var $author$project$Forth$PierConstruction$cleansePierLocations = function (placement) {
+var $author$project$Forth$PierConstraction$Impl$cleansePierLocations = function (placement) {
 	var loc = placement.location;
 	return _Utils_update(
 		placement,
@@ -11214,7 +11208,7 @@ var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
 				_List_fromArray(
 					[a, b, c, d]))));
 };
-var $author$project$Forth$PierConstruction$pierKey = function (loc) {
+var $author$project$Forth$PierConstraction$Impl$pierKey = function (loc) {
 	return $author$project$Forth$Geometry$Rot45$toString(loc.single) + (',' + $author$project$Forth$Geometry$Rot45$toString(loc._double));
 };
 var $elm$core$Result$map = F2(
@@ -11228,7 +11222,7 @@ var $elm$core$Result$map = F2(
 			return $elm$core$Result$Err(e);
 		}
 	});
-var $author$project$Forth$PierConstruction$updateWithResult = F3(
+var $author$project$Util$updateWithResult = F3(
 	function (key, f, dict) {
 		return A2(
 			$elm$core$Result$map,
@@ -11238,12 +11232,12 @@ var $author$project$Forth$PierConstruction$updateWithResult = F3(
 			f(
 				A2($elm$core$Dict$get, key, dict)));
 	});
-var $author$project$Forth$PierConstruction$divideIntoDict = A2(
+var $author$project$Forth$PierConstraction$Impl$divideIntoDict = A2(
 	$author$project$Util$foldlResult,
 	function (loc) {
 		return A2(
-			$author$project$Forth$PierConstruction$updateWithResult,
-			$author$project$Forth$PierConstruction$pierKey(loc.location),
+			$author$project$Util$updateWithResult,
+			$author$project$Forth$PierConstraction$Impl$pierKey(loc.location),
 			function (maybe) {
 				if (maybe.$ === 'Nothing') {
 					return $elm$core$Result$Ok(
@@ -11259,7 +11253,7 @@ var $author$project$Forth$PierConstruction$divideIntoDict = A2(
 						_Utils_Tuple2(
 							dir,
 							A2($elm$core$List$cons, loc, lis))) : $elm$core$Result$Err(
-						'橋脚の方向が一致しません ' + $author$project$Forth$PierConstruction$pierKey(loc.location));
+						'橋脚の方向が一致しません ' + $author$project$Forth$PierConstraction$Impl$pierKey(loc.location));
 				}
 			});
 	},
@@ -11278,7 +11272,7 @@ var $author$project$Types$Pier$getHeight = function (pier) {
 var $author$project$Forth$Geometry$PierLocation$toVec3 = function (loc) {
 	return $author$project$Forth$Geometry$Location$toVec3(loc.location);
 };
-var $author$project$Forth$PierConstruction$pierLocationToPlacement = F2(
+var $author$project$Forth$PierConstraction$Impl$pierLocationToPlacement = F2(
 	function (kind, loc) {
 		return {
 			angle: $author$project$Forth$Geometry$Dir$toRadian(loc.location.dir),
@@ -11294,7 +11288,7 @@ var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
 				location: A2($author$project$Forth$Geometry$Location$setHeight, newHeight, loc.location)
 			});
 	});
-var $author$project$Forth$PierConstruction$buildDoubleUpto = F4(
+var $author$project$Forth$PierConstraction$Impl$buildDoubleUpto = F4(
 	function (template, accum, to, from) {
 		buildDoubleUpto:
 		while (true) {
@@ -11305,7 +11299,7 @@ var $author$project$Forth$PierConstruction$buildDoubleUpto = F4(
 					$temp$accum = A2(
 					$elm$core$List$cons,
 					A2(
-						$author$project$Forth$PierConstruction$pierLocationToPlacement,
+						$author$project$Forth$PierConstraction$Impl$pierLocationToPlacement,
 						$author$project$Types$Pier$Wide,
 						A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 					accum),
@@ -11328,7 +11322,7 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Forth$PierConstruction$maximumHeight = function (ls) {
+var $author$project$Forth$PierConstraction$Impl$maximumHeight = function (ls) {
 	return A3(
 		$elm$core$List$foldl,
 		function (loc) {
@@ -11337,22 +11331,22 @@ var $author$project$Forth$PierConstruction$maximumHeight = function (ls) {
 		0,
 		ls);
 };
-var $author$project$Forth$PierConstruction$constructDoublePier = F2(
+var $author$project$Forth$PierConstraction$Impl$constructDoublePier = F2(
 	function (center, left) {
 		var maxHeight = A2(
 			$elm$core$Basics$max,
-			$author$project$Forth$PierConstruction$maximumHeight(center),
-			$author$project$Forth$PierConstruction$maximumHeight(left));
+			$author$project$Forth$PierConstraction$Impl$maximumHeight(center),
+			$author$project$Forth$PierConstraction$Impl$maximumHeight(left));
 		var _v0 = $elm$core$List$head(center);
 		if (_v0.$ === 'Nothing') {
 			return $elm$core$Result$Err('複線橋脚の構築で内部的なエラーが発生しました');
 		} else {
 			var loc = _v0.a;
 			return $elm$core$Result$Ok(
-				A4($author$project$Forth$PierConstruction$buildDoubleUpto, loc, _List_Nil, maxHeight, 0));
+				A4($author$project$Forth$PierConstraction$Impl$buildDoubleUpto, loc, _List_Nil, maxHeight, 0));
 		}
 	});
-var $author$project$Forth$PierConstruction$doublePier = function (_double) {
+var $author$project$Forth$PierConstraction$Impl$doublePier = function (_double) {
 	return A3(
 		$author$project$Util$foldlResult,
 		F2(
@@ -11365,7 +11359,7 @@ var $author$project$Forth$PierConstruction$doublePier = function (_double) {
 					function (r1) {
 						return A2($elm$core$List$append, r1, result);
 					},
-					A2($author$project$Forth$PierConstruction$constructDoublePier, centerLocs, leftLocs));
+					A2($author$project$Forth$PierConstraction$Impl$constructDoublePier, centerLocs, leftLocs));
 			}),
 		_List_Nil,
 		$elm$core$Dict$toList(_double));
@@ -11393,7 +11387,7 @@ var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = functi
 			0,
 			$author$project$Forth$Geometry$Dir$e));
 };
-var $author$project$Forth$PierConstruction$doubleTrackPiersRec = F4(
+var $author$project$Forth$PierConstraction$Impl$doubleTrackPiersRec = F4(
 	function (single, _double, open, list) {
 		doubleTrackPiersRec:
 		while (true) {
@@ -11413,7 +11407,7 @@ var $author$project$Forth$PierConstruction$doubleTrackPiersRec = F4(
 				} else {
 					var pierLoc = _v3.a;
 					if (A2($elm$core$Dict$member, key, open)) {
-						var leftKey = $author$project$Forth$PierConstruction$pierKey(
+						var leftKey = $author$project$Forth$PierConstraction$Impl$pierKey(
 							$author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(pierLoc.location));
 						var _v4 = _Utils_Tuple2(
 							A2($elm$core$Dict$get, leftKey, single),
@@ -11495,9 +11489,9 @@ var $author$project$Forth$PierConstruction$doubleTrackPiersRec = F4(
 			}
 		}
 	});
-var $author$project$Forth$PierConstruction$doubleTrackPiers = function (dict) {
+var $author$project$Forth$PierConstraction$Impl$doubleTrackPiers = function (dict) {
 	return A4(
-		$author$project$Forth$PierConstruction$doubleTrackPiersRec,
+		$author$project$Forth$PierConstraction$Impl$doubleTrackPiersRec,
 		$elm$core$Dict$empty,
 		$elm$core$Dict$empty,
 		dict,
@@ -11522,7 +11516,7 @@ var $elm$core$Result$map2 = F3(
 	});
 var $author$project$Types$Pier$Mini = {$: 'Mini'};
 var $author$project$Types$Pier$Single = {$: 'Single'};
-var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
+var $author$project$Forth$PierConstraction$Impl$buildSingleUpto = F4(
 	function (template, accum, to, from) {
 		buildSingleUpto:
 		while (true) {
@@ -11536,7 +11530,7 @@ var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 						$temp$accum = A2(
 						$elm$core$List$cons,
 						A2(
-							$author$project$Forth$PierConstruction$pierLocationToPlacement,
+							$author$project$Forth$PierConstraction$Impl$pierLocationToPlacement,
 							$author$project$Types$Pier$Single,
 							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 						accum),
@@ -11552,7 +11546,7 @@ var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 						$temp$accum = A2(
 						$elm$core$List$cons,
 						A2(
-							$author$project$Forth$PierConstruction$pierLocationToPlacement,
+							$author$project$Forth$PierConstraction$Impl$pierLocationToPlacement,
 							$author$project$Types$Pier$Mini,
 							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
 						accum),
@@ -11567,7 +11561,7 @@ var $author$project$Forth$PierConstruction$buildSingleUpto = F4(
 			}
 		}
 	});
-var $author$project$Forth$PierConstruction$constructSinglePierRec = F4(
+var $author$project$Forth$PierConstraction$Impl$constructSinglePierRec = F4(
 	function (accum, current, top, locs) {
 		constructSinglePierRec:
 		while (true) {
@@ -11581,7 +11575,7 @@ var $author$project$Forth$PierConstruction$constructSinglePierRec = F4(
 				if (_Utils_cmp(top, h - l.margin.bottom) > 0) {
 					return $elm$core$Result$Err('ブロックの付いたレールとかの位置関係的に配置ができません');
 				} else {
-					var $temp$accum = A4($author$project$Forth$PierConstruction$buildSingleUpto, l, accum, h - l.margin.bottom, current),
+					var $temp$accum = A4($author$project$Forth$PierConstraction$Impl$buildSingleUpto, l, accum, h - l.margin.bottom, current),
 						$temp$current = h,
 						$temp$top = h + l.margin.top,
 						$temp$locs = ls;
@@ -11594,14 +11588,14 @@ var $author$project$Forth$PierConstruction$constructSinglePierRec = F4(
 			}
 		}
 	});
-var $author$project$Forth$PierConstruction$mergeMargin = F2(
+var $author$project$Forth$PierConstraction$Impl$mergeMargin = F2(
 	function (x, y) {
 		return {
 			bottom: A2($elm$core$Basics$max, x.bottom, y.bottom),
 			top: A2($elm$core$Basics$max, x.top, y.top)
 		};
 	});
-var $author$project$Forth$PierConstruction$mergePierLocations = function (list) {
+var $author$project$Forth$PierConstraction$Impl$mergePierLocations = function (list) {
 	return $elm$core$Dict$toList(
 		A3(
 			$elm$core$List$foldl,
@@ -11618,7 +11612,7 @@ var $author$project$Forth$PierConstruction$mergePierLocations = function (list) 
 								_Utils_update(
 									x,
 									{
-										margin: A2($author$project$Forth$PierConstruction$mergeMargin, x.margin, loc.margin)
+										margin: A2($author$project$Forth$PierConstraction$Impl$mergeMargin, x.margin, loc.margin)
 									}));
 						}
 					});
@@ -11626,15 +11620,15 @@ var $author$project$Forth$PierConstruction$mergePierLocations = function (list) 
 			$elm$core$Dict$empty,
 			list));
 };
-var $author$project$Forth$PierConstruction$constructSinglePier = function (list) {
+var $author$project$Forth$PierConstraction$Impl$constructSinglePier = function (list) {
 	return A4(
-		$author$project$Forth$PierConstruction$constructSinglePierRec,
+		$author$project$Forth$PierConstraction$Impl$constructSinglePierRec,
 		_List_Nil,
 		0,
 		0,
-		$author$project$Forth$PierConstruction$mergePierLocations(list));
+		$author$project$Forth$PierConstraction$Impl$mergePierLocations(list));
 };
-var $author$project$Forth$PierConstruction$singlePier = function (single) {
+var $author$project$Forth$PierConstraction$Impl$singlePier = function (single) {
 	return A3(
 		$author$project$Util$foldlResult,
 		F2(
@@ -11646,12 +11640,12 @@ var $author$project$Forth$PierConstruction$singlePier = function (single) {
 					function (r1) {
 						return A2($elm$core$List$append, r1, result);
 					},
-					$author$project$Forth$PierConstruction$constructSinglePier(pierLocs));
+					$author$project$Forth$PierConstraction$Impl$constructSinglePier(pierLocs));
 			}),
 		_List_Nil,
 		$elm$core$Dict$toList(single));
 };
-var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
+var $author$project$Forth$PierConstraction$Impl$construct = function (list) {
 	return A2(
 		$elm$core$Result$andThen,
 		function (_v0) {
@@ -11663,18 +11657,27 @@ var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
 					function (s, d) {
 						return _Utils_ap(s, d);
 					}),
-				$author$project$Forth$PierConstruction$singlePier(single),
-				$author$project$Forth$PierConstruction$doublePier(_double));
+				$author$project$Forth$PierConstraction$Impl$singlePier(single),
+				$author$project$Forth$PierConstraction$Impl$doublePier(_double));
 		},
 		A2(
 			$elm$core$Result$andThen,
-			$author$project$Forth$PierConstruction$doubleTrackPiers,
-			$author$project$Forth$PierConstruction$divideIntoDict(
-				A2($elm$core$List$map, $author$project$Forth$PierConstruction$cleansePierLocations, list))));
+			$author$project$Forth$PierConstraction$Impl$doubleTrackPiers,
+			$author$project$Forth$PierConstraction$Impl$divideIntoDict(
+				A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, list))));
+};
+var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) {
+	return A2(
+		$elm$core$List$map,
+		$author$project$Forth$Geometry$PierLocation$mul(railPlacement.location),
+		$author$project$Forth$RailPiece$getRailPiece(railPlacement.rail).pierLocations);
+};
+var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
+	return $author$project$Forth$PierConstraction$Impl$construct(
+		A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, list));
 };
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
-	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(
-		A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, status.global.rails));
+	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(status.global.rails);
 	if (_v0.$ === 'Ok') {
 		var pierRenderData = _v0.a;
 		return {
