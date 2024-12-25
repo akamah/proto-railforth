@@ -7,8 +7,8 @@ import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
 import Forth.Geometry.Rot45 as Rot45
+import Forth.PierPlacement as PierPlacement exposing (PierPlacement)
 import Types.Pier as Pier exposing (Pier)
-import Types.PierRenderData exposing (PierRenderData)
 import Util exposing (foldlResult, updateWithResult)
 
 
@@ -81,20 +81,17 @@ divideIntoDict =
         Dict.empty
 
 
-pierLocationToPlacement : Pier -> PierLocation -> PierRenderData
+pierLocationToPlacement : Pier -> PierLocation -> PierPlacement
 pierLocationToPlacement kind loc =
-    { pier = kind
-    , position = PierLocation.toVec3 loc
-    , angle = Dir.toRadian loc.location.dir
-    }
+    PierPlacement.make kind loc.location
 
 
-constructSinglePier : List PierLocation -> Result String (List PierRenderData)
+constructSinglePier : List PierLocation -> Result String (List PierPlacement)
 constructSinglePier list =
     constructSinglePierRec [] 0 0 <| mergePierLocations list
 
 
-constructSinglePierRec : List PierRenderData -> Int -> Int -> List ( Int, PierLocation ) -> Result String (List PierRenderData)
+constructSinglePierRec : List PierPlacement -> Int -> Int -> List ( Int, PierLocation ) -> Result String (List PierPlacement)
 constructSinglePierRec accum current top locs =
     case locs of
         [] ->
@@ -114,7 +111,7 @@ constructSinglePierRec accum current top locs =
                     ls
 
 
-buildSingleUpto : PierLocation -> List PierRenderData -> Int -> Int -> List PierRenderData
+buildSingleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
 buildSingleUpto template accum to from =
     if from >= to then
         accum
@@ -159,7 +156,7 @@ mergePierLocations list =
             list
 
 
-singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierRenderData)
+singlePier : Dict String ( Dir, List PierLocation ) -> Result String (List PierPlacement)
 singlePier single =
     foldlResult
         (\( _, ( _, pierLocs ) ) result ->
@@ -236,7 +233,7 @@ doubleTrackPiersRec single double open list =
                         doubleTrackPiersRec single double open xs
 
 
-doublePier : Dict String ( Dir, List PierLocation, List PierLocation ) -> Result String (List PierRenderData)
+doublePier : Dict String ( Dir, List PierLocation, List PierLocation ) -> Result String (List PierPlacement)
 doublePier double =
     foldlResult
         (\( _, ( _, centerLocs, leftLocs ) ) result ->
@@ -249,7 +246,7 @@ doublePier double =
 
 {-| 現状では、複線橋脚だけで建設することにする
 -}
-constructDoublePier : List PierLocation -> List PierLocation -> Result String (List PierRenderData)
+constructDoublePier : List PierLocation -> List PierLocation -> Result String (List PierPlacement)
 constructDoublePier center left =
     let
         maxHeight =
@@ -263,7 +260,7 @@ constructDoublePier center left =
             Ok <| buildDoubleUpto loc [] maxHeight 0
 
 
-buildDoubleUpto : PierLocation -> List PierRenderData -> Int -> Int -> List PierRenderData
+buildDoubleUpto : PierLocation -> List PierPlacement -> Int -> Int -> List PierPlacement
 buildDoubleUpto template accum to from =
     if from >= to then
         accum
@@ -289,7 +286,7 @@ type alias PierConstructionParams =
 
 
 type alias PierConstructionResult =
-    { pierRenderData : List PierRenderData
+    { pierPlacements : List PierPlacement
     , error : Maybe PierConstructionError
     }
 
@@ -314,12 +311,12 @@ construct { must } =
                         (doublePier double)
                 )
     of
-        Ok pierRenderData ->
-            { pierRenderData = pierRenderData
+        Ok pierPlacements ->
+            { pierPlacements = pierPlacements
             , error = Nothing
             }
 
         Err err ->
-            { pierRenderData = []
+            { pierPlacements = []
             , error = Just err
             }

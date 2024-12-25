@@ -11230,16 +11230,14 @@ var $author$project$Types$Pier$getHeight = function (pier) {
 			return 1;
 	}
 };
-var $author$project$Forth$Geometry$PierLocation$toVec3 = function (loc) {
-	return $author$project$Forth$Geometry$Location$toVec3(loc.location);
-};
+var $author$project$Forth$PierPlacement$PierPlacement = F2(
+	function (pier, location) {
+		return {location: location, pier: pier};
+	});
+var $author$project$Forth$PierPlacement$make = $author$project$Forth$PierPlacement$PierPlacement;
 var $author$project$Forth$PierConstraction$Impl$pierLocationToPlacement = F2(
 	function (kind, loc) {
-		return {
-			angle: $author$project$Forth$Geometry$Dir$toRadian(loc.location.dir),
-			pier: kind,
-			position: $author$project$Forth$Geometry$PierLocation$toVec3(loc)
-		};
+		return A2($author$project$Forth$PierPlacement$make, kind, loc.location);
 	});
 var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
 	function (newHeight, loc) {
@@ -11639,13 +11637,13 @@ var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
 			$author$project$Forth$PierConstraction$Impl$divideIntoDict(
 				A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, must))));
 	if (_v1.$ === 'Ok') {
-		var pierRenderData = _v1.a;
-		return {error: $elm$core$Maybe$Nothing, pierRenderData: pierRenderData};
+		var pierPlacements = _v1.a;
+		return {error: $elm$core$Maybe$Nothing, pierPlacements: pierPlacements};
 	} else {
 		var err = _v1.a;
 		return {
 			error: $elm$core$Maybe$Just(err),
-			pierRenderData: _List_Nil
+			pierPlacements: _List_Nil
 		};
 	}
 };
@@ -11655,13 +11653,30 @@ var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) 
 		$author$project$Forth$Geometry$PierLocation$mul(railPlacement.location),
 		$author$project$Forth$RailPiece$getRailPiece(railPlacement.rail).pierLocations);
 };
+var $author$project$Types$PierRenderData$make = F3(
+	function (pier, position, angle) {
+		return {angle: angle, pier: pier, position: position};
+	});
+var $author$project$Forth$PierPlacement$toPierRenderData = function (placement) {
+	return A3(
+		$author$project$Types$PierRenderData$make,
+		placement.pier,
+		$author$project$Forth$Geometry$Location$toVec3(placement.location),
+		$author$project$Forth$Geometry$Dir$toRadian(placement.location.dir));
+};
 var $author$project$Forth$PierConstruction$construct = function (list) {
-	return $author$project$Forth$PierConstraction$Impl$construct(
+	var _v0 = $author$project$Forth$PierConstraction$Impl$construct(
 		{
 			may: _List_Nil,
 			must: A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, list),
 			mustNot: _List_Nil
 		});
+	var pierPlacements = _v0.pierPlacements;
+	var error = _v0.error;
+	return {
+		error: error,
+		pierRenderData: A2($elm$core$List$map, $author$project$Forth$PierPlacement$toPierRenderData, pierPlacements)
+	};
 };
 var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
 	return A3(

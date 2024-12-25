@@ -1,8 +1,7 @@
 module Forth.PierConstruction exposing (construct)
 
-import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
-import Forth.PierConstraction.Impl as Impl exposing (construct)
-import Forth.PierPlacement as PierPlacement exposing (PierPlacement)
+import Forth.PierConstraction.Impl as Impl
+import Forth.PierPlacement as PierPlacement
 import Forth.RailPiece as RailPiece
 import Forth.RailPlacement exposing (RailPlacement)
 import Types.PierRenderData exposing (PierRenderData)
@@ -32,8 +31,14 @@ type alias PierConstructionError =
 
 construct : List RailPlacement -> PierConstructionResult
 construct list =
-    Impl.construct
-        { must = List.concatMap RailPiece.getPierLocations list
-        , may = []
-        , mustNot = []
-        }
+    let
+        { pierPlacements, error } =
+            Impl.construct
+                { must = List.concatMap RailPiece.getPierLocations list
+                , may = []
+                , mustNot = []
+                }
+    in
+    { pierRenderData = List.map PierPlacement.toPierRenderData pierPlacements
+    , error = error
+    }
