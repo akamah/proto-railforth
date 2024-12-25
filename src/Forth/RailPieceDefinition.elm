@@ -2,12 +2,10 @@ module Forth.RailPieceDefinition exposing (..)
 
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint
-import Forth.Geometry.Location as Location
-import Forth.Geometry.PierLocation as PierLocation
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
 import Forth.RailPiece exposing (RailPiece, flip, invert)
-import List.Nonempty as Nonempty exposing (Nonempty(..))
+import List.Nonempty exposing (Nonempty(..))
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 
 
@@ -16,27 +14,26 @@ import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
 {- リファクタリングの途中なので、pierLocationsも同時に返すようになってしまっている。 -}
 
 
-makeFlatRailPiece : Nonempty RailLocation -> RailPiece
-makeFlatRailPiece list =
+makeRailPiece : Nonempty RailLocation -> RailPiece
+makeRailPiece list =
     { railLocations = list
-    , pierLocations = List.map (PierLocation.fromRailLocation PierLocation.flatRailMargin) <| Nonempty.toList list
     , origin = RailLocation.zero
     }
 
 
 twoEnds : RailLocation -> RailLocation -> RailPiece
 twoEnds a b =
-    makeFlatRailPiece <| Nonempty a [ b ]
+    makeRailPiece <| Nonempty a [ b ]
 
 
 threeEnds : RailLocation -> RailLocation -> RailLocation -> RailPiece
 threeEnds a b c =
-    makeFlatRailPiece <| Nonempty a [ b, c ]
+    makeRailPiece <| Nonempty a [ b, c ]
 
 
 fourEnds : RailLocation -> RailLocation -> RailLocation -> RailLocation -> RailPiece
 fourEnds a b c d =
-    makeFlatRailPiece <| Nonempty a [ b, c, d ]
+    makeRailPiece <| Nonempty a [ b, c, d ]
 
 
 minusZero : RailLocation
@@ -161,12 +158,7 @@ getRailPiece rail =
             invert i <| flip f <| twoEnds minusZero turnLeft45degPlus
 
         Curve90 f i ->
-            invert i <|
-                flip f <|
-                    { railLocations = Nonempty minusZero [ turnLeft90degPlus ]
-                    , pierLocations = List.map (PierLocation.fromRailLocation PierLocation.flatRailMargin) [ minusZero, turnLeft45degPlus, turnLeft90degPlus ]
-                    , origin = RailLocation.zero
-                    }
+            invert i <| flip f <| twoEnds minusZero turnLeft90degPlus
 
         OuterCurve45 f i ->
             invert i <| flip f <| twoEnds minusZero turnLeftOuter45degPlus
@@ -202,24 +194,10 @@ getRailPiece rail =
             invert i <| flip f <| twoEnds minusZero doubleTrackLeftPlus
 
         SlopeCurveA ->
-            { railLocations =
-                Nonempty plusZero [ slopeCurveA ]
-            , pierLocations =
-                [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
-                , { location = slopeCurveA.location, margin = PierLocation.slopeCurveMargin }
-                ]
-            , origin = RailLocation.zero
-            }
+            twoEnds plusZero slopeCurveA
 
         SlopeCurveB ->
-            { railLocations =
-                Nonempty minusZero [ slopeCurveB ]
-            , pierLocations =
-                [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
-                , { location = slopeCurveB.location, margin = PierLocation.slopeCurveMargin }
-                ]
-            , origin = RailLocation.zero
-            }
+            twoEnds minusZero slopeCurveB
 
         Stop i ->
             invert i <| twoEnds minusZero (goStraightPlus 8)
@@ -245,22 +223,7 @@ getRailPiece rail =
                 (goStraightPlus 8)
 
         UTurn ->
-            { railLocations =
-                Nonempty minusZero [ doubleTrackLeftZeroMinus ]
-            , pierLocations =
-                List.map (\loc -> { location = loc, margin = PierLocation.flatRailMargin })
-                    [ minusZero.location
-                    , Location.make (Rot45.make 10 -5 0 0) (Rot45.make 0 0 1 0) 0 Dir.se
-                    , Location.make (Rot45.make 10 0 -5 0) (Rot45.make 0 0 1 0) 0 Dir.e
-                    , Location.make (Rot45.make 10 0 0 -5) (Rot45.make 0 0 1 0) 0 Dir.ne
-                    , Location.make (Rot45.make 15 0 0 0) (Rot45.make 0 0 1 0) 0 Dir.n
-                    , Location.make (Rot45.make 10 5 0 0) (Rot45.make 0 0 1 0) 0 Dir.nw
-                    , Location.make (Rot45.make 10 0 5 0) (Rot45.make 0 0 1 0) 0 Dir.w
-                    , Location.make (Rot45.make 10 0 0 5) (Rot45.make 0 0 1 0) 0 Dir.sw
-                    , doubleTrackLeftZeroMinus.location
-                    ]
-            , origin = RailLocation.zero
-            }
+            twoEnds minusZero doubleTrackLeftZeroMinus
 
         Oneway f ->
             invert Inverted <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45degPlus
@@ -277,3 +240,142 @@ getRailPiece rail =
 
         Backward i ->
             invert i <| twoEnds minusZero (goStraightPlus 4)
+
+
+
+{-
+
+   getRailPiece : Rail IsInverted IsFlipped -> RailPiece
+   getRailPiece rail =
+       case rail of
+           Straight1 i ->
+               invert i <| twoEnds minusZero (goStraightPlus 2)
+
+           Straight2 i ->
+               invert i <| twoEnds minusZero (goStraightPlus 4)
+
+           Straight4 i ->
+               invert i <| twoEnds minusZero (goStraightPlus 8)
+
+           Straight8 i ->
+               invert i <| twoEnds minusZero (goStraightPlus 16)
+
+           DoubleStraight4 i ->
+               invert i <| fourEnds minusZero doubleTrackRightZeroMinus doubleTrackRightPlus (goStraightPlus 8)
+
+           Curve45 f i ->
+               invert i <| flip f <| twoEnds minusZero turnLeft45degPlus
+
+           Curve90 f i ->
+               invert i <| flip f <| twoEnds minusZero turnLeft90degPlus
+
+           OuterCurve45 f i ->
+               invert i <| flip f <| twoEnds minusZero turnLeftOuter45degPlus
+
+           DoubleCurve45 f i ->
+               invert i <|
+                   flip f <|
+                       fourEnds
+                           minusZero
+                           doubleTrackRightZeroMinus
+                           doubleTrackRightZeroTurnLeftOuter45degPlus
+                           turnLeft45degPlus
+
+           Turnout f i ->
+               invert i <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45degPlus
+
+           SingleDouble f i ->
+               invert i <| flip f <| threeEnds minusZero (goStraightPlus 8) doubleTrackLeftPlus
+
+           DoubleWide f i ->
+               invert i <| flip f <| fourEnds minusZero (goStraightMinus 10) doubleTrackWideLeftPlus doubleTrackLeftZeroMinus
+
+           EightPoint f i ->
+               invert i <| flip f <| threeEnds minusZero turnRight45degMinus turnLeft45degPlus
+
+           JointChange i ->
+               invert i <| twoEnds minusZero (goStraightMinus 2)
+
+           Slope f i ->
+               invert i <| flip f <| twoEnds minusZero (RailLocation.setHeight 4 (goStraightPlus 16))
+
+           Shift f i ->
+               invert i <| flip f <| twoEnds minusZero doubleTrackLeftPlus
+
+           SlopeCurveA ->
+               { railLocations =
+                   Nonempty plusZero [ slopeCurveA ]
+               , pierLocations =
+                   [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
+                   , { location = slopeCurveA.location, margin = PierLocation.slopeCurveMargin }
+                   ]
+               , origin = RailLocation.zero
+               }
+
+           SlopeCurveB ->
+               { railLocations =
+                   Nonempty minusZero [ slopeCurveB ]
+               , pierLocations =
+                   [ { location = plusZero.location, margin = PierLocation.flatRailMargin }
+                   , { location = slopeCurveB.location, margin = PierLocation.slopeCurveMargin }
+                   ]
+               , origin = RailLocation.zero
+               }
+
+           Stop i ->
+               invert i <| twoEnds minusZero (goStraightPlus 8)
+
+           AutoTurnout ->
+               threeEnds
+                   minusZero
+                   (goStraightPlus 12)
+                   halfAndTurnLeft45degPlus
+
+           AutoPoint ->
+               fourEnds
+                   minusZero
+                   halfAndDoubleTrackRightPlus
+                   (goStraightPlus 12)
+                   halfAndTurnLeft45degPlus
+
+           AutoCross ->
+               fourEnds
+                   minusZero
+                   doubleTrackRightZeroMinus
+                   doubleTrackRightPlus
+                   (goStraightPlus 8)
+
+           UTurn ->
+               { railLocations =
+                   Nonempty minusZero [ doubleTrackLeftZeroMinus ]
+               , pierLocations =
+                   List.map (\loc -> { location = loc, margin = PierLocation.flatRailMargin })
+                       [ minusZero.location
+                       , Location.make (Rot45.make 10 -5 0 0) (Rot45.make 0 0 1 0) 0 Dir.se
+                       , Location.make (Rot45.make 10 0 -5 0) (Rot45.make 0 0 1 0) 0 Dir.e
+                       , Location.make (Rot45.make 10 0 0 -5) (Rot45.make 0 0 1 0) 0 Dir.ne
+                       , Location.make (Rot45.make 15 0 0 0) (Rot45.make 0 0 1 0) 0 Dir.n
+                       , Location.make (Rot45.make 10 5 0 0) (Rot45.make 0 0 1 0) 0 Dir.nw
+                       , Location.make (Rot45.make 10 0 5 0) (Rot45.make 0 0 1 0) 0 Dir.w
+                       , Location.make (Rot45.make 10 0 0 5) (Rot45.make 0 0 1 0) 0 Dir.sw
+                       , doubleTrackLeftZeroMinus.location
+                       ]
+               , origin = RailLocation.zero
+               }
+
+           Oneway f ->
+               invert Inverted <| flip f <| threeEnds minusZero (goStraightPlus 8) turnLeft45degPlus
+
+           WideCross ->
+               fourEnds
+                   minusZero
+                   halfRightZeroPlus
+                   halfRightStraight8Minus
+                   (goStraightPlus 8)
+
+           Forward i ->
+               invert i <| twoEnds minusZero (goStraightPlus 4)
+
+           Backward i ->
+               invert i <| twoEnds minusZero (goStraightPlus 4)
+-}

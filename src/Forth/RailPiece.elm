@@ -1,6 +1,5 @@
 module Forth.RailPiece exposing (RailPiece, flip, invert, rotate)
 
-import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
@@ -19,8 +18,7 @@ type alias RailPiece =
     --| また、必ずしもある必要はないはずなので通常のListで持つ
     --| 順序は関係ないが、Setを使うのも手間なので
     -- TODO: いずれこれは分離する予定だが、テストを通すためにしばらくはこのままで。
-    , pierLocations : List PierLocation
-
+    --    , pierLocations : List PierLocation
     --| 主に表示用として、レールの種類的にはどこに配置するべきか、の情報。回転を考慮すると、locationsの先頭のほかにこれを用意する他なかった
     --| 基本の形から回転していない場合は、locationsの先頭とちょうど逆になる。表示用なので凹凸は考慮しない
     , origin : RailLocation
@@ -36,7 +34,8 @@ invert inverted piece =
         Inverted ->
             { railLocations = Nonempty.map RailLocation.invertJoint piece.railLocations
             , origin = RailLocation.invertJoint piece.origin
-            , pierLocations = piece.pierLocations
+
+            --            , pierLocations = piece.pierLocations
             }
 
 
@@ -50,7 +49,8 @@ flip flipped piece =
 
         Flipped ->
             { railLocations = Nonempty.map RailLocation.flip <| Util.reverseTail piece.railLocations
-            , pierLocations = List.map PierLocation.flip piece.pierLocations
+
+            --            , pierLocations = List.map PierLocation.flip piece.pierLocations
             , origin = RailLocation.flip piece.origin
             }
 
@@ -68,5 +68,6 @@ rotate piece =
             in
             { origin = RailLocation.mul rot.location piece.origin
             , railLocations = Util.rotate <| Nonempty.map (RailLocation.mul rot.location) piece.railLocations
-            , pierLocations = List.map (PierLocation.mul rot.location) piece.pierLocations
+
+            --            , pierLocations = List.map (PierLocation.mul rot.location) piece.pierLocations
             }

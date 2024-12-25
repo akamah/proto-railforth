@@ -3,7 +3,6 @@ module Forth.RailPieceTest exposing (..)
 import Expect exposing (..)
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint
-import Forth.Geometry.PierLocation as PierLocation
 import Forth.Geometry.RailLocation as RailLocation
 import Forth.Geometry.Rot45 as Rot45
 import Forth.RailPiece exposing (..)
@@ -27,11 +26,6 @@ suite =
                                 , RailLocation.make (Rot45.make 8 0 0 0) Rot45.zero 0 Dir.e Joint.Minus
                                 ]
                         , origin = RailLocation.make (Rot45.make 8 0 0 0) Rot45.zero 0 Dir.w Joint.Minus
-                        , pierLocations =
-                            [ PierLocation.make (Rot45.make 8 0 0 0) Rot45.zero 0 Dir.e PierLocation.flatRailMargin
-                            , PierLocation.make (Rot45.make 0 0 0 0) Rot45.zero 0 Dir.w PierLocation.flatRailMargin
-                            , PierLocation.make (Rot45.make 8 0 -8 8) Rot45.zero 0 Dir.sw PierLocation.flatRailMargin
-                            ]
                         }
                         (rotate <| getRailPiece <| Turnout NotFlipped NotInverted)
             , test "rotate Turnout twice" <|
@@ -44,11 +38,6 @@ suite =
                                 , RailLocation.make (Rot45.make 0 8 -8 8) Rot45.zero 0 Dir.nw Joint.Plus
                                 ]
                         , origin = RailLocation.make (Rot45.make 0 8 -8 0) Rot45.zero 0 Dir.nw Joint.Minus
-                        , pierLocations =
-                            [ PierLocation.make (Rot45.make 0 8 -8 0) Rot45.zero 0 Dir.se PierLocation.flatRailMargin
-                            , PierLocation.make (Rot45.make 0 8 -8 8) Rot45.zero 0 Dir.nw PierLocation.flatRailMargin
-                            , PierLocation.make (Rot45.make 0 0 0 0) Rot45.zero 0 Dir.w PierLocation.flatRailMargin
-                            ]
                         }
                         (rotate <| rotate <| getRailPiece <| Turnout NotFlipped NotInverted)
             , test "rotate Turnout three times" <|

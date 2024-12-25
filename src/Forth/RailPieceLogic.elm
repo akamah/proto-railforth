@@ -93,4 +93,5 @@ getRailLocations railPlacement =
 
 getPierLocations : RailPlacement -> List PierLocation
 getPierLocations railPlacement =
-    List.map (PierLocation.mul railPlacement.location) (getRailPiece railPlacement.rail).pierLocations
+    -- List.map (PierLocation.mul railPlacement.location) (getRailPiece railPlacement.rail).pierLocations
+    []
