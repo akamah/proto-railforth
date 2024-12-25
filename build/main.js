@@ -10414,7 +10414,7 @@ var $author$project$Util$rotate = function (_v0) {
 					[x])));
 	}
 };
-var $author$project$Forth$RailPiece$rotateRailPiece = function (piece) {
+var $author$project$Forth$RailPiece$rotate = function (piece) {
 	var _v0 = piece.railLocations;
 	if (!_v0.b.b) {
 		return piece;
@@ -10449,7 +10449,7 @@ var $author$project$Forth$RailPieceLogic$getAppropriateRailAndPieceForJoint = F3
 		var railPieceMinus = A3(
 			$author$project$Util$loop,
 			rotation,
-			$author$project$Forth$RailPiece$rotateRailPiece,
+			$author$project$Forth$RailPiece$rotate,
 			$author$project$Forth$RailPieceDefinition$getRailPiece(railNotInverted));
 		var railInverted = A2(
 			$author$project$Types$Rail$map,
@@ -10458,7 +10458,7 @@ var $author$project$Forth$RailPieceLogic$getAppropriateRailAndPieceForJoint = F3
 		var railPiecePlus = A3(
 			$author$project$Util$loop,
 			rotation,
-			$author$project$Forth$RailPiece$rotateRailPiece,
+			$author$project$Forth$RailPiece$rotate,
 			$author$project$Forth$RailPieceDefinition$getRailPiece(railInverted));
 		return A2(
 			$author$project$Forth$Geometry$Joint$match,

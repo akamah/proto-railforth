@@ -1,10 +1,10 @@
-module Forth.RailPiece exposing (RailPiece, flip, invert, rotateRailPiece)
+module Forth.RailPiece exposing (RailPiece, flip, invert, rotate)
 
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
-import Util exposing (reverseTail, rotate)
+import Util
 
 
 
@@ -49,14 +49,14 @@ flip flipped piece =
             piece
 
         Flipped ->
-            { railLocations = Nonempty.map RailLocation.flip <| reverseTail piece.railLocations
+            { railLocations = Nonempty.map RailLocation.flip <| Util.reverseTail piece.railLocations
             , pierLocations = List.map PierLocation.flip piece.pierLocations
             , origin = RailLocation.flip piece.origin
             }
 
 
-rotateRailPiece : RailPiece -> RailPiece
-rotateRailPiece piece =
+rotate : RailPiece -> RailPiece
+rotate piece =
     case piece.railLocations of
         Nonempty _ [] ->
             piece
@@ -67,6 +67,6 @@ rotateRailPiece piece =
                     RailLocation.mul current.location (RailLocation.inv next)
             in
             { origin = RailLocation.mul rot.location piece.origin
-            , railLocations = rotate <| Nonempty.map (RailLocation.mul rot.location) piece.railLocations
+            , railLocations = Util.rotate <| Nonempty.map (RailLocation.mul rot.location) piece.railLocations
             , pierLocations = List.map (PierLocation.mul rot.location) piece.pierLocations
             }

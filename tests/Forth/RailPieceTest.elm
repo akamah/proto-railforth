@@ -33,7 +33,7 @@ suite =
                             , PierLocation.make (Rot45.make 8 0 -8 8) Rot45.zero 0 Dir.sw PierLocation.flatRailMargin
                             ]
                         }
-                        (rotateRailPiece <| getRailPiece <| Turnout NotFlipped NotInverted)
+                        (rotate <| getRailPiece <| Turnout NotFlipped NotInverted)
             , test "rotate Turnout twice" <|
                 \_ ->
                     Expect.equal
@@ -50,11 +50,11 @@ suite =
                             , PierLocation.make (Rot45.make 0 0 0 0) Rot45.zero 0 Dir.w PierLocation.flatRailMargin
                             ]
                         }
-                        (rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout NotFlipped NotInverted)
+                        (rotate <| rotate <| getRailPiece <| Turnout NotFlipped NotInverted)
             , test "rotate Turnout three times" <|
                 \_ ->
                     Expect.equal
                         (getRailPiece <| Turnout NotFlipped NotInverted)
-                        (rotateRailPiece <| rotateRailPiece <| rotateRailPiece <| getRailPiece <| Turnout NotFlipped NotInverted)
+                        (rotate <| rotate <| rotate <| getRailPiece <| Turnout NotFlipped NotInverted)
             ]
         ]

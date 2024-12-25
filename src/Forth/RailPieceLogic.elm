@@ -1,11 +1,9 @@
 module Forth.RailPieceLogic exposing (..)
 
-import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Joint as Joint exposing (Joint)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
-import Forth.Geometry.Rot45 as Rot45
-import Forth.RailPiece exposing (RailPiece, rotateRailPiece)
+import Forth.RailPiece exposing (RailPiece, rotate)
 import Forth.RailPieceDefinition exposing (getRailPiece)
 import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import List.Nonempty as Nonempty exposing (Nonempty(..))
@@ -24,10 +22,10 @@ getAppropriateRailAndPieceForJoint joint railType rotation =
             Rail.map (always Inverted) railType
 
         railPieceMinus =
-            loop rotation rotateRailPiece <| getRailPiece railNotInverted
+            loop rotation rotate <| getRailPiece railNotInverted
 
         railPiecePlus =
-            loop rotation rotateRailPiece <| getRailPiece railInverted
+            loop rotation rotate <| getRailPiece railInverted
     in
     if Joint.match joint (Nonempty.head railPieceMinus.railLocations).joint then
         -- これから置く予定のレールと、スタックトップの方向がマッチしたのでそのまま配置する
