@@ -3,7 +3,7 @@ module Forth.Interpreter exposing (ExecResult, execute)
 import Dict exposing (Dict)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import Forth.PierConstruction as PierConstruction
-import Forth.RailPiece as RailPiece
+import Forth.RailPieceLogic as RailPieceLogic
 import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
 import Forth.Statistics as Statistics
 import Types.Pier exposing (Pier(..))
@@ -72,9 +72,13 @@ execute src =
         tokens =
             String.words src
 
+        initialLocation : RailLocation
+        initialLocation =
+            RailLocation.invertJoint RailLocation.zero
+
         initialStatus : ExecStatus
         initialStatus =
-            { stack = [ RailPiece.initialLocation ]
+            { stack = [ initialLocation ]
             , global = { rails = [] }
             , savepoints = [ Dict.empty ]
             , frame = [ Dict.empty ]
@@ -513,7 +517,7 @@ executePlaceRail : Rail () IsFlipped -> Int -> Code
 executePlaceRail railType rotation =
     let
         railPlaceFunc =
-            RailPiece.placeRail railType rotation
+            RailPieceLogic.placeRail railType rotation
     in
     \status ->
         case status.stack of

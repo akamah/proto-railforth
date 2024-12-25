@@ -5,13 +5,13 @@ import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Joint as Joint exposing (Joint)
 import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 as Rot45
-import Forth.RailPiece as RailPiece
+import Forth.RailPieceLogic as RailPieceLogic
 import Forth.RailPlacement exposing (RailPlacement)
 
 
 getUnmatchedRailTerminals : List RailPlacement -> String
 getUnmatchedRailTerminals railPlacements =
-    List.concatMap RailPiece.getRailLocations railPlacements
+    List.concatMap RailPieceLogic.getRailLocations railPlacements
         |> toDict
         |> findUnmatchedRailTerminals
         |> String.join "\n"

@@ -7,6 +7,7 @@ import Forth.Geometry.PierLocation as PierLocation
 import Forth.Geometry.RailLocation as RailLocation
 import Forth.Geometry.Rot45 as Rot45
 import Forth.RailPiece exposing (..)
+import Forth.RailPieceDefinition exposing (getRailPiece)
 import List.Nonempty exposing (Nonempty(..))
 import Test exposing (..)
 import Types.Rail exposing (IsFlipped(..), IsInverted(..), Rail(..))
