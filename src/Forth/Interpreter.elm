@@ -320,20 +320,15 @@ haltWithError err =
 
 haltWithSuccess : ExecStatus -> ExecResult
 haltWithSuccess status =
-    case PierConstruction.toPierRenderData status.global.rails of
-        Ok pierRenderData ->
-            { rails = List.map RailPlacement.toRailRenderData status.global.rails
-            , errMsg = Nothing
-            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
-            , piers = pierRenderData
-            }
-
-        Err err ->
-            { rails = List.map RailPlacement.toRailRenderData status.global.rails
-            , errMsg = Just err
-            , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
-            , piers = []
-            }
+    let
+        { pierRenderData, error } =
+            PierConstruction.construct status.global.rails
+    in
+    { rails = List.map RailPlacement.toRailRenderData status.global.rails
+    , errMsg = error
+    , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
+    , piers = pierRenderData
+    }
 
 
 executeDrop : Code

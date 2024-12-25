@@ -11126,45 +11126,6 @@ var $author$project$Forth$Interpreter$haltWithError = function (err) {
 		rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, err.status.global.rails)
 	};
 };
-var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
-	return A3(
-		$author$project$Types$Rail$toStringWith,
-		function (_v0) {
-			return '';
-		},
-		$author$project$Types$Rail$isInvertedToString,
-		rail);
-};
-var $elm$core$Dict$update = F3(
-	function (targetKey, alter, dictionary) {
-		var _v0 = alter(
-			A2($elm$core$Dict$get, targetKey, dictionary));
-		if (_v0.$ === 'Just') {
-			var value = _v0.a;
-			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
-		} else {
-			return A2($elm$core$Dict$remove, targetKey, dictionary);
-		}
-	});
-var $author$project$Forth$Statistics$getRailCount = function (rails) {
-	return A3(
-		$elm$core$List$foldl,
-		function (rail) {
-			return A2(
-				$elm$core$Dict$update,
-				rail,
-				function (x) {
-					if (x.$ === 'Nothing') {
-						return $elm$core$Maybe$Just(1);
-					} else {
-						var n = x.a;
-						return $elm$core$Maybe$Just(n + 1);
-					}
-				});
-		},
-		$elm$core$Dict$empty,
-		A2($elm$core$List$map, $author$project$Forth$Statistics$railToStringRegardlessOfFlipped, rails));
-};
 var $elm$core$Result$andThen = F2(
 	function (callback, result) {
 		if (result.$ === 'Ok') {
@@ -11595,6 +11556,17 @@ var $author$project$Forth$PierConstraction$Impl$mergeMargin = F2(
 			top: A2($elm$core$Basics$max, x.top, y.top)
 		};
 	});
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
 var $author$project$Forth$PierConstraction$Impl$mergePierLocations = function (list) {
 	return $elm$core$Dict$toList(
 		A3(
@@ -11645,12 +11617,13 @@ var $author$project$Forth$PierConstraction$Impl$singlePier = function (single) {
 		_List_Nil,
 		$elm$core$Dict$toList(single));
 };
-var $author$project$Forth$PierConstraction$Impl$construct = function (list) {
-	return A2(
+var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
+	var must = _v0.must;
+	var _v1 = A2(
 		$elm$core$Result$andThen,
-		function (_v0) {
-			var single = _v0.a;
-			var _double = _v0.b;
+		function (_v2) {
+			var single = _v2.a;
+			var _double = _v2.b;
 			return A3(
 				$elm$core$Result$map2,
 				F2(
@@ -11664,7 +11637,17 @@ var $author$project$Forth$PierConstraction$Impl$construct = function (list) {
 			$elm$core$Result$andThen,
 			$author$project$Forth$PierConstraction$Impl$doubleTrackPiers,
 			$author$project$Forth$PierConstraction$Impl$divideIntoDict(
-				A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, list))));
+				A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, must))));
+	if (_v1.$ === 'Ok') {
+		var pierRenderData = _v1.a;
+		return {error: $elm$core$Maybe$Nothing, pierRenderData: pierRenderData};
+	} else {
+		var err = _v1.a;
+		return {
+			error: $elm$core$Maybe$Just(err),
+			pierRenderData: _List_Nil
+		};
+	}
 };
 var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) {
 	return A2(
@@ -11672,41 +11655,58 @@ var $author$project$Forth$RailPiece$getPierLocations = function (railPlacement) 
 		$author$project$Forth$Geometry$PierLocation$mul(railPlacement.location),
 		$author$project$Forth$RailPiece$getRailPiece(railPlacement.rail).pierLocations);
 };
-var $author$project$Forth$PierConstruction$toPierRenderData = function (list) {
+var $author$project$Forth$PierConstruction$construct = function (list) {
 	return $author$project$Forth$PierConstraction$Impl$construct(
-		A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, list));
+		{
+			may: _List_Nil,
+			must: A2($elm$core$List$concatMap, $author$project$Forth$RailPiece$getPierLocations, list),
+			mustNot: _List_Nil
+		});
+};
+var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
+	return A3(
+		$author$project$Types$Rail$toStringWith,
+		function (_v0) {
+			return '';
+		},
+		$author$project$Types$Rail$isInvertedToString,
+		rail);
+};
+var $author$project$Forth$Statistics$getRailCount = function (rails) {
+	return A3(
+		$elm$core$List$foldl,
+		function (rail) {
+			return A2(
+				$elm$core$Dict$update,
+				rail,
+				function (x) {
+					if (x.$ === 'Nothing') {
+						return $elm$core$Maybe$Just(1);
+					} else {
+						var n = x.a;
+						return $elm$core$Maybe$Just(n + 1);
+					}
+				});
+		},
+		$elm$core$Dict$empty,
+		A2($elm$core$List$map, $author$project$Forth$Statistics$railToStringRegardlessOfFlipped, rails));
 };
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
-	var _v0 = $author$project$Forth$PierConstruction$toPierRenderData(status.global.rails);
-	if (_v0.$ === 'Ok') {
-		var pierRenderData = _v0.a;
-		return {
-			errMsg: $elm$core$Maybe$Nothing,
-			piers: pierRenderData,
-			railCount: $author$project$Forth$Statistics$getRailCount(
-				A2(
-					$elm$core$List$map,
-					function (x) {
-						return x.rail;
-					},
-					status.global.rails)),
-			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
-		};
-	} else {
-		var err = _v0.a;
-		return {
-			errMsg: $elm$core$Maybe$Just(err),
-			piers: _List_Nil,
-			railCount: $author$project$Forth$Statistics$getRailCount(
-				A2(
-					$elm$core$List$map,
-					function (x) {
-						return x.rail;
-					},
-					status.global.rails)),
-			rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
-		};
-	}
+	var _v0 = $author$project$Forth$PierConstruction$construct(status.global.rails);
+	var pierRenderData = _v0.pierRenderData;
+	var error = _v0.error;
+	return {
+		errMsg: error,
+		piers: pierRenderData,
+		railCount: $author$project$Forth$Statistics$getRailCount(
+			A2(
+				$elm$core$List$map,
+				function (x) {
+					return x.rail;
+				},
+				status.global.rails)),
+		rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
+	};
 };
 var $author$project$Forth$RailPiece$initialLocation = A5($author$project$Forth$Geometry$RailLocation$make, $author$project$Forth$Geometry$Rot45$zero, $author$project$Forth$Geometry$Rot45$zero, 0, $author$project$Forth$Geometry$Dir$e, $author$project$Forth$Geometry$Joint$Plus);
 var $elm$core$String$words = _String_words;

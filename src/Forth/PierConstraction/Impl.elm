@@ -1,4 +1,4 @@
-module Forth.PierConstraction.Impl exposing (PierPlacement(..), construct)
+module Forth.PierConstraction.Impl exposing (construct)
 
 -- このモジュールでは、端点の集合（もしくはリスト）から橋脚の集合を構築する。
 
@@ -10,14 +10,6 @@ import Forth.Geometry.Rot45 as Rot45
 import Types.Pier as Pier exposing (Pier)
 import Types.PierRenderData exposing (PierRenderData)
 import Util exposing (foldlResult, updateWithResult)
-
-
-{-| 橋脚の配置についてどのように指定されるべきかの型
--}
-type PierPlacement
-    = Must PierLocation
-    | May PierLocation
-    | MustNot PierLocation
 
 
 
@@ -289,17 +281,45 @@ maximumHeight ls =
     List.foldl (\loc -> Basics.max loc.location.height) 0 ls
 
 
+type alias PierConstructionParams =
+    { must : List PierLocation --| 必ず設置する場所のリスト
+    , may : List Location --| 設置してもよい（複線の場合は配置しなければならない場所）のリスト
+    , mustNot : List Location --| 設置してはならない場所のリスト
+    }
+
+
+type alias PierConstructionResult =
+    { pierRenderData : List PierRenderData
+    , error : Maybe PierConstructionError
+    }
+
+
+type alias PierConstructionError =
+    String
+
+
 {-| the main function of pier-construction
 -}
-construct : List PierLocation -> Result String (List PierRenderData)
-construct list =
-    list
-        |> List.map cleansePierLocations
-        |> divideIntoDict
-        |> Result.andThen doubleTrackPiers
-        |> Result.andThen
-            (\( single, double ) ->
-                Result.map2 (\s d -> s ++ d)
-                    (singlePier single)
-                    (doublePier double)
-            )
+construct : PierConstructionParams -> PierConstructionResult
+construct { must } =
+    case
+        must
+            |> List.map cleansePierLocations
+            |> divideIntoDict
+            |> Result.andThen doubleTrackPiers
+            |> Result.andThen
+                (\( single, double ) ->
+                    Result.map2 (\s d -> s ++ d)
+                        (singlePier single)
+                        (doublePier double)
+                )
+    of
+        Ok pierRenderData ->
+            { pierRenderData = pierRenderData
+            , error = Nothing
+            }
+
+        Err err ->
+            { pierRenderData = []
+            , error = Just err
+            }
