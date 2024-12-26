@@ -63,7 +63,7 @@ getRailPiece rail =
             invert i <| twoEnds (LD.zero |> minus) (LD.straight 1 |> minus)
 
         Slope f i ->
-            invert i <| flip f <| twoEnds (LD.zero |> minus) (LD.straightAndUp 8 4 |> plus)
+            invert i <| flip f <| twoEnds (LD.zero |> minus) (LD.straightAndUp 4 8 |> plus)
 
         Shift f i ->
             invert i <| flip f <| twoEnds (LD.zero |> minus) (LD.straightDoubleLeft 4 |> plus)

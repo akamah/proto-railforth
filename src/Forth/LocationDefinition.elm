@@ -78,7 +78,7 @@ straightWideRight n =
 
 
 straightAndUp : Int -> Int -> Location
-straightAndUp n h =
+straightAndUp h n =
     L.make (R.make (2 * n) 0 0 0) R.zero h Dir.e
 
 
