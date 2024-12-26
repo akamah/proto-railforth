@@ -74,6 +74,15 @@ straightWideRight n =
 
 
 
+-- 坂直線の部
+
+
+straightAndUp : Int -> Int -> Location
+straightAndUp n h =
+    L.make (R.make (2 * n) 0 0 0) R.zero h Dir.e
+
+
+
 -- 曲線の部
 
 
@@ -108,6 +117,20 @@ outerRight45 =
 
 
 
+-- 坂曲線の部
+
+
+left45AndUp : Location
+left45AndUp =
+    L.make (R.make 0 0 8 -8) R.zero 1 Dir.ne
+
+
+right45AndUp : Location
+right45AndUp =
+    L.make (R.make 0 8 -8 0) R.zero 1 Dir.se
+
+
+
 -- 複合形の部
 
 
@@ -125,8 +148,8 @@ straightAndRight45 n =
 
 {-| 複線曲線レールの外側の先の座標
 -}
-doubleLeftAndOuterLeft45 : Location
-doubleLeftAndOuterLeft45 =
+doubleRightAndOuterLeft45 : Location
+doubleRightAndOuterLeft45 =
     L.make (R.make 0 0 8 -8) (R.make 0 0 0 -2) 0 Dir.ne
 
 

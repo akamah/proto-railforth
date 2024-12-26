@@ -1,4 +1,4 @@
-module Forth.RailPiece exposing (RailPiece, flip, invert, rotate)
+module Forth.RailPiece exposing (RailPiece, flip, fourEnds, invert, make, rotate, threeEnds, twoEnds)
 
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
 import List.Nonempty as Nonempty exposing (Nonempty(..))
@@ -23,6 +23,28 @@ type alias RailPiece =
     --| 基本の形から回転していない場合は、locationsの先頭とちょうど逆になる。表示用なので凹凸は考慮しない
     , origin : RailLocation
     }
+
+
+make : Nonempty RailLocation -> RailPiece
+make list =
+    { railLocations = list
+    , origin = RailLocation.zero
+    }
+
+
+twoEnds : RailLocation -> RailLocation -> RailPiece
+twoEnds a b =
+    make <| Nonempty a [ b ]
+
+
+threeEnds : RailLocation -> RailLocation -> RailLocation -> RailPiece
+threeEnds a b c =
+    make <| Nonempty a [ b, c ]
+
+
+fourEnds : RailLocation -> RailLocation -> RailLocation -> RailLocation -> RailPiece
+fourEnds a b c d =
+    make <| Nonempty a [ b, c, d ]
 
 
 invert : IsInverted -> RailPiece -> RailPiece
