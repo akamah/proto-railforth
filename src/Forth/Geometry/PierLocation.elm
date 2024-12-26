@@ -1,13 +1,11 @@
 module Forth.Geometry.PierLocation exposing
     ( PierLocation
     , PierMargin
-    , flatRailMargin
     , flip
     , fromRailLocation
     , make
     , mul
     , setHeight
-    , slopeCurveMargin
     , toVec3
     )
 
@@ -33,20 +31,6 @@ type alias PierLocation =
 type alias PierMargin =
     { top : Int
     , bottom : Int
-    }
-
-
-flatRailMargin : PierMargin
-flatRailMargin =
-    { top = 4
-    , bottom = 0
-    }
-
-
-slopeCurveMargin : PierMargin
-slopeCurveMargin =
-    { top = 4
-    , bottom = 1
     }
 
 
