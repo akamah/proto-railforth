@@ -3,6 +3,7 @@ module Forth.RailPieceLogic exposing (..)
 import Forth.Geometry.Joint as Joint exposing (Joint)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.RailLocation as RailLocation exposing (RailLocation)
+import Forth.PierConstraintDefinition exposing (getPierConstraint)
 import Forth.RailPiece exposing (RailPiece, rotate)
 import Forth.RailPieceDefinition exposing (getRailPiece)
 import Forth.RailPlacement as RailPlacement exposing (RailPlacement)
@@ -93,5 +94,4 @@ getRailLocations railPlacement =
 
 getPierLocations : RailPlacement -> List PierLocation
 getPierLocations railPlacement =
-    -- List.map (PierLocation.mul railPlacement.location) (getRailPiece railPlacement.rail).pierLocations
-    []
+    List.map (PierLocation.mul railPlacement.location) (getPierConstraint railPlacement.rail).must
