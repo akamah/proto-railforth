@@ -1,4 +1,4 @@
-module Forth.PierConstraction.Impl exposing (construct)
+module Forth.PierConstraction.Impl exposing (PierConstructionResult, construct)
 
 -- このモジュールでは、端点の集合（もしくはリスト）から橋脚の集合を構築する。
 
