@@ -48,3 +48,11 @@ flip flipped constraint =
             , may = List.map Location.flip constraint.may
             , mustNot = List.map Location.flip constraint.mustNot
             }
+
+
+map : (Location -> Location) -> PierConstraint -> PierConstraint
+map f constraint =
+    { must = List.map (\pl -> { pl | location = f pl.location }) constraint.must
+    , may = List.map f constraint.may
+    , mustNot = List.map f constraint.mustNot
+    }

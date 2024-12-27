@@ -11038,6 +11038,31 @@ var $author$project$Forth$Interpreter$haltWithError = function (err) {
 		rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, err.status.global.rails)
 	};
 };
+var $author$project$Forth$PierConstraint$concat = function (xs) {
+	return {
+		may: $elm$core$List$concat(
+			A2(
+				$elm$core$List$map,
+				function (x) {
+					return x.may;
+				},
+				xs)),
+		must: $elm$core$List$concat(
+			A2(
+				$elm$core$List$map,
+				function (x) {
+					return x.must;
+				},
+				xs)),
+		mustNot: $elm$core$List$concat(
+			A2(
+				$elm$core$List$map,
+				function (x) {
+					return x.mustNot;
+				},
+				xs))
+	};
+};
 var $elm$core$Result$andThen = F2(
 	function (callback, result) {
 		if (result.$ === 'Ok') {
@@ -11939,18 +11964,28 @@ var $author$project$Forth$PierConstraintDefinition$getPierConstraint = function 
 			return $author$project$Forth$PierConstraintDefinition$straightConstraint(2);
 	}
 };
-var $author$project$Forth$Geometry$PierLocation$mul = F2(
-	function (global, local) {
+var $author$project$Forth$PierConstraint$map = F2(
+	function (f, constraint) {
 		return {
-			location: A2($author$project$Forth$Geometry$Location$mul, global, local.location),
-			margin: local.margin
+			may: A2($elm$core$List$map, f, constraint.may),
+			must: A2(
+				$elm$core$List$map,
+				function (pl) {
+					return _Utils_update(
+						pl,
+						{
+							location: f(pl.location)
+						});
+				},
+				constraint.must),
+			mustNot: A2($elm$core$List$map, f, constraint.mustNot)
 		};
 	});
-var $author$project$Forth$RailPieceLogic$getPierLocations = function (railPlacement) {
+var $author$project$Forth$RailPieceLogic$getPierConstraintFromRailPlacement = function (railPlacement) {
 	return A2(
-		$elm$core$List$map,
-		$author$project$Forth$Geometry$PierLocation$mul(railPlacement.location),
-		$author$project$Forth$PierConstraintDefinition$getPierConstraint(railPlacement.rail).must);
+		$author$project$Forth$PierConstraint$map,
+		$author$project$Forth$Geometry$Location$mul(railPlacement.location),
+		$author$project$Forth$PierConstraintDefinition$getPierConstraint(railPlacement.rail));
 };
 var $author$project$Types$PierRenderData$make = F3(
 	function (pier, position, angle) {
@@ -11965,11 +12000,8 @@ var $author$project$Forth$PierPlacement$toPierRenderData = function (placement) 
 };
 var $author$project$Forth$PierConstruction$construct = function (list) {
 	var _v0 = $author$project$Forth$PierConstraction$Impl$construct(
-		{
-			may: _List_Nil,
-			must: A2($elm$core$List$concatMap, $author$project$Forth$RailPieceLogic$getPierLocations, list),
-			mustNot: _List_Nil
-		});
+		$author$project$Forth$PierConstraint$concat(
+			A2($elm$core$List$map, $author$project$Forth$RailPieceLogic$getPierConstraintFromRailPlacement, list)));
 	var pierPlacements = _v0.pierPlacements;
 	var error = _v0.error;
 	return {

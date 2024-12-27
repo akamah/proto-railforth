@@ -1,6 +1,7 @@
 module Forth.PierConstruction exposing (construct)
 
 import Forth.PierConstraction.Impl as Impl
+import Forth.PierConstraint as PierConstraint
 import Forth.PierPlacement as PierPlacement
 import Forth.RailPieceLogic as RailPieceLogic
 import Forth.RailPlacement exposing (RailPlacement)
@@ -33,11 +34,9 @@ construct : List RailPlacement -> PierConstructionResult
 construct list =
     let
         { pierPlacements, error } =
-            Impl.construct
-                { must = List.concatMap RailPieceLogic.getPierLocations list
-                , may = []
-                , mustNot = []
-                }
+            Impl.construct <|
+                PierConstraint.concat <|
+                    List.map RailPieceLogic.getPierConstraintFromRailPlacement list
     in
     { pierRenderData = List.map PierPlacement.toPierRenderData pierPlacements
     , error = error

@@ -7,6 +7,7 @@ import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
 import Forth.Geometry.Rot45 as Rot45
+import Forth.PierConstraint exposing (PierConstraint)
 import Forth.PierPlacement as PierPlacement exposing (PierPlacement)
 import Types.Pier as Pier exposing (Pier)
 import Util exposing (foldlResult, updateWithResult)
@@ -278,13 +279,6 @@ maximumHeight ls =
     List.foldl (\loc -> Basics.max loc.location.height) 0 ls
 
 
-type alias PierConstructionParams =
-    { must : List PierLocation --| 必ず設置する場所のリスト
-    , may : List Location --| 設置してもよい（複線の場合は配置しなければならない場所）のリスト
-    , mustNot : List Location --| 設置してはならない場所のリスト
-    }
-
-
 type alias PierConstructionResult =
     { pierPlacements : List PierPlacement
     , error : Maybe PierConstructionError
@@ -297,7 +291,7 @@ type alias PierConstructionError =
 
 {-| the main function of pier-construction
 -}
-construct : PierConstructionParams -> PierConstructionResult
+construct : PierConstraint -> PierConstructionResult
 construct { must } =
     case
         must
