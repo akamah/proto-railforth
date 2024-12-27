@@ -1,6 +1,7 @@
 module Types.Pier exposing
     ( Pier(..)
     , allPiers
+    , compare
     , getHeight
     , toString
     )
@@ -43,3 +44,20 @@ getHeight pier =
 allPiers : List Pier
 allPiers =
     [ Single, Wide, Mini ]
+
+
+compare : Pier -> Pier -> Order
+compare a b =
+    let
+        f x =
+            case x of
+                Single ->
+                    0
+
+                Wide ->
+                    1
+
+                Mini ->
+                    2
+    in
+    Basics.compare (f a) (f b)

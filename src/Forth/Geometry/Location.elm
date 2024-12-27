@@ -1,6 +1,7 @@
 module Forth.Geometry.Location exposing
     ( Location
     , addHeight
+    , compare
     , flip
     , inv
     , make
@@ -13,6 +14,7 @@ module Forth.Geometry.Location exposing
 import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 import Math.Vector3 as Vec3 exposing (Vec3)
+import Util exposing (lexicographic)
 
 
 {-| 3次元空間上での点と向きを表現する。
@@ -127,3 +129,11 @@ toVec3 tie =
         (singleUnit * sx + doubleUnit * dx)
         (singleUnit * sy + doubleUnit * dy)
         (heightUnit * h)
+
+
+compare : Location -> Location -> Order
+compare a b =
+    lexicographic (Rot45.compare a.single b.single) <|
+        lexicographic (Rot45.compare a.double b.double) <|
+            lexicographic (Basics.compare a.height b.height) <|
+                Dir.compare a.dir b.dir

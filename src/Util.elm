@@ -49,3 +49,12 @@ loop n f a =
 
     else
         loop (n - 1) f (f a)
+
+
+lexicographic : Order -> Order -> Order
+lexicographic x y =
+    if x /= EQ then
+        x
+
+    else
+        y
