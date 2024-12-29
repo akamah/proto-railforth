@@ -1,12 +1,12 @@
 module Forth.PierConstruction.ImplTest exposing (suite)
 
 import Expect exposing (..)
-import Forth.Geometry.Location as Location exposing (Location)
+import Forth.Geometry.Location as L exposing (Location)
 import Forth.Geometry.PierLocation exposing (PierLocation)
 import Forth.LocationDefinition as LD
 import Forth.PierConstraction.Impl exposing (PierConstructionResult, construct)
-import Forth.PierConstraint as PierConstraint exposing (PierConstraint)
-import Forth.PierConstraintDefinition exposing (flat, getPierConstraint)
+import Forth.PierConstraint exposing (PierConstraint)
+import Forth.PierConstraintDefinition exposing (flat)
 import Forth.PierPlacement as PP exposing (PierPlacement)
 import Test exposing (..)
 import Types.Pier exposing (Pier(..))
@@ -50,13 +50,75 @@ suite =
                     |> expectOk []
         , test "constructing a straight rail on the ground results in empty " <|
             \_ ->
-                construct (must [ LD.straight 0 |> flat, LD.straight 4 |> flat ])
-                    |> expectOk []
-        , test "construct a straight rail" <|
-            \_ ->
-                construct (must [ LD.straightAndUp 4 0 |> flat, LD.straightAndUp 4 4 |> flat ])
-                    |> expectOk
-                        [ PP.make Single <| LD.straight 0
-                        , PP.make Single <| LD.straight 4
+                construct
+                    (must
+                        [ LD.straight 4 |> flat
                         ]
+                    )
+                    |> expectOk []
+        , test "construct a pier" <|
+            \_ ->
+                construct
+                    (must
+                        [ LD.straight 4 |> L.setHeight 4 |> flat
+                        ]
+                    )
+                    |> expectOk
+                        [ LD.straight 4 |> PP.make Single
+                        ]
+        , test "construct a wide pier" <|
+            \_ ->
+                construct
+                    (must
+                        [ LD.straight 4 |> L.setHeight 4 |> flat
+                        , LD.straightDoubleLeft 4 |> L.setHeight 4 |> flat
+                        ]
+                    )
+                    |> expectOk
+                        [ LD.straight 4 |> PP.make Wide
+                        ]
+        , test "construct mini and single piers" <|
+            \_ ->
+                construct
+                    (must
+                        [ LD.straight 4 |> L.setHeight 0 |> flat
+                        , LD.straight 4 |> L.setHeight 5 |> flat
+                        , LD.straight 4 |> L.setHeight 15 |> flat
+                        ]
+                    )
+                    |> expectOk
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 4 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 5 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 9 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 13 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 14 |> PP.make Mini
+                        ]
+
+        -- -- XFAIL
+        -- , test "construct a single pier on a wide pier" <|
+        --     \_ ->
+        --         construct
+        --             (must
+        --                 [ LD.straight 4 |> L.setHeight 0 |> flat
+        --                 , LD.straightDoubleLeft 4 |> L.setHeight 0 |> flat
+        --                 , LD.straight 4 |> L.setHeight 8 |> flat
+        --                 ]
+        --             )
+        --             |> expectOk
+        --                 [ LD.straight 4 |> PP.make Wide
+        --                 , LD.straight 4 |> L.setHeight 4 |> PP.make Single
+        --                 ]
+        -- -- XFAIL
+        -- , test "construct a wide pier if necessary" <|
+        --     \_ ->
+        --         construct
+        --             (may
+        --                 [ LD.straight 4 |> L.setHeight 4 |> flat
+        --                 ]
+        --                 [ LD.straightDoubleLeft 4 |> L.setHeight 4 ]
+        --             )
+        --             |> expectOk
+        --                 [ LD.straight 4 |> PP.make Wide
+        --                 ]
         ]
