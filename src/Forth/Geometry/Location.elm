@@ -6,6 +6,7 @@ module Forth.Geometry.Location exposing
     , inv
     , make
     , moveLeftByDoubleTrackLength
+    , moveRightByDoubleTrackLength
     , mul
     , setHeight
     , toVec3
@@ -102,6 +103,12 @@ moveLeftByDoubleTrackLength : Location -> Location
 moveLeftByDoubleTrackLength loc =
     mul loc <|
         make Rot45.zero (Rot45.add (Dir.toRot45 Dir.n) (Dir.toRot45 Dir.n)) 0 Dir.e
+
+
+moveRightByDoubleTrackLength : Location -> Location
+moveRightByDoubleTrackLength loc =
+    mul loc <|
+        make Rot45.zero (Rot45.add (Dir.toRot45 Dir.s) (Dir.toRot45 Dir.s)) 0 Dir.e
 
 
 toVec3 : Location -> Vec3

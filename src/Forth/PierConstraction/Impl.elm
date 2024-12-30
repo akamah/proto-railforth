@@ -1,4 +1,4 @@
-module Forth.PierConstraction.Impl exposing (PierConstructionResult, construct, constructDoubleTrackPiers, pierPlanarKey)
+module Forth.PierConstraction.Impl exposing (PierConstructionResult, construct, constructDoubleTrackPiers, findNeighborMayLocations, pierPlanarKey)
 
 -- このモジュールでは、端点の集合（もしくはリスト）から橋脚の集合を構築する。
 
@@ -132,6 +132,41 @@ def combine(initialSet)
 getLeft : Location -> Location
 getLeft location =
     Location.moveLeftByDoubleTrackLength location
+
+
+getRight : Location -> Location
+getRight location =
+    Location.moveRightByDoubleTrackLength location
+
+
+{-| mustに入っているそれぞれの座標の、ちょうど左右の隣にあるmayの座標を、必ず設置するように変換する.
+まあ左右両方に合った場合はエラーなのですが、橋脚が構築される方が嬉しいためそのように振る舞う。
+-}
+findNeighborMayLocations : List PierLocation -> List PierLocation -> List PierLocation
+findNeighborMayLocations mustList mayList =
+    let
+        initialMayDict =
+            Dict.fromList <| List.map (\pl -> ( pierSpatialKey pl.location, pl )) mayList
+
+        transferIfFound location ( accum, mayDict ) =
+            case Dict.get (pierSpatialKey location) mayDict of
+                Just foundLocation ->
+                    ( foundLocation :: accum, Dict.remove (pierSpatialKey location) mayDict )
+
+                Nothing ->
+                    ( accum, mayDict )
+
+        rec list ( accum, mayDict ) =
+            case list of
+                [] ->
+                    accum
+
+                loc :: locs ->
+                    rec locs <|
+                        transferIfFound (getRight loc.location) <|
+                            transferIfFound (getLeft loc.location) ( accum, mayDict )
+    in
+    rec mustList ( [], initialMayDict )
 
 
 {-| 単線を想定した橋脚の列から複線橋脚を抜き出す。

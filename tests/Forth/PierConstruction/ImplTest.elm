@@ -161,9 +161,41 @@ constructDoubleTrackPiersSuite =
         ]
 
 
+findNeighborMayLocationsSuite : Test
+findNeighborMayLocationsSuite =
+    describe "findNeighborMayLocationsSuite"
+        [ test "found left" <|
+            \_ ->
+                Impl.findNeighborMayLocations
+                    [ LD.straight 4 |> flat ]
+                    [ LD.straightDoubleLeft 4 |> flat ]
+                    |> Expect.equal [ LD.straightDoubleLeft 4 |> flat ]
+        , test "found right" <|
+            \_ ->
+                Impl.findNeighborMayLocations
+                    [ LD.straight 4 |> flat ]
+                    [ LD.straightDoubleRight 4 |> flat ]
+                    |> Expect.equal [ LD.straightDoubleRight 4 |> flat ]
+        , test "found right and left" <|
+            \_ ->
+                Impl.findNeighborMayLocations
+                    [ LD.straight 4 |> flat ]
+                    [ LD.straightDoubleLeft 4 |> flat, LD.straightDoubleRight 4 |> flat ]
+                    -- TODO: ここは順不同でテストしたい
+                    |> Expect.equal [ LD.straightDoubleRight 4 |> flat, LD.straightDoubleLeft 4 |> flat ]
+        , test "didn't find if the height is different" <|
+            \_ ->
+                Impl.findNeighborMayLocations
+                    [ LD.straight 4 |> flat ]
+                    [ LD.straight 4 |> L.setHeight 4 |> flat ]
+                    |> Expect.equal []
+        ]
+
+
 suite : Test
 suite =
     describe "PierConstruction.Impl"
         [ constructSuite
         , constructDoubleTrackPiersSuite
+        , findNeighborMayLocationsSuite
         ]
