@@ -1,7 +1,7 @@
 module Util exposing (..)
 
 import Dict exposing (Dict)
-import List.Nonempty exposing (Nonempty(..))
+import List.Nonempty as Nonempty exposing (Nonempty(..))
 
 
 foldlResult : (a -> b -> Result err b) -> b -> List a -> Result err b
@@ -58,3 +58,21 @@ lexicographic x y =
 
     else
         y
+
+
+appendToDictNonempty : comparable -> value -> Dict comparable (Nonempty value) -> Dict comparable (Nonempty value)
+appendToDictNonempty key value =
+    Dict.update key
+        (\oldValue ->
+            case oldValue of
+                Nothing ->
+                    Just <| Nonempty.singleton value
+
+                Just values ->
+                    Just <| Nonempty.cons value values
+        )
+
+
+splitByKey : (a -> comparable) -> List a -> Dict comparable (Nonempty a)
+splitByKey keyOf =
+    List.foldl (\loc dict -> appendToDictNonempty (keyOf loc) loc dict) Dict.empty

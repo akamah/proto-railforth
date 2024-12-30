@@ -11089,6 +11089,10 @@ var $author$project$Forth$PierConstraction$Impl$cleansePierLocations = function 
 				})
 		});
 };
+var $author$project$Forth$Geometry$Dir$toString = function (_v0) {
+	var d = _v0.a;
+	return 'Dir ' + $elm$core$String$fromInt(d);
+};
 var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
 	var a = _v0.a;
 	var b = _v0.b;
@@ -11106,8 +11110,19 @@ var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
 				_List_fromArray(
 					[a, b, c, d]))));
 };
-var $author$project$Forth$PierConstraction$Impl$pierKey = function (loc) {
-	return $author$project$Forth$Geometry$Rot45$toString(loc.single) + (',' + $author$project$Forth$Geometry$Rot45$toString(loc._double));
+var $author$project$Forth$PierConstraction$Impl$pierPlanarKey = function (_v0) {
+	var single = _v0.single;
+	var _double = _v0._double;
+	var dir = _v0.dir;
+	return A2(
+		$elm$core$String$join,
+		',',
+		_List_fromArray(
+			[
+				$author$project$Forth$Geometry$Rot45$toString(single),
+				$author$project$Forth$Geometry$Rot45$toString(_double),
+				$author$project$Forth$Geometry$Dir$toString(dir)
+			]));
 };
 var $elm$core$Result$map = F2(
 	function (func, ra) {
@@ -11135,7 +11150,7 @@ var $author$project$Forth$PierConstraction$Impl$divideIntoDict = A2(
 	function (loc) {
 		return A2(
 			$author$project$Util$updateWithResult,
-			$author$project$Forth$PierConstraction$Impl$pierKey(loc.location),
+			$author$project$Forth$PierConstraction$Impl$pierPlanarKey(loc.location),
 			function (maybe) {
 				if (maybe.$ === 'Nothing') {
 					return $elm$core$Result$Ok(
@@ -11151,7 +11166,7 @@ var $author$project$Forth$PierConstraction$Impl$divideIntoDict = A2(
 						_Utils_Tuple2(
 							dir,
 							A2($elm$core$List$cons, loc, lis))) : $elm$core$Result$Err(
-						'橋脚の方向が一致しません ' + $author$project$Forth$PierConstraction$Impl$pierKey(loc.location));
+						'橋脚の方向が一致しません ' + $author$project$Forth$PierConstraction$Impl$pierPlanarKey(loc.location));
 				}
 			});
 	},
@@ -11309,7 +11324,7 @@ var $author$project$Forth$PierConstraction$Impl$doubleTrackPiersRec = F4(
 				} else {
 					var pierLoc = _v3.a;
 					if (A2($elm$core$Dict$member, key, open)) {
-						var leftKey = $author$project$Forth$PierConstraction$Impl$pierKey(
+						var leftKey = $author$project$Forth$PierConstraction$Impl$pierPlanarKey(
 							$author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(pierLoc.location));
 						var _v4 = _Utils_Tuple2(
 							A2($elm$core$Dict$get, leftKey, single),
@@ -11560,6 +11575,8 @@ var $author$project$Forth$PierConstraction$Impl$singlePier = function (single) {
 };
 var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
 	var must = _v0.must;
+	var may = _v0.may;
+	var mustNot = _v0.mustNot;
 	var _v1 = A2(
 		$elm$core$Result$andThen,
 		function (_v2) {

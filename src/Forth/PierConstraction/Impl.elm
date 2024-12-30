@@ -1,4 +1,4 @@
-module Forth.PierConstraction.Impl exposing (PierConstructionResult, construct)
+module Forth.PierConstraction.Impl exposing (PierConstructionResult, construct, constructDoubleTrackPiers, pierPlanarKey)
 
 -- このモジュールでは、端点の集合（もしくはリスト）から橋脚の集合を構築する。
 
@@ -9,6 +9,8 @@ import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierM
 import Forth.Geometry.Rot45 as Rot45
 import Forth.PierConstraint exposing (PierConstraint)
 import Forth.PierPlacement as PierPlacement exposing (PierPlacement)
+import List.Nonempty as Nonempty exposing (Nonempty(..))
+import Set
 import Types.Pier as Pier exposing (Pier)
 import Util exposing (foldlResult, updateWithResult)
 
@@ -42,6 +44,8 @@ import Util exposing (foldlResult, updateWithResult)
 
 
 {-| 橋脚の方向を、8方向から4方向に直す
+✅ この関数は今後も使う。
+TODO: Dirにもっと良い型がほしい
 -}
 cleansePierLocations : PierLocation -> PierLocation
 cleansePierLocations placement =
@@ -52,11 +56,128 @@ cleansePierLocations placement =
     { placement | location = { loc | dir = Dir.toUndirectedDir loc.dir } }
 
 
+type alias PierPlanarKey =
+    String
+
+
+type alias PierSpatialKey =
+    String
+
+
 {-| 座標の位置を文字列にエンコードする。主にDictのキーにするために使う
 -}
-pierKey : Location -> String
-pierKey loc =
-    Rot45.toString loc.single ++ "," ++ Rot45.toString loc.double
+pierPlanarKey : Location -> PierPlanarKey
+pierPlanarKey { single, double, dir } =
+    String.join "," [ Rot45.toString single, Rot45.toString double, Dir.toString dir ]
+
+
+pierSpatialKey : Location -> PierSpatialKey
+pierSpatialKey { single, double, dir, height } =
+    String.join "," [ Rot45.toString single, Rot45.toString double, Dir.toString dir, String.fromInt height ]
+
+
+{-| pierLocationsをDictに変換してソートもするやつ。主にこれを使う。
+locationでもPierLocationでも使えるようにgetterを持たせておいた
+-}
+buildPierKeyDict : (location -> comparable) -> (location -> location -> Order) -> List location -> Dict comparable (Nonempty location)
+buildPierKeyDict keyOf comparator locs =
+    Util.splitByKey keyOf locs
+        |> Dict.map (\_ list -> Nonempty.sortWith comparator list)
+
+
+{-| 単線の橋脚の位置の集合から、(単線,複線) の橋脚の位置の集合を計算する。
+
+具体的には、
+
+1.  initialSet が与えられる。
+2.  initialSetから　1つ取り出し、sとする
+3.  sの左隣の位置がinitialSetに入っているならば、取り出してdとする。
+      - sとdをdoubleSetに移動する。
+
+```ruby
+def combine(initialSet)
+  singleSet = {}
+  doubleSet = {}
+
+  while s = initialSet.pop()
+    l = left(s)
+
+    # あれよね、sの右にあったらエラーよね。もしsの右が処理済みだったとしたら、sはdoubleとして裁かれてるので、
+    # sの右は処理済みではない。なのでエラー処理するにしてもinitialSetから見て確認する必要がある。
+    if initialSet[right(s)]
+      error
+    end
+
+    if d = initialSet[l]
+      initialSet.remove(d)
+      # あと、dの左にあるかもしれない。そうなったらエラーや。
+      # そこに関しては、処理済みかどうかはあまり関係ないと思うので全部から確認する。
+      if initialSet[left(d)] or singleSet[left(d)] or doubleSet[left(d)]
+        error
+      end
+
+      # そうでないならば、いい感じに構築できる。
+      doubleSet << s
+    else
+      singleSet << s
+    end
+  end
+
+  return singleSet, doubleSet
+```
+
+色々終わったら (singleSet, doubleSet) を返却する
+
+-}
+getLeft : Location -> Location
+getLeft location =
+    Location.moveLeftByDoubleTrackLength location
+
+
+{-| 単線を想定した橋脚の列から複線橋脚を抜き出す。
+もし、複々線になることがあったら複線橋脚を構築できないためエラーなのだが、ここでは構築してしまう。
+理由としては、実際に構築できなかったとしても可視化したいため。
+残りの段のエラー処理等でリカバリすることを想定。
+-}
+constructDoubleTrackPiers :
+    Dict PierPlanarKey (Nonempty PierLocation)
+    ->
+        { single : Dict PierPlanarKey (Nonempty PierLocation)
+        , double : Dict PierPlanarKey ( Nonempty PierLocation, Nonempty PierLocation )
+        }
+constructDoubleTrackPiers locationDict =
+    let
+        rec closed single double list =
+            case list of
+                [] ->
+                    { single = single, double = double }
+
+                ( key, pierLocations ) :: rest ->
+                    let
+                        left =
+                            pierPlanarKey <| getLeft (Nonempty.head pierLocations).location
+                    in
+                    if Set.member key closed then
+                        -- skip if key is already visited
+                        rec closed single double rest
+
+                    else
+                        case Dict.get left single of
+                            Nothing ->
+                                -- not found. construct a single pier
+                                rec (Set.insert key closed)
+                                    single
+                                    double
+                                    rest
+
+                            Just doubleLocations ->
+                                -- found a location next to loc. Construct a double pier
+                                rec (Set.insert key <| Set.insert left closed)
+                                    (Dict.remove key <| Dict.remove left single)
+                                    (Dict.insert key ( pierLocations, doubleLocations ) double)
+                                    rest
+    in
+    rec Set.empty locationDict Dict.empty (Dict.toList locationDict)
 
 
 {-| pierLocationを、平面座標ごとに一括りにする
@@ -65,7 +186,7 @@ divideIntoDict : List PierLocation -> Result String (Dict String ( Dir, List Pie
 divideIntoDict =
     foldlResult
         (\loc ->
-            updateWithResult (pierKey loc.location)
+            updateWithResult (pierPlanarKey loc.location)
                 (\maybe ->
                     case maybe of
                         Nothing ->
@@ -76,7 +197,7 @@ divideIntoDict =
                                 Ok ( dir, loc :: lis )
 
                             else
-                                Err <| "橋脚の方向が一致しません " ++ pierKey loc.location
+                                Err <| "橋脚の方向が一致しません " ++ pierPlanarKey loc.location
                 )
         )
         Dict.empty
@@ -195,7 +316,7 @@ doubleTrackPiersRec single double open list =
                     if Dict.member key open then
                         let
                             leftKey =
-                                pierKey (Location.moveLeftByDoubleTrackLength pierLoc.location)
+                                pierPlanarKey (Location.moveLeftByDoubleTrackLength pierLoc.location)
                         in
                         case ( Dict.get leftKey single, Dict.get leftKey open ) of
                             ( Just ( dir2, pierLocs2 ), _ ) ->
@@ -292,7 +413,7 @@ type alias PierConstructionError =
 {-| the main function of pier-construction
 -}
 construct : PierConstraint -> PierConstructionResult
-construct { must } =
+construct { must, may, mustNot } =
     case
         must
             |> List.map cleansePierLocations
