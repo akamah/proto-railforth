@@ -11631,7 +11631,7 @@ var $author$project$Forth$PierConstraint$flip = F2(
 			return constraint;
 		} else {
 			return {
-				may: A2($elm$core$List$map, $author$project$Forth$Geometry$Location$flip, constraint.may),
+				may: A2($elm$core$List$map, $author$project$Forth$Geometry$PierLocation$flip, constraint.may),
 				must: A2($elm$core$List$map, $author$project$Forth$Geometry$PierLocation$flip, constraint.must),
 				mustNot: A2($elm$core$List$map, $author$project$Forth$Geometry$Location$flip, constraint.mustNot)
 			};
@@ -11660,7 +11660,10 @@ var $author$project$Forth$PierConstraintDefinition$straightConstraint = function
 	return {
 		may: A2(
 			$elm$core$List$map,
-			$author$project$Forth$LocationDefinition$straight,
+			function (i) {
+				return $author$project$Forth$PierConstraintDefinition$flat(
+					$author$project$Forth$LocationDefinition$straight(i));
+			},
 			A2($elm$core$List$range, 1, n - 1)),
 		must: _List_fromArray(
 			[
@@ -11984,7 +11987,16 @@ var $author$project$Forth$PierConstraintDefinition$getPierConstraint = function 
 var $author$project$Forth$PierConstraint$map = F2(
 	function (f, constraint) {
 		return {
-			may: A2($elm$core$List$map, f, constraint.may),
+			may: A2(
+				$elm$core$List$map,
+				function (pl) {
+					return _Utils_update(
+						pl,
+						{
+							location: f(pl.location)
+						});
+				},
+				constraint.may),
 			must: A2(
 				$elm$core$List$map,
 				function (pl) {

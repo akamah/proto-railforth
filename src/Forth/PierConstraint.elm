@@ -10,13 +10,14 @@ import Types.Rail exposing (IsFlipped(..))
 
    must : 必ず設置しなければならない。
    may : 設置してもしなくてもよい。複線橋脚を配置せざるを得ない際に使用。
+     複線橋脚を設置する際の上下のマージンが必要なので PierLocation型となる
    mustNot : 設置してはいけない。複線橋脚を設置してはいけない際に使用。
 -}
 
 
 type alias PierConstraint =
     { must : List PierLocation
-    , may : List Location
+    , may : List PierLocation
     , mustNot : List Location
     }
 
@@ -45,7 +46,7 @@ flip flipped constraint =
 
         Flipped ->
             { must = List.map PierLocation.flip constraint.must
-            , may = List.map Location.flip constraint.may
+            , may = List.map PierLocation.flip constraint.may
             , mustNot = List.map Location.flip constraint.mustNot
             }
 
@@ -53,6 +54,6 @@ flip flipped constraint =
 map : (Location -> Location) -> PierConstraint -> PierConstraint
 map f constraint =
     { must = List.map (\pl -> { pl | location = f pl.location }) constraint.must
-    , may = List.map f constraint.may
+    , may = List.map (\pl -> { pl | location = f pl.location }) constraint.may
     , mustNot = List.map f constraint.mustNot
     }

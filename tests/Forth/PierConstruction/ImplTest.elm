@@ -34,7 +34,7 @@ must pierLocations =
     { must = pierLocations, may = [], mustNot = [] }
 
 
-may : List PierLocation -> List Location -> PierConstraint
+may : List PierLocation -> List PierLocation -> PierConstraint
 may pierLocations locations =
     { must = pierLocations, may = locations, mustNot = [] }
 

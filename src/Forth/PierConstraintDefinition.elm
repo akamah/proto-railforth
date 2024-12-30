@@ -68,7 +68,7 @@ slopeCurveMargin =
 straightConstraint : Int -> PierConstraint
 straightConstraint n =
     { must = [ LD.zero |> flat, LD.straight n |> flat ]
-    , may = List.range 1 (n - 1) |> List.map LD.straight
+    , may = List.range 1 (n - 1) |> List.map (\i -> LD.straight i |> flat)
     , mustNot = []
     }
 
