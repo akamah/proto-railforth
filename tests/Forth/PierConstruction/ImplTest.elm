@@ -7,7 +7,7 @@ import Forth.Geometry.PierLocation exposing (PierLocation)
 import Forth.LocationDefinition as LD
 import Forth.PierConstraction.Impl as Impl exposing (PierConstructionResult, construct)
 import Forth.PierConstraint exposing (PierConstraint)
-import Forth.PierConstraintDefinition exposing (flat)
+import Forth.PierConstraintDefinition exposing (flat, slopeCurve)
 import Forth.PierPlacement as PP exposing (PierPlacement)
 import Http.Progress exposing (Progress(..))
 import List.Nonempty as Nonempty
@@ -192,10 +192,76 @@ findNeighborMayLocationsSuite =
         ]
 
 
+constructSinglePier2Suite : Test
+constructSinglePier2Suite =
+    describe "constructSinglePier2"
+        [ test "empty" <|
+            \_ ->
+                Impl.constructSinglePier2 [] |> Expect.equal []
+        , test "on the ground" <|
+            \_ ->
+                Impl.constructSinglePier2
+                    [ LD.straight 4 |> flat ]
+                    |> Expect.equal []
+        , test "one location" <|
+            \_ ->
+                Impl.constructSinglePier2
+                    [ LD.straight 4 |> L.setHeight 10 |> flat ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 4 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 8 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 9 |> PP.make Mini
+                        ]
+        , test "two locations" <|
+            \_ ->
+                Impl.constructSinglePier2
+                    [ LD.straight 4 |> L.setHeight 3 |> flat
+                    , LD.straight 4 |> L.setHeight 10 |> flat
+                    ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 1 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 2 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 3 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 7 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 8 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 9 |> PP.make Mini
+                        ]
+        , test "slope curve" <|
+            \_ ->
+                Impl.constructSinglePier2
+                    [ LD.straight 4 |> L.setHeight 5 |> slopeCurve
+                    , LD.straight 4 |> L.setHeight 11 |> slopeCurve
+                    ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 5 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 9 |> PP.make Mini
+                        ]
+        ]
+
+
+constructDoublePier2Suite : Test
+constructDoublePier2Suite =
+    describe "constructDoublePier2Suite"
+        [ test "empty" <|
+            \_ ->
+                Impl.constructDoublePier2 [] [] |> Expect.equal []
+        , test "on the ground" <|
+            \_ ->
+                Impl.constructDoublePier2
+                    [ LD.straight 4 |> flat ]
+                    [ LD.straightDoubleRight 4 |> flat ]
+                    |> Expect.equal []
+        ]
+
+
 suite : Test
 suite =
     describe "PierConstruction.Impl"
         [ constructSuite
         , constructDoubleTrackPiersSuite
         , findNeighborMayLocationsSuite
+        , constructSinglePier2Suite
         ]

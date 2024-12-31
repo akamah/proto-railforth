@@ -215,6 +215,46 @@ constructDoubleTrackPiers locationDict =
     rec Set.empty locationDict Dict.empty (Dict.toList locationDict)
 
 
+{-| 単線の橋脚を構築する。Locationはすべて同じ座標であることを仮定したい
+-}
+constructSinglePier2 : List PierLocation -> List PierPlacement
+constructSinglePier2 locations =
+    let
+        -- 例えば、6つ上の位置に建築する場合だと、橋脚1つとミニ橋脚2つが必要になる。
+        -- そういう感じで、ある地点からある地点までの橋脚を埋める。大きい橋脚から貪欲にやる。
+        buildUpto targetLocation placementAccum currentHeight =
+            let
+                canBuildPier targetPier =
+                    -- 現在地点から数えて、pierLocationの下マージン + 高さの余裕があれば配置が可能。
+                    currentHeight + Pier.getHeight targetPier <= targetLocation.location.height - targetLocation.margin.bottom
+
+                buildPierAndRec targetPier =
+                    let
+                        nextLocation =
+                            Location.setHeight currentHeight targetLocation.location
+                    in
+                    buildUpto targetLocation
+                        (PierPlacement.make targetPier nextLocation :: placementAccum)
+                        (currentHeight + Pier.getHeight targetPier)
+            in
+            if canBuildPier Single then
+                buildPierAndRec Single
+
+            else if canBuildPier Mini then
+                buildPierAndRec Mini
+
+            else
+                placementAccum
+
+        rec current locs accum =
+            case locs of
+                [] ->
+                    List.reverse accum
+
+                pierLocation :: rest ->
+                    rec pierLocation.location.height rest <| buildUpto pierLocation accum current
+    in
+    rec 0 locations []
 {-| pierLocationを、平面座標ごとに一括りにする
 -}
 divideIntoDict : List PierLocation -> Result String (Dict String ( Dir, List PierLocation ))
