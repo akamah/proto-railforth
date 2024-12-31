@@ -1,17 +1,17 @@
-module Forth.PierConstraction.Impl exposing (PierConstructionResult, construct, constructDoubleTrackPiers, findNeighborMayLocations, pierPlanarKey)
+module Forth.PierConstraction.Impl exposing (PierConstructionResult, construct, constructDoublePier2, constructDoubleTrackPiers, constructSinglePier2, findNeighborMayLocations, pierPlanarKey)
 
 -- このモジュールでは、端点の集合（もしくはリスト）から橋脚の集合を構築する。
 
 import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
-import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation, PierMargin)
+import Forth.Geometry.PierLocation as PL exposing (PierLocation, PierMargin)
 import Forth.Geometry.Rot45 as Rot45
 import Forth.PierConstraint exposing (PierConstraint)
 import Forth.PierPlacement as PierPlacement exposing (PierPlacement)
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Set
-import Types.Pier as Pier exposing (Pier)
+import Types.Pier as Pier exposing (Pier(..))
 import Util exposing (foldlResult, updateWithResult)
 
 
@@ -276,14 +276,14 @@ buildSingleUpto template accum to from =
     else if to >= from + Pier.getHeight Pier.Single then
         buildSingleUpto
             template
-            (pierLocationToPlacement Pier.Single (PierLocation.setHeight from template) :: accum)
+            (pierLocationToPlacement Pier.Single (PL.setHeight from template) :: accum)
             to
             (from + Pier.getHeight Pier.Single)
 
     else
         buildSingleUpto
             template
-            (pierLocationToPlacement Pier.Mini (PierLocation.setHeight from template) :: accum)
+            (pierLocationToPlacement Pier.Mini (PL.setHeight from template) :: accum)
             to
             (from + Pier.getHeight Pier.Mini)
 
@@ -425,7 +425,7 @@ buildDoubleUpto template accum to from =
     else
         buildDoubleUpto
             template
-            (pierLocationToPlacement Pier.Wide (PierLocation.setHeight from template) :: accum)
+            (pierLocationToPlacement Pier.Wide (PL.setHeight from template) :: accum)
             to
             (from + Pier.getHeight Pier.Wide)
 
