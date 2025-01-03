@@ -255,6 +255,77 @@ constructSinglePier2 locations =
                     rec pierLocation.location.height rest <| buildUpto pierLocation accum current
     in
     rec 0 locations []
+
+
+{-| 複線の橋脚を構築する。
+primaryは複線の右側、secondaryは左側。
+正しければ構築し、間違っていたら後段のバリデーションに渡すため無茶苦茶でも構築を行う。
+-}
+constructDoublePier2 : List PierLocation -> List PierLocation -> List PierPlacement
+constructDoublePier2 primaryPierLocations secondaryPierLocations =
+    let
+        buildUpto targetLocation placementAccum currentHeight =
+            let
+                -- TODO: この辺の関数は単線の橋脚と共通なのでコードも共通化したい
+                canBuildPier targetPier =
+                    -- 現在地点から数えて、pierLocationの下マージン + 高さの余裕があれば配置が可能。
+                    currentHeight + targetLocation.margin.bottom + Pier.getHeight targetPier <= targetLocation.location.height - targetLocation.margin.bottom
+
+                buildPierAndRec targetPier =
+                    let
+                        nextLocation =
+                            Location.setHeight currentHeight targetLocation.location
+                    in
+                    buildUpto targetLocation
+                        (PierPlacement.make targetPier nextLocation :: placementAccum)
+                        (currentHeight + Pier.getHeight targetPier)
+
+                buildDoublePierForTargetLocation targetPier =
+                    let
+                        doublePierLocationForArbitraryHeight =
+                            Location.setHeight (targetLocation.location.height - Pier.getHeight targetPier) targetLocation.location
+                    in
+                    PierPlacement.make targetPier doublePierLocationForArbitraryHeight :: placementAccum
+            in
+            -- 複線橋脚の場合、4で割り切れないheightがやってくると構築はできない。
+            -- そうした場合にもせめて表示はできるようにと、無茶苦茶な形でも構築を行う。
+            -- そのため、うまく構築できる場合、ちょうど目標高度に達した場合、その間の1-3みたいな残り高さの3通りになる。
+            if canBuildPier Wide then
+                -- 設置する余裕があるので設置して再帰
+                buildPierAndRec Wide
+
+            else if targetLocation.location.height == currentHeight then
+                -- 目標高度に達したため何もしない
+                placementAccum
+
+            else
+                -- 無理やり建築を行う。
+                buildDoublePierForTargetLocation Wide
+
+        doubleRec current primary secondary accum =
+            case ( primary, secondary ) of
+                ( p :: pRest, s :: sRest ) ->
+                    if p.location.height > s.location.height then
+                        doubleRec s.location.height (p :: pRest) sRest <| buildUpto (p |> PL.setHeight s.location.height) accum current
+
+                    else if p.location.height < s.location.height then
+                        doubleRec p.location.height pRest (s :: sRest) <| buildUpto p accum current
+
+                    else
+                        -- p == s
+                        doubleRec p.location.height pRest sRest <| buildUpto p accum current
+
+                _ ->
+                    -- TODO: 複線橋脚の構築が終わった後、primary, secondaryに微妙に残った時のことを考える
+                    List.reverse accum
+    in
+    doubleRec 0 primaryPierLocations secondaryPierLocations []
+
+
+
+-- 以下、古いコード。
+
+
 {-| pierLocationを、平面座標ごとに一括りにする
 -}
 divideIntoDict : List PierLocation -> Result String (Dict String ( Dir, List PierLocation ))

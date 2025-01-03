@@ -254,6 +254,25 @@ constructDoublePier2Suite =
                     [ LD.straight 4 |> flat ]
                     [ LD.straightDoubleRight 4 |> flat ]
                     |> Expect.equal []
+        , test "wide pier on height=12" <|
+            \_ ->
+                Impl.constructDoublePier2
+                    [ LD.straight 4 |> L.setHeight 12 |> flat ]
+                    [ LD.straightDoubleRight 4 |> L.setHeight 12 |> flat ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Wide
+                        , LD.straight 4 |> L.setHeight 4 |> PP.make Wide
+                        , LD.straight 4 |> L.setHeight 8 |> PP.make Wide
+                        ]
+        , test "force build the pier when a pier location is not mod 4" <|
+            \_ ->
+                Impl.constructDoublePier2
+                    [ LD.straight 4 |> L.setHeight 7 |> flat ]
+                    [ LD.straightDoubleRight 4 |> L.setHeight 7 |> flat ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Wide
+                        , LD.straight 4 |> L.setHeight 3 |> PP.make Wide
+                        ]
         ]
 
 
@@ -264,4 +283,5 @@ suite =
         , constructDoubleTrackPiersSuite
         , findNeighborMayLocationsSuite
         , constructSinglePier2Suite
+        , constructDoublePier2Suite
         ]
