@@ -213,6 +213,15 @@ constructSinglePier2Suite =
                         , LD.straight 4 |> L.setHeight 8 |> PP.make Mini
                         , LD.straight 4 |> L.setHeight 9 |> PP.make Mini
                         ]
+        , test "locations with the same height are unified" <|
+            \_ ->
+                Impl.constructSinglePier2
+                    [ LD.straight 4 |> L.setHeight 4 |> flat
+                    , LD.straight 4 |> L.setHeight 4 |> flat
+                    ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Single
+                        ]
         , test "two locations" <|
             \_ ->
                 Impl.constructSinglePier2
