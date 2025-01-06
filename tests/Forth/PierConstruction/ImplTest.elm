@@ -282,6 +282,37 @@ constructDoublePier2Suite =
                         [ LD.straight 4 |> L.setHeight 0 |> PP.make Wide
                         , LD.straight 4 |> L.setHeight 3 |> PP.make Wide
                         ]
+        , test "the primary list is longer than the secondary" <|
+            \_ ->
+                Impl.constructDoublePier2
+                    [ LD.straight 4 |> L.setHeight 4 |> flat
+                    , LD.straight 4 |> L.setHeight 15 |> flat
+                    ]
+                    [ LD.straightDoubleRight 4 |> L.setHeight 4 |> flat ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Wide
+                        , LD.straight 4 |> L.setHeight 4 |> PP.make Wide
+                        , LD.straight 4 |> L.setHeight 8 |> PP.make Single
+                        , LD.straight 4 |> L.setHeight 12 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 13 |> PP.make Mini
+                        , LD.straight 4 |> L.setHeight 14 |> PP.make Mini
+                        ]
+        , test "the secondary list is longer than the primary" <|
+            \_ ->
+                Impl.constructDoublePier2
+                    [ LD.straight 4 |> L.setHeight 4 |> flat
+                    ]
+                    [ LD.straightDoubleRight 4 |> L.setHeight 4 |> flat
+                    , LD.straightDoubleRight 4 |> L.setHeight 15 |> flat
+                    ]
+                    |> Expect.equal
+                        [ LD.straight 4 |> L.setHeight 0 |> PP.make Wide
+                        , LD.straight 4 |> L.setHeight 4 |> PP.make Wide
+                        , LD.straightDoubleRight 4 |> L.setHeight 8 |> PP.make Single
+                        , LD.straightDoubleRight 4 |> L.setHeight 12 |> PP.make Mini
+                        , LD.straightDoubleRight 4 |> L.setHeight 13 |> PP.make Mini
+                        , LD.straightDoubleRight 4 |> L.setHeight 14 |> PP.make Mini
+                        ]
         ]
 
 

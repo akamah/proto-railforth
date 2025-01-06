@@ -216,13 +216,15 @@ constructDoubleTrackPiers locationDict =
 
 
 {-| 単線の橋脚を構築する。Locationはすべて同じ座標であることを仮定したい
+現在高さ currentから、pierLocations（同じ平面座標に高さの昇順に並んでいると仮定）のそれぞれの点を満たすように、
+単線の橋脚を構築してゆく。accumは末尾再帰にするための累積変数。
 -}
-constructSinglePier2 : List PierLocation -> List PierPlacement
-constructSinglePier2 locations =
+constructSinglePier2Rec : Int -> List PierLocation -> List PierPlacement -> List PierPlacement
+constructSinglePier2Rec current pierLocations accum =
     let
         -- 例えば、6つ上の位置に建築する場合だと、橋脚1つとミニ橋脚2つが必要になる。
         -- そういう感じで、ある地点からある地点までの橋脚を埋める。大きい橋脚から貪欲にやる。
-        buildUpto targetLocation placementAccum currentHeight =
+        buildSingleUpto2 currentHeight targetLocation placementAccum =
             let
                 canBuildPier targetPier =
                     -- 現在地点から数えて、pierLocationの下マージン + 高さの余裕があれば配置が可能。
@@ -233,9 +235,9 @@ constructSinglePier2 locations =
                         nextLocation =
                             Location.setHeight currentHeight targetLocation.location
                     in
-                    buildUpto targetLocation
-                        (PierPlacement.make targetPier nextLocation :: placementAccum)
-                        (currentHeight + Pier.getHeight targetPier)
+                    (PierPlacement.make targetPier nextLocation :: placementAccum)
+                        |> buildSingleUpto2 (currentHeight + Pier.getHeight targetPier)
+                            targetLocation
             in
             if canBuildPier Single then
                 buildPierAndRec Single
@@ -245,16 +247,19 @@ constructSinglePier2 locations =
 
             else
                 placementAccum
-
-        rec current locs accum =
-            case locs of
-                [] ->
-                    List.reverse accum
-
-                pierLocation :: rest ->
-                    rec pierLocation.location.height rest <| buildUpto pierLocation accum current
     in
-    rec 0 locations []
+    case pierLocations of
+        [] ->
+            List.reverse accum
+
+        pierLocation :: rest ->
+            buildSingleUpto2 current pierLocation accum
+                |> constructSinglePier2Rec pierLocation.location.height rest
+
+
+constructSinglePier2 : List PierLocation -> List PierPlacement
+constructSinglePier2 locations =
+    constructSinglePier2Rec 0 locations []
 
 
 {-| 複線の橋脚を構築する。
@@ -304,6 +309,9 @@ constructDoublePier2 primaryPierLocations secondaryPierLocations =
 
         doubleRec current primary secondary accum =
             case ( primary, secondary ) of
+                ( [], [] ) ->
+                    List.reverse accum
+
                 ( p :: pRest, s :: sRest ) ->
                     if p.location.height > s.location.height then
                         doubleRec s.location.height (p :: pRest) sRest <| buildUpto (p |> PL.setHeight s.location.height) accum current
@@ -315,9 +323,26 @@ constructDoublePier2 primaryPierLocations secondaryPierLocations =
                         -- p == s
                         doubleRec p.location.height pRest sRest <| buildUpto p accum current
 
-                _ ->
-                    -- TODO: 複線橋脚の構築が終わった後、primary, secondaryに微妙に残った時のことを考える
-                    List.reverse accum
+                ( primaryLocation :: primaryLocations, [] ) ->
+                    -- とりあえず1個の複線橋脚を設置 |> 4つ上の位置から、primaryLocationsに沿って単線橋脚を積んでいく
+                    let
+                        doublePierLocation =
+                            Location.setHeight current primaryLocation.location
+                    in
+                    (PierPlacement.make Wide doublePierLocation :: accum)
+                        |> constructSinglePier2Rec
+                            (current + Pier.getHeight Wide)
+                            (primaryLocation :: primaryLocations)
+
+                ( [], secondaryLocation :: secondaryLocations ) ->
+                    let
+                        doublePierLocation =
+                            Location.setHeight current secondaryLocation.location |> getLeft
+                    in
+                    (PierPlacement.make Wide doublePierLocation :: accum)
+                        |> constructSinglePier2Rec
+                            (current + Pier.getHeight Wide)
+                            (secondaryLocation :: secondaryLocations)
     in
     doubleRec 0 primaryPierLocations secondaryPierLocations []
 
