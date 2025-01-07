@@ -1,6 +1,7 @@
 module Forth.Geometry.PierLocation exposing
     ( PierLocation
     , PierMargin
+    , compare
     , flip
     , fromRailLocation
     , make
@@ -14,6 +15,7 @@ import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 exposing (Rot45)
 import Math.Vector3 exposing (Vec3)
+import Util
 
 
 {-| 橋脚の設置地点を表す。
@@ -70,3 +72,10 @@ mul global local =
 toVec3 : PierLocation -> Vec3
 toVec3 loc =
     Location.toVec3 loc.location
+
+
+compare : PierLocation -> PierLocation -> Order
+compare x y =
+    Util.lexicographic (Location.compare x.location y.location) <|
+        Util.lexicographic (Basics.compare x.margin.top y.margin.top)
+            (Basics.compare x.margin.bottom y.margin.bottom)

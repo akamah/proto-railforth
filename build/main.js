@@ -11063,15 +11063,158 @@ var $author$project$Forth$PierConstraint$concat = function (xs) {
 				xs))
 	};
 };
-var $elm$core$Result$andThen = F2(
-	function (callback, result) {
-		if (result.$ === 'Ok') {
-			var value = result.a;
-			return callback(value);
-		} else {
-			var msg = result.a;
-			return $elm$core$Result$Err(msg);
+var $mgold$elm_nonempty_list$List$Nonempty$reverse = function (_v0) {
+	var x = _v0.a;
+	var xs = _v0.b;
+	var revapp = function (_v1) {
+		revapp:
+		while (true) {
+			var ls = _v1.a;
+			var c = _v1.b;
+			var rs = _v1.c;
+			if (!rs.b) {
+				return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, c, ls);
+			} else {
+				var r = rs.a;
+				var rss = rs.b;
+				var $temp$_v1 = _Utils_Tuple3(
+					A2($elm$core$List$cons, c, ls),
+					r,
+					rss);
+				_v1 = $temp$_v1;
+				continue revapp;
+			}
 		}
+	};
+	return revapp(
+		_Utils_Tuple3(_List_Nil, x, xs));
+};
+var $mgold$elm_nonempty_list$List$Nonempty$dedup = function (_v0) {
+	var x = _v0.a;
+	var xs = _v0.b;
+	var dedupe = F3(
+		function (prev, done, next) {
+			dedupe:
+			while (true) {
+				if (!next.b) {
+					return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, prev, done);
+				} else {
+					var y = next.a;
+					var ys = next.b;
+					if (_Utils_eq(y, prev)) {
+						var $temp$prev = prev,
+							$temp$done = done,
+							$temp$next = ys;
+						prev = $temp$prev;
+						done = $temp$done;
+						next = $temp$next;
+						continue dedupe;
+					} else {
+						var $temp$prev = y,
+							$temp$done = A2($elm$core$List$cons, prev, done),
+							$temp$next = ys;
+						prev = $temp$prev;
+						done = $temp$done;
+						next = $temp$next;
+						continue dedupe;
+					}
+				}
+			}
+		});
+	return $mgold$elm_nonempty_list$List$Nonempty$reverse(
+		A3(dedupe, x, _List_Nil, xs));
+};
+var $elm$core$List$sortWith = _List_sortWith;
+var $mgold$elm_nonempty_list$List$Nonempty$insertWith = F3(
+	function (cmp, hd, aList) {
+		if (aList.b) {
+			var x = aList.a;
+			var xs = aList.b;
+			return _Utils_eq(
+				A2(cmp, x, hd),
+				$elm$core$Basics$LT) ? A2(
+				$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+				x,
+				A2(
+					$elm$core$List$sortWith,
+					cmp,
+					A2($elm$core$List$cons, hd, xs))) : A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, hd, aList);
+		} else {
+			return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, hd, _List_Nil);
+		}
+	});
+var $mgold$elm_nonempty_list$List$Nonempty$sortWith = F2(
+	function (f, _v0) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		return A3(
+			$mgold$elm_nonempty_list$List$Nonempty$insertWith,
+			f,
+			x,
+			A2($elm$core$List$sortWith, f, xs));
+	});
+var $mgold$elm_nonempty_list$List$Nonempty$cons = F2(
+	function (y, _v0) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		return A2(
+			$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+			y,
+			A2($elm$core$List$cons, x, xs));
+	});
+var $mgold$elm_nonempty_list$List$Nonempty$singleton = function (x) {
+	return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, x, _List_Nil);
+};
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var $author$project$Util$appendToDictNonempty = F2(
+	function (key, value) {
+		return A2(
+			$elm$core$Dict$update,
+			key,
+			function (oldValue) {
+				if (oldValue.$ === 'Nothing') {
+					return $elm$core$Maybe$Just(
+						$mgold$elm_nonempty_list$List$Nonempty$singleton(value));
+				} else {
+					var values = oldValue.a;
+					return $elm$core$Maybe$Just(
+						A2($mgold$elm_nonempty_list$List$Nonempty$cons, value, values));
+				}
+			});
+	});
+var $author$project$Util$splitByKey = function (keyOf) {
+	return A2(
+		$elm$core$List$foldl,
+		F2(
+			function (loc, dict) {
+				return A3(
+					$author$project$Util$appendToDictNonempty,
+					keyOf(loc),
+					loc,
+					dict);
+			}),
+		$elm$core$Dict$empty);
+};
+var $author$project$Forth$PierConstraction$Impl$buildPierKeyDict = F3(
+	function (keyOf, comparator, locs) {
+		return A2(
+			$elm$core$Dict$map,
+			F2(
+				function (_v0, list) {
+					return $mgold$elm_nonempty_list$List$Nonempty$dedup(
+						A2($mgold$elm_nonempty_list$List$Nonempty$sortWith, comparator, list));
+				}),
+			A2($author$project$Util$splitByKey, keyOf, locs));
 	});
 var $author$project$Forth$Geometry$Dir$toUndirectedDir = function (_v0) {
 	var x = _v0.a;
@@ -11089,6 +11232,271 @@ var $author$project$Forth$PierConstraction$Impl$cleansePierLocations = function 
 				})
 		});
 };
+var $author$project$Forth$Geometry$Dir$compare = F2(
+	function (_v0, _v1) {
+		var a = _v0.a;
+		var b = _v1.a;
+		return A2($elm$core$Basics$compare, a, b);
+	});
+var $author$project$Util$lexicographic = F2(
+	function (x, y) {
+		return (!_Utils_eq(x, $elm$core$Basics$EQ)) ? x : y;
+	});
+var $author$project$Forth$Geometry$Rot45$compare = F2(
+	function (_v0, _v1) {
+		var xa = _v0.a;
+		var xb = _v0.b;
+		var xc = _v0.c;
+		var xd = _v0.d;
+		var ya = _v1.a;
+		var yb = _v1.b;
+		var yc = _v1.c;
+		var yd = _v1.d;
+		return A2(
+			$author$project$Util$lexicographic,
+			A2($elm$core$Basics$compare, xa, ya),
+			A2(
+				$author$project$Util$lexicographic,
+				A2($elm$core$Basics$compare, xb, yb),
+				A2(
+					$author$project$Util$lexicographic,
+					A2($elm$core$Basics$compare, xc, yc),
+					A2($elm$core$Basics$compare, xd, yd))));
+	});
+var $author$project$Forth$Geometry$Location$compare = F2(
+	function (a, b) {
+		return A2(
+			$author$project$Util$lexicographic,
+			A2($author$project$Forth$Geometry$Rot45$compare, a.single, b.single),
+			A2(
+				$author$project$Util$lexicographic,
+				A2($author$project$Forth$Geometry$Rot45$compare, a._double, b._double),
+				A2(
+					$author$project$Util$lexicographic,
+					A2($elm$core$Basics$compare, a.height, b.height),
+					A2($author$project$Forth$Geometry$Dir$compare, a.dir, b.dir))));
+	});
+var $author$project$Forth$Geometry$PierLocation$compare = F2(
+	function (x, y) {
+		return A2(
+			$author$project$Util$lexicographic,
+			A2($author$project$Forth$Geometry$Location$compare, x.location, y.location),
+			A2(
+				$author$project$Util$lexicographic,
+				A2($elm$core$Basics$compare, x.margin.top, y.margin.top),
+				A2($elm$core$Basics$compare, x.margin.bottom, y.margin.bottom)));
+	});
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $author$project$Types$Pier$Wide = {$: 'Wide'};
+var $author$project$Types$Pier$Mini = {$: 'Mini'};
+var $author$project$Types$Pier$Single = {$: 'Single'};
+var $author$project$Types$Pier$getHeight = function (pier) {
+	switch (pier.$) {
+		case 'Single':
+			return 4;
+		case 'Wide':
+			return 4;
+		default:
+			return 1;
+	}
+};
+var $author$project$Forth$PierPlacement$PierPlacement = F2(
+	function (pier, location) {
+		return {location: location, pier: pier};
+	});
+var $author$project$Forth$PierPlacement$make = $author$project$Forth$PierPlacement$PierPlacement;
+var $author$project$Forth$Geometry$Location$setHeight = F2(
+	function (newHeight, location) {
+		return _Utils_update(
+			location,
+			{height: newHeight});
+	});
+var $author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec = F3(
+	function (current, pierLocations, accum) {
+		var buildSingleUpto2 = F3(
+			function (currentHeight, targetLocation, placementAccum) {
+				var canBuildPier = function (targetPier) {
+					return _Utils_cmp(
+						currentHeight + $author$project$Types$Pier$getHeight(targetPier),
+						targetLocation.location.height - targetLocation.margin.bottom) < 1;
+				};
+				var buildPierAndRec = function (targetPier) {
+					var nextLocation = A2($author$project$Forth$Geometry$Location$setHeight, currentHeight, targetLocation.location);
+					return A3(
+						buildSingleUpto2,
+						currentHeight + $author$project$Types$Pier$getHeight(targetPier),
+						targetLocation,
+						A2(
+							$elm$core$List$cons,
+							A2($author$project$Forth$PierPlacement$make, targetPier, nextLocation),
+							placementAccum));
+				};
+				return canBuildPier($author$project$Types$Pier$Single) ? buildPierAndRec($author$project$Types$Pier$Single) : (canBuildPier($author$project$Types$Pier$Mini) ? buildPierAndRec($author$project$Types$Pier$Mini) : placementAccum);
+			});
+		if (!pierLocations.b) {
+			return $elm$core$List$reverse(accum);
+		} else {
+			var pierLocation = pierLocations.a;
+			var rest = pierLocations.b;
+			return A3(
+				$author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec,
+				pierLocation.location.height,
+				rest,
+				A3(buildSingleUpto2, current, pierLocation, accum));
+		}
+	});
+var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = function (loc) {
+	return A2(
+		$author$project$Forth$Geometry$Location$mul,
+		loc,
+		A4(
+			$author$project$Forth$Geometry$Location$make,
+			$author$project$Forth$Geometry$Rot45$zero,
+			A2(
+				$author$project$Forth$Geometry$Rot45$add,
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
+			0,
+			$author$project$Forth$Geometry$Dir$e));
+};
+var $author$project$Forth$PierConstraction$Impl$getLeft = function (location) {
+	return $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(location);
+};
+var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
+	function (newHeight, loc) {
+		return _Utils_update(
+			loc,
+			{
+				location: A2($author$project$Forth$Geometry$Location$setHeight, newHeight, loc.location)
+			});
+	});
+var $author$project$Forth$PierConstraction$Impl$constructDoublePier2 = F2(
+	function (primaryPierLocations, secondaryPierLocations) {
+		var buildUpto = F3(
+			function (targetLocation, placementAccum, currentHeight) {
+				var canBuildPier = function (targetPier) {
+					return _Utils_cmp(
+						(currentHeight + targetLocation.margin.bottom) + $author$project$Types$Pier$getHeight(targetPier),
+						targetLocation.location.height - targetLocation.margin.bottom) < 1;
+				};
+				var buildPierAndRec = function (targetPier) {
+					var nextLocation = A2($author$project$Forth$Geometry$Location$setHeight, currentHeight, targetLocation.location);
+					return A3(
+						buildUpto,
+						targetLocation,
+						A2(
+							$elm$core$List$cons,
+							A2($author$project$Forth$PierPlacement$make, targetPier, nextLocation),
+							placementAccum),
+						currentHeight + $author$project$Types$Pier$getHeight(targetPier));
+				};
+				var buildDoublePierForTargetLocation = function (targetPier) {
+					var doublePierLocationForArbitraryHeight = A2(
+						$author$project$Forth$Geometry$Location$setHeight,
+						targetLocation.location.height - $author$project$Types$Pier$getHeight(targetPier),
+						targetLocation.location);
+					return A2(
+						$elm$core$List$cons,
+						A2($author$project$Forth$PierPlacement$make, targetPier, doublePierLocationForArbitraryHeight),
+						placementAccum);
+				};
+				return canBuildPier($author$project$Types$Pier$Wide) ? buildPierAndRec($author$project$Types$Pier$Wide) : (_Utils_eq(targetLocation.location.height, currentHeight) ? placementAccum : buildDoublePierForTargetLocation($author$project$Types$Pier$Wide));
+			});
+		var doubleRec = F4(
+			function (current, primary, secondary, accum) {
+				var _v0 = _Utils_Tuple2(primary, secondary);
+				if (_v0.a.b) {
+					if (_v0.b.b) {
+						var _v1 = _v0.a;
+						var p = _v1.a;
+						var pRest = _v1.b;
+						var _v2 = _v0.b;
+						var s = _v2.a;
+						var sRest = _v2.b;
+						return (_Utils_cmp(p.location.height, s.location.height) > 0) ? A4(
+							doubleRec,
+							s.location.height,
+							A2($elm$core$List$cons, p, pRest),
+							sRest,
+							A3(
+								buildUpto,
+								A2($author$project$Forth$Geometry$PierLocation$setHeight, s.location.height, p),
+								accum,
+								current)) : ((_Utils_cmp(p.location.height, s.location.height) < 0) ? A4(
+							doubleRec,
+							p.location.height,
+							pRest,
+							A2($elm$core$List$cons, s, sRest),
+							A3(buildUpto, p, accum, current)) : A4(
+							doubleRec,
+							p.location.height,
+							pRest,
+							sRest,
+							A3(buildUpto, p, accum, current)));
+					} else {
+						var _v3 = _v0.a;
+						var primaryLocation = _v3.a;
+						var primaryLocations = _v3.b;
+						var doublePierLocation = A2($author$project$Forth$Geometry$Location$setHeight, current, primaryLocation.location);
+						return A3(
+							$author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec,
+							current + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide),
+							A2($elm$core$List$cons, primaryLocation, primaryLocations),
+							A2(
+								$elm$core$List$cons,
+								A2($author$project$Forth$PierPlacement$make, $author$project$Types$Pier$Wide, doublePierLocation),
+								accum));
+					}
+				} else {
+					if (!_v0.b.b) {
+						return $elm$core$List$reverse(accum);
+					} else {
+						var _v4 = _v0.b;
+						var secondaryLocation = _v4.a;
+						var secondaryLocations = _v4.b;
+						var doublePierLocation = $author$project$Forth$PierConstraction$Impl$getLeft(
+							A2($author$project$Forth$Geometry$Location$setHeight, current, secondaryLocation.location));
+						return A3(
+							$author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec,
+							current + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide),
+							A2($elm$core$List$cons, secondaryLocation, secondaryLocations),
+							A2(
+								$elm$core$List$cons,
+								A2($author$project$Forth$PierPlacement$make, $author$project$Types$Pier$Wide, doublePierLocation),
+								accum));
+					}
+				}
+			});
+		return A4(doubleRec, 0, primaryPierLocations, secondaryPierLocations, _List_Nil);
+	});
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $elm$core$Set$insert = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$Set$member = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return A2($elm$core$Dict$member, key, dict);
+	});
 var $author$project$Forth$Geometry$Dir$toString = function (_v0) {
 	var d = _v0.a;
 	return 'Dir ' + $elm$core$String$fromInt(d);
@@ -11124,173 +11532,81 @@ var $author$project$Forth$PierConstraction$Impl$pierPlanarKey = function (_v0) {
 				$author$project$Forth$Geometry$Dir$toString(dir)
 			]));
 };
-var $elm$core$Result$map = F2(
-	function (func, ra) {
-		if (ra.$ === 'Ok') {
-			var a = ra.a;
-			return $elm$core$Result$Ok(
-				func(a));
-		} else {
-			var e = ra.a;
-			return $elm$core$Result$Err(e);
-		}
-	});
-var $author$project$Util$updateWithResult = F3(
-	function (key, f, dict) {
-		return A2(
-			$elm$core$Result$map,
-			function (v) {
-				return A3($elm$core$Dict$insert, key, v, dict);
-			},
-			f(
-				A2($elm$core$Dict$get, key, dict)));
-	});
-var $author$project$Forth$PierConstraction$Impl$divideIntoDict = A2(
-	$author$project$Util$foldlResult,
-	function (loc) {
-		return A2(
-			$author$project$Util$updateWithResult,
-			$author$project$Forth$PierConstraction$Impl$pierPlanarKey(loc.location),
-			function (maybe) {
-				if (maybe.$ === 'Nothing') {
-					return $elm$core$Result$Ok(
-						_Utils_Tuple2(
-							loc.location.dir,
-							_List_fromArray(
-								[loc])));
+var $author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers = function (locationDict) {
+	var rec = F4(
+		function (closed, single, _double, list) {
+			rec:
+			while (true) {
+				if (!list.b) {
+					return {_double: _double, single: single};
 				} else {
-					var _v1 = maybe.a;
-					var dir = _v1.a;
-					var lis = _v1.b;
-					return _Utils_eq(dir, loc.location.dir) ? $elm$core$Result$Ok(
-						_Utils_Tuple2(
-							dir,
-							A2($elm$core$List$cons, loc, lis))) : $elm$core$Result$Err(
-						'橋脚の方向が一致しません ' + $author$project$Forth$PierConstraction$Impl$pierPlanarKey(loc.location));
+					var _v1 = list.a;
+					var key = _v1.a;
+					var pierLocations = _v1.b;
+					var rest = list.b;
+					var left = $author$project$Forth$PierConstraction$Impl$pierPlanarKey(
+						$author$project$Forth$PierConstraction$Impl$getLeft(
+							$mgold$elm_nonempty_list$List$Nonempty$head(pierLocations).location));
+					if (A2($elm$core$Set$member, key, closed)) {
+						var $temp$closed = closed,
+							$temp$single = single,
+							$temp$double = _double,
+							$temp$list = rest;
+						closed = $temp$closed;
+						single = $temp$single;
+						_double = $temp$double;
+						list = $temp$list;
+						continue rec;
+					} else {
+						var _v2 = A2($elm$core$Dict$get, left, single);
+						if (_v2.$ === 'Nothing') {
+							var $temp$closed = A2($elm$core$Set$insert, key, closed),
+								$temp$single = single,
+								$temp$double = _double,
+								$temp$list = rest;
+							closed = $temp$closed;
+							single = $temp$single;
+							_double = $temp$double;
+							list = $temp$list;
+							continue rec;
+						} else {
+							var doubleLocations = _v2.a;
+							var $temp$closed = A2(
+								$elm$core$Set$insert,
+								key,
+								A2($elm$core$Set$insert, left, closed)),
+								$temp$single = A2(
+								$elm$core$Dict$remove,
+								key,
+								A2($elm$core$Dict$remove, left, single)),
+								$temp$double = A3(
+								$elm$core$Dict$insert,
+								key,
+								_Utils_Tuple2(pierLocations, doubleLocations),
+								_double),
+								$temp$list = rest;
+							closed = $temp$closed;
+							single = $temp$single;
+							_double = $temp$double;
+							list = $temp$list;
+							continue rec;
+						}
+					}
 				}
-			});
-	},
-	$elm$core$Dict$empty);
-var $author$project$Types$Pier$Wide = {$: 'Wide'};
-var $author$project$Types$Pier$getHeight = function (pier) {
-	switch (pier.$) {
-		case 'Single':
-			return 4;
-		case 'Wide':
-			return 4;
-		default:
-			return 1;
-	}
-};
-var $author$project$Forth$PierPlacement$PierPlacement = F2(
-	function (pier, location) {
-		return {location: location, pier: pier};
-	});
-var $author$project$Forth$PierPlacement$make = $author$project$Forth$PierPlacement$PierPlacement;
-var $author$project$Forth$PierConstraction$Impl$pierLocationToPlacement = F2(
-	function (kind, loc) {
-		return A2($author$project$Forth$PierPlacement$make, kind, loc.location);
-	});
-var $author$project$Forth$Geometry$Location$setHeight = F2(
-	function (newHeight, location) {
-		return _Utils_update(
-			location,
-			{height: newHeight});
-	});
-var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
-	function (newHeight, loc) {
-		return _Utils_update(
-			loc,
-			{
-				location: A2($author$project$Forth$Geometry$Location$setHeight, newHeight, loc.location)
-			});
-	});
-var $author$project$Forth$PierConstraction$Impl$buildDoubleUpto = F4(
-	function (template, accum, to, from) {
-		buildDoubleUpto:
-		while (true) {
-			if (_Utils_cmp(from, to) > -1) {
-				return accum;
-			} else {
-				var $temp$template = template,
-					$temp$accum = A2(
-					$elm$core$List$cons,
-					A2(
-						$author$project$Forth$PierConstraction$Impl$pierLocationToPlacement,
-						$author$project$Types$Pier$Wide,
-						A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
-					accum),
-					$temp$to = to,
-					$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide);
-				template = $temp$template;
-				accum = $temp$accum;
-				to = $temp$to;
-				from = $temp$from;
-				continue buildDoubleUpto;
 			}
-		}
-	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
+		});
+	return A4(
+		rec,
+		$elm$core$Set$empty,
+		locationDict,
+		$elm$core$Dict$empty,
+		$elm$core$Dict$toList(locationDict));
 };
-var $author$project$Forth$PierConstraction$Impl$maximumHeight = function (ls) {
-	return A3(
-		$elm$core$List$foldl,
-		function (loc) {
-			return $elm$core$Basics$max(loc.location.height);
-		},
-		0,
-		ls);
+var $author$project$Forth$PierConstraction$Impl$constructSinglePier2 = function (locations) {
+	return A3($author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec, 0, locations, _List_Nil);
 };
-var $author$project$Forth$PierConstraction$Impl$constructDoublePier = F2(
-	function (center, left) {
-		var maxHeight = A2(
-			$elm$core$Basics$max,
-			$author$project$Forth$PierConstraction$Impl$maximumHeight(center),
-			$author$project$Forth$PierConstraction$Impl$maximumHeight(left));
-		var _v0 = $elm$core$List$head(center);
-		if (_v0.$ === 'Nothing') {
-			return $elm$core$Result$Err('複線橋脚の構築で内部的なエラーが発生しました');
-		} else {
-			var loc = _v0.a;
-			return $elm$core$Result$Ok(
-				A4($author$project$Forth$PierConstraction$Impl$buildDoubleUpto, loc, _List_Nil, maxHeight, 0));
-		}
-	});
-var $author$project$Forth$PierConstraction$Impl$doublePier = function (_double) {
-	return A3(
-		$author$project$Util$foldlResult,
-		F2(
-			function (_v0, result) {
-				var _v1 = _v0.b;
-				var centerLocs = _v1.b;
-				var leftLocs = _v1.c;
-				return A2(
-					$elm$core$Result$map,
-					function (r1) {
-						return A2($elm$core$List$append, r1, result);
-					},
-					A2($author$project$Forth$PierConstraction$Impl$constructDoublePier, centerLocs, leftLocs));
-			}),
-		_List_Nil,
-		$elm$core$Dict$toList(_double));
-};
-var $elm$core$Dict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
-	});
-var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = function (loc) {
+var $author$project$Forth$Geometry$Dir$s = $author$project$Forth$Geometry$Dir$Dir(6);
+var $author$project$Forth$Geometry$Location$moveRightByDoubleTrackLength = function (loc) {
 	return A2(
 		$author$project$Forth$Geometry$Location$mul,
 		loc,
@@ -11299,313 +11615,129 @@ var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = functi
 			$author$project$Forth$Geometry$Rot45$zero,
 			A2(
 				$author$project$Forth$Geometry$Rot45$add,
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$s),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$s)),
 			0,
 			$author$project$Forth$Geometry$Dir$e));
 };
-var $author$project$Forth$PierConstraction$Impl$doubleTrackPiersRec = F4(
-	function (single, _double, open, list) {
-		doubleTrackPiersRec:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Result$Ok(
-					_Utils_Tuple2(single, _double));
-			} else {
-				var _v1 = list.a;
-				var key = _v1.a;
-				var _v2 = _v1.b;
-				var dir = _v2.a;
-				var pierLocs = _v2.b;
-				var xs = list.b;
-				var _v3 = $elm$core$List$head(pierLocs);
-				if (_v3.$ === 'Nothing') {
-					return $elm$core$Result$Err('複線橋脚の構築で内部的なエラーが発生しました');
-				} else {
-					var pierLoc = _v3.a;
-					if (A2($elm$core$Dict$member, key, open)) {
-						var leftKey = $author$project$Forth$PierConstraction$Impl$pierPlanarKey(
-							$author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(pierLoc.location));
-						var _v4 = _Utils_Tuple2(
-							A2($elm$core$Dict$get, leftKey, single),
-							A2($elm$core$Dict$get, leftKey, open));
-						if (_v4.a.$ === 'Just') {
-							var _v5 = _v4.a.a;
-							var dir2 = _v5.a;
-							var pierLocs2 = _v5.b;
-							if (_Utils_eq(dir, dir2)) {
-								var $temp$single = A2($elm$core$Dict$remove, leftKey, single),
-									$temp$double = A3(
-									$elm$core$Dict$insert,
-									key,
-									_Utils_Tuple3(dir, pierLocs, pierLocs2),
-									_double),
-									$temp$open = A2($elm$core$Dict$remove, key, open),
-									$temp$list = xs;
-								single = $temp$single;
-								_double = $temp$double;
-								open = $temp$open;
-								list = $temp$list;
-								continue doubleTrackPiersRec;
-							} else {
-								return $elm$core$Result$Err('複線橋脚の構築時に隣のレールとの方向が合いません');
-							}
-						} else {
-							if (_v4.b.$ === 'Just') {
-								var _v6 = _v4.b.a;
-								var dir2 = _v6.a;
-								var pierLocs2 = _v6.b;
-								if (_Utils_eq(dir, dir2)) {
-									var $temp$single = single,
-										$temp$double = A3(
-										$elm$core$Dict$insert,
-										key,
-										_Utils_Tuple3(dir, pierLocs, pierLocs2),
-										_double),
-										$temp$open = A2(
-										$elm$core$Dict$remove,
-										leftKey,
-										A2($elm$core$Dict$remove, key, open)),
-										$temp$list = xs;
-									single = $temp$single;
-									_double = $temp$double;
-									open = $temp$open;
-									list = $temp$list;
-									continue doubleTrackPiersRec;
-								} else {
-									return $elm$core$Result$Err('複線橋脚の構築時に隣のレールとの方向が合いません');
-								}
-							} else {
-								var $temp$single = A3(
-									$elm$core$Dict$insert,
-									key,
-									_Utils_Tuple2(dir, pierLocs),
-									single),
-									$temp$double = _double,
-									$temp$open = A2($elm$core$Dict$remove, key, open),
-									$temp$list = xs;
-								single = $temp$single;
-								_double = $temp$double;
-								open = $temp$open;
-								list = $temp$list;
-								continue doubleTrackPiersRec;
-							}
-						}
-					} else {
-						var $temp$single = single,
-							$temp$double = _double,
-							$temp$open = open,
-							$temp$list = xs;
-						single = $temp$single;
-						_double = $temp$double;
-						open = $temp$open;
-						list = $temp$list;
-						continue doubleTrackPiersRec;
-					}
-				}
-			}
-		}
-	});
-var $author$project$Forth$PierConstraction$Impl$doubleTrackPiers = function (dict) {
-	return A4(
-		$author$project$Forth$PierConstraction$Impl$doubleTrackPiersRec,
-		$elm$core$Dict$empty,
-		$elm$core$Dict$empty,
-		dict,
-		$elm$core$Dict$toList(dict));
+var $author$project$Forth$PierConstraction$Impl$getRight = function (location) {
+	return $author$project$Forth$Geometry$Location$moveRightByDoubleTrackLength(location);
 };
-var $elm$core$Result$map2 = F3(
-	function (func, ra, rb) {
-		if (ra.$ === 'Err') {
-			var x = ra.a;
-			return $elm$core$Result$Err(x);
-		} else {
-			var a = ra.a;
-			if (rb.$ === 'Err') {
-				var x = rb.a;
-				return $elm$core$Result$Err(x);
-			} else {
-				var b = rb.a;
-				return $elm$core$Result$Ok(
-					A2(func, a, b));
-			}
-		}
-	});
-var $author$project$Types$Pier$Mini = {$: 'Mini'};
-var $author$project$Types$Pier$Single = {$: 'Single'};
-var $author$project$Forth$PierConstraction$Impl$buildSingleUpto = F4(
-	function (template, accum, to, from) {
-		buildSingleUpto:
-		while (true) {
-			if (_Utils_cmp(from, to) > -1) {
-				return accum;
-			} else {
-				if (_Utils_cmp(
-					to,
-					from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single)) > -1) {
-					var $temp$template = template,
-						$temp$accum = A2(
-						$elm$core$List$cons,
+var $author$project$Forth$PierConstraction$Impl$pierSpatialKey = function (_v0) {
+	var single = _v0.single;
+	var _double = _v0._double;
+	var dir = _v0.dir;
+	var height = _v0.height;
+	return A2(
+		$elm$core$String$join,
+		',',
+		_List_fromArray(
+			[
+				$author$project$Forth$Geometry$Rot45$toString(single),
+				$author$project$Forth$Geometry$Rot45$toString(_double),
+				$author$project$Forth$Geometry$Dir$toString(dir),
+				$elm$core$String$fromInt(height)
+			]));
+};
+var $author$project$Forth$PierConstraction$Impl$findNeighborMayLocations = F2(
+	function (mustList, mayList) {
+		var transferIfFound = F2(
+			function (location, _v3) {
+				var accum = _v3.a;
+				var mayDict = _v3.b;
+				var _v2 = A2(
+					$elm$core$Dict$get,
+					$author$project$Forth$PierConstraction$Impl$pierSpatialKey(location),
+					mayDict);
+				if (_v2.$ === 'Just') {
+					var foundLocation = _v2.a;
+					return _Utils_Tuple2(
+						A2($elm$core$List$cons, foundLocation, accum),
 						A2(
-							$author$project$Forth$PierConstraction$Impl$pierLocationToPlacement,
-							$author$project$Types$Pier$Single,
-							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
-						accum),
-						$temp$to = to,
-						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Single);
-					template = $temp$template;
-					accum = $temp$accum;
-					to = $temp$to;
-					from = $temp$from;
-					continue buildSingleUpto;
+							$elm$core$Dict$remove,
+							$author$project$Forth$PierConstraction$Impl$pierSpatialKey(location),
+							mayDict));
 				} else {
-					var $temp$template = template,
-						$temp$accum = A2(
-						$elm$core$List$cons,
+					return _Utils_Tuple2(accum, mayDict);
+				}
+			});
+		var rec = F2(
+			function (list, _v0) {
+				var accum = _v0.a;
+				var mayDict = _v0.b;
+				if (!list.b) {
+					return accum;
+				} else {
+					var loc = list.a;
+					var locs = list.b;
+					return A2(
+						rec,
+						locs,
 						A2(
-							$author$project$Forth$PierConstraction$Impl$pierLocationToPlacement,
-							$author$project$Types$Pier$Mini,
-							A2($author$project$Forth$Geometry$PierLocation$setHeight, from, template)),
-						accum),
-						$temp$to = to,
-						$temp$from = from + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Mini);
-					template = $temp$template;
-					accum = $temp$accum;
-					to = $temp$to;
-					from = $temp$from;
-					continue buildSingleUpto;
+							transferIfFound,
+							$author$project$Forth$PierConstraction$Impl$getRight(loc.location),
+							A2(
+								transferIfFound,
+								$author$project$Forth$PierConstraction$Impl$getLeft(loc.location),
+								_Utils_Tuple2(accum, mayDict))));
 				}
-			}
-		}
+			});
+		var initialMayDict = $elm$core$Dict$fromList(
+			A2(
+				$elm$core$List$map,
+				function (pl) {
+					return _Utils_Tuple2(
+						$author$project$Forth$PierConstraction$Impl$pierSpatialKey(pl.location),
+						pl);
+				},
+				mayList));
+		return A2(
+			rec,
+			mustList,
+			_Utils_Tuple2(_List_Nil, initialMayDict));
 	});
-var $author$project$Forth$PierConstraction$Impl$constructSinglePierRec = F4(
-	function (accum, current, top, locs) {
-		constructSinglePierRec:
-		while (true) {
-			if (!locs.b) {
-				return $elm$core$Result$Ok(accum);
-			} else {
-				var _v1 = locs.a;
-				var h = _v1.a;
-				var l = _v1.b;
-				var ls = locs.b;
-				if (_Utils_cmp(top, h - l.margin.bottom) > 0) {
-					return $elm$core$Result$Err('ブロックの付いたレールとかの位置関係的に配置ができません');
-				} else {
-					var $temp$accum = A4($author$project$Forth$PierConstraction$Impl$buildSingleUpto, l, accum, h - l.margin.bottom, current),
-						$temp$current = h,
-						$temp$top = h + l.margin.top,
-						$temp$locs = ls;
-					accum = $temp$accum;
-					current = $temp$current;
-					top = $temp$top;
-					locs = $temp$locs;
-					continue constructSinglePierRec;
-				}
-			}
-		}
-	});
-var $author$project$Forth$PierConstraction$Impl$mergeMargin = F2(
-	function (x, y) {
-		return {
-			bottom: A2($elm$core$Basics$max, x.bottom, y.bottom),
-			top: A2($elm$core$Basics$max, x.top, y.top)
-		};
-	});
-var $elm$core$Dict$update = F3(
-	function (targetKey, alter, dictionary) {
-		var _v0 = alter(
-			A2($elm$core$Dict$get, targetKey, dictionary));
-		if (_v0.$ === 'Just') {
-			var value = _v0.a;
-			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
-		} else {
-			return A2($elm$core$Dict$remove, targetKey, dictionary);
-		}
-	});
-var $author$project$Forth$PierConstraction$Impl$mergePierLocations = function (list) {
-	return $elm$core$Dict$toList(
-		A3(
-			$elm$core$List$foldl,
-			function (loc) {
-				return A2(
-					$elm$core$Dict$update,
-					loc.location.height,
-					function (elem) {
-						if (elem.$ === 'Nothing') {
-							return $elm$core$Maybe$Just(loc);
-						} else {
-							var x = elem.a;
-							return $elm$core$Maybe$Just(
-								_Utils_update(
-									x,
-									{
-										margin: A2($author$project$Forth$PierConstraction$Impl$mergeMargin, x.margin, loc.margin)
-									}));
-						}
-					});
-			},
-			$elm$core$Dict$empty,
-			list));
-};
-var $author$project$Forth$PierConstraction$Impl$constructSinglePier = function (list) {
-	return A4(
-		$author$project$Forth$PierConstraction$Impl$constructSinglePierRec,
-		_List_Nil,
-		0,
-		0,
-		$author$project$Forth$PierConstraction$Impl$mergePierLocations(list));
-};
-var $author$project$Forth$PierConstraction$Impl$singlePier = function (single) {
-	return A3(
-		$author$project$Util$foldlResult,
-		F2(
-			function (_v0, result) {
-				var _v1 = _v0.b;
-				var pierLocs = _v1.b;
-				return A2(
-					$elm$core$Result$map,
-					function (r1) {
-						return A2($elm$core$List$append, r1, result);
-					},
-					$author$project$Forth$PierConstraction$Impl$constructSinglePier(pierLocs));
-			}),
-		_List_Nil,
-		$elm$core$Dict$toList(single));
-};
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
 	var must = _v0.must;
 	var may = _v0.may;
 	var mustNot = _v0.mustNot;
-	var _v1 = A2(
-		$elm$core$Result$andThen,
-		function (_v2) {
-			var single = _v2.a;
-			var _double = _v2.b;
-			return A3(
-				$elm$core$Result$map2,
-				F2(
-					function (s, d) {
-						return _Utils_ap(s, d);
-					}),
-				$author$project$Forth$PierConstraction$Impl$singlePier(single),
-				$author$project$Forth$PierConstraction$Impl$doublePier(_double));
+	var cleanesedMustLocations = A2(
+		$elm$core$List$map,
+		$author$project$Forth$PierConstraction$Impl$cleansePierLocations,
+		A2($elm$core$Debug$log, 'must', must));
+	var cleanesedMayLocations = A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, may);
+	var mayLocationsToBePlaced = A2($author$project$Forth$PierConstraction$Impl$findNeighborMayLocations, cleanesedMustLocations, cleanesedMayLocations);
+	var mustPierKeyDict = A3(
+		$author$project$Forth$PierConstraction$Impl$buildPierKeyDict,
+		function (p) {
+			return $author$project$Forth$PierConstraction$Impl$pierPlanarKey(p.location);
 		},
-		A2(
-			$elm$core$Result$andThen,
-			$author$project$Forth$PierConstraction$Impl$doubleTrackPiers,
-			$author$project$Forth$PierConstraction$Impl$divideIntoDict(
-				A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, must))));
-	if (_v1.$ === 'Ok') {
-		var pierPlacements = _v1.a;
-		return {error: $elm$core$Maybe$Nothing, pierPlacements: pierPlacements};
-	} else {
-		var err = _v1.a;
-		return {
-			error: $elm$core$Maybe$Just(err),
-			pierPlacements: _List_Nil
-		};
-	}
+		F2(
+			function (x, y) {
+				return A2($author$project$Forth$Geometry$PierLocation$compare, x, y);
+			}),
+		_Utils_ap(cleanesedMustLocations, mayLocationsToBePlaced));
+	var pierDict = A2(
+		$elm$core$Debug$log,
+		'pierDict',
+		$author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers(mustPierKeyDict));
+	var doublePlacements = A2(
+		$elm$core$List$concatMap,
+		function (_v1) {
+			var primary = _v1.a;
+			var secondary = _v1.b;
+			return A2(
+				$author$project$Forth$PierConstraction$Impl$constructDoublePier2,
+				$mgold$elm_nonempty_list$List$Nonempty$toList(primary),
+				$mgold$elm_nonempty_list$List$Nonempty$toList(secondary));
+		},
+		$elm$core$Dict$values(pierDict._double));
+	var singlePlacements = A2(
+		$elm$core$List$concatMap,
+		A2($elm$core$Basics$composeR, $mgold$elm_nonempty_list$List$Nonempty$toList, $author$project$Forth$PierConstraction$Impl$constructSinglePier2),
+		$elm$core$Dict$values(pierDict.single));
+	var finalResult = _Utils_ap(singlePlacements, doublePlacements);
+	return {error: $elm$core$Maybe$Nothing, pierPlacements: finalResult};
 };
 var $author$project$Forth$PierConstraintDefinition$flatRailMargin = {bottom: 0, top: 4};
 var $author$project$Forth$PierConstraintDefinition$flat = function (loc) {
@@ -12206,6 +12338,16 @@ var $author$project$Graphics$MeshLoader$allMeshNames = _Utils_ap(
 var $author$project$Graphics$MeshLoader$buildMeshUri = function (name) {
 	return './assets/' + (name + '.off');
 };
+var $elm$core$Result$andThen = F2(
+	function (callback, result) {
+		if (result.$ === 'Ok') {
+			var value = result.a;
+			return callback(value);
+		} else {
+			var msg = result.a;
+			return $elm$core$Result$Err(msg);
+		}
+	});
 var $elm$http$Http$Internal$EmptyBody = {$: 'EmptyBody'};
 var $elm$http$Http$emptyBody = $elm$http$Http$Internal$EmptyBody;
 var $elm$http$Http$BadPayload = F2(
@@ -12237,6 +12379,17 @@ var $elm$http$Http$Internal$isStringBody = function (body) {
 		return false;
 	}
 };
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
 var $elm$http$Http$expectStringResponse = _Http_expectStringResponse;
 var $elm$http$Http$expectString = $elm$http$Http$expectStringResponse(
 	function (response) {
@@ -12260,11 +12413,6 @@ var $elm$core$Result$mapError = F2(
 			return $elm$core$Result$Err(
 				f(e));
 		}
-	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
 	});
 var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
@@ -13829,6 +13977,15 @@ var $author$project$Graphics$OrbitControl$doTwoPointersMove = F2(
 			A3($author$project$Graphics$OrbitControlImpl$doPanning, ocImpl, dx, dy),
 			scale);
 	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
 var $elm$core$Dict$partition = F2(
 	function (isGood, dict) {
 		var add = F3(
