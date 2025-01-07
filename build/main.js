@@ -11063,6 +11063,60 @@ var $author$project$Forth$PierConstraint$concat = function (xs) {
 				xs))
 	};
 };
+var $author$project$Forth$Geometry$Dir$toString = function (_v0) {
+	var d = _v0.a;
+	return 'Dir ' + $elm$core$String$fromInt(d);
+};
+var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
+	var a = _v0.a;
+	var b = _v0.b;
+	var c = _v0.c;
+	var d = _v0.d;
+	return A2(
+		$elm$core$String$join,
+		' ',
+		A2(
+			$elm$core$List$cons,
+			'Rot45',
+			A2(
+				$elm$core$List$map,
+				$elm$core$String$fromInt,
+				_List_fromArray(
+					[a, b, c, d]))));
+};
+var $author$project$Forth$PierConstraction$Impl$pierPlanarKey = function (_v0) {
+	var single = _v0.single;
+	var _double = _v0._double;
+	var dir = _v0.dir;
+	return A2(
+		$elm$core$String$join,
+		',',
+		_List_fromArray(
+			[
+				$author$project$Forth$Geometry$Rot45$toString(single),
+				$author$project$Forth$Geometry$Rot45$toString(_double),
+				$author$project$Forth$Geometry$Dir$toString(dir)
+			]));
+};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $author$project$Forth$Geometry$PierLocation$PierLocation = F2(
+	function (location, margin) {
+		return {location: location, margin: margin};
+	});
+var $author$project$Forth$Geometry$PierLocation$merge = F2(
+	function (x, y) {
+		return A2(
+			$author$project$Forth$Geometry$PierLocation$PierLocation,
+			x.location,
+			{
+				bottom: A2($elm$core$Basics$max, x.margin.bottom, y.margin.bottom),
+				top: A2($elm$core$Basics$max, x.margin.top, y.margin.top)
+			});
+	});
 var $mgold$elm_nonempty_list$List$Nonempty$reverse = function (_v0) {
 	var x = _v0.a;
 	var xs = _v0.b;
@@ -11089,148 +11143,42 @@ var $mgold$elm_nonempty_list$List$Nonempty$reverse = function (_v0) {
 	return revapp(
 		_Utils_Tuple3(_List_Nil, x, xs));
 };
-var $mgold$elm_nonempty_list$List$Nonempty$dedup = function (_v0) {
-	var x = _v0.a;
-	var xs = _v0.b;
-	var dedupe = F3(
-		function (prev, done, next) {
-			dedupe:
+var $author$project$Forth$Geometry$PierLocation$mergePierLocations = function (list) {
+	var rec = F3(
+		function (accum, prev, ls) {
+			rec:
 			while (true) {
-				if (!next.b) {
-					return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, prev, done);
+				if (!ls.b) {
+					return $mgold$elm_nonempty_list$List$Nonempty$reverse(
+						A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, prev, accum));
 				} else {
-					var y = next.a;
-					var ys = next.b;
-					if (_Utils_eq(y, prev)) {
-						var $temp$prev = prev,
-							$temp$done = done,
-							$temp$next = ys;
+					var l = ls.a;
+					var rest = ls.b;
+					if (_Utils_eq(prev.location.height, l.location.height)) {
+						var $temp$accum = accum,
+							$temp$prev = A2($author$project$Forth$Geometry$PierLocation$merge, prev, l),
+							$temp$ls = rest;
+						accum = $temp$accum;
 						prev = $temp$prev;
-						done = $temp$done;
-						next = $temp$next;
-						continue dedupe;
+						ls = $temp$ls;
+						continue rec;
 					} else {
-						var $temp$prev = y,
-							$temp$done = A2($elm$core$List$cons, prev, done),
-							$temp$next = ys;
+						var $temp$accum = A2($elm$core$List$cons, prev, accum),
+							$temp$prev = l,
+							$temp$ls = rest;
+						accum = $temp$accum;
 						prev = $temp$prev;
-						done = $temp$done;
-						next = $temp$next;
-						continue dedupe;
+						ls = $temp$ls;
+						continue rec;
 					}
 				}
 			}
 		});
-	return $mgold$elm_nonempty_list$List$Nonempty$reverse(
-		A3(dedupe, x, _List_Nil, xs));
-};
-var $elm$core$List$sortWith = _List_sortWith;
-var $mgold$elm_nonempty_list$List$Nonempty$insertWith = F3(
-	function (cmp, hd, aList) {
-		if (aList.b) {
-			var x = aList.a;
-			var xs = aList.b;
-			return _Utils_eq(
-				A2(cmp, x, hd),
-				$elm$core$Basics$LT) ? A2(
-				$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
-				x,
-				A2(
-					$elm$core$List$sortWith,
-					cmp,
-					A2($elm$core$List$cons, hd, xs))) : A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, hd, aList);
-		} else {
-			return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, hd, _List_Nil);
-		}
-	});
-var $mgold$elm_nonempty_list$List$Nonempty$sortWith = F2(
-	function (f, _v0) {
-		var x = _v0.a;
-		var xs = _v0.b;
-		return A3(
-			$mgold$elm_nonempty_list$List$Nonempty$insertWith,
-			f,
-			x,
-			A2($elm$core$List$sortWith, f, xs));
-	});
-var $mgold$elm_nonempty_list$List$Nonempty$cons = F2(
-	function (y, _v0) {
-		var x = _v0.a;
-		var xs = _v0.b;
-		return A2(
-			$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
-			y,
-			A2($elm$core$List$cons, x, xs));
-	});
-var $mgold$elm_nonempty_list$List$Nonempty$singleton = function (x) {
-	return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, x, _List_Nil);
-};
-var $elm$core$Dict$update = F3(
-	function (targetKey, alter, dictionary) {
-		var _v0 = alter(
-			A2($elm$core$Dict$get, targetKey, dictionary));
-		if (_v0.$ === 'Just') {
-			var value = _v0.a;
-			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
-		} else {
-			return A2($elm$core$Dict$remove, targetKey, dictionary);
-		}
-	});
-var $author$project$Util$appendToDictNonempty = F2(
-	function (key, value) {
-		return A2(
-			$elm$core$Dict$update,
-			key,
-			function (oldValue) {
-				if (oldValue.$ === 'Nothing') {
-					return $elm$core$Maybe$Just(
-						$mgold$elm_nonempty_list$List$Nonempty$singleton(value));
-				} else {
-					var values = oldValue.a;
-					return $elm$core$Maybe$Just(
-						A2($mgold$elm_nonempty_list$List$Nonempty$cons, value, values));
-				}
-			});
-	});
-var $author$project$Util$splitByKey = function (keyOf) {
-	return A2(
-		$elm$core$List$foldl,
-		F2(
-			function (loc, dict) {
-				return A3(
-					$author$project$Util$appendToDictNonempty,
-					keyOf(loc),
-					loc,
-					dict);
-			}),
-		$elm$core$Dict$empty);
-};
-var $author$project$Forth$PierConstraction$Impl$buildPierKeyDict = F3(
-	function (keyOf, comparator, locs) {
-		return A2(
-			$elm$core$Dict$map,
-			F2(
-				function (_v0, list) {
-					return $mgold$elm_nonempty_list$List$Nonempty$dedup(
-						A2($mgold$elm_nonempty_list$List$Nonempty$sortWith, comparator, list));
-				}),
-			A2($author$project$Util$splitByKey, keyOf, locs));
-	});
-var $author$project$Forth$Geometry$Dir$toUndirectedDir = function (_v0) {
-	var x = _v0.a;
-	return (x >= 4) ? $author$project$Forth$Geometry$Dir$Dir(x - 4) : $author$project$Forth$Geometry$Dir$Dir(x);
-};
-var $author$project$Forth$PierConstraction$Impl$cleansePierLocations = function (placement) {
-	var loc = placement.location;
-	return _Utils_update(
-		placement,
-		{
-			location: _Utils_update(
-				loc,
-				{
-					dir: $author$project$Forth$Geometry$Dir$toUndirectedDir(loc.dir)
-				})
-		});
+	return A3(
+		rec,
+		_List_Nil,
+		$mgold$elm_nonempty_list$List$Nonempty$head(list),
+		$mgold$elm_nonempty_list$List$Nonempty$tail(list));
 };
 var $author$project$Forth$Geometry$Dir$compare = F2(
 	function (_v0, _v1) {
@@ -11286,11 +11234,119 @@ var $author$project$Forth$Geometry$PierLocation$compare = F2(
 				A2($elm$core$Basics$compare, x.margin.top, y.margin.top),
 				A2($elm$core$Basics$compare, x.margin.bottom, y.margin.bottom)));
 	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
+var $elm$core$List$sortWith = _List_sortWith;
+var $mgold$elm_nonempty_list$List$Nonempty$insertWith = F3(
+	function (cmp, hd, aList) {
+		if (aList.b) {
+			var x = aList.a;
+			var xs = aList.b;
+			return _Utils_eq(
+				A2(cmp, x, hd),
+				$elm$core$Basics$LT) ? A2(
+				$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+				x,
+				A2(
+					$elm$core$List$sortWith,
+					cmp,
+					A2($elm$core$List$cons, hd, xs))) : A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, hd, aList);
+		} else {
+			return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, hd, _List_Nil);
+		}
 	});
+var $mgold$elm_nonempty_list$List$Nonempty$sortWith = F2(
+	function (f, _v0) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		return A3(
+			$mgold$elm_nonempty_list$List$Nonempty$insertWith,
+			f,
+			x,
+			A2($elm$core$List$sortWith, f, xs));
+	});
+var $author$project$Forth$Geometry$PierLocation$sortPierLocations = $mgold$elm_nonempty_list$List$Nonempty$sortWith($author$project$Forth$Geometry$PierLocation$compare);
+var $author$project$Forth$Geometry$PierLocation$sortAndMergePierLocations = A2($elm$core$Basics$composeR, $author$project$Forth$Geometry$PierLocation$sortPierLocations, $author$project$Forth$Geometry$PierLocation$mergePierLocations);
+var $mgold$elm_nonempty_list$List$Nonempty$cons = F2(
+	function (y, _v0) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		return A2(
+			$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+			y,
+			A2($elm$core$List$cons, x, xs));
+	});
+var $mgold$elm_nonempty_list$List$Nonempty$singleton = function (x) {
+	return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, x, _List_Nil);
+};
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var $author$project$Util$appendToDictNonempty = F2(
+	function (key, value) {
+		return A2(
+			$elm$core$Dict$update,
+			key,
+			function (oldValue) {
+				if (oldValue.$ === 'Nothing') {
+					return $elm$core$Maybe$Just(
+						$mgold$elm_nonempty_list$List$Nonempty$singleton(value));
+				} else {
+					var values = oldValue.a;
+					return $elm$core$Maybe$Just(
+						A2($mgold$elm_nonempty_list$List$Nonempty$cons, value, values));
+				}
+			});
+	});
+var $author$project$Util$splitByKey = function (keyOf) {
+	return A2(
+		$elm$core$List$foldl,
+		F2(
+			function (loc, dict) {
+				return A3(
+					$author$project$Util$appendToDictNonempty,
+					keyOf(loc),
+					loc,
+					dict);
+			}),
+		$elm$core$Dict$empty);
+};
+var $author$project$Forth$PierConstraction$Impl$buildPierKeyDict = function (locs) {
+	return A2(
+		$elm$core$Dict$map,
+		F2(
+			function (_v0, list) {
+				return $author$project$Forth$Geometry$PierLocation$sortAndMergePierLocations(list);
+			}),
+		A2(
+			$author$project$Util$splitByKey,
+			function (pl) {
+				return $author$project$Forth$PierConstraction$Impl$pierPlanarKey(pl.location);
+			},
+			locs));
+};
+var $author$project$Forth$Geometry$Dir$toUndirectedDir = function (_v0) {
+	var x = _v0.a;
+	return (x >= 4) ? $author$project$Forth$Geometry$Dir$Dir(x - 4) : $author$project$Forth$Geometry$Dir$Dir(x);
+};
+var $author$project$Forth$PierConstraction$Impl$cleansePierLocations = function (placement) {
+	var loc = placement.location;
+	return _Utils_update(
+		placement,
+		{
+			location: _Utils_update(
+				loc,
+				{
+					dir: $author$project$Forth$Geometry$Dir$toUndirectedDir(loc.dir)
+				})
+		});
+};
 var $author$project$Types$Pier$Wide = {$: 'Wide'};
 var $author$project$Types$Pier$Mini = {$: 'Mini'};
 var $author$project$Types$Pier$Single = {$: 'Single'};
@@ -11515,41 +11571,6 @@ var $elm$core$Set$member = F2(
 		var dict = _v0.a;
 		return A2($elm$core$Dict$member, key, dict);
 	});
-var $author$project$Forth$Geometry$Dir$toString = function (_v0) {
-	var d = _v0.a;
-	return 'Dir ' + $elm$core$String$fromInt(d);
-};
-var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	var c = _v0.c;
-	var d = _v0.d;
-	return A2(
-		$elm$core$String$join,
-		' ',
-		A2(
-			$elm$core$List$cons,
-			'Rot45',
-			A2(
-				$elm$core$List$map,
-				$elm$core$String$fromInt,
-				_List_fromArray(
-					[a, b, c, d]))));
-};
-var $author$project$Forth$PierConstraction$Impl$pierPlanarKey = function (_v0) {
-	var single = _v0.single;
-	var _double = _v0._double;
-	var dir = _v0.dir;
-	return A2(
-		$elm$core$String$join,
-		',',
-		_List_fromArray(
-			[
-				$author$project$Forth$Geometry$Rot45$toString(single),
-				$author$project$Forth$Geometry$Rot45$toString(_double),
-				$author$project$Forth$Geometry$Dir$toString(dir)
-			]));
-};
 var $author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers = function (locationDict) {
 	var rec = F4(
 		function (closed, single, _double, list) {
@@ -11703,15 +11724,7 @@ var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
 	var cleanesedMustLocations = A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, must);
 	var cleanesedMayLocations = A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, may);
 	var mayLocationsToBePlaced = A2($author$project$Forth$PierConstraction$Impl$findNeighborMayLocations, cleanesedMustLocations, cleanesedMayLocations);
-	var mustPierKeyDict = A3(
-		$author$project$Forth$PierConstraction$Impl$buildPierKeyDict,
-		function (p) {
-			return $author$project$Forth$PierConstraction$Impl$pierPlanarKey(p.location);
-		},
-		F2(
-			function (x, y) {
-				return A2($author$project$Forth$Geometry$PierLocation$compare, x, y);
-			}),
+	var mustPierKeyDict = $author$project$Forth$PierConstraction$Impl$buildPierKeyDict(
 		_Utils_ap(cleanesedMustLocations, mayLocationsToBePlaced));
 	var pierDict = $author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers(mustPierKeyDict);
 	var doublePlacements = A2(

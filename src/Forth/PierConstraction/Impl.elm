@@ -13,7 +13,7 @@ module Forth.PierConstraction.Impl exposing
 import Dict exposing (Dict)
 import Forth.Geometry.Dir as Dir
 import Forth.Geometry.Location as Location exposing (Location)
-import Forth.Geometry.PierLocation as PL exposing (PierLocation)
+import Forth.Geometry.PierLocation as PierLocation exposing (PierLocation)
 import Forth.Geometry.Rot45 as Rot45
 import Forth.PierConstraint exposing (PierConstraint)
 import Forth.PierPlacement as PierPlacement exposing (PierPlacement)
@@ -86,10 +86,10 @@ pierSpatialKey { single, double, dir, height } =
 {-| pierLocationsをDictに変換してソートもするやつ。主にこれを使う。
 locationでもPierLocationでも使えるようにgetterを持たせておいた
 -}
-buildPierKeyDict : (location -> comparable) -> (location -> location -> Order) -> List location -> Dict comparable (Nonempty location)
-buildPierKeyDict keyOf comparator locs =
-    Util.splitByKey keyOf locs
-        |> Dict.map (\_ list -> Nonempty.sortWith comparator list |> Nonempty.dedup)
+buildPierKeyDict : List PierLocation -> Dict PierPlanarKey (Nonempty PierLocation)
+buildPierKeyDict locs =
+    Util.splitByKey (\pl -> pierPlanarKey pl.location) locs
+        |> Dict.map (\_ list -> PierLocation.sortAndMergePierLocations list)
 
 
 getLeft : Location -> Location
@@ -320,7 +320,7 @@ constructDoublePier primaryPierLocations secondaryPierLocations =
 
                 ( p :: pRest, s :: sRest ) ->
                     if p.location.height > s.location.height then
-                        doubleRec s.location.height (p :: pRest) sRest <| buildUpto (p |> PL.setHeight s.location.height) accum current
+                        doubleRec s.location.height (p :: pRest) sRest <| buildUpto (p |> PierLocation.setHeight s.location.height) accum current
 
                     else if p.location.height < s.location.height then
                         doubleRec p.location.height pRest (s :: sRest) <| buildUpto p accum current
@@ -380,8 +380,6 @@ construct { must, may, mustNot } =
 
         mustPierKeyDict =
             buildPierKeyDict
-                (\p -> pierPlanarKey p.location)
-                (\x y -> PL.compare x y)
                 (cleanesedMustLocations ++ mayLocationsToBePlaced)
 
         pierDict =
