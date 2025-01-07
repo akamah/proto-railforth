@@ -5,8 +5,10 @@ module Forth.Geometry.PierLocation exposing
     , flip
     , fromRailLocation
     , make
+    , merge
     , mul
     , setHeight
+    , sortAndMergePierLocations
     , toVec3
     )
 
@@ -14,6 +16,8 @@ import Forth.Geometry.Dir exposing (Dir)
 import Forth.Geometry.Location as Location exposing (Location)
 import Forth.Geometry.RailLocation exposing (RailLocation)
 import Forth.Geometry.Rot45 exposing (Rot45)
+import Http.Progress exposing (Progress(..))
+import List.Nonempty as Nonempty exposing (Nonempty)
 import Math.Vector3 exposing (Vec3)
 import Util
 
@@ -74,8 +78,52 @@ toVec3 loc =
     Location.toVec3 loc.location
 
 
+{-| 2つのPierLocationを合成させる。マージンのtop, bottomについて共に大きい方を取る。
+locationは同一だと仮定する。そうでない場合の動作は未定義
+-}
+merge : PierLocation -> PierLocation -> PierLocation
+merge x y =
+    PierLocation x.location
+        { top = max x.margin.top y.margin.top
+        , bottom = max x.margin.bottom y.margin.bottom
+        }
+
+
 compare : PierLocation -> PierLocation -> Order
 compare x y =
     Util.lexicographic (Location.compare x.location y.location) <|
         Util.lexicographic (Basics.compare x.margin.top y.margin.top)
             (Basics.compare x.margin.bottom y.margin.bottom)
+
+
+{-| 隣り合う要素をマージしていく。
+平面的な座標に関しては全て同じになっていると仮定する。
+さらに、高さの昇順で並んでいるとする。
+また、同じ高さに3つ以上あったとしても処理を継続するものとする。
+-}
+mergePierLocations : Nonempty PierLocation -> Nonempty PierLocation
+mergePierLocations list =
+    let
+        rec accum prev ls =
+            case ls of
+                [] ->
+                    Nonempty.reverse <| Nonempty.Nonempty prev accum
+
+                l :: rest ->
+                    if prev.location.height == l.location.height then
+                        rec accum (merge prev l) rest
+
+                    else
+                        rec (prev :: accum) l rest
+    in
+    rec [] (Nonempty.head list) (Nonempty.tail list)
+
+
+sortPierLocations : Nonempty PierLocation -> Nonempty PierLocation
+sortPierLocations =
+    Nonempty.sortWith compare
+
+
+sortAndMergePierLocations : Nonempty PierLocation -> Nonempty PierLocation
+sortAndMergePierLocations =
+    sortPierLocations >> mergePierLocations
