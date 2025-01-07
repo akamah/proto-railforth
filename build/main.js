@@ -11315,9 +11315,9 @@ var $author$project$Forth$Geometry$Location$setHeight = F2(
 			location,
 			{height: newHeight});
 	});
-var $author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec = F3(
+var $author$project$Forth$PierConstraction$Impl$constructSinglePierRec = F3(
 	function (current, pierLocations, accum) {
-		var buildSingleUpto2 = F3(
+		var buildSingleUpto = F3(
 			function (currentHeight, targetLocation, placementAccum) {
 				var canBuildPier = function (targetPier) {
 					return _Utils_cmp(
@@ -11327,7 +11327,7 @@ var $author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec = F3(
 				var buildPierAndRec = function (targetPier) {
 					var nextLocation = A2($author$project$Forth$Geometry$Location$setHeight, currentHeight, targetLocation.location);
 					return A3(
-						buildSingleUpto2,
+						buildSingleUpto,
 						currentHeight + $author$project$Types$Pier$getHeight(targetPier),
 						targetLocation,
 						A2(
@@ -11343,10 +11343,10 @@ var $author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec = F3(
 			var pierLocation = pierLocations.a;
 			var rest = pierLocations.b;
 			return A3(
-				$author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec,
+				$author$project$Forth$PierConstraction$Impl$constructSinglePierRec,
 				pierLocation.location.height,
 				rest,
-				A3(buildSingleUpto2, current, pierLocation, accum));
+				A3(buildSingleUpto, current, pierLocation, accum));
 		}
 	});
 var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = function (loc) {
@@ -11374,7 +11374,7 @@ var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
 				location: A2($author$project$Forth$Geometry$Location$setHeight, newHeight, loc.location)
 			});
 	});
-var $author$project$Forth$PierConstraction$Impl$constructDoublePier2 = F2(
+var $author$project$Forth$PierConstraction$Impl$constructDoublePier = F2(
 	function (primaryPierLocations, secondaryPierLocations) {
 		var buildUpto = F3(
 			function (targetLocation, placementAccum, currentHeight) {
@@ -11443,7 +11443,7 @@ var $author$project$Forth$PierConstraction$Impl$constructDoublePier2 = F2(
 						var primaryLocations = _v3.b;
 						var doublePierLocation = A2($author$project$Forth$Geometry$Location$setHeight, current, primaryLocation.location);
 						return A3(
-							$author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec,
+							$author$project$Forth$PierConstraction$Impl$constructSinglePierRec,
 							current + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide),
 							A2($elm$core$List$cons, primaryLocation, primaryLocations),
 							A2(
@@ -11461,7 +11461,7 @@ var $author$project$Forth$PierConstraction$Impl$constructDoublePier2 = F2(
 						var doublePierLocation = $author$project$Forth$PierConstraction$Impl$getLeft(
 							A2($author$project$Forth$Geometry$Location$setHeight, current, secondaryLocation.location));
 						return A3(
-							$author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec,
+							$author$project$Forth$PierConstraction$Impl$constructSinglePierRec,
 							current + $author$project$Types$Pier$getHeight($author$project$Types$Pier$Wide),
 							A2($elm$core$List$cons, secondaryLocation, secondaryLocations),
 							A2(
@@ -11602,8 +11602,8 @@ var $author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers = func
 		$elm$core$Dict$empty,
 		$elm$core$Dict$toList(locationDict));
 };
-var $author$project$Forth$PierConstraction$Impl$constructSinglePier2 = function (locations) {
-	return A3($author$project$Forth$PierConstraction$Impl$constructSinglePier2Rec, 0, locations, _List_Nil);
+var $author$project$Forth$PierConstraction$Impl$constructSinglePier = function (locations) {
+	return A3($author$project$Forth$PierConstraction$Impl$constructSinglePierRec, 0, locations, _List_Nil);
 };
 var $author$project$Forth$Geometry$Dir$s = $author$project$Forth$Geometry$Dir$Dir(6);
 var $author$project$Forth$Geometry$Location$moveRightByDoubleTrackLength = function (loc) {
@@ -11696,15 +11696,11 @@ var $author$project$Forth$PierConstraction$Impl$findNeighborMayLocations = F2(
 			mustList,
 			_Utils_Tuple2(_List_Nil, initialMayDict));
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
 	var must = _v0.must;
 	var may = _v0.may;
 	var mustNot = _v0.mustNot;
-	var cleanesedMustLocations = A2(
-		$elm$core$List$map,
-		$author$project$Forth$PierConstraction$Impl$cleansePierLocations,
-		A2($elm$core$Debug$log, 'must', must));
+	var cleanesedMustLocations = A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, must);
 	var cleanesedMayLocations = A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, may);
 	var mayLocationsToBePlaced = A2($author$project$Forth$PierConstraction$Impl$findNeighborMayLocations, cleanesedMustLocations, cleanesedMayLocations);
 	var mustPierKeyDict = A3(
@@ -11717,24 +11713,21 @@ var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
 				return A2($author$project$Forth$Geometry$PierLocation$compare, x, y);
 			}),
 		_Utils_ap(cleanesedMustLocations, mayLocationsToBePlaced));
-	var pierDict = A2(
-		$elm$core$Debug$log,
-		'pierDict',
-		$author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers(mustPierKeyDict));
+	var pierDict = $author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers(mustPierKeyDict);
 	var doublePlacements = A2(
 		$elm$core$List$concatMap,
 		function (_v1) {
 			var primary = _v1.a;
 			var secondary = _v1.b;
 			return A2(
-				$author$project$Forth$PierConstraction$Impl$constructDoublePier2,
+				$author$project$Forth$PierConstraction$Impl$constructDoublePier,
 				$mgold$elm_nonempty_list$List$Nonempty$toList(primary),
 				$mgold$elm_nonempty_list$List$Nonempty$toList(secondary));
 		},
 		$elm$core$Dict$values(pierDict._double));
 	var singlePlacements = A2(
 		$elm$core$List$concatMap,
-		A2($elm$core$Basics$composeR, $mgold$elm_nonempty_list$List$Nonempty$toList, $author$project$Forth$PierConstraction$Impl$constructSinglePier2),
+		A2($elm$core$Basics$composeR, $mgold$elm_nonempty_list$List$Nonempty$toList, $author$project$Forth$PierConstraction$Impl$constructSinglePier),
 		$elm$core$Dict$values(pierDict.single));
 	var finalResult = _Utils_ap(singlePlacements, doublePlacements);
 	return {error: $elm$core$Maybe$Nothing, pierPlacements: finalResult};

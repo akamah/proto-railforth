@@ -1,9 +1,9 @@
 module Forth.PierConstraction.Impl exposing
     ( PierConstructionResult
     , construct
-    , constructDoublePier2
+    , constructDoublePier
     , constructDoubleTrackPiers
-    , constructSinglePier2
+    , constructSinglePier
     , findNeighborMayLocations
     , pierPlanarKey
     )
@@ -227,12 +227,12 @@ constructDoubleTrackPiers locationDict =
 現在高さ currentから、pierLocations（同じ平面座標に高さの昇順に並んでいると仮定）のそれぞれの点を満たすように、
 単線の橋脚を構築してゆく。accumは末尾再帰にするための累積変数。
 -}
-constructSinglePier2Rec : Int -> List PierLocation -> List PierPlacement -> List PierPlacement
-constructSinglePier2Rec current pierLocations accum =
+constructSinglePierRec : Int -> List PierLocation -> List PierPlacement -> List PierPlacement
+constructSinglePierRec current pierLocations accum =
     let
         -- 例えば、6つ上の位置に建築する場合だと、橋脚1つとミニ橋脚2つが必要になる。
         -- そういう感じで、ある地点からある地点までの橋脚を埋める。大きい橋脚から貪欲にやる。
-        buildSingleUpto2 currentHeight targetLocation placementAccum =
+        buildSingleUpto currentHeight targetLocation placementAccum =
             let
                 canBuildPier targetPier =
                     -- 現在地点から数えて、pierLocationの下マージン + 高さの余裕があれば配置が可能。
@@ -244,7 +244,7 @@ constructSinglePier2Rec current pierLocations accum =
                             Location.setHeight currentHeight targetLocation.location
                     in
                     (PierPlacement.make targetPier nextLocation :: placementAccum)
-                        |> buildSingleUpto2 (currentHeight + Pier.getHeight targetPier)
+                        |> buildSingleUpto (currentHeight + Pier.getHeight targetPier)
                             targetLocation
             in
             if canBuildPier Single then
@@ -261,21 +261,21 @@ constructSinglePier2Rec current pierLocations accum =
             List.reverse accum
 
         pierLocation :: rest ->
-            buildSingleUpto2 current pierLocation accum
-                |> constructSinglePier2Rec pierLocation.location.height rest
+            buildSingleUpto current pierLocation accum
+                |> constructSinglePierRec pierLocation.location.height rest
 
 
-constructSinglePier2 : List PierLocation -> List PierPlacement
-constructSinglePier2 locations =
-    constructSinglePier2Rec 0 locations []
+constructSinglePier : List PierLocation -> List PierPlacement
+constructSinglePier locations =
+    constructSinglePierRec 0 locations []
 
 
 {-| 複線の橋脚を構築する。
 primaryは複線の右側、secondaryは左側。
 正しければ構築し、間違っていたら後段のバリデーションに渡すため無茶苦茶でも構築を行う。
 -}
-constructDoublePier2 : List PierLocation -> List PierLocation -> List PierPlacement
-constructDoublePier2 primaryPierLocations secondaryPierLocations =
+constructDoublePier : List PierLocation -> List PierLocation -> List PierPlacement
+constructDoublePier primaryPierLocations secondaryPierLocations =
     let
         buildUpto targetLocation placementAccum currentHeight =
             let
@@ -338,7 +338,7 @@ constructDoublePier2 primaryPierLocations secondaryPierLocations =
                             Location.setHeight current primaryLocation.location
                     in
                     (PierPlacement.make Wide doublePierLocation :: accum)
-                        |> constructSinglePier2Rec
+                        |> constructSinglePierRec
                             (current + Pier.getHeight Wide)
                             (primaryLocation :: primaryLocations)
 
@@ -348,7 +348,7 @@ constructDoublePier2 primaryPierLocations secondaryPierLocations =
                             Location.setHeight current secondaryLocation.location |> getLeft
                     in
                     (PierPlacement.make Wide doublePierLocation :: accum)
-                        |> constructSinglePier2Rec
+                        |> constructSinglePierRec
                             (current + Pier.getHeight Wide)
                             (secondaryLocation :: secondaryLocations)
     in
@@ -371,13 +371,12 @@ construct : PierConstraint -> PierConstructionResult
 construct { must, may, mustNot } =
     let
         cleanesedMustLocations =
-            List.map cleansePierLocations (Debug.log "must" must)
+            List.map cleansePierLocations must
 
         cleanesedMayLocations =
             List.map cleansePierLocations may
 
         mayLocationsToBePlaced =
-            --            Debug.log "maylocationstobeplaced" <|
             findNeighborMayLocations cleanesedMustLocations cleanesedMayLocations
 
         mustPierKeyDict =
@@ -387,18 +386,18 @@ construct { must, may, mustNot } =
                 (cleanesedMustLocations ++ mayLocationsToBePlaced)
 
         pierDict =
-            Debug.log "pierDict" <| constructDoubleTrackPiers mustPierKeyDict
+            constructDoubleTrackPiers mustPierKeyDict
 
         singlePlacements =
             Dict.values pierDict.single
                 |> List.concatMap
-                    (Nonempty.toList >> constructSinglePier2)
+                    (Nonempty.toList >> constructSinglePier)
 
         doublePlacements =
             Dict.values pierDict.double
                 |> List.concatMap
                     (\( primary, secondary ) ->
-                        constructDoublePier2
+                        constructDoublePier
                             (Nonempty.toList primary)
                             (Nonempty.toList secondary)
                     )

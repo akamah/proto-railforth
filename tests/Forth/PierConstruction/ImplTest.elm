@@ -192,20 +192,20 @@ findNeighborMayLocationsSuite =
         ]
 
 
-constructSinglePier2Suite : Test
-constructSinglePier2Suite =
-    describe "constructSinglePier2"
+constructSinglePierSuite : Test
+constructSinglePierSuite =
+    describe "constructSinglePier"
         [ test "empty" <|
             \_ ->
-                Impl.constructSinglePier2 [] |> Expect.equal []
+                Impl.constructSinglePier [] |> Expect.equal []
         , test "on the ground" <|
             \_ ->
-                Impl.constructSinglePier2
+                Impl.constructSinglePier
                     [ LD.straight 4 |> flat ]
                     |> Expect.equal []
         , test "one location" <|
             \_ ->
-                Impl.constructSinglePier2
+                Impl.constructSinglePier
                     [ LD.straight 4 |> L.setHeight 10 |> flat ]
                     |> Expect.equal
                         [ LD.straight 4 |> L.setHeight 0 |> PP.make Single
@@ -215,7 +215,7 @@ constructSinglePier2Suite =
                         ]
         , test "locations with the same height are unified" <|
             \_ ->
-                Impl.constructSinglePier2
+                Impl.constructSinglePier
                     [ LD.straight 4 |> L.setHeight 4 |> flat
                     , LD.straight 4 |> L.setHeight 4 |> flat
                     ]
@@ -224,7 +224,7 @@ constructSinglePier2Suite =
                         ]
         , test "two locations" <|
             \_ ->
-                Impl.constructSinglePier2
+                Impl.constructSinglePier
                     [ LD.straight 4 |> L.setHeight 3 |> flat
                     , LD.straight 4 |> L.setHeight 10 |> flat
                     ]
@@ -239,7 +239,7 @@ constructSinglePier2Suite =
                         ]
         , test "slope curve" <|
             \_ ->
-                Impl.constructSinglePier2
+                Impl.constructSinglePier
                     [ LD.straight 4 |> L.setHeight 5 |> slopeCurve
                     , LD.straight 4 |> L.setHeight 11 |> slopeCurve
                     ]
@@ -251,21 +251,21 @@ constructSinglePier2Suite =
         ]
 
 
-constructDoublePier2Suite : Test
-constructDoublePier2Suite =
-    describe "constructDoublePier2Suite"
+constructDoublePierSuite : Test
+constructDoublePierSuite =
+    describe "constructDoublePierSuite"
         [ test "empty" <|
             \_ ->
-                Impl.constructDoublePier2 [] [] |> Expect.equal []
+                Impl.constructDoublePier [] [] |> Expect.equal []
         , test "on the ground" <|
             \_ ->
-                Impl.constructDoublePier2
+                Impl.constructDoublePier
                     [ LD.straight 4 |> flat ]
                     [ LD.straightDoubleRight 4 |> flat ]
                     |> Expect.equal []
         , test "wide pier on height=12" <|
             \_ ->
-                Impl.constructDoublePier2
+                Impl.constructDoublePier
                     [ LD.straight 4 |> L.setHeight 12 |> flat ]
                     [ LD.straightDoubleRight 4 |> L.setHeight 12 |> flat ]
                     |> Expect.equal
@@ -275,7 +275,7 @@ constructDoublePier2Suite =
                         ]
         , test "force build the pier when a pier location is not mod 4" <|
             \_ ->
-                Impl.constructDoublePier2
+                Impl.constructDoublePier
                     [ LD.straight 4 |> L.setHeight 7 |> flat ]
                     [ LD.straightDoubleRight 4 |> L.setHeight 7 |> flat ]
                     |> Expect.equal
@@ -284,7 +284,7 @@ constructDoublePier2Suite =
                         ]
         , test "the primary list is longer than the secondary" <|
             \_ ->
-                Impl.constructDoublePier2
+                Impl.constructDoublePier
                     [ LD.straight 4 |> L.setHeight 4 |> flat
                     , LD.straight 4 |> L.setHeight 15 |> flat
                     ]
@@ -299,7 +299,7 @@ constructDoublePier2Suite =
                         ]
         , test "the secondary list is longer than the primary" <|
             \_ ->
-                Impl.constructDoublePier2
+                Impl.constructDoublePier
                     [ LD.straight 4 |> L.setHeight 4 |> flat
                     ]
                     [ LD.straightDoubleRight 4 |> L.setHeight 4 |> flat
@@ -322,6 +322,6 @@ suite =
         [ constructSuite
         , constructDoubleTrackPiersSuite
         , findNeighborMayLocationsSuite
-        , constructSinglePier2Suite
-        , constructDoublePier2Suite
+        , constructSinglePierSuite
+        , constructDoublePierSuite
         ]
