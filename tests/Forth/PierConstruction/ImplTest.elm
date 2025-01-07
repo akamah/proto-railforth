@@ -97,33 +97,29 @@ constructSuite =
                         , LD.straight 4 |> L.setHeight 13 |> PP.make Mini
                         , LD.straight 4 |> L.setHeight 14 |> PP.make Mini
                         ]
-
-        -- -- XFAIL
-        -- , test "construct a single pier on a wide pier" <|
-        --     \_ ->
-        --         construct
-        --             (must
-        --                 [ LD.straight 4 |> L.setHeight 0 |> flat
-        --                 , LD.straightDoubleLeft 4 |> L.setHeight 0 |> flat
-        --                 , LD.straight 4 |> L.setHeight 8 |> flat
-        --                 ]
-        --             )
-        --             |> expectOk
-        --                 [ LD.straight 4 |> PP.make Wide
-        --                 , LD.straight 4 |> L.setHeight 4 |> PP.make Single
-        --                 ]
-        -- -- XFAIL
-        -- , test "construct a wide pier if necessary" <|
-        --     \_ ->
-        --         construct
-        --             (may
-        --                 [ LD.straight 4 |> L.setHeight 4 |> flat
-        --                 ]
-        --                 [ LD.straightDoubleLeft 4 |> L.setHeight 4 ]
-        --             )
-        --             |> expectOk
-        --                 [ LD.straight 4 |> PP.make Wide
-        --                 ]
+        , test "construct a single pier on a wide pier" <|
+            \_ ->
+                construct
+                    (must
+                        [ LD.straight 4 |> L.setHeight 0 |> flat
+                        , LD.straightDoubleLeft 4 |> L.setHeight 0 |> flat
+                        , LD.straight 4 |> L.setHeight 8 |> flat
+                        ]
+                    )
+                    |> expectOk
+                        [ LD.straight 4 |> PP.make Wide
+                        , LD.straight 4 |> L.setHeight 4 |> PP.make Single
+                        ]
+        , test "construct a wide pier if necessary" <|
+            \_ ->
+                construct
+                    (may
+                        [ LD.straight 4 |> L.setHeight 4 |> flat ]
+                        [ LD.straightDoubleLeft 4 |> L.setHeight 4 |> flat ]
+                    )
+                    |> expectOk
+                        [ LD.straight 4 |> PP.make Wide
+                        ]
         ]
 
 
