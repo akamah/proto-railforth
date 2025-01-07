@@ -1,5 +1,6 @@
 module Forth.Geometry.Dir exposing
     ( Dir(..)
+    , compare
     , e
     , inv
     , match
@@ -131,3 +132,8 @@ match (Dir x) (Dir y) =
 
     else
         y == x + 4
+
+
+compare : Dir -> Dir -> Order
+compare (Dir a) (Dir b) =
+    Basics.compare a b

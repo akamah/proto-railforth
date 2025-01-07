@@ -1,6 +1,7 @@
 module Forth.Geometry.Rot45 exposing
     ( Rot45
     , add
+    , compare
     , conj
     , extract
     , make
@@ -16,6 +17,8 @@ module Forth.Geometry.Rot45 exposing
 {-| 座標系の要となる。意味的にはPointなのだが、良い名前が思いつかなかったので。
 実質的には4つの整数であり。東方向、北東方向、北方向、北西方向の4つのベクトルの整数重合。
 -}
+
+import Util exposing (lexicographic)
 
 
 type Rot45
@@ -83,3 +86,11 @@ toFloat (Rot45 a b c d) =
 toString : Rot45 -> String
 toString (Rot45 a b c d) =
     String.join " " <| "Rot45" :: List.map String.fromInt [ a, b, c, d ]
+
+
+compare : Rot45 -> Rot45 -> Order
+compare (Rot45 xa xb xc xd) (Rot45 ya yb yc yd) =
+    lexicographic (Basics.compare xa ya) <|
+        lexicographic (Basics.compare xb yb) <|
+            lexicographic (Basics.compare xc yc) <|
+                Basics.compare xd yd

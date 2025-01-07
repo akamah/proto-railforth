@@ -5,7 +5,9 @@ module Forth.Geometry.RailLocation exposing
     , inv
     , invertJoint
     , make
+    , minus
     , mul
+    , plus
     , setHeight
     , setJoint
     , toVec3
@@ -32,6 +34,20 @@ make : Rot45 -> Rot45 -> Int -> Dir -> Joint -> RailLocation
 make single double height dir joint =
     { location = Location.make single double height dir
     , joint = joint
+    }
+
+
+minus : Location -> RailLocation
+minus loc =
+    { location = loc
+    , joint = Joint.Minus
+    }
+
+
+plus : Location -> RailLocation
+plus loc =
+    { location = loc
+    , joint = Joint.Plus
     }
 
 

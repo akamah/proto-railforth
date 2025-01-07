@@ -1,10 +1,12 @@
 module Forth.Geometry.Location exposing
     ( Location
     , addHeight
+    , compare
     , flip
     , inv
     , make
     , moveLeftByDoubleTrackLength
+    , moveRightByDoubleTrackLength
     , mul
     , setHeight
     , toVec3
@@ -13,6 +15,7 @@ module Forth.Geometry.Location exposing
 import Forth.Geometry.Dir as Dir exposing (Dir)
 import Forth.Geometry.Rot45 as Rot45 exposing (Rot45)
 import Math.Vector3 as Vec3 exposing (Vec3)
+import Util exposing (lexicographic)
 
 
 {-| 3次元空間上での点と向きを表現する。
@@ -102,6 +105,12 @@ moveLeftByDoubleTrackLength loc =
         make Rot45.zero (Rot45.add (Dir.toRot45 Dir.n) (Dir.toRot45 Dir.n)) 0 Dir.e
 
 
+moveRightByDoubleTrackLength : Location -> Location
+moveRightByDoubleTrackLength loc =
+    mul loc <|
+        make Rot45.zero (Rot45.add (Dir.toRot45 Dir.s) (Dir.toRot45 Dir.s)) 0 Dir.e
+
+
 toVec3 : Location -> Vec3
 toVec3 tie =
     let
@@ -127,3 +136,11 @@ toVec3 tie =
         (singleUnit * sx + doubleUnit * dx)
         (singleUnit * sy + doubleUnit * dy)
         (heightUnit * h)
+
+
+compare : Location -> Location -> Order
+compare a b =
+    lexicographic (Rot45.compare a.single b.single) <|
+        lexicographic (Rot45.compare a.double b.double) <|
+            lexicographic (Basics.compare a.height b.height) <|
+                Dir.compare a.dir b.dir
