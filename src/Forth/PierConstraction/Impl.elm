@@ -90,7 +90,7 @@ locationでもPierLocationでも使えるようにgetterを持たせておいた
 buildPierKeyDict : (location -> comparable) -> (location -> location -> Order) -> List location -> Dict comparable (Nonempty location)
 buildPierKeyDict keyOf comparator locs =
     Util.splitByKey keyOf locs
-        |> Dict.map (\_ list -> Nonempty.sortWith comparator list)
+        |> Dict.map (\_ list -> Nonempty.sortWith comparator list |> Nonempty.dedup)
 
 
 {-| 単線の橋脚の位置の集合から、(単線,複線) の橋脚の位置の集合を計算する。
