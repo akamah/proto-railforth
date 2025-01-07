@@ -342,8 +342,9 @@ constructDoublePier primaryPierLocations secondaryPierLocations =
 
                 ( [], secondaryLocation :: secondaryLocations ) ->
                     let
+                        -- 複線側から単線側を求めるため、右の点を取得する
                         doublePierLocation =
-                            Location.setHeight current secondaryLocation.location |> getLeft
+                            Location.setHeight current secondaryLocation.location |> getRight
                     in
                     (PierPlacement.make Wide doublePierLocation :: accum)
                         |> constructSinglePierRec

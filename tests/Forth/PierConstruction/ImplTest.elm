@@ -288,7 +288,7 @@ constructDoublePierSuite =
                     [ LD.straight 4 |> L.setHeight 4 |> flat
                     , LD.straight 4 |> L.setHeight 15 |> flat
                     ]
-                    [ LD.straightDoubleRight 4 |> L.setHeight 4 |> flat ]
+                    [ LD.straightDoubleLeft 4 |> L.setHeight 4 |> flat ]
                     |> Expect.equal
                         [ LD.straight 4 |> L.setHeight 0 |> PP.make Wide
                         , LD.straight 4 |> L.setHeight 4 |> PP.make Wide
@@ -302,16 +302,16 @@ constructDoublePierSuite =
                 Impl.constructDoublePier
                     [ LD.straight 4 |> L.setHeight 4 |> flat
                     ]
-                    [ LD.straightDoubleRight 4 |> L.setHeight 4 |> flat
-                    , LD.straightDoubleRight 4 |> L.setHeight 15 |> flat
+                    [ LD.straightDoubleLeft 4 |> L.setHeight 4 |> flat
+                    , LD.straightDoubleLeft 4 |> L.setHeight 15 |> flat
                     ]
                     |> Expect.equal
                         [ LD.straight 4 |> L.setHeight 0 |> PP.make Wide
                         , LD.straight 4 |> L.setHeight 4 |> PP.make Wide
-                        , LD.straightDoubleRight 4 |> L.setHeight 8 |> PP.make Single
-                        , LD.straightDoubleRight 4 |> L.setHeight 12 |> PP.make Mini
-                        , LD.straightDoubleRight 4 |> L.setHeight 13 |> PP.make Mini
-                        , LD.straightDoubleRight 4 |> L.setHeight 14 |> PP.make Mini
+                        , LD.straightDoubleLeft 4 |> L.setHeight 8 |> PP.make Single
+                        , LD.straightDoubleLeft 4 |> L.setHeight 12 |> PP.make Mini
+                        , LD.straightDoubleLeft 4 |> L.setHeight 13 |> PP.make Mini
+                        , LD.straightDoubleLeft 4 |> L.setHeight 14 |> PP.make Mini
                         ]
         ]
 

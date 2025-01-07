@@ -11349,7 +11349,8 @@ var $author$project$Forth$PierConstraction$Impl$constructSinglePierRec = F3(
 				A3(buildSingleUpto, current, pierLocation, accum));
 		}
 	});
-var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = function (loc) {
+var $author$project$Forth$Geometry$Dir$s = $author$project$Forth$Geometry$Dir$Dir(6);
+var $author$project$Forth$Geometry$Location$moveRightByDoubleTrackLength = function (loc) {
 	return A2(
 		$author$project$Forth$Geometry$Location$mul,
 		loc,
@@ -11358,13 +11359,13 @@ var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = functi
 			$author$project$Forth$Geometry$Rot45$zero,
 			A2(
 				$author$project$Forth$Geometry$Rot45$add,
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$s),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$s)),
 			0,
 			$author$project$Forth$Geometry$Dir$e));
 };
-var $author$project$Forth$PierConstraction$Impl$getLeft = function (location) {
-	return $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(location);
+var $author$project$Forth$PierConstraction$Impl$getRight = function (location) {
+	return $author$project$Forth$Geometry$Location$moveRightByDoubleTrackLength(location);
 };
 var $author$project$Forth$Geometry$PierLocation$setHeight = F2(
 	function (newHeight, loc) {
@@ -11458,7 +11459,7 @@ var $author$project$Forth$PierConstraction$Impl$constructDoublePier = F2(
 						var _v4 = _v0.b;
 						var secondaryLocation = _v4.a;
 						var secondaryLocations = _v4.b;
-						var doublePierLocation = $author$project$Forth$PierConstraction$Impl$getLeft(
+						var doublePierLocation = $author$project$Forth$PierConstraction$Impl$getRight(
 							A2($author$project$Forth$Geometry$Location$setHeight, current, secondaryLocation.location));
 						return A3(
 							$author$project$Forth$PierConstraction$Impl$constructSinglePierRec,
@@ -11477,6 +11478,23 @@ var $elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
 };
 var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength = function (loc) {
+	return A2(
+		$author$project$Forth$Geometry$Location$mul,
+		loc,
+		A4(
+			$author$project$Forth$Geometry$Location$make,
+			$author$project$Forth$Geometry$Rot45$zero,
+			A2(
+				$author$project$Forth$Geometry$Rot45$add,
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n),
+				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$n)),
+			0,
+			$author$project$Forth$Geometry$Dir$e));
+};
+var $author$project$Forth$PierConstraction$Impl$getLeft = function (location) {
+	return $author$project$Forth$Geometry$Location$moveLeftByDoubleTrackLength(location);
+};
 var $elm$core$Set$insert = F2(
 	function (key, _v0) {
 		var dict = _v0.a;
@@ -11604,24 +11622,6 @@ var $author$project$Forth$PierConstraction$Impl$constructDoubleTrackPiers = func
 };
 var $author$project$Forth$PierConstraction$Impl$constructSinglePier = function (locations) {
 	return A3($author$project$Forth$PierConstraction$Impl$constructSinglePierRec, 0, locations, _List_Nil);
-};
-var $author$project$Forth$Geometry$Dir$s = $author$project$Forth$Geometry$Dir$Dir(6);
-var $author$project$Forth$Geometry$Location$moveRightByDoubleTrackLength = function (loc) {
-	return A2(
-		$author$project$Forth$Geometry$Location$mul,
-		loc,
-		A4(
-			$author$project$Forth$Geometry$Location$make,
-			$author$project$Forth$Geometry$Rot45$zero,
-			A2(
-				$author$project$Forth$Geometry$Rot45$add,
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$s),
-				$author$project$Forth$Geometry$Dir$toRot45($author$project$Forth$Geometry$Dir$s)),
-			0,
-			$author$project$Forth$Geometry$Dir$e));
-};
-var $author$project$Forth$PierConstraction$Impl$getRight = function (location) {
-	return $author$project$Forth$Geometry$Location$moveRightByDoubleTrackLength(location);
 };
 var $author$project$Forth$PierConstraction$Impl$pierSpatialKey = function (_v0) {
 	var single = _v0.single;
