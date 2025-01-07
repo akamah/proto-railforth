@@ -52,7 +52,6 @@ import Util
 
 
 {-| 橋脚の方向を、8方向から4方向に直す
-✅ この関数は今後も使う。
 TODO: Dirにもっと良い型がほしい
 -}
 cleansePierLocations : PierLocation -> PierLocation
@@ -93,50 +92,6 @@ buildPierKeyDict keyOf comparator locs =
         |> Dict.map (\_ list -> Nonempty.sortWith comparator list |> Nonempty.dedup)
 
 
-{-| 単線の橋脚の位置の集合から、(単線,複線) の橋脚の位置の集合を計算する。
-
-具体的には、
-
-1.  initialSet が与えられる。
-2.  initialSetから　1つ取り出し、sとする
-3.  sの左隣の位置がinitialSetに入っているならば、取り出してdとする。
-      - sとdをdoubleSetに移動する。
-
-```ruby
-def combine(initialSet)
-  singleSet = {}
-  doubleSet = {}
-
-  while s = initialSet.pop()
-    l = left(s)
-
-    # あれよね、sの右にあったらエラーよね。もしsの右が処理済みだったとしたら、sはdoubleとして裁かれてるので、
-    # sの右は処理済みではない。なのでエラー処理するにしてもinitialSetから見て確認する必要がある。
-    if initialSet[right(s)]
-      error
-    end
-
-    if d = initialSet[l]
-      initialSet.remove(d)
-      # あと、dの左にあるかもしれない。そうなったらエラーや。
-      # そこに関しては、処理済みかどうかはあまり関係ないと思うので全部から確認する。
-      if initialSet[left(d)] or singleSet[left(d)] or doubleSet[left(d)]
-        error
-      end
-
-      # そうでないならば、いい感じに構築できる。
-      doubleSet << s
-    else
-      singleSet << s
-    end
-  end
-
-  return singleSet, doubleSet
-```
-
-色々終わったら (singleSet, doubleSet) を返却する
-
--}
 getLeft : Location -> Location
 getLeft location =
     Location.moveLeftByDoubleTrackLength location
@@ -177,10 +132,53 @@ findNeighborMayLocations mustList mayList =
     rec mustList ( [], initialMayDict )
 
 
-{-| 単線を想定した橋脚の列から複線橋脚を抜き出す。
+{-| 単線の橋脚の位置の集合から、(単線,複線) の橋脚の位置の集合を計算する。
+
+      具体的には、
+
+      1.  initialSet が与えられる。
+      2.  initialSetから　1つ取り出し、sとする
+      3.  sの左隣の位置がinitialSetに入っているならば、取り出してdとする。
+            - sとdをdoubleSetに移動する。
+
+      ```ruby
+      def combine(initialSet)
+        singleSet = {}
+        doubleSet = {}
+
+        while s = initialSet.pop()
+          l = left(s)
+
+          # あれよね、sの右にあったらエラーよね。もしsの右が処理済みだったとしたら、sはdoubleとして裁かれてるので、
+          # sの右は処理済みではない。なのでエラー処理するにしてもinitialSetから見て確認する必要がある。
+          if initialSet[right(s)]
+            error
+          end
+
+          if d = initialSet[l]
+            initialSet.remove(d)
+            # あと、dの左にあるかもしれない。そうなったらエラーや。
+            # そこに関しては、処理済みかどうかはあまり関係ないと思うので全部から確認する。
+            if initialSet[left(d)] or singleSet[left(d)] or doubleSet[left(d)]
+              error
+            end
+
+            # そうでないならば、いい感じに構築できる。
+            doubleSet << s
+          else
+            singleSet << s
+          end
+        end
+
+        return singleSet, doubleSet
+      ```
+
+      色々終わったら (singleSet, doubleSet) を返却する
+
 もし、複々線になることがあったら複線橋脚を構築できないためエラーなのだが、ここでは構築してしまう。
 理由としては、実際に構築できなかったとしても可視化したいため。
 残りの段のエラー処理等でリカバリすることを想定。
+
 -}
 constructDoubleTrackPiers :
     Dict PierPlanarKey (Nonempty PierLocation)
