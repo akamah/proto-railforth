@@ -1,31 +1,3 @@
-<!DOCTYPE HTML>
-<html lang="ja">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Railforth Prototype</title>
-  <script src="./build/main.js"></script>
-</head>
-
-<body>
-  <script>
-    const storage = window.localStorage;
-    let program = "";
-    if (storage) {
-      program = storage.getItem("program") || `(
-操作：
-ドラッグ / スワイプ → 回転
-Shift+ドラッグ / 二本指スワイプ → 移動
-マウスホイール / ピンチ操作 → 拡大縮小
-
-プラレール全加算器 flat ver.
-これはプラレールで全加算器を実現するレイアウトの定義ファイルです。
-2024/10/26 に OSC 2024 Tokyo/Fall にて展示します。
-
-なお、ライセンスは MIT ライセンスで提供されます。
-)
-
 (
 Copyright 2025 AKAMA Hitoshi
 
@@ -188,7 +160,7 @@ load a0-end
   q s
   ll
   s ss ss dn
-  h ll s j ll h
+  ll s j ll
   . ( b1の入力と繋がった )
 
 ( 出力Sの構築 **************** ) 
@@ -217,7 +189,7 @@ load b1-out-1
     ss
     .
   dl1 .
-  s dn h ll s j ll h
+  s dn ll s j ll
   .
     
 load b1-out-0
@@ -230,12 +202,12 @@ load c1-out-1
   save c1-out-1-inner
 
 load c1-out-1-outer
-  q r ol q h ss
+  q r ol q h s
   up up
   .
 
 load c1-out-1-inner
-  r ol s
+  r ol
   up up
 
   dtl . .
@@ -252,9 +224,8 @@ load c1-out-0
 
 load output-s
   dl1 .
-  q ll h  l or or l
-  q
-  ss s ss q s ss rr s j r .
+  q ll l or ss q h or l
+  ss q s ss rr s j r .
 
 
 ( 出力Cの構築 ************************ )
@@ -303,7 +274,6 @@ load c0-out-1
 load carry-out-result-1
   ll h ss s ll rr q s ll
   s ss r ol
-  s 
   ss up
 
   dtl . .
@@ -311,6 +281,7 @@ load carry-out-result-1
   dtl . .
   dtr3 . .
   
+  dts . .
   dtl . .
   dtl .
     j q .
@@ -320,29 +291,7 @@ load carry-out-result-0
   s ol ol s ss dr2 nip h
   ll rr q
   ol ol
-  ss q r ol q h ss ss up .
+  ss q r ol q h s ss up .
 
 load carry-out-result-bypass-0
   s ol ol shl dn .
-  `      ;
-    }
-
-    var app = Elm.Main.init({
-      flags: {
-        program: program
-      }
-    });
-
-    app.ports.save.subscribe(function (program) {
-      const storage = window.localStorage;
-      if (storage) {
-        storage.setItem("program", program);
-      }
-    });
-    app.ports.setPointerCaptureImpl.subscribe(function (event) {
-      event.target.setPointerCapture(event.pointerId);
-    });    
-  </script>
-</body>
-
-</html>
