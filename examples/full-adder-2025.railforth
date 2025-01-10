@@ -160,7 +160,7 @@ load a0-end
   q s
   ll
   s ss ss dn
-  ll s j ll
+  h ll s j ll h
   . ( b1の入力と繋がった )
 
 ( 出力Sの構築 **************** ) 
@@ -189,7 +189,7 @@ load b1-out-1
     ss
     .
   dl1 .
-  s dn ll s j ll
+  s dn h ll s j ll h
   .
     
 load b1-out-0
@@ -202,12 +202,12 @@ load c1-out-1
   save c1-out-1-inner
 
 load c1-out-1-outer
-  q r ol q h s
+  q r ol q h ss
   up up
   .
 
 load c1-out-1-inner
-  r ol
+  r ol s
   up up
 
   dtl . .
@@ -224,8 +224,9 @@ load c1-out-0
 
 load output-s
   dl1 .
-  q ll l or ss q h or l
-  ss q s ss rr s j r .
+  q ll h  l or or l
+  q
+  ss s ss q s ss rr s j r .
 
 
 ( 出力Cの構築 ************************ )
@@ -271,9 +272,13 @@ load c0-out-1
   ss s j dn shl
   save carry-out-result-0
 
+load c0-out-0
+  l j r .
+
 load carry-out-result-1
   ll h ss s ll rr q s ll
   s ss r ol
+  s 
   ss up
 
   dtl . .
@@ -281,7 +286,6 @@ load carry-out-result-1
   dtl . .
   dtr3 . .
   
-  dts . .
   dtl . .
   dtl .
     j q .
@@ -291,7 +295,7 @@ load carry-out-result-0
   s ol ol s ss dr2 nip h
   ll rr q
   ol ol
-  ss q r ol q h s ss up .
+  ss q r ol q h ss ss up .
 
 load carry-out-result-bypass-0
   s ol ol shl dn .
