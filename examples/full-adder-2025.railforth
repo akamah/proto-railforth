@@ -175,7 +175,7 @@ load a0-end
       save out-outer
     fw h q
     at
-      q
+      j
       save out-inner
     .
   .
@@ -189,7 +189,7 @@ load b1-out-1
     ss
     .
   dl1 .
-  s dn h ll s j ll h
+  s dn h ll s q ll h
   .
     
 load b1-out-0
@@ -202,12 +202,13 @@ load c1-out-1
   save c1-out-1-inner
 
 load c1-out-1-outer
-  q r ol q h ss
-  up up
+  q r ol j h s
   .
 
 load c1-out-1-inner
-  r ol s
+  r ol
+  ac2 .
+    up up .
   up up
 
   dtl . .
@@ -226,16 +227,16 @@ load output-s
   dl1 .
   q ll h  l or or l
   q
-  ss s ss q s ss rr s j r .
+  ss s ss q s ss rr s q r .
 
 
 ( 出力Cの構築 ************************ )
 load a0-out-1
   l j r
   at2
-    bk j uturn j ss .
-  dl1 .
-  s ss
+    bk j uturn j ss s .
+  s dl1 .
+  ss
   tr2 nip
   j shl dn
   ll q ll
@@ -278,7 +279,9 @@ load c0-out-0
 load carry-out-result-1
   ll h ss s ll rr q s ll
   s ss r ol
-  s 
+
+  ac2 .
+    ss up .
   ss up
 
   dtl . .
@@ -295,7 +298,7 @@ load carry-out-result-0
   s ol ol s ss dr2 nip h
   ll rr q
   ol ol
-  ss q r ol q h ss ss up .
+  ss q r ol q h s .
 
 load carry-out-result-bypass-0
   s ol ol shl dn .
