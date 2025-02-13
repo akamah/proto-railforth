@@ -12176,6 +12176,25 @@ var $author$project$Forth$PierConstruction$construct = function (list) {
 		pierRenderData: A2($elm$core$List$map, $author$project$Forth$PierPlacement$toPierRenderData, pierPlacements)
 	};
 };
+var $author$project$Forth$Statistics$getPierCount = function (piers) {
+	return A3(
+		$elm$core$List$foldl,
+		function (pier) {
+			return A2(
+				$elm$core$Dict$update,
+				pier,
+				function (x) {
+					if (x.$ === 'Nothing') {
+						return $elm$core$Maybe$Just(1);
+					} else {
+						var n = x.a;
+						return $elm$core$Maybe$Just(n + 1);
+					}
+				});
+		},
+		$elm$core$Dict$empty,
+		A2($elm$core$List$map, $author$project$Types$Pier$toString, piers));
+};
 var $author$project$Forth$Statistics$railToStringRegardlessOfFlipped = function (rail) {
 	return A3(
 		$author$project$Types$Rail$toStringWith,
@@ -12204,6 +12223,10 @@ var $author$project$Forth$Statistics$getRailCount = function (rails) {
 		$elm$core$Dict$empty,
 		A2($elm$core$List$map, $author$project$Forth$Statistics$railToStringRegardlessOfFlipped, rails));
 };
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 	var _v0 = $author$project$Forth$PierConstruction$construct(status.global.rails);
 	var pierRenderData = _v0.pierRenderData;
@@ -12211,13 +12234,22 @@ var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 	return {
 		errMsg: error,
 		piers: pierRenderData,
-		railCount: $author$project$Forth$Statistics$getRailCount(
-			A2(
-				$elm$core$List$map,
-				function (x) {
-					return x.rail;
-				},
-				status.global.rails)),
+		railCount: A2(
+			$elm$core$Dict$union,
+			$author$project$Forth$Statistics$getRailCount(
+				A2(
+					$elm$core$List$map,
+					function (x) {
+						return x.rail;
+					},
+					status.global.rails)),
+			$author$project$Forth$Statistics$getPierCount(
+				A2(
+					$elm$core$List$map,
+					function (x) {
+						return x.pier;
+					},
+					pierRenderData))),
 		rails: A2($elm$core$List$map, $author$project$Forth$RailPlacement$toRailRenderData, status.global.rails)
 	};
 };
@@ -13439,10 +13471,6 @@ var $elm$browser$Browser$Events$spawn = F3(
 						router,
 						A2($elm$browser$Browser$Events$Event, key, event));
 				}));
-	});
-var $elm$core$Dict$union = F2(
-	function (t1, t2) {
-		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
 	});
 var $elm$browser$Browser$Events$onEffects = F3(
 	function (router, subs, state) {
