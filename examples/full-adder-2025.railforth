@@ -33,7 +33,7 @@ load start-c
   save rail-0
 
   load rail-1
-    j s h ol r
+    j q s h ol r
     at1
       save out-1
     s j
@@ -50,7 +50,7 @@ load start-c
     .
 
   load rail-0
-    j ol
+    j q ol
     at2
       s ss bk j .
     rr rr
@@ -79,7 +79,7 @@ load c0-end
 ( 入り口 - 読み取り 出力0 出力1 続き )
   at1
     save out-1
-  j q
+  h j
   ac1
       j fw at1
         save out-0
@@ -92,7 +92,7 @@ load c0-end
     or
     save exit
   
-  q j rr rr
+  j h rr rr
   dr uturn . .
 
   load in
@@ -157,59 +157,61 @@ load a0-main-logic-0
 load a0-end
   ( あとで直すかも )
   ll q s ll rr
-  q s
   ll
-  s ss ss dn
-  h ll s j ll h
+  h ss ss dn s
+  ll ll j
   . ( b1の入力と繋がった )
 
 ( 出力Sの構築 **************** ) 
 
-: construct-sum-out-1
-  l j s r
-  at2 nip ( 自動ターンアウトレールの前方向には行かない )
-  bk ( もしかすると半分延伸した方がいいかも )
-  j uturn j ss
-  ac1
-      s
-      save out-outer
-    fw h q
-    at
-      j
-      save out-inner
-    .
-  .
-  load out-inner
-    load out-outer
-
-;
-
 load b1-out-1
-  construct-sum-out-1
-    ss
-    .
-  dl1 .
-  s dn h ll s q ll h
-  .
+  l j s r
+  at2 nip
+  h
+  j uturn j ss
+  h j
+  ac3
+      j ss
+      save b1-out-next
+    j bk at . .
+  j fw .
+
+
+load b1-out-next
+  dl2 nip
+  dn s h ll s j ll q
+  
     
 load b1-out-0
   l j s r
   .
 
 load c1-out-1
-  construct-sum-out-1
-    save c1-out-1-outer
-  save c1-out-1-inner
+  l j s r
+  at2 nip
+  fw
+  j uturn j ss
+  h q
+  ac1
+      j h
+      save c1-out-1-outer
+    q h
+    at
+      save c1-out-1-inner
+    .
+  q h
+  .
 
 load c1-out-1-outer
-  q r ol j h s
+  r ol q h s up
   .
 
 load c1-out-1-inner
-  r ol
-  ac2 .
-    up up .
-  up up
+  r ol j
+  up
+  dts .
+      up .
+    up nip
 
   dtl . .
   dtr3 . .
@@ -220,30 +222,26 @@ load c1-out-1-inner
 
 load c1-out-0
   l j s r
-  j
   .
 
 load output-s
   dl1 .
-  q ll h  l or or l
-  q
-  ss s ss q s ss rr s q r .
+  q ll q h l or or l
+
+  ss s ss q s q ss rr s q r .
 
 
 ( 出力Cの構築 ************************ )
 load a0-out-1
-  l j r
-  at2
-    bk j uturn j ss s .
-  s dl1 .
-  ss
-  tr2 nip
-  j shl dn
-  ll q ll
+  l q ll
+  dr ss .
+  bk at dl1 .
+  j shl dn ll q ll
+    .
   .
 
 load a0-out-0
-  l q l .
+  l j r .
 
 load b0-out-1
   l j r
@@ -277,12 +275,14 @@ load c0-out-0
   l j r .
 
 load carry-out-result-1
-  ll h ss s ll rr q s ll
-  s ss r ol
+  ll h ss s ll
+  s ss q s q h rr
+  s q ll
+  r ol q
 
   ac2 .
-    ss up .
-  ss up
+    up .
+  up
 
   dtl . .
   dtr3 . .
@@ -298,7 +298,7 @@ load carry-out-result-0
   s ol ol s ss dr2 nip h
   ll rr q
   ol ol
-  ss q r ol q h s .
+  ss h r ol q h s ss .
 
 load carry-out-result-bypass-0
   s ol ol shl dn .

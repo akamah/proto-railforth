@@ -330,7 +330,9 @@ haltWithSuccess status =
     in
     { rails = List.map RailPlacement.toRailRenderData status.global.rails
     , errMsg = error
-    , railCount = Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails
+    , railCount =
+        Dict.union (Statistics.getRailCount <| List.map (\x -> x.rail) status.global.rails)
+            (Statistics.getPierCount <| List.map (\x -> x.pier) pierRenderData)
     , piers = pierRenderData
     }
 
