@@ -85,7 +85,7 @@ init flags =
     in
     ( { meshes = MeshLoader.init
       , viewport = { width = 0, height = 0 }
-      , orbitControl = OC.init (degrees 0) (degrees 90) 10 (vec3 1800 2240 0)
+      , orbitControl = OC.init (degrees 60) (degrees 30) 5 (vec3 1800 2240 0)
       , program = flags.program
       , execResult = execResult
       , isSplitBarDragging = False

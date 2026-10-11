@@ -7,6 +7,7 @@ module Graphics.OrbitControlImpl exposing
     , init
     , makeProjectionMatrix
     , makeViewMatrix
+    , toString
     , updateViewport
     )
 
@@ -144,3 +145,11 @@ doScaleAdd (Model model) diff =
 doScaleMult : Model -> Float -> Model
 doScaleMult (Model model) mult =
     Model { model | scale = clamp 0.1 100 (model.scale * mult) }
+
+
+toString : Model -> String
+toString (Model model) =
+    "azimuth = "
+        ++ String.fromFloat model.azimuth
+        ++ ", altitude = "
+        ++ String.fromFloat model.altitude

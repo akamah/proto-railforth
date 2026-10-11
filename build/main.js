@@ -77,7 +77,7 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
   return fun.a === 9 ? fun.f(a, b, c, d, e, f, g, h, i) : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 }
 
-console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
+console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.2/optimize for better performance and smaller assets.');
 
 
 var _JsArray_empty = [];
@@ -6701,8 +6701,8 @@ var $elm$core$String$split = F2(
 var $elm$json$Json$Decode$indent = function (str) {
 	return A2(
 		$elm$core$String$join,
-		'\n    ',
-		A2($elm$core$String$split, '\n', str));
+		'\u000A    ',
+		A2($elm$core$String$split, '\u000A', str));
 };
 var $elm$core$List$foldl = F3(
 	function (func, acc, list) {
@@ -6794,7 +6794,7 @@ var $elm$core$List$reverse = function (list) {
 var $elm$core$String$uncons = _String_uncons;
 var $elm$json$Json$Decode$errorOneOf = F2(
 	function (i, error) {
-		return '\n\n(' + ($elm$core$String$fromInt(i + 1) + (') ' + $elm$json$Json$Decode$indent(
+		return '\u000A\u000A(' + ($elm$core$String$fromInt(i + 1) + (') ' + $elm$json$Json$Decode$indent(
 			$elm$json$Json$Decode$errorToString(error))));
 	});
 var $elm$json$Json$Decode$errorToString = function (error) {
@@ -6819,7 +6819,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 							return $elm$core$Char$isAlpha(_char) && A2($elm$core$String$all, $elm$core$Char$isAlphaNum, rest);
 						}
 					}();
-					var fieldName = isSimple ? ('.' + f) : ('[\'' + (f + '\']'));
+					var fieldName = isSimple ? ('.' + f) : ('[\u0027' + (f + '\u0027]'));
 					var $temp$error = err,
 						$temp$context = A2($elm$core$List$cons, fieldName, context);
 					error = $temp$error;
@@ -6870,7 +6870,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 								$elm$core$List$length(errors)) + ' ways:'));
 							return A2(
 								$elm$core$String$join,
-								'\n\n',
+								'\u000A\u000A',
 								A2(
 									$elm$core$List$cons,
 									introduction,
@@ -6882,16 +6882,16 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					var json = error.b;
 					var introduction = function () {
 						if (!context.b) {
-							return 'Problem with the given value:\n\n';
+							return 'Problem with the given value:\u000A\u000A';
 						} else {
 							return 'Problem with the value at json' + (A2(
 								$elm$core$String$join,
 								'',
-								$elm$core$List$reverse(context)) + ':\n\n    ');
+								$elm$core$List$reverse(context)) + ':\u000A\u000A    ');
 						}
 					}();
 					return introduction + ($elm$json$Json$Decode$indent(
-						A2($elm$json$Json$Encode$encode, 4, json)) + ('\n\n' + msg));
+						A2($elm$json$Json$Encode$encode, 4, json)) + ('\u000A\u000A' + msg));
 			}
 		}
 	});
@@ -7447,7 +7447,7 @@ var $elm$core$Dict$values = function (dict) {
 var $author$project$Main$formatRailCount = function (dict) {
 	return A2(
 		$elm$core$String$join,
-		'\n',
+		'\u000A',
 		$elm$core$Dict$values(
 			A2(
 				$elm$core$Dict$map,
@@ -7455,7 +7455,7 @@ var $author$project$Main$formatRailCount = function (dict) {
 					function (name, count) {
 						return name + (': ' + $elm$core$String$fromInt(count));
 					}),
-				dict))) + ('\n\nTotal: ' + $elm$core$String$fromInt(
+				dict))) + ('\u000A\u000ATotal: ' + $elm$core$String$fromInt(
 		A3(
 			$elm$core$Dict$foldl,
 			F3(
@@ -7830,9 +7830,9 @@ var $elm_explorations$webgl$WebGL$Internal$DepthTest = F4(
 		return {$: 'DepthTest', a: a, b: b, c: c, d: d};
 	});
 var $elm_explorations$webgl$WebGL$Settings$DepthTest$less = function (_v0) {
-	var write = _v0.write;
-	var near = _v0.near;
 	var far = _v0.far;
+	var near = _v0.near;
+	var write = _v0.write;
 	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 513, write, near, far);
 };
 var $elm_explorations$webgl$WebGL$Settings$DepthTest$default = $elm_explorations$webgl$WebGL$Settings$DepthTest$less(
@@ -8833,15 +8833,15 @@ var $elm$html$Html$Attributes$width = function (n) {
 		$elm$core$String$fromInt(n));
 };
 var $author$project$Main$viewCanvas = function (_v0) {
-	var right = _v0.right;
-	var top = _v0.top;
-	var width = _v0.width;
-	var height = _v0.height;
-	var meshes = _v0.meshes;
-	var rails = _v0.rails;
-	var piers = _v0.piers;
-	var viewMatrix = _v0.viewMatrix;
 	var projectionMatrix = _v0.projectionMatrix;
+	var viewMatrix = _v0.viewMatrix;
+	var piers = _v0.piers;
+	var rails = _v0.rails;
+	var meshes = _v0.meshes;
+	var height = _v0.height;
+	var width = _v0.width;
+	var top = _v0.top;
+	var right = _v0.right;
 	return A3(
 		$elm_explorations$webgl$WebGL$toHtmlWith,
 		_List_fromArray(
@@ -10438,8 +10438,8 @@ var $author$project$Forth$Interpreter$executePlaceRail = F2(
 				var restOfStack = _v0.b;
 				var _v1 = railPlaceFunc(top);
 				if (_v1.$ === 'Just') {
-					var nextLocations = _v1.a.nextLocations;
 					var railPlacement = _v1.a.railPlacement;
+					var nextLocations = _v1.a.nextLocations;
 					return $elm$core$Result$Ok(
 						_Utils_update(
 							status,
@@ -10979,7 +10979,7 @@ try {
 		return $author$project$Forth$Interpreter$controlWords;
 	};
 } catch ($) {
-	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    analyzeWord\n  │     ↓\n  │    controlWords\n  │     ↓\n  │    analyzeWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDefRec\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `Forth.Interpreter` are causing infinite recursion:\n\n  ┌─────┐\n  │    analyzeWord\n  │     ↓\n  │    controlWords\n  │     ↓\n  │    analyzeWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDef\n  │     ↓\n  │    analyzeWordsUntilEndOfWordDefRec\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.2/bad-recursion to learn how to fix it!';}
 var $elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
 		return true;
@@ -11085,9 +11085,9 @@ var $author$project$Forth$Geometry$Rot45$toString = function (_v0) {
 					[a, b, c, d]))));
 };
 var $author$project$Forth$PierConstraction$Impl$pierPlanarKey = function (_v0) {
-	var single = _v0.single;
-	var _double = _v0._double;
 	var dir = _v0.dir;
+	var _double = _v0._double;
+	var single = _v0.single;
 	return A2(
 		$elm$core$String$join,
 		',',
@@ -11645,10 +11645,10 @@ var $author$project$Forth$PierConstraction$Impl$constructSinglePier = function (
 	return A3($author$project$Forth$PierConstraction$Impl$constructSinglePierRec, 0, locations, _List_Nil);
 };
 var $author$project$Forth$PierConstraction$Impl$pierSpatialKey = function (_v0) {
-	var single = _v0.single;
-	var _double = _v0._double;
-	var dir = _v0.dir;
 	var height = _v0.height;
+	var dir = _v0.dir;
+	var _double = _v0._double;
+	var single = _v0.single;
 	return A2(
 		$elm$core$String$join,
 		',',
@@ -11718,9 +11718,9 @@ var $author$project$Forth$PierConstraction$Impl$findNeighborMayLocations = F2(
 			_Utils_Tuple2(_List_Nil, initialMayDict));
 	});
 var $author$project$Forth$PierConstraction$Impl$construct = function (_v0) {
-	var must = _v0.must;
-	var may = _v0.may;
 	var mustNot = _v0.mustNot;
+	var may = _v0.may;
+	var must = _v0.must;
 	var cleanesedMustLocations = A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, must);
 	var cleanesedMayLocations = A2($elm$core$List$map, $author$project$Forth$PierConstraction$Impl$cleansePierLocations, may);
 	var mayLocationsToBePlaced = A2($author$project$Forth$PierConstraction$Impl$findNeighborMayLocations, cleanesedMustLocations, cleanesedMayLocations);
@@ -12169,8 +12169,8 @@ var $author$project$Forth$PierConstruction$construct = function (list) {
 	var _v0 = $author$project$Forth$PierConstraction$Impl$construct(
 		$author$project$Forth$PierConstraint$concat(
 			A2($elm$core$List$map, $author$project$Forth$RailPieceLogic$getPierConstraintFromRailPlacement, list)));
-	var pierPlacements = _v0.pierPlacements;
 	var error = _v0.error;
+	var pierPlacements = _v0.pierPlacements;
 	return {
 		error: error,
 		pierRenderData: A2($elm$core$List$map, $author$project$Forth$PierPlacement$toPierRenderData, pierPlacements)
@@ -12229,8 +12229,8 @@ var $elm$core$Dict$union = F2(
 	});
 var $author$project$Forth$Interpreter$haltWithSuccess = function (status) {
 	var _v0 = $author$project$Forth$PierConstruction$construct(status.global.rails);
-	var pierRenderData = _v0.pierRenderData;
 	var error = _v0.error;
+	var pierRenderData = _v0.pierRenderData;
 	return {
 		errMsg: error,
 		piers: pierRenderData,
@@ -13248,7 +13248,7 @@ var $author$project$Graphics$OFF$parse = function (input) {
 				function (deadend) {
 					return 'dead end at (line, col) = (' + ($elm$core$String$fromInt(deadend.row) + (', ' + ($elm$core$String$fromInt(deadend.col) + ')')));
 				}),
-			$elm$core$String$join('\n')),
+			$elm$core$String$join('\u000A')),
 		A2($elm$parser$Parser$run, $author$project$Graphics$OFF$parser, input));
 };
 var $elm$core$Basics$composeL = F3(
@@ -13329,9 +13329,9 @@ var $author$project$Main$init = function (flags) {
 			meshes: $author$project$Graphics$MeshLoader$init,
 			orbitControl: A4(
 				$author$project$Graphics$OrbitControl$init,
-				$elm$core$Basics$degrees(0),
-				$elm$core$Basics$degrees(90),
-				10,
+				$elm$core$Basics$degrees(60),
+				$elm$core$Basics$degrees(30),
+				5,
 				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1800, 2240, 0)),
 			program: flags.program,
 			showEditor: false,
@@ -13559,8 +13559,8 @@ var $elm$core$List$filterMap = F2(
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
-		var key = _v0.key;
 		var event = _v0.event;
+		var key = _v0.key;
 		var toMessage = function (_v2) {
 			var subKey = _v2.a;
 			var _v3 = _v2.b;
@@ -13795,8 +13795,8 @@ var $author$project$Graphics$MeshLoader$sequence = function (list) {
 };
 var $elm_explorations$linear_algebra$Math$Vector3$sub = _MJS_v3sub;
 var $author$project$Graphics$MeshLoader$convertMesh = function (_v0) {
-	var vertices = _v0.vertices;
 	var indices = _v0.indices;
+	var vertices = _v0.vertices;
 	var verticesArray = $elm$core$Array$fromList(vertices);
 	var calcNormal = F3(
 		function (v0, v1, v2) {
@@ -13999,9 +13999,9 @@ var $author$project$Graphics$OrbitControl$sub2 = F2(
 	});
 var $author$project$Graphics$OrbitControl$doTwoPointersMove = F2(
 	function (ocImpl, _v0) {
-		var oldPoint = _v0.oldPoint;
-		var newPoint = _v0.newPoint;
 		var otherPoint = _v0.otherPoint;
+		var newPoint = _v0.newPoint;
+		var oldPoint = _v0.oldPoint;
 		var scale = A2($author$project$Graphics$OrbitControl$distance, oldPoint, otherPoint) / A2($author$project$Graphics$OrbitControl$distance, newPoint, otherPoint);
 		var _v1 = A2($author$project$Graphics$OrbitControl$sub2, newPoint, oldPoint);
 		var dx = _v1.a;
@@ -14142,16 +14142,24 @@ var $author$project$Graphics$OrbitControl$updatePointerMove = F3(
 				model,
 				{points: updatedPoints}));
 	});
+var $elm$core$Debug$log = _Debug_log;
+var $author$project$Graphics$OrbitControlImpl$toString = function (_v0) {
+	var model = _v0.a;
+	return 'azimuth = ' + ($elm$core$String$fromFloat(model.azimuth) + (', altitude = ' + $elm$core$String$fromFloat(model.altitude)));
+};
 var $author$project$Graphics$OrbitControl$updatePointerUp = F2(
 	function (_v0, pointerId) {
 		var model = _v0.a;
-		return $author$project$Graphics$OrbitControl$Model(
-			_Utils_update(
-				model,
-				{
-					draggingState: $elm$core$Maybe$Nothing,
-					points: A2($elm$core$Dict$remove, pointerId, model.points)
-				}));
+		return A2(
+			$elm$core$Debug$log,
+			$author$project$Graphics$OrbitControlImpl$toString(model.ocImpl),
+			$author$project$Graphics$OrbitControl$Model(
+				_Utils_update(
+					model,
+					{
+						draggingState: $elm$core$Maybe$Nothing,
+						points: A2($elm$core$Dict$remove, pointerId, model.points)
+					})));
 	});
 var $author$project$Main$updateViewport = F3(
 	function (w, h, model) {
