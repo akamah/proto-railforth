@@ -19,317 +19,66 @@
 Shift+ドラッグ / 二本指スワイプ → 移動
 マウスホイール / ピンチ操作 → 拡大縮小
 
-プラレール全加算器 2025 ver.
-これはプラレールで全加算器を実現するレイアウトの定義ファイルです。
-2025/02/21-22 に OSC 2024 Tokyo/Fall にて展示します。
-
-なお、ライセンスは MIT ライセンスで提供されます。
+* 2026/10/11 プラレールグレイコードカウンター
+* 本プログラムはMITライセンスで提供されます。末尾のライセンス表示をご覧下さい。
 )
 
+: base
+l r s
+;
+
+: floor
+up
+l l l l
+
+s h
+at ( binary の部分 )
+  h
+  at ( graycode の部分 )
+    l .
+  tl2
+    tl1 .
+    l l l l
+    dn
+    . ( 下に降りる )
+  r r r r ( 上からくる部分に繋がる )
+
+.
+l l l
+;
+
+: roof
+up
+l l l l
+s ss h
+at ( 一番上のグレイコードの部分 )
+  l .
+r
+tl1 . 
+l l l l
+dn
+;
+
+base  ( 0 )
+floor ( 1 )
+floor ( 2 )
+floor ( 3 )
+floor ( 4 )
+floor ( 5 )
+floor ( 6 )
+floor ( 7 )
+roof  ( 8 )
+
 (
-Copyright 2025 AKAMA Hitoshi
+Copyright 2026 AKAMA Hitoshi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-)
+)  
 
-save start-c
-
-load start-c
-  ascend
-  dts . .
-  dts . .
-  dts . .
-  dts . .
-
-  dtl . .
-  dtl . .
-  dtr3 . .
-  dtl . .
-  dtl . .
-  dtr3 .
-
-  save c0-main-logic-1
-  save c0-main-logic-0
-
-: logic-carry-out
-( 0の内側の線路の座標 1の線路の座標 - 読み取り 出力0 出力1 続き )
-  save rail-1
-  save rail-0
-
-  load rail-1
-    j q s h ol r
-    at1
-      save out-1
-    s j
-    ac1
-        j
-        at1
-          save out-0
-        j .
-      ss
-      dl1 .
-      at
-        save in
-      save exit
-    .
-
-  load rail-0
-    j q ol
-    at2
-      s ss bk j .
-    rr rr
-    dr uturn . .
-  
-  load in
-    load out-0
-      load out-1
-        load exit
-;
-  
-load c0-main-logic-0
-  load c0-main-logic-1
-    logic-carry-out
-        save c0-end
-      save c0-out-1
-    save c0-out-0
-  save c0-in
-
-load c0-end
-  l j s ll
-  
-  save c1-main-logic
-
-: logic-sum
-( 入り口 - 読み取り 出力0 出力1 続き )
-  at1
-    save out-1
-  h j
-  ac1
-      j fw at1
-        save out-0
-      .
-    j ss
-    dr1 .
-    j
-    at
-      save in
-    or
-    save exit
-  
-  j h rr rr
-  dr uturn . .
-
-  load in
-    load out-0
-      load out-1
-        load exit
-;
-
-load c1-main-logic
-  logic-sum
-        save c1-end
-      save c1-out-1
-    save c1-out-0
-  save c1-input
-
-load c1-end
-  up l or ll
-  q 
-  dr .
-  dtl . .
-  dtl . .
-  dtl . .
-  dtr3 . 
-    save b0-main-logic-1
-  save b0-main-logic-0
-      
-load b0-main-logic-0
-  load b0-main-logic-1
-    logic-carry-out
-        save b0-end
-      save b0-out-1
-    save b0-out-0
-  save b0-in
-
-load b0-end
-  l j s ll
-  logic-sum
-     save b1-end
-      save b1-out-1
-    save b1-out-0
-  save b1-input
-
-load b1-end
-  up ll
-  save a0-start
-
-load a0-start
-  q dr . 
-  dtl . .
-  dtl .
-    save a0-main-logic-1
-  save a0-main-logic-0
-
-load a0-main-logic-0
-  load a0-main-logic-1
-    logic-carry-out
-        save a0-in ( 最上階だけこちらがinになる )
-      save a0-out-1
-    save a0-out-0
-  save a0-end ( inと交換 )
-
-load a0-end
-  ( あとで直すかも )
-  ll q s ll rr
-  ll
-  h ss ss dn s
-  ll ll j
-  . ( b1の入力と繋がった )
-
-( 出力Sの構築 **************** ) 
-
-load b1-out-1
-  l j s r
-  at2 nip
-  h
-  j uturn j ss
-  h j
-  ac3
-      j ss
-      save b1-out-next
-    j bk at . .
-  j fw .
-
-
-load b1-out-next
-  dl2 nip
-  dn s h ll s j ll q
-  
-    
-load b1-out-0
-  l j s r
-  .
-
-load c1-out-1
-  l j s r
-  at2 nip
-  fw
-  j uturn j ss
-  h q
-  ac1
-      j h
-      save c1-out-1-outer
-    q h
-    at
-      save c1-out-1-inner
-    .
-  q h
-  .
-
-load c1-out-1-outer
-  r ol q h s up
-  .
-
-load c1-out-1-inner
-  r ol j
-  up
-  dts .
-      up .
-    up nip
-
-  dtl . .
-  dtr3 . .
-  dtl . .
-  dtl . .
-
-  save output-s
-
-load c1-out-0
-  l j s r
-  .
-
-load output-s
-  dl1 .
-  q ll q h l or or l
-
-  ss s ss q s q ss rr s q r .
-
-
-( 出力Cの構築 ************************ )
-load a0-out-1
-  l q ll
-  dr ss .
-  bk at dl1 .
-  j shl dn ll q ll
-    .
-  .
-
-load a0-out-0
-  l j r .
-
-load b0-out-1
-  l j r
-  at2
-    fw j uturn j ss
-    ss ss s j dn shl
-    save carry-out-result-bypass-0
-  ss ss
-  tr2 nip
-  j shl dn
-  ll q ll
-  .
-
-load b0-out-0
-  l q l .
-
-load c0-out-1
-  l j r
-  at2
-    fw j uturn j ss s
-    .
-  s
-  ac . swap
-    fw at nip
-    s j shl dn
-    save carry-out-result-1
-  ss s j dn shl
-  save carry-out-result-0
-
-load c0-out-0
-  l j r .
-
-load carry-out-result-1
-  ll h ss s ll
-  s ss q s q h rr
-  s q ll
-  r ol q
-
-  ac2 .
-    up .
-  up
-
-  dtl . .
-  dtr3 . .
-  dtl . .
-  dtr3 . .
-  
-  dtl . .
-  dtl .
-    j q .
-  j q .
-
-load carry-out-result-0
-  s ol ol s ss dr2 nip h
-  ll rr q
-  ol ol
-  ss h r ol q h s ss .
-
-load carry-out-result-bypass-0
-  s ol ol shl dn .
   `      ;
     }
 
